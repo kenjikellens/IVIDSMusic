@@ -56,15 +56,15 @@ export const PageSystem = {
         if (get('browse-search-input')) get('browse-search-input').value = query;
 
         if (!query) {
-            if (browseHero) browseHero.style.display = 'flex';
-            if (resultsHeader) resultsHeader.style.display = 'none';
-            if (rowsCont) rowsCont.style.display = 'none';
-            if (gridView) gridView.style.display = 'none';
+            if (browseHero) browseHero.classList.remove('is-hidden');
+            if (resultsHeader) resultsHeader.classList.add('is-hidden');
+            if (rowsCont) rowsCont.classList.add('is-hidden');
+            if (gridView) gridView.classList.add('is-hidden');
             return;
         }
 
-        if (browseHero) browseHero.style.display = 'none';
-        if (resultsHeader) resultsHeader.style.display = 'flex';
+        if (browseHero) browseHero.classList.add('is-hidden');
+        if (resultsHeader) resultsHeader.classList.remove('is-hidden');
         if (get('search-subtitle')) get('search-subtitle').textContent = `Results for "${query}"${params.year ? ` - ${params.year}` : ''}`;
 
         // Add Load More Logic
@@ -76,7 +76,7 @@ export const PageSystem = {
             btn.disabled = true; btn.textContent = 'Loading...';
             try {
                 const data = await MusicAPI.search(query, PAGE_SIZE, params.type, params.year, currentOffset);
-                if (data.length === 0) get('load-more-container').style.display = 'none';
+                if (data.length === 0) get('load-more-container').classList.add('is-hidden');
                 else {
                     data.forEach(item => grid.appendChild(CardSystem.createCard(item)));
                     if (window.Loader) window.Loader.init();
@@ -95,8 +95,8 @@ export const PageSystem = {
             </div>`;
 
         if (params.type) {
-            if (rowsCont) rowsCont.style.display = 'none';
-            if (gridView) gridView.style.display = 'block';
+            if (rowsCont) rowsCont.classList.add('is-hidden');
+            if (gridView) gridView.classList.remove('is-hidden');
             if (get('grid-title')) get('grid-title').textContent = params.type.charAt(0).toUpperCase() + params.type.slice(1) + "s";
             const grid = get('grid-results');
             grid.innerHTML = SKELETON_CARD.repeat(12);
@@ -107,10 +107,13 @@ export const PageSystem = {
             data.forEach(item => grid.appendChild(CardSystem.createCard(item)));
             if (window.Loader) window.Loader.init();
 
-            if (get('load-more-container')) get('load-more-container').style.display = data.length >= PAGE_SIZE ? 'block' : 'none';
+            if (get('load-more-container')) {
+                if (data.length >= PAGE_SIZE) get('load-more-container').classList.remove('is-hidden');
+                else get('load-more-container').classList.add('is-hidden');
+            }
         } else {
-            if (rowsCont) rowsCont.style.display = 'block';
-            if (gridView) gridView.style.display = 'none';
+            if (rowsCont) rowsCont.classList.remove('is-hidden');
+            if (gridView) gridView.classList.add('is-hidden');
             ['artists', 'songs', 'albums'].forEach(id => {
                 if (get(`${id}-results`)) get(`${id}-results`).innerHTML = SKELETON_CARD.repeat(6);
             });
@@ -126,7 +129,10 @@ export const PageSystem = {
                 const el = get(id); if (!el) return;
                 el.innerHTML = '';
                 data.forEach(item => el.appendChild(CardSystem.createCard(item)));
-                if (get(contId)) get(contId).style.display = data.length ? 'block' : 'none';
+                if (get(contId)) {
+                    if (data.length) get(contId).classList.remove('is-hidden');
+                    else get(contId).classList.add('is-hidden');
+                }
             };
             fill('artists-results', artists, 'artists-row-container');
             fill('songs-results', songs, 'songs-row-container');

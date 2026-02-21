@@ -1,97 +1,67 @@
-<div id="search-container-root" class="search-container-main">
+<!-- Search page content -->
+<!-- Nuclear Reconstruction (v12): Minimalist, flat structure to eliminate all flickering -->
 
-    <!-- Browse Hero -->
-    <div id="browse-hero" class="browse-hero">
-        <p class="browse-tagline">Your World of Music</p>
-        <h1 class="browse-hero-title">Search</h1>
-        <div class="browse-search-wrapper">
-            <svg class="browse-search-icon" viewBox="0 0 24 24" fill="none">
-                <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5" />
-                <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-            </svg>
-            <input id="browse-search-input" class="browse-search-input" type="text"
-                placeholder="Artists, songs, albums..." autocomplete="off" oninput="handleBrowseInput(this.value)"
-                onkeydown="if(event.key==='Enter' && this.value.trim()) window.performSearch(this.value.trim())">
+<!-- State 1: Browse Hero (No Query) -->
+<div id="browse-hero" class="browse-hero is-hidden">
+    <p class="browse-tagline">Your World of Music</p>
+    <h1 class="browse-hero-title">Search</h1>
+    <div class="browse-search-wrapper">
+        <svg class="browse-search-icon" viewBox="0 0 24 24" fill="none">
+            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5" />
+            <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+        </svg>
+        <input id="browse-search-input" class="browse-search-input" type="text" placeholder="Artists, songs, albums..."
+            autocomplete="off" oninput="handleBrowseInput(this.value)"
+            onkeydown="if(event.key==='Enter' && this.value.trim()) window.performSearch(this.value.trim())">
+    </div>
+</div>
+
+<!-- State 2: Results Header -->
+<div id="results-header" class="search-page-header is-hidden">
+    <div class="search-page-title-group">
+        <h1 id="search-title" class="search-page-title">Search Results</h1>
+        <p id="search-subtitle" class="search-page-subtitle"></p>
+    </div>
+    <div id="search-filters" class="search-filter-bar">
+        <input type="number" id="year-input" placeholder="Year" class="year-input" onchange="applyYearFilter()">
+    </div>
+</div>
+
+<!-- State 3: Dynamic Results container -->
+<div id="results-rows-container" class="is-hidden">
+    <div id="artists-row-container" class="row-scroll-wrapper is-hidden">
+        <div class="row-header">
+            <h2 class="row-title">Artists</h2>
+            <a class="more-link" onclick="setSearchFilter('artist')">See all</a>
         </div>
+        <div class="results-row" id="artists-results"></div>
     </div>
 
-    <!-- Results Header -->
-    <div id="results-header" class="search-page-header" style="display:none;">
-        <div class="search-page-title-group">
-            <h1 id="search-title" class="search-page-title">Search Results</h1>
-            <p id="search-subtitle" class="search-page-subtitle"></p>
+    <div id="songs-row-container" class="row-scroll-wrapper is-hidden">
+        <div class="row-header">
+            <h2 class="row-title">Songs</h2>
+            <a class="more-link" onclick="setSearchFilter('all')">See all</a>
         </div>
-        <div id="search-filters" class="search-filter-bar">
-            <input type="number" id="year-input" placeholder="Year" class="year-input" onchange="applyYearFilter()">
-        </div>
+        <div class="results-row" id="songs-results"></div>
     </div>
 
-    <!-- Results/Discovery Area -->
-    <div id="search-content-area">
-        <!-- Discovery (Popular) -->
-
-
-        <!-- Dynamic Results Rows -->
-        <div id="results-rows-container" style="display: none;">
-            <div class="row-scroll-wrapper" id="artists-row-container">
-                <div class="row-header">
-                    <h2 class="row-title">Artists</h2>
-                    <a class="more-link" onclick="setSearchFilter('artist')">See all</a>
-                </div>
-                <button class="scroll-arrow left" onclick="scrollRow('artists-results', -1)">
-                    <div class="scroll-arrow-icon">❮</div>
-                </button>
-                <div class="results-row" id="artists-results"></div>
-                <button class="scroll-arrow right" onclick="scrollRow('artists-results', 1)">
-                    <div class="scroll-arrow-icon">❯</div>
-                </button>
-            </div>
-
-            <div class="row-scroll-wrapper" id="songs-row-container">
-                <div class="row-header">
-                    <h2 class="row-title">Songs</h2>
-                    <a class="more-link" onclick="setSearchFilter('all')">See all</a>
-                </div>
-                <button class="scroll-arrow left" onclick="scrollRow('songs-results', -1)">
-                    <div class="scroll-arrow-icon">❮</div>
-                </button>
-                <div class="results-row" id="songs-results"></div>
-                <button class="scroll-arrow right" onclick="scrollRow('songs-results', 1)">
-                    <div class="scroll-arrow-icon">❯</div>
-                </button>
-            </div>
-
-            <div class="row-scroll-wrapper" id="albums-row-container">
-                <div class="row-header">
-                    <h2 class="row-title">Albums</h2>
-                    <a class="more-link" onclick="setSearchFilter('album')">See all</a>
-                </div>
-                <button class="scroll-arrow left" onclick="scrollRow('albums-results', -1)">
-                    <div class="scroll-arrow-icon">❮</div>
-                </button>
-                <div class="results-row" id="albums-results"></div>
-                <button class="scroll-arrow right" onclick="scrollRow('albums-results', 1)">
-                    <div class="scroll-arrow-icon">❯</div>
-                </button>
-            </div>
+    <div id="albums-row-container" class="row-scroll-wrapper is-hidden">
+        <div class="row-header">
+            <h2 class="row-title">Albums</h2>
+            <a class="more-link" onclick="setSearchFilter('album')">See all</a>
         </div>
+        <div class="results-row" id="albums-results"></div>
+    </div>
+</div>
 
-        <!-- Grid View for "More" -->
-        <div id="single-category-grid" style="display: none;">
-            <div class="grid-header">
-                <button class="back-button" onclick="setSearchFilter(null)">
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-                            stroke-linejoin="round" />
-                    </svg>
-                    Back
-                </button>
-                <h2 class="row-title" id="grid-title">Results</h2>
-            </div>
-            <div class="grid-results" id="grid-results"></div>
-            <div id="load-more-container" class="load-more-container" style="display: none;">
-                <button id="load-more-btn" class="btn btn-secondary" onclick="loadMoreResults()">Load More</button>
-            </div>
-        </div>
+<!-- State 4: Grid View -->
+<div id="single-category-grid" class="is-hidden">
+    <div class="grid-header">
+        <button class="back-button" onclick="setSearchFilter(null)">Back</button>
+        <h2 class="row-title" id="grid-title">Results</h2>
+    </div>
+    <div class="grid-results" id="grid-results"></div>
+    <div id="load-more-container" class="is-hidden">
+        <button id="load-more-btn" class="btn btn-secondary" onclick="loadMoreResults()">Load More</button>
     </div>
 </div>
