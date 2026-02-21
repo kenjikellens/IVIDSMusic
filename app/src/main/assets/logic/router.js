@@ -1,0 +1,60 @@
+export const Router = {
+    currentPage: null,
+    currentParams: null,
+
+    async loadPage(pageName, params = null) {
+        // Allow re-loading the same page if parameters changed
+        if (this.currentPage === pageName && JSON.stringify(this.currentParams) === JSON.stringify(params)) {
+            return;
+        }
+
+        const mainView = document.getElementById('main-view');
+        if (!mainView) return;
+
+        try {
+            console.log(`[Router] Loading: ${pageName}`, params);
+            const response = await fetch(`pages/${pageName}.html?v=${Date.now()}`);
+            if (!response.ok) throw new Error(`Could not load page: ${pageName}`);
+
+            const html = await response.text();
+
+            this.currentParams = params;
+            this.currentPage = pageName;
+
+            // Parse HTML safely
+            const temp = document.createElement('div');
+            temp.innerHTML = html;
+
+            // Extract scripts to run them manually
+            const scripts = Array.from(temp.querySelectorAll('script'));
+            scripts.forEach(s => s.remove());
+
+            // Clear view and inject new HTML
+            mainView.innerHTML = temp.innerHTML;
+
+            // Clean up old dynamic scripts
+            document.querySelectorAll('.dynamic-script').forEach(s => s.remove());
+
+            // Initialize Page Logic via PageSystem (NO JS IN HTML)
+            const { PageSystem } = await import('./pages.js');
+            const initMethod = `init${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
+            if (PageSystem[initMethod]) {
+                await PageSystem[initMethod](params || {});
+            }
+
+            // Update sidebar active state
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+                if (link.id === `nav-${pageName}`) link.classList.add('active');
+            });
+
+            mainView.scrollTop = 0;
+
+        } catch (error) {
+            console.error('[Router] Error:', error);
+            mainView.innerHTML = `<div style="padding: 40px;"><h1>Error</h1><p>${error.message}</p></div>`;
+        }
+    }
+};
+
+window.Router = Router;

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="IVIDS Music — stream your favourite music ad-free.">
+    <title>IVIDS Music</title>
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="loader.css">
+    <script type="module" src="../logic/loader.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Sidebar Navigation -->
+        <aside id="sidebar-container">
+            <div class="sidebar-brand">
+                <img class="brand-icon" src="svg/brand.svg" alt="IVIDS">
+                <span class="brand-name">IVIDS</span>
+            </div>
+
+            <nav>
+                <ul class="nav-links">
+                    <li>
+                        <a href="#" class="active" onclick="Router.loadPage('home')" id="nav-home">
+                            <img class="nav-icon" src="svg/home.svg" alt="">
+                            Home
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="Router.loadPage('search')" id="nav-search">
+                            <img class="nav-icon" src="svg/search.svg" alt="">
+                            Search
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="Router.loadPage('library')" id="nav-library">
+                            <img class="nav-icon" src="svg/library.svg" alt="">
+                            Your Library
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" onclick="Router.loadPage('profile')" id="nav-profile">
+                            <img class="nav-icon" src="svg/user.svg" alt="">
+                            You
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="nav-divider"></div>
+
+                <ul class="nav-links">
+                    <li>
+                        <a href="#" onclick="Router.loadPage('settings')" id="nav-settings">
+                            <img class="nav-icon" src="svg/settings.svg" alt="">
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Content Area with Header -->
+        <div class="content-wrapper">
+            <header>
+                <div class="search-container">
+                    <img class="search-icon" src="svg/search.svg" alt="">
+                    <input type="text" placeholder="Artists, songs, albums..." id="header-search-input"
+                        onkeydown="if(event.key === 'Enter') { Router.loadPage('search', { query: this.value }); }">
+                </div>
+                <div class="header-right">
+                    <div class="user-profile" title="User Profile" onclick="Router.loadPage('profile')">
+                        <img src="svg/user.svg" alt="Profile">
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main View for Dynamic Content -->
+            <main id="main-view"></main>
+
+            <!-- Persistent Player Bar -->
+            <footer id="player-bar" class="is-inactive">
+                <!-- Left: Song Info -->
+                <div class="player-info">
+                    <img src="" id="player-cover" class="player-cover" alt="">
+                    <div class="player-track-details">
+                        <div id="player-title" class="player-title">—</div>
+                        <div id="player-artist" class="player-artist">—</div>
+                        <div id="player-status-container" class="player-status">
+                            <div id="player-loader" class="ivids-loader small"></div>
+                            <div id="download-status" class="player-status-text">Preparing...</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Center: Controls & Progress -->
+                <div class="player-controls">
+                    <div class="player-main-controls">
+                        <button class="player-control-btn secondary" onclick="YouTubePlayer.previous()"
+                            title="Previous">
+                            <img src="svg/previous.svg" alt="Previous">
+                        </button>
+                        <button id="play-pause-btn" class="player-control-btn main" title="Play / Pause">
+                            <img id="play-icon" src="svg/play.svg" alt="Play">
+                        </button>
+                        <button class="player-control-btn secondary" onclick="YouTubePlayer.next()" title="Next">
+                            <img src="svg/next.svg" alt="Next">
+                        </button>
+                    </div>
+                    <div class="player-progress">
+                        <span id="current-time" class="time-label">0:00</span>
+                        <input type="range" id="progress-slider" class="ivids-slider" value="0" min="0" max="100">
+                        <span id="total-duration" class="time-label">0:00</span>
+                    </div>
+                </div>
+                <!-- Right: Volume -->
+                <div class="player-volume">
+                    <img class="player-volume-icon" src="svg/volume.svg" alt="Volume">
+                    <input type="range" id="volume-slider" class="ivids-slider player-volume-slider" value="100" min="0"
+                        max="100">
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Screensaver Overlay -->
+    <div id="screensaver-overlay"></div>
+
+    <script type="module">
+        import { Router } from '../logic/router.js';
+        import { SettingsManager } from '../logic/settings-manager.js';
+        import '../logic/player.js';
+
+        window.onload = () => {
+            SettingsManager.init();
+            Router.loadPage('home');
+        };
+
+        // Screensaver logic
+        let idleTimer;
+        const resetTimer = () => {
+            document.getElementById('screensaver-overlay').classList.remove('active');
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+                document.getElementById('screensaver-overlay').classList.add('active');
+            }, 60000);
+        };
+        document.onmousemove = resetTimer;
+        document.onkeypress = resetTimer;
+        resetTimer();
+    </script>
+</body>
+
+</html>

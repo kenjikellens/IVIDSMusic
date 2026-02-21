@@ -1,0 +1,20 @@
+# Node
+node_modules/
+npm-debug.log*
+
+# Downloaded audio files
+server/downloads/
+
+# Large binaries (yt-dlp, ffmpeg) — install separately
+server/bin/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Gemini
+.gemini/
