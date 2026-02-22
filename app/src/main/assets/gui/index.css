@@ -1447,8 +1447,8 @@ header {
     }
 
     .nav-icon {
-        width: calc(22px * var(--ui-scale));
-        height: calc(22px * var(--ui-scale));
+        width: calc(28px * var(--ui-scale));
+        height: calc(28px * var(--ui-scale));
     }
 
     /* â”€â”€ Content Wrapper: full width + clear bottom space â”€â”€ */
@@ -1469,14 +1469,14 @@ header {
 
     #header-search-input {
         width: 100%;
-        font-size: 0.85rem;
+        font-size: calc(0.95rem * var(--ui-scale));
         padding: calc(10px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(10px * var(--ui-scale)) calc(38px * var(--ui-scale));
     }
 
     .search-icon {
         left: calc(12px * var(--ui-scale));
-        width: calc(15px * var(--ui-scale));
-        height: calc(15px * var(--ui-scale));
+        width: calc(18px * var(--ui-scale));
+        height: calc(18px * var(--ui-scale));
     }
 
     .user-profile {
