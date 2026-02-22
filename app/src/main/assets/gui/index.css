@@ -1370,7 +1370,7 @@ header {
 
 @media (orientation: portrait) {
     :root {
-        --ui-base-scale: 0.75;
+        --ui-base-scale: 0.9;
         --player-height: auto;
         --sidebar-width: 0px;
         --bottom-nav-height: calc(60px * var(--ui-scale));
@@ -1507,12 +1507,12 @@ header {
     }
 
     .hero-title {
-        font-size: 1.6rem;
+        font-size: calc(1.8rem * var(--ui-scale));
     }
 
     .hero-desc {
-        font-size: 0.85rem;
-        margin-bottom: 16px;
+        font-size: calc(0.9rem * var(--ui-scale));
+        margin-bottom: calc(16px * var(--ui-scale));
     }
 
     .hero-buttons {
@@ -1522,7 +1522,7 @@ header {
 
     .btn {
         padding: calc(9px * var(--ui-scale)) calc(20px * var(--ui-scale));
-        font-size: 0.8rem;
+        font-size: calc(0.85rem * var(--ui-scale));
     }
 
     /* â”€â”€ Music Cards: narrower â”€â”€ */
@@ -1549,12 +1549,11 @@ header {
     }
 
     .row-title {
-        font-size: 1.1rem;
-        font-size: 0.85rem;
+        font-size: calc(1.1rem * var(--ui-scale));
     }
 
     .row-container {
-        margin-bottom: 16px;
+        margin-bottom: calc(16px * var(--ui-scale));
     }
 
     /* Hide scroll arrows on touch */
