@@ -8,12 +8,12 @@ Built with a premium dark glassmorphism UI, it combines the power of the **Deeze
 
 ## ✨ Features
 
-- 🔍 **Smart Search** — Search for songs, artists, and albums with real-time results powered by Deezer
+- 🔍 **Smart Search** — Integrated search experience syncing header input and a premium centered frosted-glass search bar
 - 🎵 **Ad-Free Streaming** — Audio is streamed directly from YouTube via Invidious, with zero ads
-- 🎨 **Premium Dark UI** — Glassmorphism design with dynamic blurred backgrounds, smooth animations, and vibrant colors
+- 🎨 **Premium Dark UI** — Glassmorphism design with dynamic blurred backgrounds, custom typographic branding, and smooth CSS interactions
 - 📱 **Fully Native** — Runs entirely on your Android device, no PC or external server needed
 - 🏠 **Home Page** — Curated genre rows (Pop, Rock, Hip-Hop, Hardcore, 90's, Electronic) with album art
-- 🔎 **Browse & Discover** — Search by artist, song, or album with category filtering and load-more pagination
+- 🔎 **Browse & Discover** — Filter results by category (Artists, Songs, Albums) and refine with dynamic Year filtering, plus a dismissible mini-hero promo
 - 💾 **Track Persistence** — Remembers your last played song across sessions using localStorage
 - 📜 **Listen History** — Automatically tracks your recently played songs (stored locally, max 20 tracks, no duplicates)
 - 🎤 **Artist Pages** — Dedicated artist views with real artist images from Deezer
@@ -165,9 +165,10 @@ Enables SPA-like navigation without page reloads:
 
 ### `cards.js` — Card Component System
 Creates reusable music card elements:
-- Song cards with play overlay
-- Album cards with stacked visual effect that navigate to search results
-- Artist cards with circular images and lazy-loaded imagery
+- Robust click handler that safely plays tracks or navigates to albums/artists
+- Song cards with interactive play overlay
+- Album cards that automatically generate a search query for their tracks
+- Artist cards with circular layouts and lazy-loaded imagery
 - Scrollable card rows with arrow navigation
 - Dynamic color tinting based on album art
 
@@ -182,7 +183,7 @@ Manages user preferences:
 ### `pages.js` — Page Initialization System
 Centralizes all page-specific logic:
 - `initHome()` — Loads genre-based recommendations, renders skeleton loaders, populates album card rows
-- `initSearch()` — Handles search queries, category filtering, pagination with "Load More"
+- `initSearch()` — Handles exact state synchronization between search inputs, applies robust year filtering, manages grid/row displays, and implements "Load More" pagination
 - `initArtist()` — Renders individual artist detail views
 - `initProfile()` — Loads real listen history from localStorage, displays empty states when no data exists
 - `initSettings()` — Populates scale factor buttons, highlights the active selection, wires up click handlers
@@ -201,7 +202,7 @@ Injects SVG spinner animations into `.ivids-loader` elements:
 The landing page displays curated genre rows — Pop, Rock, Hip-Hop, Hardcore, 90's, and Electronic — each populated with album cards from the Deezer API. Skeleton loaders with spinners appear while data loads, then smoothly transition to real content.
 
 ### 🔍 Search (`search.html`)
-Full search experience with a hero browse section, real-time results across artists, songs, and albums, category filter tabs, and infinite "Load More" pagination. Also accessible via the header search bar.
+The comprehensive search hub. It begins with a hero browse section featuring a premium dark glassmorphic input, a dismissible "Start Your Experience" promo box, and syncs seamlessly with the sidebar header search. Results appear in real-time categorized by Artists, Songs, and Albums. Users can refine lists using a specific Year filter and infinitely load more via pagination.
 
 ### 🎤 Artist (`artist.html`)
 A dedicated detail page for individual artists, showing artist name and image with further content to be expanded.

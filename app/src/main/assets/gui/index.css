@@ -136,28 +136,36 @@ body {
 
 .sidebar-brand {
     display: flex;
-    align-items: center;
     justify-content: center;
-    gap: calc(10px * var(--ui-scale));
     margin-bottom: calc(36px * var(--ui-scale));
     padding: 0 calc(20px * var(--ui-scale));
 }
 
-.brand-icon {
-    width: calc(28px * var(--ui-scale));
-    height: calc(28px * var(--ui-scale));
-    color: var(--primary-color);
-    filter: drop-shadow(0 0 8px rgba(var(--primary-rgb), 0.5));
-    flex-shrink: 0;
+.brand-text-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1;
 }
 
-.brand-name {
-    color: var(--primary-color);
-    font-size: calc(1.2rem * var(--ui-scale));
+.brand-ivids {
+    color: var(--text-main);
+    font-size: calc(2.2rem * var(--ui-scale));
     font-weight: 800;
     letter-spacing: 4px;
     text-transform: uppercase;
-    text-shadow: 0 0 20px rgba(var(--primary-rgb), 0.3);
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.2);
+}
+
+.brand-music {
+    color: var(--primary-color);
+    font-size: calc(1rem * var(--ui-scale));
+    font-weight: 600;
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    margin-left: 8px;
+    /* Offset to center optically with the generous letter-spacing */
+    text-shadow: 0 0 20px rgba(var(--primary-rgb), 0.4);
 }
 
 /* ============================
@@ -166,10 +174,6 @@ body {
    we use CSS filters to colorize them.
    ============================ */
 
-/* Brand icon â€” primary aqua color */
-img.brand-icon {
-    filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
-}
 
 /* Nav icons â€” muted grey by default */
 img.nav-icon {
