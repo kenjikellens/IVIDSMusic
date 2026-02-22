@@ -1,5 +1,20 @@
 <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5" />
-    <circle cx="12" cy="12" r="3" fill="currentColor" />
-    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+    <defs>
+        <!-- Mask to cleanly cut out the play button from the equalizer -->
+        <mask id="cutout-play">
+            <rect width="24" height="24" fill="white" />
+            <path d="M8.5 7.5L15.5 12L8.5 16.5V7.5Z" fill="black" stroke="black" stroke-width="2.5" stroke-linejoin="round"/>
+        </mask>
+    </defs>
+
+    <!-- 7-bar Equalizer forming an interactive soundwave -->
+    <g mask="url(#cutout-play)">
+        <rect x="2" y="9" width="2" height="6" rx="1" fill="black" />
+        <rect x="5" y="6" width="2" height="12" rx="1" fill="black" />
+        <rect x="8" y="3" width="2" height="18" rx="1" fill="black" />
+        <rect x="11" y="1" width="2" height="22" rx="1" fill="black" />
+        <rect x="14" y="3" width="2" height="18" rx="1" fill="black" />
+        <rect x="17" y="6" width="2" height="12" rx="1" fill="black" />
+        <rect x="20" y="9" width="2" height="6" rx="1" fill="black" />
+    </g>
 </svg>
