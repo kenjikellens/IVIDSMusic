@@ -13,8 +13,10 @@ export const PageSystem = {
                 <div class="skeleton-img">
                     <div class="ivids-loader poster-loader"></div>
                 </div>
-                <div class="skeleton-text title"></div>
-                <div class="skeleton-text artist"></div>
+                <div class="skeleton-info-box">
+                    <div class="skeleton-text title"></div>
+                    <div class="skeleton-text artist"></div>
+                </div>
             </div>
         `;
 
@@ -90,8 +92,10 @@ export const PageSystem = {
                 <div class="skeleton-img">
                     <div class="ivids-loader poster-loader"></div>
                 </div>
-                <div class="skeleton-text title"></div>
-                <div class="skeleton-text artist"></div>
+                <div class="skeleton-info-box">
+                    <div class="skeleton-text title"></div>
+                    <div class="skeleton-text artist"></div>
+                </div>
             </div>`;
 
         if (params.type) {
