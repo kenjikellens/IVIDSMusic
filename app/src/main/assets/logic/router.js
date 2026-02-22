@@ -35,18 +35,18 @@ export const Router = {
             // Clean up old dynamic scripts
             document.querySelectorAll('.dynamic-script').forEach(s => s.remove());
 
+            // Update sidebar active state immediately for instant feedback
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+                if (link.id === `nav-${pageName}`) link.classList.add('active');
+            });
+
             // Initialize Page Logic via PageSystem (NO JS IN HTML)
             const { PageSystem } = await import('./pages.js');
             const initMethod = `init${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
             if (PageSystem[initMethod]) {
                 await PageSystem[initMethod](params || {});
             }
-
-            // Update sidebar active state
-            document.querySelectorAll('.nav-links a').forEach(link => {
-                link.classList.remove('active');
-                if (link.id === `nav-${pageName}`) link.classList.add('active');
-            });
 
             mainView.scrollTop = 0;
 
