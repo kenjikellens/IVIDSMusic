@@ -64,9 +64,17 @@ export const CardSystem = {
                 window.Router.loadPage('artist', { name: e.target.dataset.name });
                 return;
             }
-            if (track.type === 'song') YouTubePlayer.loadTrack(track);
-            else if (track.type === 'album') window.Router.loadPage('search', { query: track.title || track.name, type: 'song' });
-            else if (track.type === 'artist') window.Router.loadPage('artist', { name: track.name });
+
+            // Determine action based on type
+            if (track.type === 'artist') {
+                window.Router.loadPage('artist', { name: track.name });
+            } else if (track.type === 'album') {
+                // If it's an album, search for its songs
+                window.Router.loadPage('search', { query: track.title || track.name, type: 'song' });
+            } else {
+                // Default to playing (song / track)
+                YouTubePlayer.loadTrack(track);
+            }
         };
 
         return card;

@@ -6,13 +6,25 @@
     <p class="browse-tagline">Your World of Music</p>
     <h1 class="browse-hero-title">Search</h1>
     <div class="browse-search-wrapper">
-        <svg class="browse-search-icon" viewBox="0 0 24 24" fill="none">
-            <circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2.5" />
-            <path d="M16.5 16.5L21 21" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
-        </svg>
+        <img class="browse-search-icon" src="svg/search.svg" alt="">
         <input id="browse-search-input" class="browse-search-input" type="text" placeholder="Artists, songs, albums..."
             autocomplete="off" oninput="handleBrowseInput(this.value)"
             onkeydown="if(event.key==='Enter' && this.value.trim()) window.performSearch(this.value.trim())">
+    </div>
+
+    <!-- Search Promo (Mini Hero style) -->
+    <div id="search-promo" class="search-hero-promo">
+        <button class="promo-close-btn" onclick="this.parentElement.remove()">
+            <img src="svg/close.svg" alt="Close">
+        </button>
+        <div class="hero-bg">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+        </div>
+        <div class="hero-content">
+            <h2 class="hero-title">Start Your Experience</h2>
+            <p class="hero-desc">Explore millions of tracks and discover your next favorite artist.</p>
+        </div>
     </div>
 </div>
 

@@ -54,8 +54,7 @@ export const MusicAPI = {
                         id: item.id,
                         title: item.title,
                         artist: item.artist?.name || 'Unknown',
-                        cover: item.cover_big || item.cover_xl,
-                        type: 'album'
+                        cover: item.cover_big || item.cover_xl
                     };
                 } else {
                     return {

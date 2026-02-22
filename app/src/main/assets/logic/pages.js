@@ -56,6 +56,7 @@ export const PageSystem = {
 
         if (get('header-search-input')) get('header-search-input').value = query;
         if (get('browse-search-input')) get('browse-search-input').value = query;
+        if (get('year-input')) get('year-input').value = params.year || '';
 
         if (!query) {
             if (browseHero) browseHero.classList.remove('is-hidden');
@@ -108,6 +109,7 @@ export const PageSystem = {
 
             const data = await MusicAPI.search(query, PAGE_SIZE, params.type, params.year, 0, true);
             grid.innerHTML = '';
+
             data.forEach(item => grid.appendChild(CardSystem.createCard(item)));
             if (window.Loader) window.Loader.init();
 
@@ -141,6 +143,7 @@ export const PageSystem = {
             fill('artists-results', artists, 'artists-row-container');
             fill('songs-results', songs, 'songs-row-container');
             fill('albums-results', albums, 'albums-row-container');
+
             if (window.Loader) window.Loader.init();
         }
     },
@@ -202,5 +205,11 @@ window.performSearch = (q) => window.Router.loadPage('search', { query: q });
 window.handleBrowseInput = (v) => { if (document.getElementById('header-search-input')) document.getElementById('header-search-input').value = v; };
 window.setSearchFilter = (t) => {
     const p = window.Router.currentParams || {};
-    window.Router.loadPage('search', { query: p.query, type: t });
+    window.Router.loadPage('search', { ...p, type: t });
+};
+
+window.applyYearFilter = () => {
+    const year = document.getElementById('year-input')?.value;
+    const p = window.Router.currentParams || {};
+    window.Router.loadPage('search', { ...p, year });
 };
