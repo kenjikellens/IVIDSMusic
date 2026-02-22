@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 @property --ui-scale {
     syntax: '<number>';
@@ -166,27 +166,27 @@ body {
    we use CSS filters to colorize them.
    ============================ */
 
-/* Brand icon — primary aqua color */
+/* Brand icon â€” primary aqua color */
 img.brand-icon {
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
 
-/* Nav icons — muted grey by default */
+/* Nav icons â€” muted grey by default */
 img.nav-icon {
     filter: brightness(0) invert(0.65);
 }
 
-/* Nav icons — white on hover */
+/* Nav icons â€” white on hover */
 .nav-links a:hover img.nav-icon {
     filter: brightness(0) invert(1);
 }
 
-/* Nav icons — primary aqua when active */
+/* Nav icons â€” primary aqua when active */
 .nav-links a.active img.nav-icon {
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
 
-/* Header search icon — muted, aqua on focus */
+/* Header search icon â€” muted, aqua on focus */
 img.search-icon {
     filter: brightness(0) invert(0.4);
 }
@@ -202,7 +202,7 @@ img.search-icon {
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
 
-/* Player control button icons — white */
+/* Player control button icons â€” white */
 .player-control-btn img {
     display: block;
     filter: brightness(0) invert(1);
@@ -601,7 +601,7 @@ header {
 }
 
 /* ============================
-   Row Containers — Album Grids
+   Row Containers â€” Album Grids
    ============================ */
 .row-container {
     margin-bottom: calc(24px * var(--ui-scale));
@@ -622,7 +622,7 @@ header {
 }
 
 /* ============================
-   Music Card — Split Layout (Image + Info)
+   Music Card â€” Split Layout (Image + Info)
    ============================ */
 .music-card {
     position: relative;
@@ -795,7 +795,7 @@ header {
 }
 
 .music-card::after {
-    content: '▶';
+    content: 'â–¶';
     position: absolute;
     top: 50%;
     left: 50%;
@@ -1047,7 +1047,7 @@ header {
     z-index: 1;
 }
 
-/* Player Bar — Element Classes */
+/* Player Bar â€” Element Classes */
 .player-info {
     display: flex;
     align-items: center;
@@ -1073,7 +1073,7 @@ header {
 
 .player-cover:not([src])::after,
 .player-cover[src=""]::after {
-    content: '🎵';
+    content: 'ðŸŽµ';
     font-size: 1.2rem;
     opacity: 0.2;
 }
@@ -1355,11 +1355,6 @@ header {
     }
 }
 
-@media (max-width: 768px) {
-    :root {
-        --ui-base-scale: 0.6;
-    }
-}
 
 @media (orientation: portrait) {
     :root {
@@ -1370,12 +1365,12 @@ header {
         --main-vertical-padding: calc(40px * var(--ui-scale));
     }
 
-    /* ── App Shell: vertical stack ── */
+    /* â”€â”€ App Shell: vertical stack â”€â”€ */
     #app {
         flex-direction: column;
     }
 
-    /* ── Sidebar → Bottom Tab Bar ── */
+    /* â”€â”€ Sidebar â†’ Bottom Tab Bar â”€â”€ */
     #sidebar-container {
         position: fixed;
         bottom: 0;
@@ -1444,13 +1439,13 @@ header {
         height: calc(22px * var(--ui-scale));
     }
 
-    /* ── Content Wrapper: full width + clear bottom space ── */
+    /* â”€â”€ Content Wrapper: full width + clear bottom space â”€â”€ */
     .content-wrapper {
         width: 100%;
         padding-bottom: calc(var(--bottom-nav-height) + (10px * var(--ui-scale)));
     }
 
-    /* ── Header: compact ── */
+    /* â”€â”€ Header: compact â”€â”€ */
     header {
         padding: 0 calc(16px * var(--ui-scale));
         height: calc(52px * var(--ui-scale));
@@ -1486,12 +1481,12 @@ header {
         gap: calc(10px * var(--ui-scale));
     }
 
-    /* ── Main content: tighter padding ── */
+    /* â”€â”€ Main content: tighter padding â”€â”€ */
     #main-view {
         padding: calc(20px * var(--ui-scale)) calc(8px * var(--ui-scale));
     }
 
-    /* ── Hero: compact ── */
+    /* â”€â”€ Hero: compact â”€â”€ */
     .hero {
         min-height: calc(180px * var(--ui-scale));
         padding: calc(24px * var(--ui-scale)) calc(12px * var(--ui-scale));
@@ -1518,7 +1513,7 @@ header {
         font-size: 0.8rem;
     }
 
-    /* ── Music Cards: narrower ── */
+    /* â”€â”€ Music Cards: narrower â”€â”€ */
     .music-card {
         width: calc(110px * var(--ui-scale));
         min-width: calc(110px * var(--ui-scale));
@@ -1556,7 +1551,7 @@ header {
     display: none !important;
 }
 
-/* ── Skeletons: match card sizing ── */
+/* â”€â”€ Skeletons: match card sizing â”€â”€ */
 .skeleton-card {
     width: calc(110px * var(--ui-scale));
     min-width: calc(110px * var(--ui-scale));
@@ -1578,7 +1573,7 @@ header {
     display: none;
 }
 
-/* ── Player Bar: compact stacked layout ── */
+/* â”€â”€ Player Bar: compact stacked layout â”€â”€ */
 #player-bar {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
@@ -1657,19 +1652,19 @@ header {
     min-width: calc(30px * var(--ui-scale));
 }
 
-/* Hide volume in portrait — phones use hardware volume */
+/* Hide volume in portrait â€” phones use hardware volume */
 .player-volume {
     display: none;
 }
 
 
-/* ── Back button ── */
+/* â”€â”€ Back button â”€â”€ */
 .back-button {
     padding: 7px 14px;
     font-size: 0.82rem;
 }
 
-/* ── Load more ── */
+/* â”€â”€ Load more â”€â”€ */
 .load-more-container {
     padding: 20px 0;
 }
@@ -2160,6 +2155,10 @@ header {
 
 /* Mobile Adjustments */
 @media (max-width: 768px) {
+    :root {
+        --ui-base-scale: 0.6;
+    }
+
     .profile-header {
         flex-direction: column;
         text-align: center;
@@ -2178,21 +2177,7 @@ header {
     .profile-stats-grid {
         grid-template-columns: 1fr;
     }
-}
 
-.scale-btn:hover {
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.05);
-}
-
-.scale-btn.active {
-    background: var(--primary-color);
-    color: #000;
-    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
-}
-
-/* Mobile Friendly Adjustments */
-@media (max-width: 768px) {
     .settings-item {
         flex-direction: column;
         align-items: flex-start;
@@ -2208,4 +2193,15 @@ header {
         flex: 1;
         text-align: center;
     }
+}
+
+.scale-btn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.scale-btn.active {
+    background: var(--primary-color);
+    color: #000;
+    box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
 }
