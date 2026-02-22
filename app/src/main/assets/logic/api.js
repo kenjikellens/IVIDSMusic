@@ -116,12 +116,12 @@ export const MusicAPI = {
 
                 if (genre === '90\'s') {
                     // THE FIX: True year-range filtering (1990-1999) sorted by popularity
-                    tracks = await this.search('top hits', 12, 'album', '1990-1999', 0, true);
+                    tracks = await this.search('top hits', 12, 'all', '1990-1999', 0, true);
                 } else if (genre === 'Hardcore') {
                     // THE FIX: Authentic genre search instead of broken Genre IDs
-                    tracks = await this.search('Hardcore Punk', 12, 'album', null, 0, true);
+                    tracks = await this.search('Hardcore Punk', 12, 'all', null, 0, true);
                 } else {
-                    tracks = await this.search(genre, 12, 'album', null, 0, true);
+                    tracks = await this.search(genre, 12, 'all', null, 0, true);
                 }
 
                 return {
@@ -139,22 +139,75 @@ export const MusicAPI = {
     },
 
     /**
-     * Get specific YouTube Video ID using redundant Invidious instances
+     * Get specific YouTube Video ID using redundant instances and search fallbacks
      */
     async getYouTubeVideoId(query) {
         const searchQuery = encodeURIComponent(query);
-        for (const instance of this.invidiousInstances) {
+
+        // 1. Try Multiple Invidious Instances
+        const instances = [
+            'https://invidious.flokinet.to',
+            'https://iv.melmac.space',
+            'https://invidious.drgns.space',
+            'https://invidious.perennialte.chs.org',
+            'https://yt.artemislena.eu'
+        ];
+
+        for (const instance of instances) {
             try {
                 const url = `${instance}/api/v1/search?q=${searchQuery}&type=video&limit=1`;
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
                 const response = await fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
                 if (!response.ok) continue;
                 const data = await response.json();
-                if (data && data.length > 0) return data[0].videoId;
+                if (data && data.length > 0 && data[0].videoId) return data[0].videoId;
+            } catch (error) { continue; } // Silent fail, try next
+        }
+
+        // 2. Try Piped API Fallback
+        const pipedInstances = [
+            'https://pipedapi.kavin.rocks',
+            'https://pipedapi.moomoo.me',
+            'https://pipedapi.syncpundit.io'
+        ];
+        for (const instance of pipedInstances) {
+            try {
+                const url = `${instance}/search?q=${searchQuery}&filter=all`;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 4000);
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                if (!response.ok) continue;
+                const data = await response.json();
+                if (data && data.items && data.items.length > 0) {
+                    const item = data.items.find(i => i.url && i.url.includes('/watch?v='));
+                    if (item) return item.url.split('v=')[1].split('&')[0];
+                }
             } catch (error) { continue; }
         }
+
+        // 3. Bulletproof Fallback: Proxy HTML scraping directly from YouTube
+        // This relies on the local proxy extracting the raw YouTube HTML and pulling the first video ID match.
+        try {
+            const ytUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
+            const proxyUrl = this.proxyUrl + encodeURIComponent(ytUrl);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 6000);
+            const res = await fetch(proxyUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+            const html = await res.text();
+
+            // Standard scraping regex for YouTube INITIAL_DATA video IDs
+            const match = html.match(/"videoId":"([^"]{11})"/);
+            if (match && match[1]) {
+                return match[1];
+            }
+        } catch (e) {
+            console.error('[Search] All YouTube Video Search methods failed.', e);
+        }
+
         return null;
     },
 

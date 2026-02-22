@@ -9,14 +9,22 @@ const app = express();
 const PORT = 3000;
 
 // Config
+// Determine paths to the assets/downloads/temp and assets/downloads/saved folder
+const PROJECT_ROOT = path.resolve(__dirname, '../../');
+const ASSETS_DIR = path.join(PROJECT_ROOT, 'app', 'src', 'main', 'assets');
+const DOWNLOADS_DIR = path.join(ASSETS_DIR, 'downloads', 'temp');
+const SAVED_DIR = path.join(ASSETS_DIR, 'downloads', 'saved');
+
 const BIN_DIR = path.join(__dirname, 'bin');
-const DOWNLOADS_DIR = path.join(process.env.USERPROFILE || process.env.HOME, '.ivids_music_downloads');
 const YTDLP_PATH = path.join(BIN_DIR, 'yt-dlp.exe');
 const FFMPEG_PATH = path.join(BIN_DIR, 'ffmpeg.exe');
 
-// Ensure downloads directory exists
+// Ensure downloads directories exist
 if (!fs.existsSync(DOWNLOADS_DIR)) {
     fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
+}
+if (!fs.existsSync(SAVED_DIR)) {
+    fs.mkdirSync(SAVED_DIR, { recursive: true });
 }
 
 app.use(cors());
@@ -24,6 +32,7 @@ app.use(express.json());
 
 // Serve downloaded files statically
 app.use('/tracks', express.static(DOWNLOADS_DIR));
+app.use('/saved', express.static(SAVED_DIR));
 
 /**
  * Proxy endpoint to bypass CORS for music APIs (like Deezer)
@@ -106,6 +115,42 @@ app.get('/play', async (req, res) => {
             res.status(500).json({ error: 'Download failed' });
         }
     });
+});
+
+/**
+ * Endpoint: /save?videoId=...&artist=...&title=...
+ * Moves an existing file from downloads to downloads/saved
+ */
+app.get('/save', (req, res) => {
+    const { videoId, artist, title } = req.query;
+
+    if (!videoId || !artist || !title) {
+        return res.status(400).json({ error: 'Missing parameters (videoId, artist, title required)' });
+    }
+
+    const cleanArtist = sanitizeFilename(artist);
+    const cleanTitle = sanitizeFilename(title);
+    const fileName = `${cleanArtist} - ${cleanTitle}.mp3`;
+
+    const sourcePath = path.join(DOWNLOADS_DIR, fileName);
+    const destPath = path.join(SAVED_DIR, fileName);
+
+    if (!fs.existsSync(sourcePath)) {
+        return res.status(404).json({ error: 'File not found in temporary cache', status: 'error' });
+    }
+
+    try {
+        fs.renameSync(sourcePath, destPath);
+        console.log(`[Save] Moved to saved: ${fileName}`);
+        res.json({
+            status: 'saved',
+            message: 'Track saved successfully',
+            url: `http://localhost:${PORT}/saved/${encodeURIComponent(fileName)}`
+        });
+    } catch (err) {
+        console.error('[Save Error]', err);
+        res.status(500).json({ error: 'Failed to move file', status: 'error' });
+    }
 });
 
 app.listen(PORT, '0.0.0.0', () => {

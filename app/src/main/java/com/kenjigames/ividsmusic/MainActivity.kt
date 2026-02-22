@@ -21,10 +21,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var webView: WebView
     private val client = OkHttpClient()
 
-    // Helpt bij het laden van lokale bestanden via een virtueel domein (voorkomt fetch blokkades)
     private val assetLoader by lazy {
+        val downloadDir = File(cacheDir, "downloads")
+        if (!downloadDir.exists()) downloadDir.mkdirs()
+        
+        val savedDir = File(filesDir, "saved")
+        if (!savedDir.exists()) savedDir.mkdirs()
+
         WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .addPathHandler("/temp/", WebViewAssetLoader.InternalStoragePathHandler(this, downloadDir))
+            .addPathHandler("/saved/", WebViewAssetLoader.InternalStoragePathHandler(this, savedDir))
             .build()
     }
 
@@ -59,9 +66,15 @@ class MainActivity : AppCompatActivity() {
                 }
                 
                 // 3. Onderschep de Play verzoeken (voor YouTube audio)
-                if (url.toString().contains("localhost:3000/play")) {
+                if (url.toString().contains("localhost:3000/play") || url.toString().contains("/api/play")) {
                     val videoId = url.getQueryParameter("videoId") ?: return null
                     return handlePlayRequest(videoId)
+                }
+
+                // 4. Onderschep de Save verzoeken
+                if (url.toString().contains("localhost:3000/save") || url.toString().contains("/api/save")) {
+                    val videoId = url.getQueryParameter("videoId") ?: return null
+                    return handleSaveRequest(videoId)
                 }
 
                 return super.shouldInterceptRequest(view, request)
@@ -119,10 +132,35 @@ class MainActivity : AppCompatActivity() {
 
             val resultJson = JSONObject()
             if (audioUrl.isNotEmpty()) {
-                resultJson.put("status", "ready")
-                resultJson.put("url", audioUrl)
+                // Download audio file to cache folder (temp)
+                val downloadDir = File(cacheDir, "downloads")
+                if (!downloadDir.exists()) downloadDir.mkdirs()
+                
+                // Clear older files to prevent hoarding
+                downloadDir.listFiles()?.forEach { if (it.isFile) it.delete() }
+                
+                val outputFile = File(downloadDir, "$videoId.m4a")
+                
+                val req = Request.Builder().url(audioUrl).build()
+                val response = client.newCall(req).execute()
+                
+                response.body?.byteStream()?.use { input ->
+                    java.io.FileOutputStream(outputFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                
+                if (outputFile.exists() && outputFile.length() > 0) {
+                    val localUrl = "https://appassets.androidplatform.net/temp/$videoId.m4a"
+                    resultJson.put("status", "ready")
+                    resultJson.put("url", localUrl)
+                } else {
+                    resultJson.put("status", "error")
+                    resultJson.put("message", "File download failed or empty.")
+                }
             } else {
                 resultJson.put("status", "error")
+                resultJson.put("message", "No audio streams found.")
             }
 
             WebResourceResponse(
@@ -133,6 +171,46 @@ class MainActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Log.e("IVIDS", "Play request error: ${e.message}")
             createErrorResponse("Play error: ${e.message}")
+        }
+    }
+
+    private fun handleSaveRequest(videoId: String): WebResourceResponse? {
+        return try {
+            val downloadDir = File(cacheDir, "downloads")
+            val sourceFile = File(downloadDir, "$videoId.m4a")
+            
+            if (!sourceFile.exists()) {
+                Log.e("IVIDS", "Save error: Source file not found in cache")
+                return createErrorResponse("Source file not found")
+            }
+
+            val savedDir = File(filesDir, "saved")
+            if (!savedDir.exists()) savedDir.mkdirs()
+            
+            val destFile = File(savedDir, "$videoId.m4a")
+            
+            // Move file (copy then delete source to handle potential cross-volume issues)
+            sourceFile.copyTo(destFile, overwrite = true)
+            
+            val resultJson = JSONObject()
+            if (destFile.exists() && destFile.length() > 0) {
+                val localUrl = "https://appassets.androidplatform.net/saved/$videoId.m4a"
+                resultJson.put("status", "saved")
+                resultJson.put("message", "Track saved successfully")
+                resultJson.put("url", localUrl)
+            } else {
+                resultJson.put("status", "error")
+                resultJson.put("message", "Failed to save file.")
+            }
+
+            WebResourceResponse(
+                "application/json",
+                "UTF-8",
+                ByteArrayInputStream(resultJson.toString().toByteArray(StandardCharsets.UTF_8))
+            )
+        } catch (e: Exception) {
+            Log.e("IVIDS", "Save request error: ${e.message}")
+            createErrorResponse("Save error: ${e.message}")
         }
     }
 

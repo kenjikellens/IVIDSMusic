@@ -114,10 +114,15 @@ export const YouTubePlayer = {
         const statusEl = document.getElementById('download-status');
         const loaderEl = document.getElementById('player-loader');
         const playerBar = document.getElementById('player-bar');
+        const saveBtn = document.getElementById('save-track-btn'); // New save button
 
         if (playerBar) playerBar.classList.remove('is-inactive');
         if (statusContainer) statusContainer.style.display = 'flex';
         if (loaderEl) loaderEl.style.display = 'inline-flex';
+        if (saveBtn) {
+            saveBtn.disabled = true; // Disable until ready
+            saveBtn.style.opacity = '0.5';
+        }
         if (statusEl) {
             statusEl.textContent = 'Searching YouTube...';
             statusEl.style.color = 'var(--primary-color)';
@@ -143,6 +148,15 @@ export const YouTubePlayer = {
 
             if (data.status === 'ready') {
                 if (statusContainer) statusContainer.style.display = 'none';
+
+                // Track is ready, enable save functionality
+                if (saveBtn) {
+                    saveBtn.disabled = false;
+                    saveBtn.style.opacity = '1';
+                    // Store videoId for saving later
+                    saveBtn.dataset.videoId = videoId;
+                }
+
                 this.audio.src = data.url;
                 this.audio.play();
             } else {
@@ -163,6 +177,43 @@ export const YouTubePlayer = {
         if (!this.audio.src) return;
         if (this.isPlaying) this.audio.pause();
         else this.audio.play();
+    },
+
+    async saveTrack() {
+        if (!this.currentTrack) return;
+
+        const saveBtn = document.getElementById('save-track-btn');
+        if (!saveBtn || !saveBtn.dataset.videoId || saveBtn.disabled) return;
+
+        const videoId = saveBtn.dataset.videoId;
+
+        try {
+            // Visual feedback: saving
+            saveBtn.disabled = true;
+            saveBtn.style.opacity = '0.5';
+
+            const params = new URLSearchParams({
+                videoId: videoId,
+                artist: this.currentTrack.artist,
+                title: this.currentTrack.title
+            });
+
+            const response = await fetch(`${Config.SERVER_URL}/save?${params.toString()}`);
+            const data = await response.json();
+
+            if (data.status === 'saved') {
+                console.log('[Save]', data.message);
+                // Visual feedback: success
+                saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--primary-color)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+            } else {
+                throw new Error(data.message || 'Failed to save');
+            }
+        } catch (err) {
+            console.error('[Save Error]', err);
+            saveBtn.disabled = false;
+            saveBtn.style.opacity = '1';
+            alert('Could not save track: ' + err.message);
+        }
     }
 };
 
