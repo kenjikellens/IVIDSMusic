@@ -1547,47 +1547,47 @@ header {
     .row-posters>.music-card {
         scroll-snap-align: start;
     }
-}
 
-.row-title {
-    font-size: 1.1rem;
-    font-size: 0.85rem;
-}
+    .row-title {
+        font-size: 1.1rem;
+        font-size: 0.85rem;
+    }
 
-.row-container {
-    margin-bottom: 16px;
-}
+    .row-container {
+        margin-bottom: 16px;
+    }
 
-/* Hide scroll arrows on touch */
-.scroll-arrow {
-    display: none !important;
-}
+    /* Hide scroll arrows on touch */
+    .scroll-arrow {
+        display: none !important;
+    }
 
-/* â”€â”€ Skeletons: match card sizing â”€â”€ */
-.skeleton-card {
-    width: calc(110px * var(--ui-scale));
-    min-width: calc(110px * var(--ui-scale));
-}
+    /* â”€â”€ Skeletons: match card sizing â”€â”€ */
+    .skeleton-card {
+        width: calc(110px * var(--ui-scale));
+        min-width: calc(110px * var(--ui-scale));
+    }
 
-.skeleton-info-box {
-    margin: 0 -11px -11px -11px;
-    /* Maintain same overlap ratio */
-}
+    .skeleton-info-box {
+        margin: 0 -11px -11px -11px;
+        /* Maintain same overlap ratio */
+    }
 
-.skeleton-poster {
-    width: calc(110px * var(--ui-scale));
-    height: calc(110px * var(--ui-scale));
-}
+    .skeleton-poster {
+        width: calc(110px * var(--ui-scale));
+        height: calc(110px * var(--ui-scale));
+    }
 
-.skeleton-row {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-}
+    .skeleton-row {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
 
-.skeleton-row::-webkit-scrollbar {
-    display: none;
+    .skeleton-row::-webkit-scrollbar {
+        display: none;
+    }
 }
 
 /* â”€â”€ Player Bar: compact stacked layout â”€â”€ */
