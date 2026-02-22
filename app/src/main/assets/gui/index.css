@@ -51,7 +51,6 @@
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
-    transition: --ui-scale 0.5s var(--ease-out-expo);
 }
 
 /* ============================
@@ -811,7 +810,7 @@ header {
     justify-content: center;
     font-size: calc(1.2rem * var(--ui-scale));
     opacity: 0;
-    transition: all 0.3s var(--ease-spring);
+    transition: opacity 0.3s var(--ease-spring), transform 0.3s var(--ease-spring);
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     padding-left: 4px;
     z-index: 2;
@@ -1246,7 +1245,7 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -1780,7 +1779,7 @@ header {
     height: calc(22px * var(--ui-scale));
     color: var(--text-muted);
     pointer-events: none;
-    transition: all 0.3s ease;
+    transition: color 0.3s ease;
 }
 
 .browse-search-input {
@@ -1789,7 +1788,7 @@ header {
     border-radius: calc(100px * var(--ui-scale));
     font-size: calc(1.2rem * var(--ui-scale));
     color: var(--text-main);
-    transition: all 0.4s var(--ease-out-expo);
+    transition: background 0.4s var(--ease-out-expo), border-color 0.4s var(--ease-out-expo), box-shadow 0.4s var(--ease-out-expo);
     backdrop-filter: blur(20px);
 }
 
@@ -1874,7 +1873,7 @@ header {
     cursor: pointer;
     font-size: 0.95rem;
     font-weight: 500;
-    transition: all 0.3s var(--ease-out-expo);
+    transition: background 0.3s var(--ease-out-expo), border-color 0.3s var(--ease-out-expo), color 0.3s var(--ease-out-expo), scale 0.3s var(--ease-out-expo), box-shadow 0.3s var(--ease-out-expo);
 }
 
 .search-chip:hover {
@@ -1907,7 +1906,7 @@ header {
     cursor: pointer;
     font-family: inherit;
     font-size: 0.9rem;
-    transition: all 0.3s ease;
+    transition: color 0.3s ease, border-color 0.3s ease;
 }
 
 .back-button:hover {
@@ -2006,7 +2005,7 @@ header {
     font-size: calc(0.85rem * var(--ui-scale));
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* ============================
@@ -2150,7 +2149,7 @@ header {
     border-radius: 30px;
     font-weight: 600;
     border: 1px solid rgba(var(--primary-rgb), 0.2);
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease;
     cursor: pointer;
 }
 
