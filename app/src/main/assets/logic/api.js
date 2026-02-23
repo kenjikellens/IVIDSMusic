@@ -107,7 +107,7 @@ export const MusicAPI = {
     },
 
     /**
-     * Fetch authentic categories using Deezer's ranking and date filters
+     * Fetch categories using iTunes
      */
     async getCategories(genres = ['Pop', 'Rock', 'Hip-Hop', 'Hardcore', '90\'s', 'Electronic']) {
         const results = await Promise.all(
@@ -115,19 +115,26 @@ export const MusicAPI = {
                 let tracks = [];
 
                 if (genre === '90\'s') {
-                    // THE FIX: True year-range filtering (1990-1999) sorted by popularity
-                    tracks = await this.search('top hits', 12, 'all', '1990-1999', 0, true);
+                    tracks = await this.searchiTunes('90s hits', 12, 'all');
                 } else if (genre === 'Hardcore') {
-                    // THE FIX: Authentic genre search instead of broken Genre IDs
-                    tracks = await this.search('Hardcore Punk', 12, 'all', null, 0, true);
+                    tracks = await this.searchiTunes('hardcore', 12, 'all');
                 } else {
-                    tracks = await this.search(genre, 12, 'all', null, 0, true);
+                    tracks = await this.searchiTunes(genre, 12, 'all');
                 }
+
+                // Perform rough variety filtering
+                const seen = new Set();
+                const uniqueTracks = tracks.filter(item => {
+                    const key = `${item.artist?.toLowerCase() || ''}-${item.title?.toLowerCase() || ''}`;
+                    if (seen.has(key)) return false;
+                    seen.add(key);
+                    return true;
+                }).slice(0, 12);
 
                 return {
                     title: genre,
                     id: genre.toLowerCase().replace(/\s+/g, '-').replace(/'/g, ''),
-                    tracks
+                    tracks: uniqueTracks
                 };
             })
         );
@@ -244,5 +251,32 @@ export const MusicAPI = {
             };
             img.onerror = () => resolve("rgba(255,255,255,0.05)");
         });
+    },
+
+    /**
+     * Gets a list of user's saved tracks.
+     * @returns {Promise<Array>} List of track objects {filename, artist, title, url}
+     */
+    async getSavedTracks() {
+        if (window.AndroidAPI) {
+            try {
+                // Native Android Mode
+                const jsonStr = window.AndroidAPI.getSavedTracks();
+                return JSON.parse(jsonStr || '[]');
+            } catch (error) {
+                console.error('[API] Native getSavedTracks error:', error);
+                return [];
+            }
+        } else {
+            // Web / Node.js Mode
+            try {
+                const response = await fetch(`${Config.SERVER_URL}/api/saved`);
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return await response.json();
+            } catch (error) {
+                console.error('[API] Web getSavedTracks error:', error);
+                return [];
+            }
+        }
     }
 };

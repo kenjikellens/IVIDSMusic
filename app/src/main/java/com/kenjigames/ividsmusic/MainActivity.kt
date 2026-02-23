@@ -15,6 +15,9 @@ import okhttp3.Request
 import java.io.ByteArrayInputStream
 import java.nio.charset.StandardCharsets
 import org.json.JSONObject
+import org.json.JSONArray
+import android.webkit.JavascriptInterface
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -50,6 +53,8 @@ class MainActivity : AppCompatActivity() {
         // Nodig voor cross-origin verzoeken vanuit lokale bestanden
         settings.allowFileAccessFromFileURLs = true
         settings.allowUniversalAccessFromFileURLs = true
+
+        webView.addJavascriptInterface(AndroidAPI(), "AndroidAPI")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
@@ -230,6 +235,39 @@ class MainActivity : AppCompatActivity() {
             webView.goBack()
         } else {
             super.onBackPressed()
+        }
+    }
+
+    inner class AndroidAPI {
+        @JavascriptInterface
+        fun getSavedTracks(): String {
+            return try {
+                val savedDir = File(filesDir, "saved")
+                if (!savedDir.exists()) return "[]"
+
+                val files = savedDir.listFiles() ?: return "[]"
+                val jsonArray = JSONArray()
+
+                for (file in files) {
+                    if (file.isFile && (file.name.endsWith(".mp3") || file.name.endsWith(".m4a"))) {
+                        val nameWithoutExt = file.nameWithoutExtension
+                        val parts = nameWithoutExt.split(" - ", limit = 2)
+                        val artist = if (parts.isNotEmpty()) parts[0].trim() else "Unknown Artist"
+                        val title = if (parts.size > 1) parts[1].trim() else nameWithoutExt
+
+                        val trackObj = JSONObject()
+                        trackObj.put("filename", file.name)
+                        trackObj.put("artist", artist)
+                        trackObj.put("title", title)
+                        trackObj.put("url", "https://appassets.androidplatform.net/saved/${Uri.encode(file.name)}")
+                        jsonArray.put(trackObj)
+                    }
+                }
+                jsonArray.toString()
+            } catch (e: Exception) {
+                Log.e("IVIDS", "getSavedTracks error: ${e.message}")
+                "[]"
+            }
         }
     }
 }

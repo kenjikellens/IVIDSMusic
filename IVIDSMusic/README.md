@@ -17,6 +17,8 @@ IVIDSMusic is a sleek, modern music player that lets you search for artists, alb
 - 💾 **Track Persistence** — Remembers your last played song across sessions
 - 🎤 **Artist Pages** — Dedicated artist views with real artist images
 - 🎛️ **Persistent Player Bar** — Slides in when music plays, stays out of the way when not
+- 📂 **Library View** — Save and download tracks to a local folder for offline playback
+- 🔌 **Local Node.js API** — Background server handles fetching, downloading, and serving local tracks
 
 ---
 
@@ -62,6 +64,22 @@ node server.js
 Then open `gui/index.html` in your browser (or serve it with a local static server).
 
 > The server runs on `http://localhost:3000` by default.
+
+---
+
+## ⚠️ Important Technical Notes
+
+**Do NOT change the Category/Genre API from iTunes.** 
+We previously attempted to use the Deezer API for the Categories/Home page (e.g., searching for "Pop" or "Rock" genres). However, free-tier Deezer API searches return highly inaccurate tags (e.g., returning children's Cartoons for the "Pop" genre). The iTunes API *must* be kept for building the Home categories to ensure high-quality, expected results.
+
+---
+
+## 🆕 Recent Updates
+
+- **Library Implementation:** Added a new Library view that dynamically loads downloaded MP3s from the local `/saved` folder.
+- **Offline Playback:** The player now supports instantly playing locally saved tracks bypassing the YouTube/Invidious streaming network.
+- **Node.js CORS Fixes:** Fixed CORS and Fetch rejection errors on the Node server, allowing the frontend Live Server (`127.0.0.1`) to communicate flawlessly with the backend download engine.
+- **Android Native Bridge:** Added a `JavascriptInterface` to `MainActivity.kt` so the Android app can natively list and play downloaded MP3s.
 
 ---
 

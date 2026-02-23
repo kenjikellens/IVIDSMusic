@@ -197,6 +197,56 @@ export const PageSystem = {
         });
 
         if (window.Loader) window.Loader.init();
+    },
+
+    async initLibrary() {
+        const container = document.getElementById('library-list-container');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="skeleton-card" style="width: 100%; height: 60px;"></div>
+            <div class="skeleton-card" style="width: 100%; height: 60px;"></div>
+            <div class="skeleton-card" style="width: 100%; height: 60px;"></div>
+        `;
+
+        try {
+            const tracks = await MusicAPI.getSavedTracks();
+            container.innerHTML = '';
+
+            if (!tracks || tracks.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">📂</div>
+                        <p>Your library is empty. Download some tracks!</p>
+                    </div>`;
+                return;
+            }
+
+            tracks.forEach(track => {
+                // Pass a flag or special object to indicate this is a local track
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'library-track-item';
+                itemDiv.innerHTML = `
+                    <div class="track-info">
+                        <div class="track-title">${track.title}</div>
+                        <div class="track-artist">${track.artist}</div>
+                    </div>
+                    <button class="play-local-btn player-control-btn main small">
+                        <img src="svg/play.svg" alt="Play">
+                    </button>
+                `;
+
+                itemDiv.querySelector('.play-local-btn').onclick = () => {
+                    YouTubePlayer.playSavedTrack(track);
+                };
+
+                container.appendChild(itemDiv);
+            });
+
+        } catch (error) {
+            console.error('[Library] Failed to load', error);
+            container.innerHTML = '<p class="error-msg">Failed to load library.</p>';
+        }
     }
 };
 

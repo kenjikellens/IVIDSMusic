@@ -1,19 +1,17 @@
-<div class="library-container">
-    <div class="library-hero">
+<div class="library-container page-container fade-in">
+    <div class="library-hero" style="margin-bottom: 30px;">
         <div class="library-hero-content">
             <h1 class="library-title">Your Library</h1>
-            <p class="library-subtitle">Collection of your liked songs and saved albums.</p>
+            <p class="library-subtitle">Collection of your downloaded songs for offline playback.</p>
         </div>
     </div>
 
     <div class="row-scroll-wrapper">
         <div class="row-header">
-            <h2 class="row-title">Your Playlists</h2>
+            <h2 class="row-title">Saved Tracks</h2>
         </div>
-        <div class="empty-state">
-            <div class="empty-icon">📁</div>
-            <p>No playlists created yet.</p>
-            <button class="btn btn-secondary" onclick="Router.loadPage('playlists')">Create Playlist</button>
+        <div id="library-list-container" style="display: flex; flex-direction: column; gap: 10px;">
+            <!-- Tracks rendered here via pages.js -->
         </div>
     </div>
 </div>

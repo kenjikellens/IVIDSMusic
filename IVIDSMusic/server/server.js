@@ -27,8 +27,43 @@ if (!fs.existsSync(SAVED_DIR)) {
     fs.mkdirSync(SAVED_DIR, { recursive: true });
 }
 
-app.use(cors());
+app.use(cors({ origin: '*' })); // Allow all origins like Live Server (127.0.0.1 / localhost)
 app.use(express.json());
+
+/**
+ * Endpoint: /api/saved
+ * Returns a list of all saved tracks in the SAVED_DIR.
+ */
+app.get('/api/saved', (req, res) => {
+    try {
+        if (!fs.existsSync(SAVED_DIR)) {
+            return res.json([]);
+        }
+
+        const files = fs.readdirSync(SAVED_DIR);
+        const tracks = files
+            .filter(file => file.endsWith('.mp3') || file.endsWith('.m4a'))
+            .map(file => {
+                // Assuming format: "Artist - Title.ext"
+                const nameWithoutExt = path.parse(file).name;
+                const parts = nameWithoutExt.split(' - ');
+                const artist = parts.length > 1 ? parts[0].trim() : 'Unknown Artist';
+                const title = parts.length > 1 ? parts.slice(1).join(' - ').trim() : nameWithoutExt;
+
+                return {
+                    filename: file,
+                    artist: artist,
+                    title: title,
+                    url: `http://127.0.0.1:${PORT}/saved/${encodeURIComponent(file)}`
+                };
+            });
+
+        res.json(tracks);
+    } catch (err) {
+        console.error('[API Saved Error]', err);
+        res.status(500).json({ error: 'Failed to read saved directory' });
+    }
+});
 
 // Serve downloaded files statically
 app.use('/tracks', express.static(DOWNLOADS_DIR));
@@ -86,7 +121,7 @@ app.get('/play', async (req, res) => {
         console.log(`[Cache Hit] Serving: ${fileName}`);
         return res.json({
             status: 'ready',
-            url: `http://localhost:${PORT}/tracks/${encodeURIComponent(fileName)}`
+            url: `http://127.0.0.1:${PORT}/tracks/${encodeURIComponent(fileName)}`
         });
     }
 
@@ -108,7 +143,7 @@ app.get('/play', async (req, res) => {
             console.log(`[Success] Downloaded: ${fileName}`);
             res.json({
                 status: 'ready',
-                url: `http://localhost:${PORT}/tracks/${encodeURIComponent(fileName)}`
+                url: `http://127.0.0.1:${PORT}/tracks/${encodeURIComponent(fileName)}`
             });
         } else {
             console.error(`yt-dlp exited with code ${code}`);
@@ -145,7 +180,7 @@ app.get('/save', (req, res) => {
         res.json({
             status: 'saved',
             message: 'Track saved successfully',
-            url: `http://localhost:${PORT}/saved/${encodeURIComponent(fileName)}`
+            url: `http://127.0.0.1:${PORT}/saved/${encodeURIComponent(fileName)}`
         });
     } catch (err) {
         console.error('[Save Error]', err);

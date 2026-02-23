@@ -173,6 +173,48 @@ export const YouTubePlayer = {
         }
     },
 
+    /**
+     * Instantly play a track from local saved storage.
+     * @param {Object} track {filename, artist, title, url}
+     */
+    playSavedTrack(track) {
+        if (!this.audio) this.init();
+
+        this.currentTrack = track;
+
+        // Persist last played (so it remembers across reloads)
+        localStorage.setItem('ivids_last_track', JSON.stringify(track));
+
+        const history = JSON.parse(localStorage.getItem('iv_recent_tracks') || '[]');
+        const filtered = history.filter(t => !(t.title === track.title && t.artist === track.artist));
+        filtered.unshift(track);
+        localStorage.setItem('iv_recent_tracks', JSON.stringify(filtered.slice(0, 20)));
+
+        this.setUI(track);
+
+        const statusContainer = document.getElementById('player-status-container');
+        const playerBar = document.getElementById('player-bar');
+        const saveBtn = document.getElementById('save-track-btn'); // New save button
+
+        if (playerBar) playerBar.classList.remove('is-inactive');
+        if (statusContainer) statusContainer.style.display = 'none';
+
+        if (saveBtn) {
+            saveBtn.disabled = true;
+            // It's already saved, so let's show the success icon (or hide the button)
+            saveBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--primary-color); width:20px; height:20px;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>';
+            saveBtn.style.opacity = '1';
+        }
+
+        // Set local audio stream and drop into playback
+        try {
+            this.audio.src = track.url;
+            this.audio.play();
+        } catch (error) {
+            console.error('[Player Error]', error);
+        }
+    },
+
     toggle() {
         if (!this.audio.src) return;
         if (this.isPlaying) this.audio.pause();
