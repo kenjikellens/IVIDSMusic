@@ -1,6 +1,7 @@
 export const Router = {
     currentPage: null,
     currentParams: null,
+    abortController: null,
 
     async loadPage(pageName, params = null) {
         // Allow re-loading the same page if parameters changed
@@ -11,9 +12,17 @@ export const Router = {
         const mainView = document.getElementById('main-view');
         if (!mainView) return;
 
+        // 1. Instant Visual Clear & Abort previous requests
+        mainView.innerHTML = '<div class="page-loading-overlay"><div class="ivids-loader"></div></div>';
+        if (this.abortController) {
+            this.abortController.abort();
+            console.log(`[Router] Aborted requests from: ${this.currentPage}`);
+        }
+        this.abortController = new AbortController();
+
         try {
             console.log(`[Router] Loading: ${pageName}`, params);
-            const response = await fetch(`pages/${pageName}.html?v=${Date.now()}`);
+            const response = await fetch(`pages/${pageName}.html?v=${Date.now()}`, { signal: this.abortController.signal });
             if (!response.ok) throw new Error(`Could not load page: ${pageName}`);
 
             const html = await response.text();

@@ -1,8 +1,73 @@
 <div class="library-container page-container fade-in">
-    <div class="library-hero" style="margin-bottom: 30px;">
+    <div class="library-hero">
+        <div class="hero-bg">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+        </div>
         <div class="library-hero-content">
-            <h1 class="library-title">Your Library</h1>
-            <p class="library-subtitle">Collection of your downloaded songs for offline playback.</p>
+            <div class="library-identity">
+                <div class="library-icon-box">
+                    <img src="svg/library.svg" alt="" class="library-hero-icon">
+                </div>
+                <div class="library-text-info">
+                    <h1 class="library-title">Your Library</h1>
+                    <p class="library-subtitle">Collection of your downloaded songs for offline playback.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="library-action-bar">
+        <div class="action-left">
+            <button id="library-play-all" class="btn btn-primary play-all-btn" onclick="YouTubePlayer.playAllSaved()">
+                <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 5v14l11-7z" />
+                </svg>
+                Play All
+            </button>
+            <button id="library-shuffle" class="btn btn-secondary shuffle-btn" onclick="YouTubePlayer.shuffleSaved()">
+                <img src="svg/shuffle.svg" alt="Shuffle" class="btn-icon">
+                Shuffle
+            </button>
+        </div>
+        <div class="action-right">
+            <div class="library-search-box">
+                <img src="svg/search.svg" alt="" class="lib-search-icon">
+                <input type="text" id="library-track-search" placeholder="Search in library..."
+                    oninput="PageSystem.filterLibrary(this.value)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Recently Listened Row -->
+    <div id="recent-row-container" class="row-scroll-wrapper is-hidden">
+        <div class="row-header">
+            <h2 class="row-title">Recently Listened</h2>
+            <button class="btn-text-only" onclick="PageSystem.clearHistory()">Clear All</button>
+        </div>
+        <div id="library-recent-list" class="results-row">
+            <!-- Rendered by pages.js -->
+        </div>
+    </div>
+
+    <!-- Playlists Row -->
+    <div id="playlists-row-container" class="row-scroll-wrapper">
+        <div class="row-header">
+            <h2 class="row-title">Playlists</h2>
+        </div>
+
+        <!-- Playlist Empty State -->
+        <div id="playlists-empty-state" class="playlist-empty-state">
+            <div class="playlist-empty-content">
+                <span class="playlist-empty-icon">📂</span>
+                <p>No created playlists yet.</p>
+            </div>
+        </div>
+
+        <div id="library-playlists-list" class="results-row is-hidden">
+            <!-- Rendered by pages.js -->
         </div>
     </div>
 
@@ -10,7 +75,21 @@
         <div class="row-header">
             <h2 class="row-title">Saved Tracks</h2>
         </div>
-        <div id="library-list-container" style="display: flex; flex-direction: column; gap: 10px;">
+
+        <!-- Empty State (hidden by default) -->
+        <div id="library-empty-state" class="library-empty-state is-hidden">
+            <div class="empty-glow"></div>
+            <div class="empty-content">
+                <div class="empty-icon-wrapper">
+                    <img src="svg/library.svg" alt="" class="empty-icon">
+                </div>
+                <h3>Your library is empty</h3>
+                <p>Start exploring and save your favorite tracks for offline listening.</p>
+                <button class="btn btn-primary" onclick="Router.loadPage('home')">Explore Music</button>
+            </div>
+        </div>
+
+        <div id="library-list-container" class="library-list">
             <!-- Tracks rendered here via pages.js -->
         </div>
     </div>

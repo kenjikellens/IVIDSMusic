@@ -1,5 +1,6 @@
 import { MusicAPI } from './api.js';
 import { Config } from './config.js';
+import { HistorySystem } from './history.js';
 
 export const YouTubePlayer = {
     audio: new Audio(),
@@ -102,11 +103,8 @@ export const YouTubePlayer = {
         // Persist last track
         localStorage.setItem('ivids_last_track', JSON.stringify(track));
 
-        // Save to recently played history (max 20, no duplicates)
-        const history = JSON.parse(localStorage.getItem('iv_recent_tracks') || '[]');
-        const filtered = history.filter(t => !(t.title === track.title && t.artist === track.artist));
-        filtered.unshift(track);
-        localStorage.setItem('iv_recent_tracks', JSON.stringify(filtered.slice(0, 20)));
+        // Save to history using automated system
+        HistorySystem.add(track);
 
         this.setUI(track);
 
@@ -185,10 +183,8 @@ export const YouTubePlayer = {
         // Persist last played (so it remembers across reloads)
         localStorage.setItem('ivids_last_track', JSON.stringify(track));
 
-        const history = JSON.parse(localStorage.getItem('iv_recent_tracks') || '[]');
-        const filtered = history.filter(t => !(t.title === track.title && t.artist === track.artist));
-        filtered.unshift(track);
-        localStorage.setItem('iv_recent_tracks', JSON.stringify(filtered.slice(0, 20)));
+        // Save to history using automated system
+        HistorySystem.add(track);
 
         this.setUI(track);
 
@@ -255,6 +251,27 @@ export const YouTubePlayer = {
             saveBtn.disabled = false;
             saveBtn.style.opacity = '1';
             alert('Could not save track: ' + err.message);
+        }
+    },
+
+    async playAllSaved() {
+        const { MusicAPI } = await import('./api.js');
+        const tracks = await MusicAPI.getSavedTracks();
+        if (tracks && tracks.length > 0) {
+            this.queue = [...tracks];
+            this.currentIndex = 0;
+            this.playSavedTrack(this.queue[this.currentIndex]);
+        }
+    },
+
+    async shuffleSaved() {
+        const { MusicAPI } = await import('./api.js');
+        const tracks = await MusicAPI.getSavedTracks();
+        if (tracks && tracks.length > 0) {
+            const shuffled = [...tracks].sort(() => Math.random() - 0.5);
+            this.queue = shuffled;
+            this.currentIndex = 0;
+            this.playSavedTrack(this.queue[this.currentIndex]);
         }
     }
 };

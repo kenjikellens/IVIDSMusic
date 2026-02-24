@@ -1,6 +1,7 @@
 import { MusicAPI } from './api.js';
 import { YouTubePlayer } from './player.js';
 import { CardSystem } from './cards.js';
+import { HistorySystem } from './history.js';
 
 export const PageSystem = {
     async initHome() {
@@ -20,29 +21,54 @@ export const PageSystem = {
             </div>
         `;
 
-        // Pre-render skeletons with titles
-        container.innerHTML = GENRES.map(genre => `
+        // 1. Render History immediately (local data)
+        const history = HistorySystem.get();
+        const historyHTML = history.length > 0 ? `
+            <div id="home-history-section">
+                <!-- Rendered below via JS for consistency -->
+            </div>
+        ` : '';
+
+        // 2. Pre-render skeletons with titles
+        container.innerHTML = historyHTML + GENRES.map(genre => `
             <div class="row-container">
                 <div class="row-header"><h2 class="row-title">${genre}</h2></div>
                 <div class="skeleton-row">${SKELETON_CARD.repeat(12)}</div>
             </div>
         `).join('');
 
+        const histSec = document.getElementById('home-history-section');
+        if (histSec && history.length > 0) {
+            histSec.appendChild(CardSystem.createRow('Recently Listened', 'home-recent-list', history.slice(0, 12)));
+        }
+
         if (window.Loader) window.Loader.init();
 
         try {
-            const rows = await MusicAPI.getRecommendations();
+            const signal = window.Router.abortController?.signal;
+            const rows = await MusicAPI.getRecommendations(signal);
+
+            if (signal?.aborted) return;
+
+            // Preserve History section, replace skeletons only
+            const historySection = document.getElementById('home-history-section');
             container.innerHTML = '';
+            if (historySection) container.appendChild(historySection);
+
             rows.forEach(category => container.appendChild(CardSystem.createRow(category.title, category.id, category.tracks)));
 
-            if (window.Loader) window.Loader.init(); // Init loaders in real cards if any
+            if (window.Loader) window.Loader.init();
 
             const heroBtn = document.getElementById('play-hero-btn');
             if (heroBtn && rows[0]?.tracks[0]) {
                 heroBtn.onclick = () => YouTubePlayer.loadTrack(rows[0].tracks[0]);
             }
         } catch (e) {
-            container.innerHTML = '<p class="error-msg">Failed to load content.</p>';
+            console.error('[Home] Error:', e);
+            const err = document.createElement('p');
+            err.className = 'error-msg';
+            err.textContent = 'Failed to load content.';
+            container.appendChild(err);
         }
     },
 
@@ -180,8 +206,8 @@ export const PageSystem = {
         const recentList = document.getElementById('profile-recent-list');
         if (!recentList) return;
 
-        // Load real recently played from localStorage (populated by player)
-        const history = JSON.parse(localStorage.getItem('iv_recent_tracks') || '[]');
+        // Load real recently played from centralized history
+        const history = HistorySystem.get();
 
         if (history.length === 0) {
             recentList.innerHTML = `
@@ -201,52 +227,132 @@ export const PageSystem = {
 
     async initLibrary() {
         const container = document.getElementById('library-list-container');
+        const emptyState = document.getElementById('library-empty-state');
         if (!container) return;
 
+        // Reset search input
+        const searchInput = document.getElementById('library-track-search');
+        if (searchInput) searchInput.value = '';
+
+        // Show history instantly (local data)
+        this.renderRecentTracks();
+
         container.innerHTML = `
-            <div class="skeleton-card" style="width: 100%; height: 60px;"></div>
-            <div class="skeleton-card" style="width: 100%; height: 60px;"></div>
-            <div class="skeleton-card" style="width: 100%; height: 60px;"></div>
+            <div class="skeleton-list">
+                ${`<div class="skeleton-card track-skeleton" style="width: 100%; height: 60px; margin-bottom: 10px;"></div>`.repeat(5)}
+            </div>
         `;
 
         try {
-            const tracks = await MusicAPI.getSavedTracks();
-            container.innerHTML = '';
+            const signal = window.Router.abortController?.signal;
+            const tracks = await MusicAPI.getSavedTracks(signal);
 
-            if (!tracks || tracks.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">📂</div>
-                        <p>Your library is empty. Download some tracks!</p>
-                    </div>`;
-                return;
-            }
+            if (signal?.aborted) return;
 
-            tracks.forEach(track => {
-                // Pass a flag or special object to indicate this is a local track
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'library-track-item';
-                itemDiv.innerHTML = `
-                    <div class="track-info">
-                        <div class="track-title">${track.title}</div>
-                        <div class="track-artist">${track.artist}</div>
-                    </div>
-                    <button class="play-local-btn player-control-btn main small">
-                        <img src="svg/play.svg" alt="Play">
-                    </button>
-                `;
+            this.savedTracks = tracks || []; // Store globally for filtering
 
-                itemDiv.querySelector('.play-local-btn').onclick = () => {
-                    YouTubePlayer.playSavedTrack(track);
-                };
-
-                container.appendChild(itemDiv);
-            });
+            this.renderLibrary(this.savedTracks);
 
         } catch (error) {
             console.error('[Library] Failed to load', error);
             container.innerHTML = '<p class="error-msg">Failed to load library.</p>';
         }
+    },
+
+    renderLibrary(tracks) {
+        const container = document.getElementById('library-list-container');
+        const emptyState = document.getElementById('library-empty-state');
+        if (!container) return;
+
+        container.innerHTML = '';
+
+        if (!tracks || tracks.length === 0) {
+            if (emptyState) emptyState.classList.remove('is-hidden');
+            container.classList.add('is-hidden');
+            return;
+        }
+
+        if (emptyState) emptyState.classList.add('is-hidden');
+        container.classList.remove('is-hidden');
+
+        tracks.forEach(track => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'library-track-item';
+            itemDiv.innerHTML = `
+                <div class="track-info">
+                    <div class="track-title">${track.title}</div>
+                    <div class="track-artist">${track.artist}</div>
+                </div>
+                <button class="play-local-btn player-control-btn main small">
+                    <img src="svg/play.svg" alt="Play">
+                </button>
+            `;
+
+            itemDiv.onclick = (e) => {
+                YouTubePlayer.playSavedTrack(track);
+            };
+
+            container.appendChild(itemDiv);
+        });
+    },
+
+    renderRecentTracks() {
+        const container = document.getElementById('library-recent-list');
+        const rowWrapper = document.getElementById('recent-row-container');
+        if (!container || !rowWrapper) return;
+
+        const history = HistorySystem.get();
+
+        if (history.length === 0) {
+            rowWrapper.classList.add('is-hidden');
+            return;
+        }
+
+        rowWrapper.classList.remove('is-hidden');
+        container.innerHTML = '';
+
+        const validHistory = history.filter(t => t.title && t.artist && t.cover);
+
+        validHistory.forEach(track => {
+            const card = document.createElement('div');
+            card.className = 'music-card';
+            card.innerHTML = `
+                <div class="card-image-box">
+                    <img src="${track.cover}" class="poster" alt="${track.title}">
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title">${track.title}</div>
+                    <div class="card-artist">${track.artist}</div>
+                </div>
+            `;
+
+            card.onclick = () => {
+                if (track.url) {
+                    YouTubePlayer.playSavedTrack(track);
+                } else {
+                    YouTubePlayer.loadTrack(track);
+                }
+            };
+
+            container.appendChild(card);
+        });
+    },
+
+    clearHistory() {
+        if (confirm('Are you sure you want to clear your playback history?')) {
+            HistorySystem.clear();
+            this.renderRecentTracks();
+        }
+    },
+
+    filterLibrary(query) {
+        if (!this.savedTracks) return;
+        const q = query.toLowerCase().trim();
+        const filtered = this.savedTracks.filter(t =>
+            t.title.toLowerCase().includes(q) ||
+            t.artist.toLowerCase().includes(q)
+        );
+        this.renderLibrary(filtered);
     }
 };
 

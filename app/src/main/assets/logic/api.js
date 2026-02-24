@@ -22,7 +22,7 @@ export const MusicAPI = {
     /**
      * Universal search using Deezer for better metadata/filtering
      */
-    async search(query = 'top hits', limit = 20, type = 'all', yearRange = null, offset = 0, unique = false) {
+    async search(query = 'top hits', limit = 20, type = 'all', yearRange = null, offset = 0, unique = false, signal = null) {
         try {
             // Build Deezer Advanced Query
             let q = query;
@@ -34,7 +34,7 @@ export const MusicAPI = {
             else if (type === 'album') endpoint = 'search/album';
 
             const url = `${this.deezerUrl}/${endpoint}?q=${encodeURIComponent(q)}&limit=${unique ? 50 : limit}&index=${offset}`;
-            const response = await fetch(this.proxyUrl + encodeURIComponent(url));
+            const response = await fetch(this.proxyUrl + encodeURIComponent(url), { signal });
             const data = await response.json();
 
             if (!data.data) return [];
@@ -90,11 +90,11 @@ export const MusicAPI = {
     /**
      * Fallback to iTunes if Deezer/Proxy fails
      */
-    async searchiTunes(query, limit, type) {
+    async searchiTunes(query, limit, type, signal = null) {
         try {
             const ent = type === 'artist' ? 'musicArtist' : (type === 'album' ? 'album' : 'song');
             const url = `${this.itunesUrl}?term=${encodeURIComponent(query)}&entity=${ent}&limit=${limit}`;
-            const res = await fetch(url);
+            const res = await fetch(url, { signal });
             const data = await res.json();
             return data.results.map(item => ({
                 id: item.trackId || item.collectionId || item.artistId,
@@ -109,17 +109,17 @@ export const MusicAPI = {
     /**
      * Fetch categories using iTunes
      */
-    async getCategories(genres = ['Pop', 'Rock', 'Hip-Hop', 'Hardcore', '90\'s', 'Electronic']) {
+    async getCategories(genres = ['Pop', 'Rock', 'Hip-Hop', 'Hardcore', '90\'s', 'Electronic'], signal = null) {
         const results = await Promise.all(
             genres.map(async (genre) => {
                 let tracks = [];
 
                 if (genre === '90\'s') {
-                    tracks = await this.searchiTunes('90s hits', 12, 'all');
+                    tracks = await this.searchiTunes('90s hits', 12, 'all', signal);
                 } else if (genre === 'Hardcore') {
-                    tracks = await this.searchiTunes('hardcore', 12, 'all');
+                    tracks = await this.searchiTunes('hardcore', 12, 'all', signal);
                 } else {
-                    tracks = await this.searchiTunes(genre, 12, 'all');
+                    tracks = await this.searchiTunes(genre, 12, 'all', signal);
                 }
 
                 // Perform rough variety filtering
@@ -141,8 +141,8 @@ export const MusicAPI = {
         return results.filter(row => row.tracks.length > 0);
     },
 
-    async getRecommendations() {
-        return this.getCategories();
+    async getRecommendations(signal = null) {
+        return this.getCategories(undefined, signal);
     },
 
     /**
@@ -257,7 +257,7 @@ export const MusicAPI = {
      * Gets a list of user's saved tracks.
      * @returns {Promise<Array>} List of track objects {filename, artist, title, url}
      */
-    async getSavedTracks() {
+    async getSavedTracks(signal = null) {
         if (window.AndroidAPI) {
             try {
                 // Native Android Mode
@@ -270,7 +270,7 @@ export const MusicAPI = {
         } else {
             // Web / Node.js Mode
             try {
-                const response = await fetch(`${Config.SERVER_URL}/api/saved`);
+                const response = await fetch(`${Config.SERVER_URL}/api/saved`, { signal });
                 if (!response.ok) throw new Error(`HTTP ${response.status}`);
                 return await response.json();
             } catch (error) {
