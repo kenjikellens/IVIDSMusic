@@ -1747,6 +1747,12 @@ header {
     }
 }
 
+@media (max-width: 600px) {
+    :root {
+        --ui-base-scale: 0.66;
+    }
+}
+
 /* â”€â”€ Player Bar: compact stacked layout â”€â”€ */
 #player-bar {
     grid-template-columns: 1fr;

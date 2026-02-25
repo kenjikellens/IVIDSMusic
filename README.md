@@ -11,7 +11,7 @@ Built with a premium dark glassmorphism UI, it combines the power of the **Deeze
 - 🔍 **Smart Search** — Integrated search experience syncing header input and a premium centered frosted-glass search bar
 - 🎵 **Ad-Free Streaming** — Audio is streamed directly from YouTube via Invidious, with zero ads
 - 🖥️ **Cross-Platform Compatibility** — Designed to run flawlessly in both **Native Android** (Mobile & TV) and standard **Web Browsers** (Chrome, Firefox, Safari)
-- 📐 **Adaptive Design** — Fluidly adapts across 3 distinct layout breakpoints (Desktop, Tablet, Mobile)
+- 📐 **Adaptive Design** — Fluidly adapts across 4 distinct layout breakpoints (Desktop, Tablet, Mobile, and Compact Mobile)
 - 🎨 **Premium Dark UI** — Glassmorphism design with dynamic blurred backgrounds, custom typographic branding, and smooth CSS interactions
 - 🏠 **Home Page** — Curated genre rows (Pop, Rock, Hip-Hop, Hardcore, 90's, Electronic) with album art
 - 🔎 **Browse & Discover** — Filter results by category (Artists, Songs, Albums) and refine with dynamic Year filtering, plus a dismissible mini-hero promo
@@ -41,11 +41,12 @@ The system is engineered to work in two primary environments, requiring zero con
 
 ### Layout Breakpoints
 
-The UI follows a mobile-first philosophy with three primary layout states governed by fluid CSS scaling:
+The UI follows a mobile-first philosophy with four primary layout states governed by fluid CSS scaling:
 
 1.  **Desktop (> 1200px)**: The standard wide-screen experience with a persistent sidebar and expanded music grids.
 2.  **Tablet / Large Mobile (≤ 1200px)**: The UI automatically scales down to 75% (`--ui-base-scale: 0.75`) to maintain layout density on smaller laptops and tablets.
 3.  **Portrait / Phone (Orientation-based)**: A significant layout shift optimized for vertical screens. The sidebar transforms into a bottom navigation bar, margins are tightened, and font sizes/icons are adjusted for touch precision.
+4.  **Small Mobile / Compact (≤ 600px)**: An ultra-compact mode with a 66% UI scale (`--ui-base-scale: 0.66`) to ensure everything remains readable and functional on very small displays.
 
 ### How It Works (Android Native)
 

@@ -3,10 +3,11 @@
 When working on this project, the AI must strictly adhere to the following rules:
 
 ## 1. Responsive Design & Breakpoints
-The AI MUST maintain, respect, and design for the 3 core layout breakpoints to ensure a consistent experience across all devices:
+The AI MUST maintain, respect, and design for the 4 core layout breakpoints to ensure a consistent experience across all devices:
 - **Desktop (Default)**: Standard wide-screen layout.
 - **Tablet / Large Mobile (≤ 1200px)**: UI scales to maintain density.
-- **Mobile / Portrait (≤ 768px & Orientation: Portrait)**: Layout shifts to a bottom navigation bar, optimized for vertical screens and touch interactions.
+- **Mobile / Portrait (Orientation: Portrait)**: Layout shifts to a bottom navigation bar, optimized for vertical screens and touch interactions.
+- **Small Mobile / Compact (≤ 600px)**: UI scales down to 66% to maintain accessibility on ultra-small displays.
 
 ## 2. Cross-Environment Compatibility
 The AI MUST ensure that all features, APIs, and overall systems work flawlessly in BOTH primary environments without requiring user configuration:
