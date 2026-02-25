@@ -693,8 +693,6 @@ header {
 .music-card:focus-visible {
     transform: scale(1.05);
     /* slightly higher scale to test */
-    box-shadow: 0 12px 36px rgba(255, 255, 255, 0.15);
-    /* elegant white glow shadow */
     background: var(--card-color, rgba(255, 255, 255, 0.08));
     border-color: color-mix(in srgb, var(--card-color), white 40%);
     z-index: 10;
@@ -775,6 +773,8 @@ header {
     background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
     margin: 0 -11px -11px -11px;
     /* Slightly more to overlap perfectly */
+    border-bottom-left-radius: calc(12px * var(--ui-scale));
+    border-bottom-right-radius: calc(12px * var(--ui-scale));
     z-index: 2;
 }
 
