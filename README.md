@@ -11,7 +11,7 @@ Built with a premium dark glassmorphism UI, it combines the power of the **Deeze
 - 🔍 **Smart Search** — Integrated search experience syncing header input and a premium centered frosted-glass search bar
 - 🎵 **Ad-Free Streaming** — Audio is streamed directly from YouTube via Invidious, with zero ads
 - 🖥️ **Cross-Platform Compatibility** — Designed to run flawlessly in both **Native Android** (Mobile & TV) and standard **Web Browsers** (Chrome, Firefox, Safari)
-- 📐 **Adaptive Design** — Fluidly adapts across 4 distinct layout breakpoints (Desktop, Tablet, Mobile, and Compact Mobile)
+- 📐 **Adaptive Design** — Fluidly adapts across a granular 6-layer layout hierarchy (Desktop, Laptop, Tablet, Phablet, Mobile, and Compact Mobile)
 - 🎨 **Premium Dark UI** — Glassmorphism design with dynamic blurred backgrounds, custom typographic branding, and smooth CSS interactions
 - 🏠 **Home Page** — Curated genre rows (Pop, Rock, Hip-Hop, Hardcore, 90's, Electronic) with album art
 - 🔎 **Browse & Discover** — Filter results by category (Artists, Songs, Albums) and refine with dynamic Year filtering, plus a dismissible mini-hero promo
@@ -41,12 +41,16 @@ The system is engineered to work in two primary environments, requiring zero con
 
 ### Layout Breakpoints
 
-The UI follows a mobile-first philosophy with four primary layout states governed by fluid CSS scaling:
+The UI follows a mobile-first philosophy with a granular layout hierarchy governed by fluid CSS scaling:
 
-1.  **Desktop (> 1200px)**: The standard wide-screen experience with a persistent sidebar and expanded music grids.
-2.  **Tablet / Large Mobile (≤ 1200px)**: The UI automatically scales down to 75% (`--ui-base-scale: 0.75`) to maintain layout density on smaller laptops and tablets.
-3.  **Portrait / Phone (Orientation-based)**: A significant layout shift optimized for vertical screens. The sidebar transforms into a bottom navigation bar, margins are tightened, and font sizes/icons are adjusted for touch precision.
-4.  **Small Mobile / Compact (≤ 600px)**: An ultra-compact mode with a 66% UI scale (`--ui-base-scale: 0.66`) to ensure everything remains readable and functional on very small displays.
+1.  **Standard Desktop (> 1200px)**: The default experience at **100% scale** with a persistent sidebar.
+2.  **Compact Desktop / Laptop (≤ 1200px)**: UI scales to **90%** to maintain density on smaller screens.
+3.  **Large Tablet (≤ 768px)**: UI scales to **80%** for optimized readability.
+4.  **Small Tablet / Phablet (≤ 720px)**: UI scales to **75%** to ensure elements fit comfortably.
+5.  **Mobile / Large Phone (≤ 600px)**: UI scales to **66%** for compact touch interfaces.
+6.  **Small Mobile / Compact (≤ 520px)**: An ultra-compact mode at **60% scale** for very small displays.
+
+**Note on Portrait Mode**: On any device in portrait orientation, the UI automatically undergoes a structural layout shift, moving the sidebar to a bottom navigation bar and tightening margins, while respecting the width-based scale above.
 
 ### How It Works (Android Native)
 
