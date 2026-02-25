@@ -4,12 +4,6 @@ When working on this project, the AI must strictly adhere to the following rules
 
 ## 1. Responsive Design & Breakpoints
 The AI MUST maintain, respect, and design for the granular layout hierarchy to ensure a consistent experience across all devices:
-- **Standard Desktop (> 1200px)**: Default 100% scale.
-- **Laptop (≤ 1200px)**: Scale to 90%.
-- **Large Tablet (≤ 768px)**: Scale to 80%.
-- **Phablet (≤ 720px)**: Scale to 75%.
-- **Mobile (≤ 600px)**: Scale to 66%.
-- **Compact Mobile (≤ 520px)**: Scale down to 60%.
 - **Portrait Mode**: Mandatory layout shift (sidebar to bottom nav) for vertical screens, independent of width scale.
 
 ## 2. Cross-Environment Compatibility

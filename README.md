@@ -11,7 +11,7 @@ Built with a premium dark glassmorphism UI, it combines the power of the **Deeze
 - 🔍 **Smart Search** — Integrated search experience syncing header input and a premium centered frosted-glass search bar
 - 🎵 **Ad-Free Streaming** — Audio is streamed directly from YouTube via Invidious, with zero ads
 - 🖥️ **Cross-Platform Compatibility** — Designed to run flawlessly in both **Native Android** (Mobile & TV) and standard **Web Browsers** (Chrome, Firefox, Safari)
-- 📐 **Adaptive Design** — Fluidly adapts across a granular 6-layer layout hierarchy (Desktop, Laptop, Tablet, Phablet, Mobile, and Compact Mobile)
+- 📐 **Adaptive Design** — Fluidly adapts across a granular layout hierarchy (Desktop, Laptop, Tablet, Mobile)
 - 🎨 **Premium Dark UI** — Glassmorphism design with dynamic blurred backgrounds, custom typographic branding, and smooth CSS interactions
 - 🏠 **Home Page** — Curated genre rows (Pop, Rock, Hip-Hop, Hardcore, 90's, Electronic) with album art
 - 🔎 **Browse & Discover** — Filter results by category (Artists, Songs, Albums) and refine with dynamic Year filtering, plus a dismissible mini-hero promo
@@ -44,11 +44,11 @@ The system is engineered to work in two primary environments, requiring zero con
 The UI follows a mobile-first philosophy with a granular layout hierarchy governed by fluid CSS scaling:
 
 1.  **Standard Desktop (> 1200px)**: The default experience at **100% scale** with a persistent sidebar.
-2.  **Compact Desktop / Laptop (≤ 1200px)**: UI scales to **90%** to maintain density on smaller screens.
-3.  **Large Tablet (≤ 768px)**: UI scales to **80%** for optimized readability.
-4.  **Small Tablet / Phablet (≤ 720px)**: UI scales to **75%** to ensure elements fit comfortably.
-5.  **Mobile / Large Phone (≤ 600px)**: UI scales to **66%** for compact touch interfaces.
-6.  **Small Mobile / Compact (≤ 520px)**: An ultra-compact mode at **60% scale** for very small displays.
+2.  **Compact Desktop / Laptop (≤ 1200px)**: UI scales to **90%** to maintain density.
+3.  **Standard Tablet (≤ 1024px)**: UI scales to **80%** for optimized readability.
+4.  **Small Tablet / Large Mobile (≤ 768px)**: UI scales to **75%** to ensure elements fit comfortably.
+5.  **Medium Mobile (≤ 700px)**: UI scales to **70%** for compact touch interfaces.
+6.  **Small Mobile / Compact (≤ 600px)**: The base compact mode at **60% scale** for smaller displays.
 
 **Note on Portrait Mode**: On any device in portrait orientation, the UI automatically undergoes a structural layout shift, moving the sidebar to a bottom navigation bar and tightening margins, while respecting the width-based scale above.
 
