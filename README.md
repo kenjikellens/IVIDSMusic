@@ -10,7 +10,8 @@ Built with a premium dark glassmorphism UI, it combines the power of the **Deeze
 
 - 🔍 **Smart Search** — Integrated search experience syncing header input and a premium centered frosted-glass search bar
 - 🎵 **Ad-Free Streaming** — Audio is streamed directly from YouTube via Invidious, with zero ads
-- 🖥️ **True Cross-Platform** — Works flawlessly natively on **Android Mobile**, **Android TV** (with full D-pad remote navigation), and in any **Web Browser**
+- 🖥️ **Cross-Platform Compatibility** — Designed to run flawlessly in both **Native Android** (Mobile & TV) and standard **Web Browsers** (Chrome, Firefox, Safari)
+- 📐 **Adaptive Design** — Fluidly adapts across 3 distinct layout breakpoints (Desktop, Tablet, Mobile)
 - 🎨 **Premium Dark UI** — Glassmorphism design with dynamic blurred backgrounds, custom typographic branding, and smooth CSS interactions
 - 🏠 **Home Page** — Curated genre rows (Pop, Rock, Hip-Hop, Hardcore, 90's, Electronic) with album art
 - 🔎 **Browse & Discover** — Filter results by category (Artists, Songs, Albums) and refine with dynamic Year filtering, plus a dismissible mini-hero promo
@@ -29,9 +30,22 @@ Built with a premium dark glassmorphism UI, it combines the power of the **Deeze
 
 ## 🏗️ Architecture
 
-IVIDS Music uses a **hybrid architecture**: a native Android shell (Kotlin) wrapping a high-quality web-based UI (HTML/CSS/JS). This approach gives the best of both worlds — a beautiful, responsive web UI with native Android networking capabilities.
+IVIDS Music uses a **hybrid architecture**: a native Android shell (Kotlin) wrapping a high-quality web-based UI (HTML/CSS/JS). This approach ensures a beautiful, responsive interface that functions as a robust native app while maintaining full compatibility with modern web browsers.
 
-When running natively, the app intercepts requests and uses a custom local proxy to bypass CORS. When running in a web browser, the app detects the environment and automatically switches to a public CORS proxy (`api.allorigins.win`) so the UI continues to function perfectly without the Android backend.
+### Environment Support
+
+The system is engineered to work in two primary environments, requiring zero configuration from the user:
+
+- **Native Android Shell**: The Kotlin backend intercepts requests via `shouldInterceptRequest()` to bypass CORS and handle YouTube stream extraction natively using OkHttp.
+- **Stand-alone Web**: When running in a browser (outside the Android shell), the app automatically detects the environment and switches to public CORS proxies (`api.allorigins.win`) to maintain full functionality.
+
+### Layout Breakpoints
+
+The UI follows a mobile-first philosophy with three primary layout states governed by fluid CSS scaling:
+
+1.  **Desktop (> 1200px)**: The standard wide-screen experience with a persistent sidebar and expanded music grids.
+2.  **Tablet / Large Mobile (≤ 1200px)**: The UI automatically scales down to 75% (`--ui-base-scale: 0.75`) to maintain layout density on smaller laptops and tablets.
+3.  **Portrait / Phone (Orientation-based)**: A significant layout shift optimized for vertical screens. The sidebar transforms into a bottom navigation bar, margins are tightened, and font sizes/icons are adjusted for touch precision.
 
 ### How It Works (Android Native)
 
