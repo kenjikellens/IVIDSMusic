@@ -770,7 +770,7 @@ header {
 
 .music-card .card-info-box {
     padding: calc(12px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
     margin: 0 calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale));
     /* Pull precisely by the padding amount to fill the box */
     border-bottom-left-radius: calc(12px * var(--ui-scale));
@@ -788,7 +788,7 @@ header {
     margin-bottom: calc(2px * var(--ui-scale));
     padding-bottom: calc(8px * var(--ui-scale));
     text-align: left;
-    text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
 }
 
 .card-artist {
@@ -797,7 +797,7 @@ header {
     color: #b3b3b3;
     padding: 0 calc(6px * var(--ui-scale));
     text-align: center;
-    text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
