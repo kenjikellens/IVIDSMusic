@@ -13,3 +13,5 @@ The AI MUST ensure that all features, APIs, and overall systems work flawlessly 
 - **Native Android (Mobile & TV)**: The application must function natively, utilizing the Kotlin backend interception (`shouldInterceptRequest`) for API requests, CORS bypassing, and audio stream extraction.
 
 Any new features, data fetching logic, or architectural changes MUST be designed to support both environments seamlessly.
+
+NEVER autominously update github repository, only if i asked you to update it.

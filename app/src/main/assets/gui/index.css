@@ -677,12 +677,14 @@ header {
         box-shadow 0.35s var(--ease-out-expo),
         z-index 0s;
     border-radius: calc(12px * var(--ui-scale));
-    padding: calc(10px * var(--ui-scale));
+    padding: calc(16px * var(--ui-scale));
     /* Add some padding for the 'box' feel */
-    background: transparent;
-    border: none;
+    background: var(--card-color, rgba(255, 255, 255, 0.05));
+    border: 2px solid transparent;
+    background-clip: padding-box;
 
     /* Removed overflow: hidden so shadows and scaled pseudo-elements can escape the box */
+    overflow: hidden;
     z-index: 1;
 }
 
@@ -691,7 +693,8 @@ header {
 .music-card:focus-visible {
     transform: scale(1.05);
     /* slightly higher scale to test */
-    background: transparent;
+    background: var(--card-color, rgba(255, 255, 255, 0.08));
+    border-color: color-mix(in srgb, var(--card-color), white 40%);
     z-index: 10;
     /* Important: pop above siblings when scaled */
     outline: none;
