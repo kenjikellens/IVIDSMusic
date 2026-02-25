@@ -680,8 +680,7 @@ header {
     padding: calc(16px * var(--ui-scale));
     /* Add some padding for the 'box' feel */
     background: var(--card-color, rgba(255, 255, 255, 0.05));
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    border: none;
 
     /* Removed overflow: hidden so shadows and scaled pseudo-elements can escape the box */
     overflow: hidden;
@@ -694,7 +693,7 @@ header {
     transform: scale(1.05);
     /* slightly higher scale to test */
     background: var(--card-color, rgba(255, 255, 255, 0.08));
-    border-color: color-mix(in srgb, var(--card-color), white 40%);
+    box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--card-color), white 40%);
     z-index: 10;
     /* Important: pop above siblings when scaled */
     outline: none;
@@ -773,8 +772,6 @@ header {
     background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
     margin: 0 calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale));
     /* Pull precisely by the padding amount to fill the box */
-    border-bottom-left-radius: calc(12px * var(--ui-scale));
-    border-bottom-right-radius: calc(12px * var(--ui-scale));
     z-index: 2;
 }
 
