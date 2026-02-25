@@ -267,6 +267,7 @@ img.player-volume-icon {
 }
 
 .nav-links a:hover .nav-icon,
+.nav-links a:focus-visible .nav-icon,
 .nav-links a.active .nav-icon {
     opacity: 1;
 }
@@ -300,6 +301,7 @@ img.player-volume-icon {
 }
 
 .nav-links a:hover::before,
+.nav-links a:focus-visible::before,
 .nav-links a.active::before {
     transform: scaleY(1);
 }
@@ -625,6 +627,13 @@ header {
    ============================ */
 .row-container {
     margin-bottom: calc(24px * var(--ui-scale));
+    position: relative;
+    z-index: 1;
+}
+
+.row-container:hover,
+.row-container:focus-within {
+    z-index: 20;
 }
 
 .row-title {
@@ -638,11 +647,22 @@ header {
 .row-posters {
     display: flex;
     gap: calc(18px * var(--ui-scale));
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+
+    /* Extra padding allows cards to scale up inside the container box without touching edges */
+    padding: calc(20px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(40px * var(--ui-scale)) calc(12px * var(--ui-scale));
+
+    scrollbar-width: none;
+    /* Firefox */
+}
+
+.row-posters::-webkit-scrollbar {
+    display: none;
 }
 
 /* ============================
-   Music Card â€” Split Layout (Image + Info)
+   Music Card — Split Layout (Image + Info)
    ============================ */
 .music-card {
     position: relative;
@@ -654,7 +674,8 @@ header {
     gap: calc(10px * var(--ui-scale));
     cursor: pointer;
     transition: transform 0.35s var(--ease-out-expo),
-        box-shadow 0.35s var(--ease-out-expo);
+        box-shadow 0.35s var(--ease-out-expo),
+        z-index 0s;
     border-radius: calc(12px * var(--ui-scale));
     padding: calc(10px * var(--ui-scale));
     /* Add some padding for the 'box' feel */
@@ -662,21 +683,26 @@ header {
     border: 2px solid transparent;
     background-clip: padding-box;
     /* Only show border color on hover */
-    overflow: hidden;
+
+    /* Removed overflow: hidden so shadows and scaled pseudo-elements can escape the box */
     z-index: 1;
 }
 
 
 .music-card:hover,
 .music-card:focus-visible {
-    transform: scale(1.03);
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+    transform: scale(1.05);
+    /* slightly higher scale to test */
+    box-shadow: 0 12px 36px rgba(255, 255, 255, 0.15);
+    /* elegant white glow shadow */
     background: var(--card-color, rgba(255, 255, 255, 0.08));
-    border-color: color-mix(in srgb, var(--card-color), black 25%);
+    border-color: color-mix(in srgb, var(--card-color), white 40%);
+    z-index: 10;
+    /* Important: pop above siblings when scaled */
+    outline: none;
 }
 
-.music-card:hover .poster,
-.music-card:focus-visible .poster {
+.music-card:hover .poster {
     filter: brightness(1.15);
 }
 
@@ -808,8 +834,7 @@ header {
     transition: opacity 0.3s ease, bottom 0.3s ease;
 }
 
-.music-card:hover .poster-overlay,
-.music-card:focus-visible .poster-overlay {
+.music-card:hover .poster-overlay {
     opacity: 1;
     bottom: 0;
 }
@@ -839,8 +864,7 @@ header {
     margin-top: -15px;
 }
 
-.music-card:hover::after,
-.music-card:focus-visible::after {
+.music-card:hover::after {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
 }
@@ -856,8 +880,6 @@ header {
     display: flex;
     gap: calc(18px * var(--ui-scale));
     /* Match .row-posters gap */
-    padding: 0;
-    overflow: hidden;
     margin-bottom: calc(36px * var(--ui-scale));
 }
 
@@ -1259,7 +1281,8 @@ header {
     left: -24px;
 }
 
-.row-scroll-wrapper:hover .scroll-arrow {
+.row-scroll-wrapper:hover .scroll-arrow,
+.row-scroll-wrapper:focus-within .scroll-arrow {
     opacity: 1;
     pointer-events: auto;
 }
@@ -1611,6 +1634,116 @@ header {
 
     .skeleton-row::-webkit-scrollbar {
         display: none;
+    }
+
+    /* ── Search/Browse: compact ── */
+    .browse-hero {
+        padding: calc(40px * var(--ui-scale)) calc(16px * var(--ui-scale));
+    }
+
+    .browse-hero-title {
+        font-size: calc(2rem * var(--ui-scale));
+        letter-spacing: -1px;
+    }
+
+    .browse-search-input {
+        padding: calc(14px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(14px * var(--ui-scale)) calc(48px * var(--ui-scale));
+        font-size: calc(1rem * var(--ui-scale));
+    }
+
+    .search-page-title {
+        font-size: calc(1.6rem * var(--ui-scale));
+    }
+
+    .search-page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    /* ── Profile: stacked ── */
+    .profile-header {
+        flex-direction: column;
+        text-align: center;
+        padding: calc(24px * var(--ui-scale));
+        gap: calc(20px * var(--ui-scale));
+    }
+
+    .profile-avatar-wrapper {
+        width: calc(100px * var(--ui-scale));
+        height: calc(100px * var(--ui-scale));
+    }
+
+    .profile-name {
+        font-size: calc(1.8rem * var(--ui-scale));
+    }
+
+    .profile-stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: calc(12px * var(--ui-scale));
+    }
+
+    .stat-card {
+        padding: calc(16px * var(--ui-scale));
+    }
+
+    .profile-actions {
+        justify-content: center;
+    }
+
+    /* ── Library: compact ── */
+    .library-hero {
+        padding: calc(24px * var(--ui-scale));
+        min-height: unset;
+    }
+
+    .library-identity {
+        flex-direction: column;
+        text-align: center;
+        gap: calc(16px * var(--ui-scale));
+    }
+
+    .library-icon-box {
+        width: calc(64px * var(--ui-scale));
+        height: calc(64px * var(--ui-scale));
+    }
+
+    .library-title {
+        font-size: calc(2rem * var(--ui-scale));
+    }
+
+    .library-subtitle {
+        max-width: 100%;
+    }
+
+    .library-action-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #library-track-search {
+        width: 100%;
+    }
+
+    #library-track-search:focus {
+        width: 100%;
+    }
+
+    /* ── Settings: tighter ── */
+    .settings-container {
+        padding: calc(12px * var(--ui-scale));
+    }
+
+    .settings-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    /* ── Playlist cards: narrower ── */
+    .playlist-card {
+        width: calc(130px * var(--ui-scale));
+        min-width: calc(130px * var(--ui-scale));
     }
 }
 

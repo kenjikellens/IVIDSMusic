@@ -59,6 +59,10 @@ export const Router = {
 
             mainView.scrollTop = 0;
 
+            if (window.TVNav) {
+                setTimeout(() => window.TVNav.reinitFocus(), 100);
+            }
+
         } catch (error) {
             console.error('[Router] Error:', error);
             mainView.innerHTML = `<div style="padding: 40px;"><h1>Error</h1><p>${error.message}</p></div>`;

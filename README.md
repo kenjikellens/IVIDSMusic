@@ -10,8 +10,8 @@ Built with a premium dark glassmorphism UI, it combines the power of the **Deeze
 
 - 🔍 **Smart Search** — Integrated search experience syncing header input and a premium centered frosted-glass search bar
 - 🎵 **Ad-Free Streaming** — Audio is streamed directly from YouTube via Invidious, with zero ads
+- 🖥️ **True Cross-Platform** — Works flawlessly natively on **Android Mobile**, **Android TV** (with full D-pad remote navigation), and in any **Web Browser**
 - 🎨 **Premium Dark UI** — Glassmorphism design with dynamic blurred backgrounds, custom typographic branding, and smooth CSS interactions
-- 📱 **Fully Native** — Runs entirely on your Android device, no PC or external server needed
 - 🏠 **Home Page** — Curated genre rows (Pop, Rock, Hip-Hop, Hardcore, 90's, Electronic) with album art
 - 🔎 **Browse & Discover** — Filter results by category (Artists, Songs, Albums) and refine with dynamic Year filtering, plus a dismissible mini-hero promo
 - 💾 **Track Persistence** — Remembers your last played song across sessions using localStorage
@@ -31,7 +31,9 @@ Built with a premium dark glassmorphism UI, it combines the power of the **Deeze
 
 IVIDS Music uses a **hybrid architecture**: a native Android shell (Kotlin) wrapping a high-quality web-based UI (HTML/CSS/JS). This approach gives the best of both worlds — a beautiful, responsive web UI with native Android networking capabilities.
 
-### How It Works
+When running natively, the app intercepts requests and uses a custom local proxy to bypass CORS. When running in a web browser, the app detects the environment and automatically switches to a public CORS proxy (`api.allorigins.win`) so the UI continues to function perfectly without the Android backend.
+
+### How It Works (Android Native)
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -62,14 +64,6 @@ IVIDS Music uses a **hybrid architecture**: a native Android shell (Kotlin) wrap
 └─────────────────────────────────────────────┘
 ```
 
-### The Key Trick: Native Request Interception
-
-The JavaScript code thinks it's talking to a local server at `http://localhost:3000`. But there is no server — Android's `WebViewClient.shouldInterceptRequest()` catches these requests **before they leave the device** and handles them natively in Kotlin using OkHttp:
-
-1. **`/proxy?url=...`** — The JS code sends Deezer API requests through this "proxy" (originally needed to bypass CORS in a browser). On Android, the Kotlin code simply fetches the URL directly with OkHttp and returns the response. No CORS issues exist in a native context.
-
-2. **`/play?videoId=...`** — When a user taps a song, the JS code requests the audio URL for a YouTube video. The Kotlin code queries the Invidious API to find an audio-only stream URL and returns it. The HTML5 `<audio>` element then plays the stream directly.
-
 ---
 
 ## 🛠️ Tech Stack
@@ -81,11 +75,11 @@ The JavaScript code thinks it's talking to a local server at `http://localhost:3
 | **Frontend UI** | HTML5, Vanilla CSS, Vanilla JS (ES Modules) | The entire user interface |
 | **Music Discovery** | Deezer API | Search, album art, artist images, genre browsing |
 | **Audio Playback** | Invidious API + HTML5 `<audio>` | YouTube audio stream extraction and playback |
-| **Persistence** | localStorage (WebView) | Last played track, listen history, UI scale settings |
+| **Persistence** | localStorage (WebView/Browser) | Last played track, listen history, UI scale settings |
 
 ---
 
-## 📁 Project Structure
+## � Project Structure
 
 ```
 IVIDSMusic/
@@ -226,32 +220,29 @@ Currently features:
 
 ---
 
-## 📱 Requirements
+## �🚀 Getting Started
 
-- **Android 7.0+** (API level 24)
-- **Internet connection** (for Deezer API and audio streaming)
-- No additional tools, servers, or dependencies needed
+IVIDS Music can be run in **two ways**: natively on an Android device/TV, or directly in a web browser.
 
----
-
-## 🚀 Getting Started
-
+### Option 1: Native Android / Android TV
 1. **Clone the repository**
    ```bash
    git clone https://github.com/kenjikellens/IVIDSMusic.git
    ```
-
 2. **Open in Android Studio**
    - Open Android Studio
    - Select "Open an Existing Project"
    - Navigate to the cloned `IVIDSMusic` folder
-
 3. **Build & Run**
-   - Connect an Android device or start an emulator
+   - Connect an Android phone, Android TV, or start an emulator
    - Click the **Run ▶** button
-   - The app will install and launch automatically
+   - The app will automatically configure the correct scaling and navigation mode (TV or Touch).
 
-That's it — no server setup, no API keys, no configuration needed.
+### Option 2: Web Browser (Live Server)
+Because the UI is built entirely with web technologies, you can run the app directly in Firefox, Chrome, or Safari.
+1. Navigate to the UI source folder: `app/src/main/assets/gui/`
+2. Open `index.html` using an extension like **VS Code Live Server**.
+3. The app will automatically detect it is running on the web, bypass the Android-specific logic, and use public CORS proxies to ensure Deezer features work perfectly.
 
 ---
 
@@ -263,7 +254,7 @@ IVIDS Music follows a **premium dark UI** aesthetic inspired by modern music str
 - **Dynamic Backgrounds**: Album art colors are extracted and bleed into the background for an immersive feel
 - **Smooth Animations**: CSS transitions and micro-animations on every interaction (hover, focus, page load)
 - **Responsive Scaling**: Uses a registered CSS `@property --ui-scale` variable to adapt to different screen sizes and user preferences, settable from 75% to 150%
-- **Skeleton Loading**: Content placeholders with animated shimmer effects while data loads from the API
+- **TV Support**: Fully custom spatial navigation engine (`tv-nav.js`) enables perfect D-pad control on Android TV interfaces
 - **Persistent Player Bar**: Slides in when music starts playing, stays hidden when inactive
 - **Mobile-First**: All pages and settings use media queries to adapt gracefully to smaller screens
 - **Accent Color System**: Uses CSS custom properties (`--primary-color`, `--accent-color`) with HSL-based tinting for a cohesive color palette

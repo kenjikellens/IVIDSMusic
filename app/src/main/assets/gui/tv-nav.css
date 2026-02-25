@@ -1,0 +1,59 @@
+/* TV Navigation & Leanback Adjustments */
+
+body.tv-mode {
+    /* Kept empty or add other body tv logic if needed */
+}
+
+body.tv-mode ::-webkit-scrollbar {
+    display: none;
+    /* Hide scrollbars, D-pad scrolling takes over */
+}
+
+body.tv-mode .scroll-arrow {
+    display: none !important;
+    /* Hide on-screen arrows */
+}
+
+/* ============================
+   TV Focus Rings 
+   ============================ */
+
+/* Generic Focus Ring */
+body.tv-mode a:focus-visible,
+body.tv-mode button:focus-visible,
+body.tv-mode input:focus-visible,
+body.tv-mode [tabindex="0"]:focus-visible {
+    outline: 3px solid var(--primary-color) !important;
+    outline-offset: 4px !important;
+    z-index: 100;
+}
+
+/* Hide outline on cards since the image box gets it */
+body.tv-mode .music-card:focus-visible {
+    outline: none !important;
+}
+
+body.tv-mode .music-card:focus-visible .card-image-box {
+    outline: 3px solid var(--primary-color) !important;
+    outline-offset: 4px !important;
+}
+
+/* Circular elements */
+body.tv-mode .user-profile:focus-visible,
+body.tv-mode .music-card.type-artist:focus-visible .card-image-box,
+body.tv-mode .player-control-btn:focus-visible,
+body.tv-mode .profile-avatar-edit:focus-visible,
+body.tv-mode .promo-close-btn:focus-visible,
+body.tv-mode .blob:focus-visible {
+    border-radius: 50% !important;
+}
+
+/* Player Bar Sliders Focus */
+body.tv-mode .ivids-slider:focus-visible {
+    outline: none !important;
+}
+
+body.tv-mode .ivids-slider:focus-visible::-webkit-slider-thumb {
+    outline: 3px solid var(--primary-color) !important;
+    outline-offset: 4px !important;
+}

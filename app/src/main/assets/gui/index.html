@@ -7,6 +7,7 @@
     <meta name="description" content="IVIDS Music — stream your favourite music ad-free.">
     <title>IVIDS Music</title>
     <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="tv-nav.css">
     <link rel="stylesheet" href="loader.css">
     <link rel="icon" type="image/png" href="gemini-logo.png">
     <script type="module" src="../logic/loader.js"></script>
@@ -73,7 +74,8 @@
                         onkeydown="if(event.key === 'Enter') { Router.loadPage('search', { query: this.value }); }">
                 </div>
                 <div class="header-right">
-                    <div class="user-profile" title="User Profile" onclick="Router.loadPage('profile')">
+                    <div class="user-profile" title="User Profile" onclick="Router.loadPage('profile')" tabindex="0"
+                        onkeydown="if(event.key === 'Enter') this.click()">
                         <img src="svg/user.svg" alt="Profile">
                     </div>
                 </div>
@@ -139,9 +141,11 @@
         import { Router } from '../logic/router.js';
         import { SettingsManager } from '../logic/settings-manager.js';
         import '../logic/player.js';
+        import { TVNav } from '../logic/tv-nav.js';
 
         window.onload = () => {
             SettingsManager.init();
+            TVNav.init();
             Router.loadPage('home');
         };
 
@@ -156,6 +160,7 @@
         };
         document.onmousemove = resetTimer;
         document.onkeypress = resetTimer;
+        document.onkeydown = resetTimer; // Added for TV remote support
         resetTimer();
     </script>
 </body>

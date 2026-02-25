@@ -106,36 +106,105 @@ export const MusicAPI = {
         } catch (e) { return []; }
     },
 
+    // Deezer genre IDs (from https://api.deezer.com/genre)
+    genreMap: {
+        'Pop': 132,
+        'Rock': 152,
+        'Hip-Hop': 116,
+        'Electronic': 106,
+        'Hardcore': 464,      // Metal (closest match)
+        'R&B': 165,
+        'Jazz': 129,
+        'Dance': 113,
+        'Alternative': 85,
+    },
+
     /**
-     * Fetch categories using iTunes
+     * Fetch genre categories using Deezer chart endpoints (proper genre filtering)
      */
     async getCategories(genres = ['Pop', 'Rock', 'Hip-Hop', 'Hardcore', '90\'s', 'Electronic'], signal = null) {
         const results = await Promise.all(
             genres.map(async (genre) => {
-                let tracks = [];
+                try {
+                    let tracks = [];
 
-                if (genre === '90\'s') {
-                    tracks = await this.searchiTunes('90s hits', 12, 'all', signal);
-                } else if (genre === 'Hardcore') {
-                    tracks = await this.searchiTunes('hardcore', 12, 'all', signal);
-                } else {
-                    tracks = await this.searchiTunes(genre, 12, 'all', signal);
+                    if (genre === '90\'s') {
+                        // Deezer has no "decade" genre, so use advanced search with dur_min to get variety
+                        // Search for popular tracks from the 90s era
+                        const queries = ['best of 90s', '90s dance hits', '90s rock hits', '90s pop classics'];
+                        const randomQuery = queries[Math.floor(Math.random() * queries.length)];
+                        const url = `${this.deezerUrl}/search?q=${encodeURIComponent(randomQuery)}&limit=30`;
+
+                        let fetchUrl = url;
+                        if (window.Config && window.Config.isNative) {
+                            fetchUrl = this.proxyUrl + encodeURIComponent(url);
+                        } else {
+                            // Use public CORS proxy for web browsers (Live Server)
+                            fetchUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+                        }
+
+                        const response = await fetch(fetchUrl, { signal });
+                        const data = await response.json();
+                        if (data.data) {
+                            tracks = data.data.map(item => ({
+                                type: 'song',
+                                id: item.id,
+                                title: item.title,
+                                artist: item.artist?.name || 'Unknown',
+                                album: item.album?.title || 'Unknown',
+                                cover: item.album?.cover_big || item.album?.cover_xl,
+                                previewUrl: item.preview
+                            }));
+                        }
+                    } else {
+                        // Use Deezer chart endpoint for proper genre filtering
+                        const genreId = this.genreMap[genre];
+                        if (!genreId) return { title: genre, id: genre.toLowerCase(), tracks: [] };
+
+                        const url = `${this.deezerUrl}/chart/${genreId}/tracks?limit=30`;
+
+                        let fetchUrl = url;
+                        if (window.Config && window.Config.isNative) {
+                            fetchUrl = this.proxyUrl + encodeURIComponent(url);
+                        } else {
+                            // Use public CORS proxy for web browsers (Live Server)
+                            fetchUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+                        }
+
+                        const response = await fetch(fetchUrl, { signal });
+                        const data = await response.json();
+
+                        if (data.data) {
+                            tracks = data.data.map(item => ({
+                                type: 'song',
+                                id: item.id,
+                                title: item.title_short || item.title,
+                                artist: item.artist?.name || 'Unknown',
+                                album: item.album?.title || 'Unknown',
+                                cover: item.album?.cover_big || item.album?.cover_xl,
+                                previewUrl: item.preview
+                            }));
+                        }
+                    }
+
+                    // Variety filter: max 1 track per artist
+                    const seen = new Set();
+                    const uniqueTracks = tracks.filter(item => {
+                        const key = (item.artist || '').toLowerCase();
+                        if (seen.has(key)) return false;
+                        seen.add(key);
+                        return true;
+                    }).slice(0, 12);
+
+                    return {
+                        title: genre,
+                        id: genre.toLowerCase().replace(/\s+/g, '-').replace(/'/g, ''),
+                        tracks: uniqueTracks
+                    };
+                } catch (e) {
+                    console.error(`[API] Genre ${genre} failed:`, e);
+                    return { title: genre, id: genre.toLowerCase(), tracks: [] };
                 }
-
-                // Perform rough variety filtering
-                const seen = new Set();
-                const uniqueTracks = tracks.filter(item => {
-                    const key = `${item.artist?.toLowerCase() || ''}-${item.title?.toLowerCase() || ''}`;
-                    if (seen.has(key)) return false;
-                    seen.add(key);
-                    return true;
-                }).slice(0, 12);
-
-                return {
-                    title: genre,
-                    id: genre.toLowerCase().replace(/\s+/g, '-').replace(/'/g, ''),
-                    tracks: uniqueTracks
-                };
             })
         );
         return results.filter(row => row.tracks.length > 0);

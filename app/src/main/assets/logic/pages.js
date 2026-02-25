@@ -5,43 +5,6 @@ import { HistorySystem } from './history.js';
 
 export const PageSystem = {
     async initHome() {
-        const container = document.getElementById('home-rows-container');
-        if (!container) return;
-
-        const GENRES = ['Pop', 'Rock', 'Hip-Hop', 'Hardcore', '90\'s', 'Electronic'];
-        const SKELETON_CARD = `
-            <div class="skeleton-card">
-                <div class="skeleton-img">
-                    <div class="ivids-loader poster-loader"></div>
-                </div>
-                <div class="skeleton-info-box">
-                    <div class="skeleton-text title"></div>
-                    <div class="skeleton-text artist"></div>
-                </div>
-            </div>
-        `;
-
-        // 1. Render History immediately (local data)
-        const history = HistorySystem.get();
-        const historyHTML = history.length > 0 ? `
-            <div id="home-history-section">
-                <!-- Rendered below via JS for consistency -->
-            </div>
-        ` : '';
-
-        // 2. Pre-render skeletons with titles
-        container.innerHTML = historyHTML + GENRES.map(genre => `
-            <div class="row-container">
-                <div class="row-header"><h2 class="row-title">${genre}</h2></div>
-                <div class="skeleton-row">${SKELETON_CARD.repeat(12)}</div>
-            </div>
-        `).join('');
-
-        const histSec = document.getElementById('home-history-section');
-        if (histSec && history.length > 0) {
-            histSec.appendChild(CardSystem.createRow('Recently Listened', 'home-recent-list', history.slice(0, 12)));
-        }
-
         if (window.Loader) window.Loader.init();
 
         try {
@@ -50,12 +13,29 @@ export const PageSystem = {
 
             if (signal?.aborted) return;
 
-            // Preserve History section, replace skeletons only
-            const historySection = document.getElementById('home-history-section');
-            container.innerHTML = '';
-            if (historySection) container.appendChild(historySection);
+            // Target the hardcoded containers and populate them
+            rows.forEach(category => {
+                const rowContent = document.getElementById(`content-${category.id}`);
+                if (rowContent) {
+                    const existingCards = Array.from(rowContent.children);
 
-            rows.forEach(category => container.appendChild(CardSystem.createRow(category.title, category.id, category.tracks)));
+                    // Replace skeleton content with real data on the same element
+                    category.tracks.forEach((track, index) => {
+                        if (index < existingCards.length) {
+                            CardSystem.hydrateCard(existingCards[index], track);
+                        } else {
+                            rowContent.appendChild(CardSystem.createCard(track));
+                        }
+                    });
+
+                    // Remove any leftover skeletons if API returned fewer tracks
+                    if (existingCards.length > category.tracks.length) {
+                        for (let i = category.tracks.length; i < existingCards.length; i++) {
+                            existingCards[i].remove();
+                        }
+                    }
+                }
+            });
 
             if (window.Loader) window.Loader.init();
 
@@ -65,10 +45,6 @@ export const PageSystem = {
             }
         } catch (e) {
             console.error('[Home] Error:', e);
-            const err = document.createElement('p');
-            err.className = 'error-msg';
-            err.textContent = 'Failed to load content.';
-            container.appendChild(err);
         }
     },
 
@@ -278,18 +254,24 @@ export const PageSystem = {
         tracks.forEach(track => {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'library-track-item';
+            itemDiv.tabIndex = 0; // Added for TV Nav
             itemDiv.innerHTML = `
                 <div class="track-info">
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist}</div>
                 </div>
-                <button class="play-local-btn player-control-btn main small">
+                <button class="play-local-btn player-control-btn main small" tabindex="-1">
                     <img src="svg/play.svg" alt="Play">
                 </button>
             `;
 
-            itemDiv.onclick = (e) => {
-                YouTubePlayer.playSavedTrack(track);
+            const playTrack = () => YouTubePlayer.playSavedTrack(track);
+            itemDiv.onclick = playTrack;
+            itemDiv.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    playTrack();
+                }
             };
 
             container.appendChild(itemDiv);
@@ -316,6 +298,7 @@ export const PageSystem = {
         validHistory.forEach(track => {
             const card = document.createElement('div');
             card.className = 'music-card';
+            card.tabIndex = 0; // Added for TV Nav
             card.innerHTML = `
                 <div class="card-image-box">
                     <img src="${track.cover}" class="poster" alt="${track.title}">
@@ -326,11 +309,19 @@ export const PageSystem = {
                 </div>
             `;
 
-            card.onclick = () => {
+            const playRecent = () => {
                 if (track.url) {
                     YouTubePlayer.playSavedTrack(track);
                 } else {
                     YouTubePlayer.loadTrack(track);
+                }
+            };
+
+            card.onclick = playRecent;
+            card.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    playRecent();
                 }
             };
 

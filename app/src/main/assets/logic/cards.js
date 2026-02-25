@@ -6,10 +6,17 @@ import { YouTubePlayer } from './player.js';
  */
 export const CardSystem = {
     /**
-     * Creates a music card DOM element.
+     * Creates a new music card DOM element.
      */
     createCard(track) {
         const card = document.createElement('div');
+        return this.hydrateCard(card, track);
+    },
+
+    /**
+     * Populates an existing DOM element with track data, converting it into a loaded card.
+     */
+    hydrateCard(card, track) {
         card.className = `music-card type-${track.type || 'song'}`;
         card.tabIndex = 0;
 
@@ -74,6 +81,13 @@ export const CardSystem = {
             } else {
                 // Default to playing (song / track)
                 YouTubePlayer.loadTrack(track);
+            }
+        };
+
+        card.onkeydown = (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                card.click();
             }
         };
 

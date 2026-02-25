@@ -64,8 +64,8 @@ class MainActivity : AppCompatActivity() {
                 val assetResponse = assetLoader.shouldInterceptRequest(url)
                 if (assetResponse != null) return assetResponse
 
-                // 2. Onderschep de Proxy verzoeken (voor Deezer)
-                if (url.toString().contains("localhost:3000/proxy?url=")) {
+                // 2. Onderschep de Proxy verzoeken (voor Deezer en YouTube scraper)
+                if (url.toString().contains("localhost:3000/proxy") || url.toString().contains("/api/proxy")) {
                     val targetUrl = url.getQueryParameter("url") ?: return null
                     return handleProxyRequest(targetUrl)
                 }
