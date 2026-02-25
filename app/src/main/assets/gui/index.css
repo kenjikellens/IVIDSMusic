@@ -771,8 +771,8 @@ header {
 .music-card .card-info-box {
     padding: calc(12px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
     background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0.2) 60%, transparent 100%);
-    margin: 0 -11px -11px -11px;
-    /* Slightly more to overlap perfectly */
+    margin: 0 calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale));
+    /* Pull precisely by the padding amount to fill the box */
     border-bottom-left-radius: calc(12px * var(--ui-scale));
     border-bottom-right-radius: calc(12px * var(--ui-scale));
     z-index: 2;
