@@ -798,6 +798,10 @@ header {
     padding: 0 calc(6px * var(--ui-scale));
     text-align: center;
     text-shadow: 0 0 4px rgba(0, 0, 0, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
 }
 
 .card-artist a {
@@ -1810,10 +1814,16 @@ header {
 
 .player-title {
     font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .player-artist {
     font-size: 0.7rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* Row 2: controls + progress merged into one row */

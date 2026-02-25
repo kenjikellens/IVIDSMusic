@@ -4,6 +4,7 @@ When working on this project, the AI must strictly adhere to the following rules
 
 ## 1. Responsive Design & Breakpoints
 The AI MUST maintain, respect, and design for the granular layout hierarchy to ensure a consistent experience across all devices:
+- **5 Width Breakpoints**: 1200px, 1024px, 768px, 700px, 600px.
 - **Portrait Mode**: Mandatory layout shift (sidebar to bottom nav) for vertical screens, independent of width scale.
 
 ## 2. Cross-Environment Compatibility
