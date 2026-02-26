@@ -21,6 +21,8 @@ You must ensure that your code works flawlessly in both primary environments:
 - **No Autonomous Pushing**: You must NEVER push changes to the GitHub repository on your own initiative.
 - **Explicit Permission Required**: You must always ask for explicit permission from the user before using `git push`. Keep your changes in the local workspace until you are instructed to push them to the cloud.
 
+if the user says **"push to main"**, you may directly push ALL changes to main, if the user says **"push [file] to main"**, you only push this file.
+
 ## 4. Change Logging
 For every file you **edit**, **add**, or **delete**, you must append a new line to the project's `CHANGELOG.md` file (located at the root of the project). Each log entry must follow this format:
 

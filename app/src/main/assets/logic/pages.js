@@ -3,6 +3,8 @@ import { YouTubePlayer } from './player.js';
 import { CardSystem } from './cards.js';
 import { HistorySystem } from './history.js';
 
+let isHeroDismissed = false;
+
 export const PageSystem = {
     async initHome() {
         if (window.Loader) window.Loader.init();
@@ -42,6 +44,27 @@ export const PageSystem = {
             const heroBtn = document.getElementById('play-hero-btn');
             if (heroBtn && rows[0]?.tracks[0]) {
                 heroBtn.onclick = () => YouTubePlayer.loadTrack(rows[0].tracks[0]);
+            }
+
+            // Hero Dismissal Logic
+            const hero = document.querySelector('.hero');
+            const closeBtn = document.getElementById('close-hero-btn');
+
+            // Cleanup legacy persistence if it exists
+            if (localStorage.getItem('hero_dismissed')) {
+                localStorage.removeItem('hero_dismissed');
+            }
+
+            if (hero) {
+                if (isHeroDismissed) {
+                    hero.classList.add('is-hidden');
+                } else if (closeBtn) {
+                    closeBtn.onclick = (e) => {
+                        e.stopPropagation(); // Avoid triggering parent clicks
+                        hero.classList.add('is-hidden');
+                        isHeroDismissed = true;
+                    };
+                }
             }
         } catch (e) {
             console.error('[Home] Error:', e);
