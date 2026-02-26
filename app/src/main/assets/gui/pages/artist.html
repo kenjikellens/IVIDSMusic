@@ -1,6 +1,65 @@
-<!-- Artist Profile Page (Placeholder) -->
-<div class="artist-page">
-    <h1 id="artist-name">Loading...</h1>
-    <p id="artist-genre" class="artist-genre"></p>
-    <div id="artist-content"></div>
+<div class="artist-page page-container">
+    <!-- Hero Section -->
+    <div class="artist-hero">
+        <div class="hero-bg">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+            <div class="blob blob-4"></div>
+        </div>
+        <div class="artist-hero-content fade-in">
+            <div class="artist-avatar-wrapper">
+                <div class="ivids-loader poster-loader" id="artist-avatar-loader"></div>
+                <img id="artist-avatar" src="" alt="" class="artist-avatar" style="opacity: 0;">
+            </div>
+            <div class="artist-info-wrapper">
+                <h1 id="artist-name" class="artist-name">Loading...</h1>
+                <div class="artist-stats" id="artist-stats">
+                    <span id="artist-fans">-- fans</span>
+                    <span class="stat-dot">•</span>
+                    <span id="artist-albums-count">-- albums</span>
+                </div>
+                <div class="artist-actions">
+                    <button class="btn btn-primary" id="play-artist-btn" disabled>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                        Play Top Track
+                    </button>
+                    <!-- <button class="btn btn-secondary" id="view-songs-btn">View All Songs</button> -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="artist-content" id="artist-content">
+        <!-- Top Tracks -->
+        <div id="artist-top-tracks-container" class="row-scroll-wrapper is-hidden">
+            <div class="row-header">
+                <h2 class="row-title">Top Tracks</h2>
+            </div>
+            <button class="scroll-arrow left" onclick="scrollRow('artist-top-tracks', -1)">
+                <div class="scroll-arrow-icon">❮</div>
+            </button>
+            <div class="results-row" id="artist-top-tracks"></div>
+            <button class="scroll-arrow right" onclick="scrollRow('artist-top-tracks', 1)">
+                <div class="scroll-arrow-icon">❯</div>
+            </button>
+        </div>
+
+        <!-- Albums -->
+        <div id="artist-albums-container" class="row-scroll-wrapper is-hidden">
+            <div class="row-header">
+                <h2 class="row-title">Albums</h2>
+            </div>
+            <button class="scroll-arrow left" onclick="scrollRow('artist-albums', -1)">
+                <div class="scroll-arrow-icon">❮</div>
+            </button>
+            <div class="results-row" id="artist-albums"></div>
+            <button class="scroll-arrow right" onclick="scrollRow('artist-albums', 1)">
+                <div class="scroll-arrow-icon">❯</div>
+            </button>
+        </div>
+    </div>
 </div>

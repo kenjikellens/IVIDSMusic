@@ -1,0 +1,42 @@
+<div class="album-page page-container">
+    <!-- Hero Section -->
+    <div class="artist-hero album-hero">
+        <div class="hero-bg">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+            <div class="blob blob-4"></div>
+        </div>
+        <div class="artist-hero-content fade-in">
+            <div class="album-cover-wrapper">
+                <div class="ivids-loader poster-loader" id="album-cover-loader"></div>
+                <img id="album-cover" src="" alt="" class="album-cover" style="opacity: 0;">
+            </div>
+            <div class="artist-info-wrapper">
+                <h1 id="album-title" class="artist-name">Loading...</h1>
+                <div class="artist-stats">
+                    <span id="album-artist" class="clickable-artist" onclick="">--</span>
+                    <span class="stat-dot">•</span>
+                    <span id="album-release-date">--</span>
+                    <span class="stat-dot">•</span>
+                    <span id="album-tracks-count">-- tracks</span>
+                </div>
+                <div class="artist-actions">
+                    <button class="btn btn-primary" id="play-album-btn" disabled>
+                        <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                        Play Album
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tracklist Section -->
+    <div class="album-content">
+        <div class="tracklist-container" id="album-tracklist">
+            <!-- Tracks will be injected here -->
+        </div>
+    </div>
+</div>

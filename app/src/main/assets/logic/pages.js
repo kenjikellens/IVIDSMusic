@@ -175,8 +175,84 @@ export const PageSystem = {
 
     async initArtist(params) {
         if (!params || !params.name) return;
-        const nameEl = document.getElementById('artist-name');
-        if (nameEl) nameEl.textContent = params.name;
+
+        const signal = window.Router.abortController?.signal;
+        if (window.Loader) window.Loader.init();
+
+        try {
+            // 1. Fetch main artist data
+            const artist = await MusicAPI.getArtistByName(params.name, signal);
+            if (signal?.aborted) return;
+
+            if (artist) {
+                const nameEl = document.getElementById('artist-name');
+                const avatarEl = document.getElementById('artist-avatar');
+                const avatarLoader = document.getElementById('artist-avatar-loader');
+                const fansEl = document.getElementById('artist-fans');
+                const albumsCountEl = document.getElementById('artist-albums-count');
+
+                if (nameEl) nameEl.textContent = artist.name;
+                if (fansEl) fansEl.textContent = `${(artist.nb_fan || 0).toLocaleString()} fans`;
+
+                if (avatarEl && artist.picture_xl) {
+                    avatarEl.onload = () => {
+                        avatarEl.style.opacity = '1';
+                        if (avatarLoader) avatarLoader.style.display = 'none';
+                    };
+                    avatarEl.src = artist.picture_xl;
+                }
+
+                // Get average color for hero blobs
+                MusicAPI.getAverageColor(artist.picture_xl).then(color => {
+                    const hero = document.querySelector('.artist-hero');
+                    if (hero) hero.style.setProperty('--primary-color', color);
+                });
+
+                // 2. Fetch Top Tracks & Albums in parallel
+                const [topTracks, albums] = await Promise.all([
+                    MusicAPI.getArtistTopTracks(artist.id, 15, signal).catch(() => []),
+                    MusicAPI.getArtistAlbums(artist.id, 50, artist.name, signal).catch(() => [])
+                ]);
+
+                // Update album count with actual studio albums
+                if (albumsCountEl) albumsCountEl.textContent = `${albums.length} albums`;
+
+                if (signal?.aborted) return;
+
+                // Wire up Play button
+                const playBtn = document.getElementById('play-artist-btn');
+                if (playBtn && topTracks.length > 0) {
+                    playBtn.disabled = false;
+                    playBtn.onclick = () => {
+                        YouTubePlayer.loadTrack(topTracks[0]);
+                    };
+                }
+
+                // Render Top Tracks
+                const topTracksCont = document.getElementById('artist-top-tracks-container');
+                const topTracksRow = document.getElementById('artist-top-tracks');
+                if (topTracksCont && topTracksRow && topTracks.length > 0) {
+                    topTracksRow.innerHTML = '';
+                    topTracks.forEach(track => {
+                        topTracksRow.appendChild(CardSystem.createCard(track));
+                    });
+                    topTracksCont.classList.remove('is-hidden');
+                }
+
+                // Render Albums
+                const albumsCont = document.getElementById('artist-albums-container');
+                const albumsRow = document.getElementById('artist-albums');
+                if (albumsCont && albumsRow && albums.length > 0) {
+                    albumsRow.innerHTML = '';
+                    albums.forEach(album => {
+                        albumsRow.appendChild(CardSystem.createCard(album));
+                    });
+                    albumsCont.classList.remove('is-hidden');
+                }
+            }
+        } catch (e) {
+            console.error('[initArtist] Failed to load artist:', e);
+        }
     },
 
     async initSettings() {
@@ -367,12 +443,86 @@ export const PageSystem = {
             t.artist.toLowerCase().includes(q)
         );
         this.renderLibrary(filtered);
+    },
+    async initAlbum(params) {
+        if (!params || !params.id) return;
+
+        const signal = window.Router.abortController?.signal;
+        if (window.Loader) window.Loader.init();
+
+        try {
+            const album = await MusicAPI.getAlbumDetails(params.id, signal);
+            if (signal?.aborted) return;
+
+            if (album) {
+                const titleEl = document.getElementById('album-title');
+                const artistEl = document.getElementById('album-artist');
+                const coverEl = document.getElementById('album-cover');
+                const coverLoader = document.getElementById('album-cover-loader');
+                const dateEl = document.getElementById('album-release-date');
+                const countEl = document.getElementById('album-tracks-count');
+
+                if (titleEl) titleEl.textContent = album.title;
+                if (artistEl) {
+                    artistEl.textContent = album.artist;
+                    artistEl.onclick = () => window.Router.loadPage('artist', { name: album.artist });
+                }
+                if (dateEl) dateEl.textContent = new Date(album.releaseDate).getFullYear();
+                if (countEl) countEl.textContent = `${album.nb_tracks} tracks`;
+
+                if (coverEl && album.cover) {
+                    coverEl.onload = () => {
+                        coverEl.style.opacity = '1';
+                        if (coverLoader) coverLoader.style.display = 'none';
+                    };
+                    coverEl.src = album.cover;
+                }
+
+                // Dynamic background color
+                MusicAPI.getAverageColor(album.cover).then(color => {
+                    const hero = document.querySelector('.album-hero');
+                    if (hero) hero.style.setProperty('--primary-color', color);
+                });
+
+                // Play Button
+                const playBtn = document.getElementById('play-album-btn');
+                if (playBtn && album.tracks.length > 0) {
+                    playBtn.disabled = false;
+                    playBtn.onclick = () => YouTubePlayer.loadTrack(album.tracks[0]);
+                }
+
+                // Render Tracks
+                const tracklistCont = document.getElementById('album-tracklist');
+                if (tracklistCont) {
+                    tracklistCont.innerHTML = '';
+                    album.tracks.forEach((track, index) => {
+                        const trackRow = document.createElement('div');
+                        trackRow.className = 'album-track-row';
+                        trackRow.tabIndex = 0;
+                        trackRow.innerHTML = `
+                            <div class="track-number">${index + 1}</div>
+                            <div class="track-details">
+                                <div class="track-title">${track.title}</div>
+                                <div class="track-artist">${track.artist}</div>
+                            </div>
+                            <div class="track-duration">--:--</div>
+                        `;
+                        trackRow.onclick = () => YouTubePlayer.loadTrack(track);
+                        trackRow.onkeydown = (e) => {
+                            if (e.key === 'Enter') trackRow.click();
+                        };
+                        tracklistCont.appendChild(trackRow);
+                    });
+                }
+            }
+        } catch (e) {
+            console.error('[initAlbum] Error:', e);
+        }
     }
 };
 
 // Global UI helpers
 window.performSearch = (q) => window.Router.loadPage('search', { query: q });
-window.handleBrowseInput = (v) => { if (document.getElementById('header-search-input')) document.getElementById('header-search-input').value = v; };
 window.setSearchFilter = (t) => {
     const p = window.Router.currentParams || {};
     window.Router.loadPage('search', { ...p, type: t });

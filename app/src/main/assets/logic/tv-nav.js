@@ -188,12 +188,17 @@ export const TVNav = {
                 }
                 break;
             case 'Escape':
-            case 'Backspace':
-            case 'BrowserBack':
                 // Prevent going back out of app if possible
                 if (document.activeElement && document.activeElement.tagName.toLowerCase() === 'input') {
                     document.activeElement.blur();
                     e.preventDefault();
+                    return;
+                }
+                break;
+            case 'Backspace':
+            case 'BrowserBack':
+                // Let inputs handle their own backspace (delete text) natively
+                if (document.activeElement && document.activeElement.tagName.toLowerCase() === 'input') {
                     return;
                 }
                 break;

@@ -323,6 +323,127 @@ export const MusicAPI = {
     },
 
     /**
+     * Gets full artist profile data by name.
+     */
+    async getArtistByName(name, signal = null) {
+        try {
+            // Step 1: Search for the artist to get their ID
+            const searchUrl = `${this.deezerUrl}/search/artist?q=${encodeURIComponent(name)}&limit=1`;
+            const searchFetchUrl = this.proxyUrl + encodeURIComponent(searchUrl);
+
+            const searchRes = await fetch(searchFetchUrl, { signal });
+            const searchData = await searchRes.json();
+            if (!searchData?.data?.length) return null;
+
+            const artistId = searchData.data[0].id;
+
+            // Step 2: Fetch the direct /artist/{id} endpoint for accurate stats
+            const detailUrl = `${this.deezerUrl}/artist/${artistId}`;
+            const detailFetchUrl = this.proxyUrl + encodeURIComponent(detailUrl);
+
+            const detailRes = await fetch(detailFetchUrl, { signal });
+            const artist = await detailRes.json();
+            return artist || null;
+        } catch (e) {
+            console.error('[API] Failed to get artist by name', e);
+        }
+        return null;
+    },
+
+    /**
+     * Gets artist's top tracks formatted for CardSystem.
+     */
+    async getArtistTopTracks(id, limit = 10, signal = null) {
+        try {
+            const url = `${this.deezerUrl}/artist/${id}/top?limit=${limit}`;
+            const fetchUrl = this.proxyUrl + encodeURIComponent(url);
+
+            const res = await fetch(fetchUrl, { signal });
+            const data = await res.json();
+
+            if (data && data.data) {
+                return data.data.map(item => ({
+                    type: 'song',
+                    id: item.id,
+                    title: item.title_short || item.title,
+                    artist: item.artist?.name || 'Unknown',
+                    album: item.album?.title || 'Unknown',
+                    cover: item.album?.cover_big || item.album?.cover_xl,
+                    previewUrl: item.preview
+                }));
+            }
+        } catch (e) {
+            console.error('[API] Failed to get artist top tracks', e);
+        }
+        return [];
+    },
+
+    /**
+     * Gets artist's albums formatted for CardSystem.
+     */
+    async getArtistAlbums(id, limit = 50, artistName = 'Unknown', signal = null) {
+        try {
+            const url = `${this.deezerUrl}/artist/${id}/albums?limit=${limit}`;
+            const fetchUrl = this.proxyUrl + encodeURIComponent(url);
+
+            const res = await fetch(fetchUrl, { signal });
+            const data = await res.json();
+
+            if (data && data.data) {
+                return data.data
+                    .filter(item => item.record_type === 'album')
+                    .map(item => ({
+                        type: 'album',
+                        id: item.id,
+                        title: item.title,
+                        artist: artistName,
+                        cover: item.cover_big || item.cover_xl,
+                        releaseDate: item.release_date
+                    }));
+            }
+        } catch (e) {
+            console.error('[API] Failed to get artist albums', e);
+        }
+        return [];
+    },
+
+    /**
+     * Gets full album details and its tracks.
+     */
+    async getAlbumDetails(id, signal = null) {
+        try {
+            const url = `${this.deezerUrl}/album/${id}`;
+            const fetchUrl = this.proxyUrl + encodeURIComponent(url);
+
+            const res = await fetch(fetchUrl, { signal });
+            const album = await res.json();
+
+            if (album && album.tracks && album.tracks.data) {
+                return {
+                    id: album.id,
+                    title: album.title,
+                    artist: album.artist.name,
+                    cover: album.cover_big || album.cover_xl,
+                    releaseDate: album.release_date,
+                    nb_tracks: album.nb_tracks,
+                    tracks: album.tracks.data.map(item => ({
+                        type: 'song',
+                        id: item.id,
+                        title: item.title_short || item.title,
+                        artist: item.artist?.name || album.artist.name,
+                        album: album.title,
+                        cover: album.cover_big || album.cover_xl,
+                        previewUrl: item.preview
+                    }))
+                };
+            }
+        } catch (e) {
+            console.error('[API] Failed to get album details', e);
+        }
+        return null;
+    },
+
+    /**
      * Gets a list of user's saved tracks.
      * @returns {Promise<Array>} List of track objects {filename, artist, title, url}
      */

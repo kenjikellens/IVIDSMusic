@@ -32,13 +32,13 @@ export const CardSystem = {
             </div>
             <div class="card-info-box">
                 <div class="card-title">${track.title || track.name}</div>
-                <div class="card-artist">
-                    ${track.type === 'artist' ? (track.genre || 'Artist') : `
+                ${track.type === 'artist' ? '' : `
+                    <div class="card-artist">
                         <a href="#" class="artist-link" data-name="${track.artist}">
                             ${track.artist}
                         </a>
-                    `}
-                </div>
+                    </div>
+                `}
             </div>
         `;
 
@@ -76,8 +76,7 @@ export const CardSystem = {
             if (track.type === 'artist') {
                 window.Router.loadPage('artist', { name: track.name });
             } else if (track.type === 'album') {
-                // If it's an album, search for its songs
-                window.Router.loadPage('search', { query: track.title || track.name, type: 'song' });
+                window.Router.loadPage('album', { id: track.id });
             } else {
                 // Default to playing (song / track)
                 YouTubePlayer.loadTrack(track);
