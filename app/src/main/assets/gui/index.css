@@ -353,7 +353,7 @@ header {
 }
 
 #header-search-input {
-    width: calc(320px * var(--ui-scale));
+    width: 100%;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--text-main);
@@ -369,7 +369,6 @@ header {
 }
 
 #header-search-input:focus {
-    width: 100%;
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(var(--primary-rgb), 0.5);
     box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.1),

@@ -25,3 +25,6 @@
 [2026-02-26] EDITED app/src/main/assets/logic/pages.js: Implemented `initAlbum` for dynamic rendering of album details and tracks
 [2026-02-26] EDITED app/src/main/assets/gui/index.css: Added responsive styles for the album hero and tracklist rows
 [2026-02-26] EDITED app/src/main/assets/logic/cards.js: Fixed syntax error in album card click handler
+[2026-02-26] EDITED app/src/main/assets/gui/index.css: Made header search bar permanently wide and removed focus expansion
+[2026-02-26] EDITED app/src/main/assets/logic/player.js: implemented smooth progress updates via requestAnimationFrame and unified slider interaction
+[2026-02-26] EDITED app/src/main/assets/gui/index.html: added step="any" to progress slider for high-precision smooth movement

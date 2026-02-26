@@ -9,6 +9,8 @@ export const YouTubePlayer = {
     isInitialized: false,
     queue: [],
     currentIndex: -1,
+    animationFrameId: null,
+    isDraggingSlider: false,
 
     init() {
         if (this.isInitialized) return;
@@ -30,27 +32,44 @@ export const YouTubePlayer = {
             this.isPlaying = true;
             playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
             playerBar.classList.remove('is-inactive');
+            // Start smooth update loop
+            this.updateProgressLoop();
         };
         this.audio.onpause = () => {
             this.isPlaying = false;
             playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+            if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
         };
-
-        this.audio.ontimeupdate = () => {
-            if (!this.audio.duration) return;
-            const percent = (this.audio.currentTime / this.audio.duration) * 100;
-            progressSlider.value = percent;
-            currentTimeEl.textContent = this.formatTime(this.audio.currentTime);
+        this.audio.onended = () => {
+            if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
         };
 
         this.audio.onloadedmetadata = () => {
             durationEl.textContent = this.formatTime(this.audio.duration);
         };
 
+        // Slider Interaction
+        progressSlider.onmousedown = () => { this.isDraggingSlider = true; };
+        progressSlider.ontouchstart = () => { this.isDraggingSlider = true; };
+
         progressSlider.oninput = () => {
+            if (!this.audio.duration) return;
+            // Instantly update the time text while dragging
             const time = (progressSlider.value / 100) * this.audio.duration;
-            this.audio.currentTime = time;
+            currentTimeEl.textContent = this.formatTime(time);
         };
+
+        const onSliderRelease = () => {
+            if (!this.isDraggingSlider) return;
+            this.isDraggingSlider = false;
+            if (this.audio.duration) {
+                const time = (progressSlider.value / 100) * this.audio.duration;
+                this.audio.currentTime = time;
+            }
+        };
+
+        progressSlider.onmouseup = onSliderRelease;
+        progressSlider.ontouchend = onSliderRelease;
 
         volumeSlider.oninput = () => {
             this.audio.volume = volumeSlider.value / 100;
@@ -83,6 +102,23 @@ export const YouTubePlayer = {
         if (coverEl) coverEl.src = track.cover;
         if (playerBar) {
             playerBar.style.setProperty('--current-cover', `url(${track.cover})`);
+        }
+    },
+
+    updateProgressLoop() {
+        if (this.isPlaying && this.audio.duration && !this.isDraggingSlider) {
+            const progressSlider = document.getElementById('progress-slider');
+            const currentTimeEl = document.getElementById('current-time');
+
+            if (progressSlider && currentTimeEl) {
+                const percent = (this.audio.currentTime / this.audio.duration) * 100;
+                progressSlider.value = percent;
+                currentTimeEl.textContent = this.formatTime(this.audio.currentTime);
+            }
+        }
+
+        if (this.isPlaying) {
+            this.animationFrameId = requestAnimationFrame(this.updateProgressLoop.bind(this));
         }
     },
 
