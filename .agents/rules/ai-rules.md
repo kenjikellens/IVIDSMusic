@@ -21,4 +21,17 @@ You must ensure that your code works flawlessly in both primary environments:
 - **No Autonomous Pushing**: You must NEVER push changes to the GitHub repository on your own initiative.
 - **Explicit Permission Required**: You must always ask for explicit permission from the user before using `git push`. Keep your changes in the local workspace until you are instructed to push them to the cloud.
 
+## 4. Change Logging
+For every file you **edit**, **add**, or **delete**, you must append a new line to the project's `CHANGELOG.md` file (located at the root of the project). Each log entry must follow this format:
+
+[YYYY-MM-DD] [ACTION] <filename>: <brief description of what was changed/added/deleted>
+
+- **ACTION** must be one of: `EDITED`, `ADDED`, or `DELETED`.
+- The description must be concise but specific enough to understand what changed and why.
+- Example entries:
+  - [2026-02-26] EDITED index.html: Added responsive bottom navigation bar for portrait mode
+  - [2026-02-26] ADDED utils/audioHelper.js: New helper module for cross-environment audio extraction
+  - [2026-02-26] DELETED legacy/oldPlayer.js: Removed deprecated player logic replaced by audioHelper.js
+- This log entry must be written **every time** a file operation occurs, without exception.
+
 Always follow these rules for every task you perform.
