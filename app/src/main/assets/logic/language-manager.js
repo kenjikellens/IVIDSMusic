@@ -3,7 +3,7 @@
  * Handles internationalization and dynamic UI translation.
  */
 export const LanguageManager = {
-    SUPPORTED_LANGUAGES: ['en', 'nl', 'fr', 'de', 'es', 'pt', 'it'],
+    SUPPORTED_LANGUAGES: ['en', 'nl', 'fr', 'de', 'es', 'pt', 'it', 'zh', 'hi', 'ar'],
     LANGUAGE_NAMES: {
         en: 'English',
         nl: 'Nederlands',
@@ -11,7 +11,10 @@ export const LanguageManager = {
         de: 'Deutsch',
         es: 'Español',
         pt: 'Português',
-        it: 'Italiano'
+        it: 'Italiano',
+        zh: 'Chinese (简体中文)',
+        hi: 'Hindi (हिन्दी)',
+        ar: 'Arabic (العربية)'
     },
     defaultLanguage: 'en',
     currentLanguage: 'en',

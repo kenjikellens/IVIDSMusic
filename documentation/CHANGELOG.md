@@ -66,3 +66,5 @@
 
 [2026-02-27] EDITED gui/index.css: Refined language option hover/focus styles to avoid layout shift while maintaining high visibility
 [2026-02-27] ADDED documentation/future_plans.md: Created a roadmap of feature ideas for the app's future evolution
+[2026-02-27] ADDED gui/lang/zh.json, gui/lang/hi.json, gui/lang/ar.json: Added Mandarin Chinese, Hindi, and Arabic translations (top most spoken languages)
+[2026-02-27] EDITED logic/language-manager.js: Registered 3 new languages: Chinese, Hindi, and Arabic
