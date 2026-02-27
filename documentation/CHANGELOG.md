@@ -68,3 +68,5 @@
 [2026-02-27] ADDED documentation/future_plans.md: Created a roadmap of feature ideas for the app's future evolution
 [2026-02-27] ADDED gui/lang/zh.json, gui/lang/hi.json, gui/lang/ar.json: Added Mandarin Chinese, Hindi, and Arabic translations (top most spoken languages)
 [2026-02-27] EDITED logic/language-manager.js: Registered 3 new languages: Chinese, Hindi, and Arabic
+[2026-02-27] ADDED gui/lang/ru.json, gui/lang/ro.json, gui/lang/ja.json: Added Russian, Romanian, and Japanese translations
+[2026-02-27] EDITED logic/language-manager.js: Registered 3 more languages: Russian, Romanian, and Japanese
