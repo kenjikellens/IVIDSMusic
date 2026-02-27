@@ -3,12 +3,12 @@
 
 <!-- State 1: Browse Hero (No Query) -->
 <div id="browse-hero" class="browse-hero is-hidden">
-    <p class="browse-tagline">Your World of Music</p>
-    <h1 class="browse-hero-title">Search</h1>
+    <p class="browse-tagline" data-i18n="tagline">Your World of Music</p>
+    <h1 class="browse-hero-title" data-i18n="search">Search</h1>
     <div class="browse-search-wrapper">
         <img class="browse-search-icon" src="svg/search.svg" alt="">
         <input id="browse-search-input" class="browse-search-input" type="text" placeholder="Artists, songs, albums..."
-            autocomplete="off"
+            autocomplete="off" data-i18n="search_placeholder"
             onkeydown="if(event.key==='Enter' && this.value.trim()) window.performSearch(this.value.trim())">
     </div>
 
@@ -22,8 +22,9 @@
             <div class="blob blob-2"></div>
         </div>
         <div class="hero-content">
-            <h2 class="hero-title">Start Your Experience</h2>
-            <p class="hero-desc">Explore millions of tracks and discover your next favorite artist.</p>
+            <h2 class="hero-title" data-i18n="start_experience_title">Start Your Experience</h2>
+            <p class="hero-desc" data-i18n="start_experience_desc">Explore millions of tracks and discover your next
+                favorite artist.</p>
         </div>
     </div>
 </div>
@@ -31,11 +32,12 @@
 <!-- State 2: Results Header -->
 <div id="results-header" class="search-page-header is-hidden">
     <div class="search-page-title-group">
-        <h1 id="search-title" class="search-page-title">Search Results</h1>
+        <h1 id="search-title" class="search-page-title" data-i18n="results_title">Search Results</h1>
         <p id="search-subtitle" class="search-page-subtitle"></p>
     </div>
     <div id="search-filters" class="search-filter-bar">
-        <input type="number" id="year-input" placeholder="Year" class="year-input" onchange="applyYearFilter()">
+        <input type="number" id="year-input" placeholder="Year" class="year-input" onchange="applyYearFilter()"
+            data-i18n="year">
     </div>
 </div>
 
@@ -43,24 +45,24 @@
 <div id="results-rows-container" class="is-hidden">
     <div id="artists-row-container" class="row-scroll-wrapper is-hidden">
         <div class="row-header">
-            <h2 class="row-title">Artists</h2>
-            <a class="more-link" onclick="setSearchFilter('artist')">See all</a>
+            <h2 class="row-title" data-i18n="artists">Artists</h2>
+            <a class="more-link" onclick="setSearchFilter('artist')"><span data-i18n="see_all">See all</span></a>
         </div>
         <div class="results-row" id="artists-results"></div>
     </div>
 
     <div id="songs-row-container" class="row-scroll-wrapper is-hidden">
         <div class="row-header">
-            <h2 class="row-title">Songs</h2>
-            <a class="more-link" onclick="setSearchFilter('all')">See all</a>
+            <h2 class="row-title" data-i18n="songs">Songs</h2>
+            <a class="more-link" onclick="setSearchFilter('all')"><span data-i18n="see_all">See all</span></a>
         </div>
         <div class="results-row" id="songs-results"></div>
     </div>
 
     <div id="albums-row-container" class="row-scroll-wrapper is-hidden">
         <div class="row-header">
-            <h2 class="row-title">Albums</h2>
-            <a class="more-link" onclick="setSearchFilter('album')">See all</a>
+            <h2 class="row-title" data-i18n="albums">Albums</h2>
+            <a class="more-link" onclick="setSearchFilter('album')"><span data-i18n="see_all">See all</span></a>
         </div>
         <div class="results-row" id="albums-results"></div>
     </div>
@@ -69,11 +71,12 @@
 <!-- State 4: Grid View -->
 <div id="single-category-grid" class="is-hidden">
     <div class="grid-header">
-        <button class="back-button" onclick="setSearchFilter(null)">Back</button>
-        <h2 class="row-title" id="grid-title">Results</h2>
+        <button class="back-button" onclick="setSearchFilter(null)" data-i18n="back">Back</button>
+        <h2 class="row-title" id="grid-title" data-i18n="results_title">Results</h2>
     </div>
     <div class="grid-results" id="grid-results"></div>
     <div id="load-more-container" class="is-hidden">
-        <button id="load-more-btn" class="btn btn-secondary" onclick="loadMoreResults()">Load More</button>
+        <button id="load-more-btn" class="btn btn-secondary" onclick="loadMoreResults()" data-i18n="load_more">Load
+            More</button>
     </div>
 </div>

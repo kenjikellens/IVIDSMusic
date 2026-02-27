@@ -257,24 +257,30 @@ export const PageSystem = {
 
     async initSettings() {
         const { SettingsManager } = await import('./settings-manager.js');
-        const container = document.getElementById('scale-options-container');
-        if (!container) return;
+        const { LanguageManager } = await import('./language-manager.js');
 
-        const currentScale = SettingsManager.getScale();
-        const buttons = container.querySelectorAll('.scale-btn');
+        // 1. Scale UI Binding
+        const scaleContainer = document.getElementById('scale-options-container');
+        if (scaleContainer) {
+            const currentScale = SettingsManager.getScale();
+            const buttons = scaleContainer.querySelectorAll('.scale-btn');
 
-        buttons.forEach(btn => {
-            const scale = parseFloat(btn.dataset.scale);
-            if (scale === currentScale) {
-                btn.classList.add('active');
-            }
+            buttons.forEach(btn => {
+                const scale = parseFloat(btn.dataset.scale);
+                if (scale === currentScale) {
+                    btn.classList.add('active');
+                }
 
-            btn.onclick = () => {
-                buttons.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                SettingsManager.setScale(scale);
-            };
-        });
+                btn.onclick = () => {
+                    buttons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    SettingsManager.setScale(scale);
+                };
+            });
+        }
+
+        // 2. Language UI Binding
+        LanguageManager.bindLanguageUI();
     },
 
     async initProfile() {

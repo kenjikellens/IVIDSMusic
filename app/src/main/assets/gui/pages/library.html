@@ -11,8 +11,9 @@
                     <img src="svg/library.svg" alt="" class="library-hero-icon">
                 </div>
                 <div class="library-text-info">
-                    <h1 class="library-title">Your Library</h1>
-                    <p class="library-subtitle">Collection of your downloaded songs for offline playback.</p>
+                    <h1 class="library-title" data-i18n="library">Your Library</h1>
+                    <p class="library-subtitle" data-i18n="library_desc">Collection of your downloaded songs for offline
+                        playback.</p>
                 </div>
             </div>
         </div>
@@ -25,18 +26,18 @@
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path d="M8 5v14l11-7z" />
                 </svg>
-                Play All
+                <span data-i18n="play_all">Play All</span>
             </button>
             <button id="library-shuffle" class="btn btn-secondary shuffle-btn" onclick="YouTubePlayer.shuffleSaved()">
                 <img src="svg/shuffle.svg" alt="Shuffle" class="btn-icon">
-                Shuffle
+                <span data-i18n="shuffle">Shuffle</span>
             </button>
         </div>
         <div class="action-right">
             <div class="library-search-box">
                 <img src="svg/search.svg" alt="" class="lib-search-icon">
                 <input type="text" id="library-track-search" placeholder="Search in library..."
-                    oninput="PageSystem.filterLibrary(this.value)">
+                    data-i18n="search_library_placeholder" oninput="PageSystem.filterLibrary(this.value)">
             </div>
         </div>
     </div>
@@ -44,8 +45,8 @@
     <!-- Recently Listened Row -->
     <div id="recent-row-container" class="row-scroll-wrapper is-hidden">
         <div class="row-header">
-            <h2 class="row-title">Recently Listened</h2>
-            <button class="btn-text-only" onclick="PageSystem.clearHistory()">Clear All</button>
+            <h2 class="row-title" data-i18n="recently_listened">Recently Listened</h2>
+            <button class="btn-text-only" onclick="PageSystem.clearHistory()" data-i18n="clear_all">Clear All</button>
         </div>
         <div id="library-recent-list" class="results-row">
             <!-- Rendered by pages.js -->
@@ -55,14 +56,14 @@
     <!-- Playlists Row -->
     <div id="playlists-row-container" class="row-scroll-wrapper">
         <div class="row-header">
-            <h2 class="row-title">Playlists</h2>
+            <h2 class="row-title" data-i18n="playlists">Playlists</h2>
         </div>
 
         <!-- Playlist Empty State -->
         <div id="playlists-empty-state" class="playlist-empty-state">
             <div class="playlist-empty-content">
                 <span class="playlist-empty-icon">📂</span>
-                <p>No created playlists yet.</p>
+                <p data-i18n="no_playlists">No created playlists yet.</p>
             </div>
         </div>
 
@@ -73,7 +74,7 @@
 
     <div class="row-scroll-wrapper">
         <div class="row-header">
-            <h2 class="row-title">Saved Tracks</h2>
+            <h2 class="row-title" data-i18n="saved_tracks">Saved Tracks</h2>
         </div>
 
         <!-- Empty State (hidden by default) -->
@@ -83,9 +84,11 @@
                 <div class="empty-icon-wrapper">
                     <img src="svg/library.svg" alt="" class="empty-icon">
                 </div>
-                <h3>Your library is empty</h3>
-                <p>Start exploring and save your favorite tracks for offline listening.</p>
-                <button class="btn btn-primary" onclick="Router.loadPage('home')">Explore Music</button>
+                <h3 data-i18n="library_empty_title">Your library is empty</h3>
+                <p data-i18n="library_empty_desc">Start exploring and save your favorite tracks for offline listening.
+                </p>
+                <button class="btn btn-primary" onclick="Router.loadPage('home')" data-i18n="explore_music">Explore
+                    Music</button>
             </div>
         </div>
 

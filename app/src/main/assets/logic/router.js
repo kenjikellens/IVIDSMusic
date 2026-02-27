@@ -41,6 +41,11 @@ export const Router = {
             // Clear view and inject new HTML
             mainView.innerHTML = temp.innerHTML;
 
+            // Apply translations to the new content
+            if (window.LanguageManager) {
+                window.LanguageManager.translateUI(mainView);
+            }
+
             // Clean up old dynamic scripts
             document.querySelectorAll('.dynamic-script').forEach(s => s.remove());
 

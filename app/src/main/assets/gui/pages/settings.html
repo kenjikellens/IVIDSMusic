@@ -1,17 +1,17 @@
 <div class="settings-container">
-    <h1 class="row-title">Settings</h1>
+    <h1 class="row-title" data-i18n="settings">Settings</h1>
 
     <div class="settings-section">
         <h2 class="settings-section-title">
             <img class="nav-icon" src="svg/user.svg" alt=""
                 style="width: 20px; filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);">
-            Appearance
+            <span data-i18n="appearance">Appearance</span>
         </h2>
 
         <div class="settings-item">
             <div class="settings-info">
-                <div class="settings-label">Interface Scale</div>
-                <div class="settings-desc">Adjust the size of the UI elements.</div>
+                <div class="settings-label" data-i18n="interface_scale">Interface Scale</div>
+                <div class="settings-desc" data-i18n="interface_scale_desc">Adjust the size of the UI elements.</div>
             </div>
             <div class="scale-options" id="scale-options-container">
                 <button class="scale-btn" data-scale="0.75">75%</button>
@@ -22,19 +22,31 @@
                 <button class="scale-btn" data-scale="1.5">150%</button>
             </div>
         </div>
+
+        <div class="settings-item">
+            <div class="settings-info">
+                <div class="settings-label" data-i18n="language">Language</div>
+                <div class="settings-desc" data-i18n="language_desc">Choose your preferred language.</div>
+            </div>
+            <div class="scale-options" id="language-options-container">
+                <button class="lang-btn" data-lang="en">English</button>
+                <button class="lang-btn" data-lang="nl">Nederlands</button>
+                <button class="lang-btn" data-lang="fr">Français</button>
+            </div>
+        </div>
     </div>
 
     <div class="settings-section">
-        <h2 class="settings-section-title">About</h2>
+        <h2 class="settings-section-title" data-i18n="about">About</h2>
         <div class="settings-item">
             <div class="settings-info">
-                <div class="settings-label">Version</div>
+                <div class="settings-label" data-i18n="version">Version</div>
                 <div class="settings-desc">1.0.0 (Beta)</div>
             </div>
         </div>
         <div class="settings-item">
             <div class="settings-info">
-                <div class="settings-label">Powered by</div>
+                <div class="settings-label" data-i18n="powered_by">Powered by</div>
                 <div class="settings-desc">IVIDS Engine & YouTube Music</div>
             </div>
         </div>

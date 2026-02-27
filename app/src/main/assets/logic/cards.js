@@ -101,7 +101,7 @@ export const CardSystem = {
         rowWrapper.className = 'row-scroll-wrapper';
         rowWrapper.innerHTML = `
             <div class="row-header">
-                <h2 class="row-title">${title}</h2>
+                <h2 class="row-title" data-i18n="${id}_header">${title}</h2>
             </div>
             <button class="scroll-arrow left" onclick="scrollRow('${id}', -1)">
                 <div class="scroll-arrow-icon">❮</div>

@@ -28,3 +28,15 @@
 [2026-02-26] EDITED app/src/main/assets/gui/index.css: Made header search bar permanently wide and removed focus expansion
 [2026-02-26] EDITED app/src/main/assets/logic/player.js: implemented smooth progress updates via requestAnimationFrame and unified slider interaction
 [2026-02-26] EDITED app/src/main/assets/gui/index.html: added step="any" to progress slider for high-precision smooth movement
+[2026-02-27] ADDED gui/lang/: Created directory for internationalization files (EN, NL, FR)
+[2026-02-27] ADDED logic/language-manager.js: New module for multi-language support and dynamic UI translation
+[2026-02-27] EDITED logic/settings-manager.js: Integrated LanguageManager for language persistence
+[2026-02-27] EDITED logic/router.js: Added automatic translation of dynamic pages on load
+[2026-02-27] EDITED index.html: Added data-i18n attributes for main navigation and player controls
+[2026-02-27] EDITED pages/settings.html: Added language selection UI and translation keys
+[2026-02-27] EDITED logic/language-manager.js: Refined translation logic to protect icons using child-check and spans; disabled query params for Android compatibility
+[2026-02-27] EDITED gui/index.html: Wrapped sidebar and player labels in spans for non-destructive translation
+[2026-02-27] EDITED gui/pages/home.html: Wrapped hero buttons and titles in spans for safe translation
+[2026-02-27] EDITED gui/pages/search.html: Wrapped results labels and category titles in spans for localization
+[2026-02-27] EDITED logic/cards.js: Added `data-i18n` support for dynamic row headers on the home page
+[2026-02-27] EDITED gui/lang/*.json: Added missing keys for home page row headers and dynamic UI elements

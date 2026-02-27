@@ -1,3 +1,5 @@
+import { LanguageManager } from './language-manager.js';
+
 /**
  * IVIDS Music - Settings Manager
  * Handles persistence and application of user settings like UI scale.
@@ -80,15 +82,23 @@ export const SettingsManager = {
     /**
      * Initialize settings on app load
      */
-    init() {
+    async init() {
         const scale = this.getScale();
         this.applyScale(scale);
+
+        // Initialize LanguageManager
+        await LanguageManager.init();
+
         // If DOM ready, bind UI controls
         if (typeof document !== 'undefined') {
             if (document.readyState === 'loading') {
-                document.addEventListener('DOMContentLoaded', () => this.bindScaleUI());
+                document.addEventListener('DOMContentLoaded', () => {
+                    this.bindScaleUI();
+                    LanguageManager.bindLanguageUI();
+                });
             } else {
                 this.bindScaleUI();
+                LanguageManager.bindLanguageUI();
             }
         }
         console.log(`[SettingsManager] UI Scale initialized to: ${scale}`);
