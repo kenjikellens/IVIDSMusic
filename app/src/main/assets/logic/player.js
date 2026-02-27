@@ -177,7 +177,7 @@ export const YouTubePlayer = {
                 title: track.title
             });
 
-            const response = await fetch(`${Config.SERVER_URL}/play?${params.toString()}`);
+            const response = await MusicAPI._fetch(`${Config.SERVER_URL}/play?${params.toString()}`);
             const data = await response.json();
 
             if (data.status === 'ready') {
@@ -272,7 +272,7 @@ export const YouTubePlayer = {
                 title: this.currentTrack.title
             });
 
-            const response = await fetch(`${Config.SERVER_URL}/save?${params.toString()}`);
+            const response = await MusicAPI._fetch(`${Config.SERVER_URL}/save?${params.toString()}`);
             const data = await response.json();
 
             if (data.status === 'saved') {
@@ -308,6 +308,13 @@ export const YouTubePlayer = {
             this.queue = shuffled;
             this.currentIndex = 0;
             this.playSavedTrack(this.queue[this.currentIndex]);
+        }
+    },
+
+    handleError(msg) {
+        console.error("Player Error:", msg);
+        if (typeof showToast === 'function') {
+            showToast(msg);
         }
     }
 };

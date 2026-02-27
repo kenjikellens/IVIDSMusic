@@ -6,7 +6,9 @@ import { Config } from './config.js';
  */
 export const MusicAPI = {
     // Local server proxy to bypass CORS
-    proxyUrl: `${Config.SERVER_URL}/proxy?url=`,
+    get proxyUrl() {
+        return `${Config.SERVER_URL}/proxy?url=`;
+    },
 
     // Base APIs
     deezerUrl: 'https://api.deezer.com',
@@ -18,6 +20,33 @@ export const MusicAPI = {
         'https://iv.melmac.space',
         'https://invidious.drgns.space'
     ],
+
+    /**
+     * Proxy-aware fetch helper
+     * Routes external requests through the proxy in Native Mode to avoid CORS issues.
+     */
+    async _fetch(url, options = {}) {
+        let finalUrl = url;
+
+        const isExternal = url.startsWith('http') && typeof window !== 'undefined' && !url.startsWith(window.location.origin);
+
+        if (Config.isNative) {
+            // Only proxy external URLs
+            if (isExternal && !url.includes('appassets.androidplatform.net')) {
+                finalUrl = this.proxyUrl + encodeURIComponent(url);
+            }
+        } else {
+            // In web mode, route external requests (like Deezer APIs) through public corsproxy.
+            // Ignore requests that are already destined for our local Node backend (:3000).
+            if (isExternal && !url.includes(':3000')) {
+                finalUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+            }
+        }
+
+        const response = await fetch(finalUrl, options);
+        if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
+        return response;
+    },
 
     /**
      * Universal search using Deezer for better metadata/filtering
@@ -34,7 +63,7 @@ export const MusicAPI = {
             else if (type === 'album') endpoint = 'search/album';
 
             const url = `${this.deezerUrl}/${endpoint}?q=${encodeURIComponent(q)}&limit=${unique ? 50 : limit}&index=${offset}`;
-            const response = await fetch(this.proxyUrl + encodeURIComponent(url), { signal });
+            const response = await this._fetch(url, { signal });
             const data = await response.json();
 
             if (!data.data) return [];
@@ -94,7 +123,7 @@ export const MusicAPI = {
         try {
             const ent = type === 'artist' ? 'musicArtist' : (type === 'album' ? 'album' : 'song');
             const url = `${this.itunesUrl}?term=${encodeURIComponent(query)}&entity=${ent}&limit=${limit}`;
-            const res = await fetch(url, { signal });
+            const res = await this._fetch(url, { signal });
             const data = await res.json();
             return data.results.map(item => ({
                 id: item.trackId || item.collectionId || item.artistId,
@@ -135,15 +164,7 @@ export const MusicAPI = {
                         const randomQuery = queries[Math.floor(Math.random() * queries.length)];
                         const url = `${this.deezerUrl}/search?q=${encodeURIComponent(randomQuery)}&limit=30`;
 
-                        let fetchUrl = url;
-                        if (window.Config && window.Config.isNative) {
-                            fetchUrl = this.proxyUrl + encodeURIComponent(url);
-                        } else {
-                            // Use public CORS proxy for web browsers (Live Server)
-                            fetchUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
-                        }
-
-                        const response = await fetch(fetchUrl, { signal });
+                        const response = await this._fetch(url, { signal });
                         const data = await response.json();
                         if (data.data) {
                             tracks = data.data.map(item => ({
@@ -163,15 +184,7 @@ export const MusicAPI = {
 
                         const url = `${this.deezerUrl}/chart/${genreId}/tracks?limit=30`;
 
-                        let fetchUrl = url;
-                        if (window.Config && window.Config.isNative) {
-                            fetchUrl = this.proxyUrl + encodeURIComponent(url);
-                        } else {
-                            // Use public CORS proxy for web browsers (Live Server)
-                            fetchUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
-                        }
-
-                        const response = await fetch(fetchUrl, { signal });
+                        const response = await this._fetch(url, { signal });
                         const data = await response.json();
 
                         if (data.data) {
@@ -234,9 +247,8 @@ export const MusicAPI = {
                 const url = `${instance}/api/v1/search?q=${searchQuery}&type=video&limit=1`;
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
-                const response = await fetch(url, { signal: controller.signal });
+                const response = await this._fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
-                if (!response.ok) continue;
                 const data = await response.json();
                 if (data && data.length > 0 && data[0].videoId) return data[0].videoId;
             } catch (error) { continue; } // Silent fail, try next
@@ -253,9 +265,8 @@ export const MusicAPI = {
                 const url = `${instance}/search?q=${searchQuery}&filter=all`;
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 4000);
-                const response = await fetch(url, { signal: controller.signal });
+                const response = await this._fetch(url, { signal: controller.signal });
                 clearTimeout(timeoutId);
-                if (!response.ok) continue;
                 const data = await response.json();
                 if (data && data.items && data.items.length > 0) {
                     const item = data.items.find(i => i.url && i.url.includes('/watch?v='));
@@ -268,10 +279,9 @@ export const MusicAPI = {
         // This relies on the local proxy extracting the raw YouTube HTML and pulling the first video ID match.
         try {
             const ytUrl = `https://www.youtube.com/results?search_query=${searchQuery}`;
-            const proxyUrl = this.proxyUrl + encodeURIComponent(ytUrl);
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 6000);
-            const res = await fetch(proxyUrl, { signal: controller.signal });
+            const res = await this._fetch(ytUrl, { signal: controller.signal });
             clearTimeout(timeoutId);
             const html = await res.text();
 
@@ -329,9 +339,7 @@ export const MusicAPI = {
         try {
             // Step 1: Search for the artist to get their ID
             const searchUrl = `${this.deezerUrl}/search/artist?q=${encodeURIComponent(name)}&limit=1`;
-            const searchFetchUrl = this.proxyUrl + encodeURIComponent(searchUrl);
-
-            const searchRes = await fetch(searchFetchUrl, { signal });
+            const searchRes = await this._fetch(searchUrl, { signal });
             const searchData = await searchRes.json();
             if (!searchData?.data?.length) return null;
 
@@ -339,9 +347,7 @@ export const MusicAPI = {
 
             // Step 2: Fetch the direct /artist/{id} endpoint for accurate stats
             const detailUrl = `${this.deezerUrl}/artist/${artistId}`;
-            const detailFetchUrl = this.proxyUrl + encodeURIComponent(detailUrl);
-
-            const detailRes = await fetch(detailFetchUrl, { signal });
+            const detailRes = await this._fetch(detailUrl, { signal });
             const artist = await detailRes.json();
             return artist || null;
         } catch (e) {
@@ -356,9 +362,7 @@ export const MusicAPI = {
     async getArtistTopTracks(id, limit = 10, signal = null) {
         try {
             const url = `${this.deezerUrl}/artist/${id}/top?limit=${limit}`;
-            const fetchUrl = this.proxyUrl + encodeURIComponent(url);
-
-            const res = await fetch(fetchUrl, { signal });
+            const res = await this._fetch(url, { signal });
             const data = await res.json();
 
             if (data && data.data) {
@@ -384,9 +388,7 @@ export const MusicAPI = {
     async getArtistAlbums(id, limit = 50, artistName = 'Unknown', signal = null) {
         try {
             const url = `${this.deezerUrl}/artist/${id}/albums?limit=${limit}`;
-            const fetchUrl = this.proxyUrl + encodeURIComponent(url);
-
-            const res = await fetch(fetchUrl, { signal });
+            const res = await this._fetch(url, { signal });
             const data = await res.json();
 
             if (data && data.data) {
@@ -413,9 +415,7 @@ export const MusicAPI = {
     async getAlbumDetails(id, signal = null) {
         try {
             const url = `${this.deezerUrl}/album/${id}`;
-            const fetchUrl = this.proxyUrl + encodeURIComponent(url);
-
-            const res = await fetch(fetchUrl, { signal });
+            const res = await this._fetch(url, { signal });
             const album = await res.json();
 
             if (album && album.tracks && album.tracks.data) {

@@ -40,3 +40,17 @@
 [2026-02-27] EDITED gui/pages/search.html: Wrapped results labels and category titles in spans for localization
 [2026-02-27] EDITED logic/cards.js: Added `data-i18n` support for dynamic row headers on the home page
 [2026-02-27] EDITED gui/lang/*.json: Added missing keys for home page row headers and dynamic UI elements
+[2026-02-27] EDITED logic/config.js: Improved environment detection and added explicit `isNative` property
+[2026-02-27] EDITED logic/api.js: Fixed typos in `isNative` check and converted `proxyUrl` to dynamic getter to resolve 'failed to fetch' errors
+[2026-02-27] EDITED logic/player.js: Switched to `MusicAPI._fetch` for playback and save requests to ensure consistent CORS/proxy handling
+[2026-02-27] EDITED logic/config.js: Simplified `Config` to static properties for better cross-module reliability
+[2026-02-27] EDITED MainActivity.kt: Refactored `shouldInterceptRequest` to use robust path-based matching and improved logging
+[2026-02-27] EDITED logic/api.js: Implemented centralized proxy-aware `_fetch` helper to solve CORS 'failed to fetch' errors in Android WebView
+[2026-02-27] EDITED logic/player.js: Fixed critical syntax error (misplaced `handleError` method) that broke script parsing
+[2026-02-27] EDITED logic/api.js: Refined `isExternal` detection to use `window.location.origin` for better CORS handling in Web Mode
+[2026-02-27] EDITED gui/temp_server.js: Implemented robust CORS support (including `OPTIONS` preflight) and improved proxy logging
+[2026-02-27] EDITED logic/config.js: Updated `SERVER_URL` to dynamically match localhost/127.0.0.1 origins for web compatibility
+[2026-02-27] EDITED logic/config.js: Fixed URL parsing issue when app is loaded via `file:///` protocol in Web Mode
+[2026-02-27] EDITED logic/api.js: Restored `corsproxy.io` for external requests (Deezer) in Web Mode to fix cards failing to load
+[2026-02-27] ADDED startUp.py: Created a Python script to automatically run the local Node server and open the browser in 1 click
+

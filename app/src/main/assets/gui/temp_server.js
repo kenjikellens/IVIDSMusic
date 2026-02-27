@@ -12,8 +12,16 @@ if (!fs.existsSync(downloadsDir)) fs.mkdirSync(downloadsDir);
 if (!fs.existsSync(savedDir)) fs.mkdirSync(savedDir);
 
 const server = http.createServer(async (req, res) => {
-    // Basic CORS for API testing
+    // Robust CORS for Web Mode
     res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+
+    // Handle Preflight (OPTIONS)
+    if (req.method === 'OPTIONS') {
+        res.writeHead(204);
+        return res.end();
+    }
 
     const parsedUrl = url.parse(req.url, true);
     let pathname = parsedUrl.pathname;
@@ -23,14 +31,19 @@ const server = http.createServer(async (req, res) => {
         const targetUrl = parsedUrl.query.url;
         if (!targetUrl) return res.end(JSON.stringify({ error: "missing url" }));
         try {
+            console.log(`[Proxy] Fetching: ${targetUrl}`);
             const fetchReq = await fetch(targetUrl, {
                 headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)' }
             });
             const data = await fetchReq.text();
-            res.writeHead(200, { 'Content-Type': 'application/json' });
+
+            // Try to forward the content-type if possible
+            const contentType = fetchReq.headers.get('content-type') || 'application/json';
+            res.writeHead(200, { 'Content-Type': contentType });
             return res.end(data);
         } catch (e) {
-            res.writeHead(500);
+            console.error(`[Proxy Error]`, e.message);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
             return res.end(JSON.stringify({ error: e.message }));
         }
     }
@@ -46,10 +59,11 @@ const server = http.createServer(async (req, res) => {
         // Using yt-dlp to get the highest quality audio URL (-f 140 is m4a audio, or bestaudio)
         exec(`yt-dlp -f bestaudio -g "${ytUrl}"`, (err, stdout, stderr) => {
             if (err || !stdout) {
-                console.error(`[Play Error]`, stderr || err?.message);
+                console.error(`[Play Error] yt-dlp failed:`, stderr || err?.message);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ status: 'error', message: 'yt-dlp extraction failed' }));
+                return res.end(JSON.stringify({ status: 'error', message: 'yt-dlp extraction failed', details: stderr }));
             }
+            console.log(`[Play Ready] Video: ${videoId}`);
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({ status: 'ready', url: stdout.trim() }));
         });
@@ -73,10 +87,11 @@ const server = http.createServer(async (req, res) => {
         const ytUrl = `https://www.youtube.com/watch?v=${videoId}`;
         exec(`yt-dlp -f bestaudio -o "${outputPath}" "${ytUrl}"`, (err, stdout, stderr) => {
             if (err) {
-                console.error(`[Save Error]`, stderr || err.message);
+                console.error(`[Save Error] yt-dlp failed:`, stderr || err.message);
                 res.writeHead(500, { 'Content-Type': 'application/json' });
-                return res.end(JSON.stringify({ status: 'error', message: 'yt-dlp download failed' }));
+                return res.end(JSON.stringify({ status: 'error', message: 'yt-dlp download failed', details: stderr }));
             }
+            console.log(`[Save Done] Saved: ${filename}`);
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
                 status: 'saved',

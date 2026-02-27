@@ -22,7 +22,11 @@ import java.io.File
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
-    private val client = OkHttpClient()
+    private val client = OkHttpClient.Builder()
+        .connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
 
     private val assetLoader by lazy {
         val downloadDir = File(cacheDir, "downloads")
@@ -59,28 +63,40 @@ class MainActivity : AppCompatActivity() {
         webView.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
                 val url = request?.url ?: return null
+                val urlString = url.toString()
+                val path = url.path ?: ""
                 
-                // 1. Onderschep verzoeken naar de lokale assets via het virtuele domein
+                // Prioritize API requests to avoid potential conflicts with AssetLoader
+                // 1. Onderschep de Proxy verzoeken (voor Deezer en YouTube scraper)
+                if (path.contains("/proxy")) {
+                    val targetUrl = url.getQueryParameter("url")
+                    if (targetUrl != null) return handleProxyRequest(targetUrl)
+                }
+                
+                // 2. Onderschep de Play verzoeken (voor YouTube audio)
+                if (path.contains("/play")) {
+                    val videoId = url.getQueryParameter("videoId")
+                    if (videoId != null) return handlePlayRequest(videoId)
+                }
+
+                // 3. Onderschep de Save verzoeken
+                if (path.contains("/save")) {
+                    val videoId = url.getQueryParameter("videoId")
+                    if (videoId != null) return handleSaveRequest(videoId)
+                }
+
+                // 4. Onderschep de Saved-tracks lijst verzoek
+                if (path.contains("/saved") && !path.endsWith(".m4a") && !path.endsWith(".mp3")) {
+                    return WebResourceResponse(
+                        "application/json",
+                        "UTF-8",
+                        ByteArrayInputStream(AndroidAPI().getSavedTracks().toByteArray(StandardCharsets.UTF_8))
+                    )
+                }
+
+                // fallback to assets
                 val assetResponse = assetLoader.shouldInterceptRequest(url)
                 if (assetResponse != null) return assetResponse
-
-                // 2. Onderschep de Proxy verzoeken (voor Deezer en YouTube scraper)
-                if (url.toString().contains("localhost:3000/proxy") || url.toString().contains("/api/proxy")) {
-                    val targetUrl = url.getQueryParameter("url") ?: return null
-                    return handleProxyRequest(targetUrl)
-                }
-                
-                // 3. Onderschep de Play verzoeken (voor YouTube audio)
-                if (url.toString().contains("localhost:3000/play") || url.toString().contains("/api/play")) {
-                    val videoId = url.getQueryParameter("videoId") ?: return null
-                    return handlePlayRequest(videoId)
-                }
-
-                // 4. Onderschep de Save verzoeken
-                if (url.toString().contains("localhost:3000/save") || url.toString().contains("/api/save")) {
-                    val videoId = url.getQueryParameter("videoId") ?: return null
-                    return handleSaveRequest(videoId)
-                }
 
                 return super.shouldInterceptRequest(view, request)
             }
@@ -111,8 +127,15 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun handlePlayRequest(videoId: String): WebResourceResponse? {
+        Log.d("IVIDS", "Starting handlePlayRequest for videoId: $videoId")
         return try {
-            val instances = arrayOf("https://invidious.flokinet.to", "https://iv.melmac.space", "https://invidious.drgns.space")
+            val instances = arrayOf(
+                "https://invidious.flokinet.to", 
+                "https://iv.melmac.space", 
+                "https://invidious.drgns.space",
+                "https://invidious.perennialte.chs.org",
+                "https://yt.artemislena.eu"
+            )
             var audioUrl = ""
             
             for (instance in instances) {
