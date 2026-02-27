@@ -1,9 +1,5 @@
 /* TV Navigation & Leanback Adjustments */
 
-body.tv-mode {
-    /* Kept empty or add other body tv logic if needed */
-}
-
 body.tv-mode ::-webkit-scrollbar {
     display: none;
     /* Hide scrollbars, D-pad scrolling takes over */
@@ -56,4 +52,16 @@ body.tv-mode .ivids-slider:focus-visible {
 body.tv-mode .ivids-slider:focus-visible::-webkit-slider-thumb {
     outline: 3px solid var(--primary-color) !important;
     outline-offset: 4px !important;
+}
+
+/* Language Modal Focus */
+body.tv-mode .lang-edit-btn:focus-visible,
+body.tv-mode .lang-modal-close:focus-visible {
+    border-radius: 50% !important;
+}
+
+body.tv-mode .lang-option:focus-visible {
+    outline: 3px solid var(--primary-color) !important;
+    outline-offset: 2px !important;
+    background: rgba(255, 255, 255, 0.08);
 }

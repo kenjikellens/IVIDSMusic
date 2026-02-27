@@ -22,9 +22,14 @@ export const SettingsManager = {
      * @param {number} value - Scale factor (e.g., 0.75, 1.1)
      */
     setScale(value) {
-        localStorage.setItem('iv_ui_scale', value);
-        this.applyScale(value);
-        this.updateScaleButtons(value);
+        // Clamp value between 0.5 (50%) and 2.0 (200%)
+        let clampedValue = Math.max(0.5, Math.min(2.0, value));
+        // Round to 1 decimal place to prevent floating point issues (e.g. 1.1000000000000001)
+        clampedValue = Math.round(clampedValue * 10) / 10;
+
+        localStorage.setItem('iv_ui_scale', clampedValue);
+        this.applyScale(clampedValue);
+        this.updateScaleDisplay(clampedValue);
     },
 
     /**
@@ -39,41 +44,39 @@ export const SettingsManager = {
     },
 
     /**
-     * Update active state for scale buttons in the settings UI
+     * Update the scale value display in the settings UI
      */
-    updateScaleButtons(value) {
+    updateScaleDisplay(value) {
         try {
-            const buttons = document.querySelectorAll('.scale-btn[data-scale]');
-            buttons.forEach(btn => {
-                const btnVal = parseFloat(btn.getAttribute('data-scale'));
-                if (Math.abs(btnVal - value) < 0.0001) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            });
+            const display = document.getElementById('current-scale-display');
+            if (display) {
+                display.textContent = `${Math.round(value * 100)}%`;
+            }
         } catch (e) {
             // ignore if DOM not available
         }
     },
 
     /**
-     * Bind click handlers for scale buttons in settings UI
+     * Bind click handlers for the scale stepper in settings UI
      */
     bindScaleUI() {
         try {
-            const container = document.getElementById('scale-options-container');
-            if (!container) return;
-            container.addEventListener('click', (ev) => {
-                const btn = ev.target.closest && ev.target.closest('.scale-btn');
-                if (!btn) return;
-                const data = btn.getAttribute('data-scale');
-                if (!data) return;
-                const val = parseFloat(data);
-                if (!isNaN(val)) this.setScale(val);
-            });
-            // set initial active state
-            this.updateScaleButtons(this.getScale());
+            if (!this._scaleListenerBound) {
+                document.body.addEventListener('click', (ev) => {
+                    const target = ev.target;
+
+                    if (target.id === 'scale-decrease') {
+                        this.setScale(this.getScale() - 0.1);
+                    } else if (target.id === 'scale-increase') {
+                        this.setScale(this.getScale() + 0.1);
+                    }
+                });
+                this._scaleListenerBound = true;
+            }
+
+            // set initial display if possible
+            this.updateScaleDisplay(this.getScale());
         } catch (e) {
             // ignore if DOM not available
         }

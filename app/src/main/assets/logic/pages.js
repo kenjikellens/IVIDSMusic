@@ -2,6 +2,7 @@ import { MusicAPI } from './api.js';
 import { YouTubePlayer } from './player.js';
 import { CardSystem } from './cards.js';
 import { HistorySystem } from './history.js';
+import { SettingsManager } from './settings-manager.js';
 
 let isHeroDismissed = false;
 
@@ -68,6 +69,18 @@ export const PageSystem = {
             }
         } catch (e) {
             console.error('[Home] Error:', e);
+        }
+    },
+
+    async initSettings() {
+        try {
+            // Update the display text to match current persistence state
+            SettingsManager.updateScaleDisplay(SettingsManager.getScale());
+            if (window.LanguageManager) {
+                window.LanguageManager.updateLanguageDisplay();
+            }
+        } catch (e) {
+            console.error('[Settings] Error:', e);
         }
     },
 

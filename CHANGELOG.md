@@ -53,4 +53,15 @@
 [2026-02-27] EDITED logic/config.js: Fixed URL parsing issue when app is loaded via `file:///` protocol in Web Mode
 [2026-02-27] EDITED logic/api.js: Restored `corsproxy.io` for external requests (Deezer) in Web Mode to fix cards failing to load
 [2026-02-27] ADDED startUp.py: Created a Python script to automatically run the local Node server and open the browser in 1 click
+[2026-02-27] EDITED gui/pages/settings.html, logic/settings-manager.js, gui/index.css: Redesigned the Interface Scale UI into a stepper control (`- 100% +`) allowing 10% increments from 50% to 200%.
+[2026-02-27] EDITED gui/tv-nav.css: Removed empty `body.tv-mode` ruleset to fix CSS lint warning
+[2026-02-27] ADDED gui/svg/edit.svg: New pencil/edit SVG icon for the language edit button
+[2026-02-27] EDITED gui/pages/settings.html: Replaced inline language buttons with display + edit icon and added language selection modal popup
+[2026-02-27] EDITED gui/index.css: Added language display row, modal overlay, modal card, and language option styles with glassmorphism and animations
+[2026-02-27] EDITED logic/language-manager.js: Rewrote with modal open/close logic, LANGUAGE_NAMES map, and document-level event delegation
+[2026-02-27] EDITED logic/pages.js: Added LanguageManager.updateLanguageDisplay() call to initSettings
+[2026-02-27] EDITED gui/tv-nav.css: Added TV focus ring styles for language edit button, modal close, and language options
+[2026-02-27] ADDED gui/lang/de.json, gui/lang/es.json, gui/lang/pt.json, gui/lang/it.json: Added German, Spanish, Portuguese, and Italian translations
+[2026-02-27] EDITED logic/language-manager.js: Registered 4 new supported languages to auto-populate the language modal
 
+[2026-02-27] EDITED gui/index.css: Updated language option hover and focus styles with thicker borders (2px) and bold text (font-weight: 700) for better visibility
