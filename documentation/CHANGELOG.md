@@ -70,3 +70,4 @@
 [2026-02-27] EDITED logic/language-manager.js: Registered 3 new languages: Chinese, Hindi, and Arabic
 [2026-02-27] ADDED gui/lang/ru.json, gui/lang/ro.json, gui/lang/ja.json: Added Russian, Romanian, and Japanese translations
 [2026-02-27] EDITED logic/language-manager.js: Registered 3 more languages: Russian, Romanian, and Japanese
+[2026-02-27] EDITED gui/index.css, logic/language-manager.js: Implemented responsive column-based grid for language selector; reduced padding and font size for a more compact UI

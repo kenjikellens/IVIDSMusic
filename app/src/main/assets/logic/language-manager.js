@@ -131,6 +131,14 @@ export const LanguageManager = {
 
         // Generate language option buttons
         list.innerHTML = '';
+
+        // Dynamic row/col calculation: fill vertically, wrap into columns
+        const langCount = this.SUPPORTED_LANGUAGES.length;
+        const cols = langCount > 7 ? (langCount > 14 ? 3 : 2) : 1;
+        const rows = Math.ceil(langCount / cols);
+        list.style.setProperty('--lang-rows', rows);
+        list.style.setProperty('--lang-cols', cols);
+
         this.SUPPORTED_LANGUAGES.forEach(lang => {
             const btn = document.createElement('button');
             btn.className = 'lang-option' + (lang === this.currentLanguage ? ' active' : '');
