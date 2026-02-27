@@ -64,4 +64,5 @@
 [2026-02-27] ADDED gui/lang/de.json, gui/lang/es.json, gui/lang/pt.json, gui/lang/it.json: Added German, Spanish, Portuguese, and Italian translations
 [2026-02-27] EDITED logic/language-manager.js: Registered 4 new supported languages to auto-populate the language modal
 
-[2026-02-27] EDITED gui/index.css: Updated language option hover and focus styles with thicker borders (2px) and bold text (font-weight: 700) for better visibility
+[2026-02-27] EDITED gui/index.css: Refined language option hover/focus styles to avoid layout shift while maintaining high visibility
+[2026-02-27] ADDED documentation/future_plans.md: Created a roadmap of feature ideas for the app's future evolution
