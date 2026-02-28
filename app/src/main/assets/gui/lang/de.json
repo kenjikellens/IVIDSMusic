@@ -62,5 +62,12 @@
    "top_albums_header": "Top Alben",
    "top_artists_header": "Top Künstler",
    "moods_header": "Stimmungen erkunden",
-   "new_releases_header": "Neuerscheinungen"
+   "new_releases_header": "Neuerscheinungen",
+   "more_info": "Mehr Info",
+   "from_the_artist": "Vom Künstler",
+   "similar_tracks": "Ähnliche Titel",
+   "view_artist": "Künstler ansehen",
+   "song": "Lied",
+   "song_no_track": "Nichts wird abgespielt",
+   "song_no_track_desc": "Spiele zuerst ein Lied ab, dann tippe auf Mehr Info."
 }

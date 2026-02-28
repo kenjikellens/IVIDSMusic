@@ -62,5 +62,12 @@
    "top_albums_header": "शीर्ष एल्बम",
    "top_artists_header": "शीर्ष कलाकार",
    "moods_header": "मूड खोजें",
-   "new_releases_header": "नई रिलीज़"
+   "new_releases_header": "नई रिलीज़",
+   "more_info": "अधिक जानकारी",
+   "from_the_artist": "कलाकार से",
+   "similar_tracks": "समान ट्रैक",
+   "view_artist": "कलाकार देखें",
+   "song": "गाना",
+   "song_no_track": "कुछ नहीं बज रहा",
+   "song_no_track_desc": "पहले कोई गाना चलाएं, फिर अधिक जानकारी पर टैप करें।"
 }

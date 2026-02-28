@@ -62,5 +62,12 @@
    "top_albums_header": "Principais Álbuns",
    "top_artists_header": "Principais Artistas",
    "moods_header": "Explorar Humores",
-   "new_releases_header": "Novos Lançamentos"
+   "new_releases_header": "Novos Lançamentos",
+   "more_info": "Mais info",
+   "from_the_artist": "Do artista",
+   "similar_tracks": "Faixas similares",
+   "view_artist": "Ver artista",
+   "song": "Música",
+   "song_no_track": "Nada está a tocar",
+   "song_no_track_desc": "Reproduza primeiro uma música, depois toque em Mais info."
 }

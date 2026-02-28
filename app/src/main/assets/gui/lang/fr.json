@@ -62,5 +62,12 @@
     "top_albums_header": "Meilleurs albums",
     "top_artists_header": "Meilleurs artistes",
     "moods_header": "Explorer les ambiances",
-    "new_releases_header": "Nouvelles sorties"
+    "new_releases_header": "Nouvelles sorties",
+    "more_info": "Plus d'infos",
+    "from_the_artist": "De l'artiste",
+    "similar_tracks": "Titres similaires",
+    "view_artist": "Voir l'artiste",
+    "song": "Chanson",
+    "song_no_track": "Rien ne joue",
+    "song_no_track_desc": "Lisez d'abord une chanson, puis appuyez sur Plus d'infos."
 }

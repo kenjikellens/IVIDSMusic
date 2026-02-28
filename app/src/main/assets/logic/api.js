@@ -468,5 +468,61 @@ export const MusicAPI = {
                 return [];
             }
         }
+    },
+
+    /**
+     * Gets rich metadata for a single track by Deezer ID.
+     * @returns {Object} { id, title, artist, artistId, album, albumId, cover, duration, bpm, explicit, genres, releaseDate, previewUrl }
+     */
+    async getTrackDetails(id, signal = null) {
+        try {
+            const url = `${this.deezerUrl}/track/${id}`;
+            const res = await this._fetch(url, { signal });
+            const t = await res.json();
+            return {
+                id: t.id,
+                title: t.title,
+                artist: t.artist?.name || 'Unknown',
+                artistId: t.artist?.id || null,
+                album: t.album?.title || 'Unknown',
+                albumId: t.album?.id || null,
+                cover: t.album?.cover_big || t.album?.cover_xl || '',
+                duration: t.duration || 0, // seconds
+                bpm: t.bpm || null,
+                explicit: t.explicit_lyrics || false,
+                genres: t.genres?.data?.map(g => g.name) || [],
+                releaseDate: t.release_date || null,
+                previewUrl: t.preview || null,
+                contributors: t.contributors?.map(c => c.name) || []
+            };
+        } catch (e) {
+            console.error('[API] Failed to get track details', e);
+            return null;
+        }
+    },
+
+    /**
+     * Gets tracks related to a given Deezer track ID.
+     */
+    async getRelatedTracks(id, signal = null) {
+        try {
+            const url = `${this.deezerUrl}/track/${id}/related`;
+            const res = await this._fetch(url, { signal });
+            const data = await res.json();
+            if (data?.data) {
+                return data.data.map(item => ({
+                    type: 'song',
+                    id: item.id,
+                    title: item.title_short || item.title,
+                    artist: item.artist?.name || 'Unknown',
+                    album: item.album?.title || 'Unknown',
+                    cover: item.album?.cover_big || item.album?.cover_xl || '',
+                    previewUrl: item.preview
+                }));
+            }
+        } catch (e) {
+            console.error('[API] Failed to get related tracks', e);
+        }
+        return [];
     }
 };

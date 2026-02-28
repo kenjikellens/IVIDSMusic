@@ -62,5 +62,12 @@
    "top_albums_header": "Album Principali",
    "top_artists_header": "Artisti Principali",
    "moods_header": "Esplora Stati d'Animo",
-   "new_releases_header": "Nuove Uscite"
+   "new_releases_header": "Nuove Uscite",
+   "more_info": "Più info",
+   "from_the_artist": "Dell'artista",
+   "similar_tracks": "Brani simili",
+   "view_artist": "Visualizza artista",
+   "song": "Canzone",
+   "song_no_track": "Niente è in riproduzione",
+   "song_no_track_desc": "Riproduci prima un brano, poi tocca Più info."
 }

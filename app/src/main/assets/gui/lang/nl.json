@@ -62,5 +62,12 @@
     "top_albums_header": "Topalbums",
     "top_artists_header": "Topartiesten",
     "moods_header": "Ontdek stemmingen",
-    "new_releases_header": "Nieuwe releases"
+    "new_releases_header": "Nieuwe releases",
+    "more_info": "Meer info",
+    "from_the_artist": "Van de artiest",
+    "similar_tracks": "Vergelijkbare nummers",
+    "view_artist": "Bekijk artiest",
+    "song": "Nummer",
+    "song_no_track": "Er speelt niets",
+    "song_no_track_desc": "Speel eerst een nummer af en tik dan op Meer info."
 }

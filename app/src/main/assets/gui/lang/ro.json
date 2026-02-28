@@ -62,5 +62,12 @@
    "top_albums_header": "Albume de top",
    "top_artists_header": "Artiști de top",
    "moods_header": "Explorează stări",
-   "new_releases_header": "Lansări noi"
+   "new_releases_header": "Lansări noi",
+   "more_info": "Mai multe info",
+   "from_the_artist": "De la artist",
+   "similar_tracks": "Piese similare",
+   "view_artist": "Vezi artistul",
+   "song": "Cântec",
+   "song_no_track": "Nimic nu se redă",
+   "song_no_track_desc": "Redă mai întâi o melodie, apoi apasă pe Mai multe info."
 }

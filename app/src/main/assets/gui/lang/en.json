@@ -62,5 +62,12 @@
     "top_albums_header": "Top Albums",
     "top_artists_header": "Top Artists",
     "moods_header": "Explore Moods",
-    "new_releases_header": "New Releases"
+    "new_releases_header": "New Releases",
+    "more_info": "More Info",
+    "from_the_artist": "From the Artist",
+    "similar_tracks": "Similar Tracks",
+    "view_artist": "View Artist",
+    "song": "Song",
+    "song_no_track": "Nothing is playing",
+    "song_no_track_desc": "Play a song first, then tap More Info to see its details."
 }

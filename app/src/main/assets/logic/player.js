@@ -96,12 +96,18 @@ export const YouTubePlayer = {
         const artistEl = document.getElementById('player-artist');
         const coverEl = document.getElementById('player-cover');
         const playerBar = document.getElementById('player-bar');
+        const moreInfoBtn = document.getElementById('more-info-btn');
 
         if (titleEl) titleEl.textContent = track.title;
         if (artistEl) artistEl.textContent = track.artist;
         if (coverEl) coverEl.src = track.cover;
         if (playerBar) {
             playerBar.style.setProperty('--current-cover', `url(${track.cover})`);
+        }
+        // Enable the More Info button whenever a track is set
+        if (moreInfoBtn) {
+            moreInfoBtn.disabled = false;
+            moreInfoBtn.style.opacity = '1';
         }
     },
 
@@ -136,6 +142,11 @@ export const YouTubePlayer = {
         this.init();
         this.currentTrack = track;
 
+        // Refresh Song Detail page if currently active
+        if (window.Router?.currentPage === 'song') {
+            window.Router.loadPage('song', { id: track.id });
+        }
+
         // Persist last track
         localStorage.setItem('ivids_last_track', JSON.stringify(track));
 
@@ -153,9 +164,14 @@ export const YouTubePlayer = {
         if (playerBar) playerBar.classList.remove('is-inactive');
         if (statusContainer) statusContainer.style.display = 'flex';
         if (loaderEl) loaderEl.style.display = 'inline-flex';
+        const moreInfoBtn = document.getElementById('more-info-btn');
         if (saveBtn) {
             saveBtn.disabled = true; // Disable until ready
             saveBtn.style.opacity = '0.5';
+        }
+        if (moreInfoBtn) {
+            moreInfoBtn.disabled = false;
+            moreInfoBtn.style.opacity = '1';
         }
         if (statusEl) {
             statusEl.textContent = 'Searching YouTube...';
@@ -215,6 +231,11 @@ export const YouTubePlayer = {
         if (!this.audio) this.init();
 
         this.currentTrack = track;
+
+        // Refresh Song Detail page if currently active
+        if (window.Router?.currentPage === 'song') {
+            window.Router.loadPage('song', { id: track.id });
+        }
 
         // Persist last played (so it remembers across reloads)
         localStorage.setItem('ivids_last_track', JSON.stringify(track));

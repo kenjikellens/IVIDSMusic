@@ -62,5 +62,12 @@
    "top_albums_header": "Топ альбомы",
    "top_artists_header": "Топ артисты",
    "moods_header": "Исследовать настроения",
-   "new_releases_header": "Новые релизы"
+   "new_releases_header": "Новые релизы",
+   "more_info": "Подробнее",
+   "from_the_artist": "От артиста",
+   "similar_tracks": "Похожие треки",
+   "view_artist": "Смотреть артиста",
+   "song": "Песня",
+   "song_no_track": "Ничего не играет",
+   "song_no_track_desc": "Сначала воспроизведите песню, затем нажмите «Подробнее»."
 }

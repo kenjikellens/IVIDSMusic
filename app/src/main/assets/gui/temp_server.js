@@ -131,7 +131,8 @@ const server = http.createServer(async (req, res) => {
     }
 
     // 5. Serve Static Files
-    let filePath = path.join(process.cwd(), pathname === '/' ? 'index.html' : pathname);
+    const assetsRoot = path.join(__dirname, '..');
+    let filePath = path.join(assetsRoot, pathname === '/' ? 'gui/index.html' : pathname);
 
     // Serve from "saved" directory dynamically
     if (pathname.startsWith('/saved/')) {
@@ -168,5 +169,5 @@ const server = http.createServer(async (req, res) => {
 const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}/`);
-    console.log(`Open http://localhost:${PORT}/ in your web browser to test.`);
+    console.log(`Main GUI at: http://localhost:${PORT}/gui/index.html`);
 });

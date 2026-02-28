@@ -537,6 +537,139 @@ export const PageSystem = {
         } catch (e) {
             console.error('[initAlbum] Error:', e);
         }
+    },
+
+    async initSong() {
+        const track = window.YouTubePlayer?.currentTrack;
+        const signal = window.Router.abortController?.signal;
+
+        // If no track is playing, show an empty state
+        if (!track) {
+            const main = document.querySelector('.song-page');
+            if (main) main.innerHTML = `
+                <div class="song-empty-state">
+                    <div class="empty-icon-wrapper"><img src="svg/library.svg" alt="" class="empty-icon"></div>
+                    <h3 data-i18n="song_no_track">Nothing is playing</h3>
+                    <p data-i18n="song_no_track_desc">Play a song first, then tap More Info to see its details.</p>
+                    <button class="btn btn-primary" onclick="Router.loadPage('home')" data-i18n="explore_music">Explore Music</button>
+                </div>`;
+            if (window.LanguageManager) window.LanguageManager.translateUI(document.getElementById('main-view'));
+            return;
+        }
+
+        if (window.Loader) window.Loader.init();
+
+        // Populate immediately with what we already know from the player
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setEl('song-title', track.title);
+        setEl('song-artist', track.artist);
+        setEl('song-album', track.album || '—');
+
+        const coverEl = document.getElementById('song-cover');
+        if (coverEl) { coverEl.src = track.cover; coverEl.style.opacity = '1'; }
+
+        // Apply background color from cover
+        MusicAPI.getAverageColor(track.cover).then(color => {
+            const hero = document.querySelector('.song-hero');
+            if (hero) hero.style.setProperty('--song-color', color);
+        });
+
+        // Wire up Play button
+        const playBtn = document.getElementById('song-play-btn');
+        if (playBtn) playBtn.onclick = () => YouTubePlayer.loadTrack(track);
+
+        // Wire up Save button (mirror player bar save)
+        const saveBtn = document.getElementById('song-save-btn');
+        if (saveBtn) saveBtn.onclick = () => YouTubePlayer.saveTrack();
+
+        // Wire up artist click
+        const artistLink = document.getElementById('song-artist-link');
+        if (artistLink) artistLink.onclick = () => Router.loadPage('artist', { name: track.artist });
+
+        // Format helper
+        const fmtDur = s => { const m = Math.floor(s / 60); const sec = s % 60; return `${m}:${sec < 10 ? '0' : ''}${sec}`; };
+
+        try {
+            // Fetch rich metadata + related/artist tracks in parallel
+            const [details, related] = await Promise.all([
+                track.id ? MusicAPI.getTrackDetails(track.id, signal).catch(() => null) : Promise.resolve(null),
+                track.id ? MusicAPI.getRelatedTracks(track.id, signal).catch(() => []) : Promise.resolve([])
+            ]);
+
+            if (signal?.aborted) return;
+
+            if (details) {
+                // Update with rich metadata for maximum accuracy
+                if (details.title) setEl('song-title', details.title);
+                if (details.artist) setEl('song-artist', details.artist);
+                if (details.album) setEl('song-album', details.album);
+
+                // Duration
+                if (details.duration) setEl('song-duration', fmtDur(details.duration));
+
+                // Release Year
+                if (details.releaseDate) setEl('song-year', new Date(details.releaseDate).getFullYear());
+
+                // Album link
+                const albumLink = document.getElementById('song-album-link');
+                if (albumLink && details.albumId) albumLink.onclick = () => Router.loadPage('album', { id: details.albumId });
+
+                // Genre chips
+                const chipsContainer = document.getElementById('song-genres');
+                if (chipsContainer) {
+                    chipsContainer.innerHTML = '';
+                    const genres = details.genres?.length ? details.genres : (track.genre ? [track.genre] : []);
+                    genres.forEach(g => {
+                        const chip = document.createElement('span');
+                        chip.className = 'genre-chip';
+                        chip.textContent = g;
+                        chipsContainer.appendChild(chip);
+                    });
+                    // BPM badge
+                    if (details.bpm && details.bpm > 0) {
+                        const bpmBadge = document.createElement('span');
+                        bpmBadge.className = 'bpm-badge';
+                        bpmBadge.textContent = `${Math.round(details.bpm)} BPM`;
+                        chipsContainer.appendChild(bpmBadge);
+                    }
+                    // Explicit badge
+                    if (details.explicit) {
+                        const expBadge = document.createElement('span');
+                        expBadge.className = 'explicit-badge';
+                        expBadge.textContent = 'E';
+                        expBadge.title = 'Explicit content';
+                        chipsContainer.appendChild(expBadge);
+                    }
+                }
+
+                // Fetch artist top tracks for "From the Artist" row
+                if (details.artistId) {
+                    const artistTracks = await MusicAPI.getArtistTopTracks(details.artistId, 12, signal).catch(() => []);
+                    if (signal?.aborted) return;
+                    const artistRow = document.getElementById('song-artist-tracks');
+                    const artistRowContainer = document.getElementById('song-artist-row');
+                    if (artistRow && artistTracks.length > 0) {
+                        artistRow.innerHTML = '';
+                        artistTracks.forEach(t => artistRow.appendChild(CardSystem.createCard(t)));
+                        if (artistRowContainer) artistRowContainer.classList.remove('is-hidden');
+                        if (window.Loader) window.Loader.init();
+                    }
+                }
+            }
+
+            // Related tracks row
+            const relatedRow = document.getElementById('song-related-tracks');
+            const relatedContainer = document.getElementById('song-related-row');
+            if (relatedRow && related.length > 0) {
+                relatedRow.innerHTML = '';
+                related.forEach(t => relatedRow.appendChild(CardSystem.createCard(t)));
+                if (relatedContainer) relatedContainer.classList.remove('is-hidden');
+                if (window.Loader) window.Loader.init();
+            }
+
+        } catch (e) {
+            console.error('[initSong] Error:', e);
+        }
     }
 };
 

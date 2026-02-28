@@ -62,5 +62,12 @@
    "top_albums_header": "أفضل الألبومات",
    "top_artists_header": "أفضل الفنانين",
    "moods_header": "استكشف الأجواء",
-   "new_releases_header": "إصدارات جديدة"
+   "new_releases_header": "إصدارات جديدة",
+   "more_info": "مزيد من المعلومات",
+   "from_the_artist": "من الفنان",
+   "similar_tracks": "مسارات مماثلة",
+   "view_artist": "عرض الفنان",
+   "song": "أغنية",
+   "song_no_track": "لا يوجد شيء يعزف",
+   "song_no_track_desc": "شغّل أغنية أولاً، ثم انقر على مزيد من المعلومات."
 }

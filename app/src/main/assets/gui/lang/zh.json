@@ -62,5 +62,12 @@
    "top_albums_header": "热门专辑",
    "top_artists_header": "热门艺人",
    "moods_header": "探索心情",
-   "new_releases_header": "最新发行"
+   "new_releases_header": "最新发行",
+   "more_info": "更多信息",
+   "from_the_artist": "来自艺人",
+   "similar_tracks": "相似曲目",
+   "view_artist": "查看艺人",
+   "song": "歌曲",
+   "song_no_track": "没有正在播放的内容",
+   "song_no_track_desc": "请先播放一首歌曲，然后点击更多信息。"
 }

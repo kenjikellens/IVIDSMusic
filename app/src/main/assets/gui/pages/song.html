@@ -1,0 +1,95 @@
+<!-- Song Detail Page -->
+<div class="song-page page-container fade-in">
+
+   <!-- Hero Section -->
+   <div class="song-hero">
+      <div class="hero-bg">
+         <div class="blob blob-1"></div>
+         <div class="blob blob-2"></div>
+         <div class="blob blob-3"></div>
+      </div>
+
+      <div class="song-hero-content">
+         <!-- Cover Art -->
+         <div class="song-cover-wrapper">
+            <div class="ivids-loader poster-loader" id="song-cover-loader"></div>
+            <img id="song-cover" class="song-cover" src="" alt="" style="opacity:0">
+         </div>
+
+         <!-- Info -->
+         <div class="song-info">
+            <div class="song-meta-row">
+               <span class="song-type-label" data-i18n="song">Song</span>
+            </div>
+            <h1 id="song-title" class="song-title">—</h1>
+            <div class="song-sub-info">
+               <button id="song-artist-link" class="song-artist-btn">
+                  <span id="song-artist" class="song-artist">—</span>
+               </button>
+               <span class="song-dot">·</span>
+               <button id="song-album-link" class="song-album-btn">
+                  <span id="song-album" class="song-album">—</span>
+               </button>
+               <span class="song-dot">·</span>
+               <span id="song-year" class="song-year">—</span>
+               <span class="song-dot">·</span>
+               <span id="song-duration" class="song-duration">—</span>
+            </div>
+
+            <!-- Actions -->
+            <div class="song-actions">
+               <button id="song-play-btn" class="btn btn-primary">
+                  <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor">
+                     <path d="M8 5v14l11-7z" />
+                  </svg>
+                  <span data-i18n="play">Play</span>
+               </button>
+               <button id="song-save-btn" class="btn btn-secondary">
+                  <img src="svg/download.svg" alt="" class="btn-icon" style="filter:brightness(0) invert(1);">
+                  <span data-i18n="download_track">Save</span>
+               </button>
+               <button class="btn btn-secondary"
+                  onclick="Router.loadPage('artist', { name: document.getElementById('song-artist')?.textContent })">
+                  <span data-i18n="view_artist">View Artist</span>
+               </button>
+            </div>
+         </div>
+      </div>
+   </div>
+
+   <!-- Metadata Tags -->
+   <div class="song-tags-section">
+      <div id="song-genres" class="song-genres-container">
+         <!-- Genre chips, BPM badge and explicit badge injected by JS -->
+      </div>
+   </div>
+
+   <!-- From the Artist Row -->
+   <div id="song-artist-row" class="row-scroll-wrapper is-hidden">
+      <div class="row-header">
+         <h2 class="row-title" data-i18n="from_the_artist">From the Artist</h2>
+      </div>
+      <button class="scroll-arrow left" onclick="scrollRow('song-artist-tracks', -1)">
+         <div class="scroll-arrow-icon">❮</div>
+      </button>
+      <div class="results-row" id="song-artist-tracks"></div>
+      <button class="scroll-arrow right" onclick="scrollRow('song-artist-tracks', 1)">
+         <div class="scroll-arrow-icon">❯</div>
+      </button>
+   </div>
+
+   <!-- Similar Tracks Row -->
+   <div id="song-related-row" class="row-scroll-wrapper is-hidden">
+      <div class="row-header">
+         <h2 class="row-title" data-i18n="similar_tracks">Similar Tracks</h2>
+      </div>
+      <button class="scroll-arrow left" onclick="scrollRow('song-related-tracks', -1)">
+         <div class="scroll-arrow-icon">❮</div>
+      </button>
+      <div class="results-row" id="song-related-tracks"></div>
+      <button class="scroll-arrow right" onclick="scrollRow('song-related-tracks', 1)">
+         <div class="scroll-arrow-icon">❯</div>
+      </button>
+   </div>
+
+</div>

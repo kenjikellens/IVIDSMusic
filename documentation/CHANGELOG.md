@@ -71,3 +71,18 @@
 [2026-02-27] ADDED gui/lang/ru.json, gui/lang/ro.json, gui/lang/ja.json: Added Russian, Romanian, and Japanese translations
 [2026-02-27] EDITED logic/language-manager.js: Registered 3 more languages: Russian, Romanian, and Japanese
 [2026-02-27] EDITED gui/index.css, logic/language-manager.js: Implemented responsive column-based grid for language selector; reduced padding and font size for a more compact UI
+[2026-02-28] EDITED app/src/main/assets/gui/index.css: Reduced standard card sizes and skeleton widths for a more compact layout across all breakpoints.
+[2026-02-28] EDITED app/src/main/assets/gui/index.css: Implemented white glassy background, backdrop blur, and refined borders for cards and track items in the Library section.
+[2026-02-28] EDITED documentation/future_plans.md: Expanded all future feature ideas with more detailed descriptions and specific technical/UX implementations.
+[2026-02-28] ADDED app/src/main/assets/gui/svg/info.svg: Info circle icon for the player's More Info button
+[2026-02-28] EDITED app/src/main/assets/gui/index.html: Added More Info button to the player bar
+[2026-02-28] EDITED app/src/main/assets/logic/player.js: Enabled More Info button on track load and playback
+[2026-02-28] EDITED app/src/main/assets/logic/api.js: Added getTrackDetails and getRelatedTracks for rich song metadata
+[2026-02-28] EDITED app/src/main/assets/logic/pages.js: Implemented initSong for the new Song Detail page
+[2026-02-28] ADDED app/src/main/assets/gui/pages/song.html: Created template for Song Detail page with hero and metadata
+[2026-02-28] EDITED app/src/main/assets/gui/index.css: Added comprehensive styles for the Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/*.json: Added internationalization keys for the Song Detail page in all 13 languages
+[2026-02-28] EDITED app/src/main/assets/logic/pages.js: Fixed bug where album metadata wasn't updating from the detailed API fetch.
+[2026-02-28] EDITED app/src/main/assets/logic/player.js: Fixed bug where the Song Detail page wouldn't refresh when a new track was played from within the page.
+[2026-02-28] EDITED app/src/main/assets/gui/temp_server.js: Updated static root to `assets/` and set default `/` route to `gui/index.html`.
+[2026-02-28] EDITED StartUp.py: Updated browser URL to `gui/index.html` for out-of-the-box project startup.

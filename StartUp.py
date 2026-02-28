@@ -20,8 +20,8 @@ def main():
         # Give the server a moment to start up
         time.sleep(1.5)
         
-        # Open the default web browser
-        url = "http://localhost:3000/"
+        # Open the default web browser to the correct GUI entry point
+        url = "http://localhost:3000/gui/index.html"
         print(f"Opening browser to {url}...")
         webbrowser.open(url)
         

@@ -62,5 +62,12 @@
    "top_albums_header": "トップアルバム",
    "top_artists_header": "トップアーティスト",
    "moods_header": "気分を探索",
-   "new_releases_header": "ニューリリース"
+   "new_releases_header": "ニューリリース",
+   "more_info": "詳細",
+   "from_the_artist": "このアーティストの曲",
+   "similar_tracks": "関連曲",
+   "view_artist": "アーティストを見る",
+   "song": "曲",
+   "song_no_track": "再生中の曲はありません",
+   "song_no_track_desc": "まず曲を再生してから、詳細をタップしてください。"
 }
