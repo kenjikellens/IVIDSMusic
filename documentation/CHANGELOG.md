@@ -109,4 +109,5 @@
 [2026-02-28] EDITED documentation/future_plans.md: Expanded roadmap with detailed descriptions
 [2026-02-28] ADDED app/src/main/assets/gui/pages/song.html: Created Song Detail page template
 [2026-02-28] ADDED app/src/main/assets/gui/svg/info.svg: Added info icon for player More Info button
+[2026-02-28] EDITED documentation/CHANGELOG.md: Added changelog entries for UI tweaks and song detail page implementation
 
