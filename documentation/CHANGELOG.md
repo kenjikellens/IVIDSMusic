@@ -86,3 +86,27 @@
 [2026-02-28] EDITED app/src/main/assets/logic/player.js: Fixed bug where the Song Detail page wouldn't refresh when a new track was played from within the page.
 [2026-02-28] EDITED app/src/main/assets/gui/temp_server.js: Updated static root to `assets/` and set default `/` route to `gui/index.html`.
 [2026-02-28] EDITED StartUp.py: Updated browser URL to `gui/index.html` for out-of-the-box project startup.
+
+[2026-02-28] EDITED StartUp.py: Updated startup script for correct URL and other tweaks
+[2026-02-28] EDITED app/src/main/assets/gui/index.css: Minor style adjustments after recent UI tweaks
+[2026-02-28] EDITED app/src/main/assets/gui/index.html: Updated More Info button integration
+[2026-02-28] EDITED app/src/main/assets/gui/lang/ar.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/de.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/en.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/fr.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/hi.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/it.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/ja.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/nl.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/pt.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/ro.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/ru.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/lang/zh.json: Updated translation keys for Song Detail page
+[2026-02-28] EDITED app/src/main/assets/gui/temp_server.js: Updated static root and default route
+[2026-02-28] EDITED app/src/main/assets/logic/api.js: Added getTrackDetails and getRelatedTracks
+[2026-02-28] EDITED app/src/main/assets/logic/pages.js: Implemented initSong and bug fixes
+[2026-02-28] EDITED app/src/main/assets/logic/player.js: Fixed song detail refresh bug
+[2026-02-28] EDITED documentation/future_plans.md: Expanded roadmap with detailed descriptions
+[2026-02-28] ADDED app/src/main/assets/gui/pages/song.html: Created Song Detail page template
+[2026-02-28] ADDED app/src/main/assets/gui/svg/info.svg: Added info icon for player More Info button
+
