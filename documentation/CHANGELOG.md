@@ -112,3 +112,15 @@
 [2026-02-28] ADDED app/src/main/assets/gui/svg/info.svg: Added info icon for player More Info button
 [2026-02-28] EDITED documentation/CHANGELOG.md: Added changelog entries for UI tweaks and song detail page implementation
 
+[2026-03-02] EDITED app/src/main/assets/logic/config.js: Added AI API key placeholders and endpoints for Smart Mixes
+[2026-03-02] EDITED app/src/main/assets/logic/api.js: Added generateAIPlaylist and getSmartMixes methods with multi-AI fallback
+[2026-03-02] ADDED app/src/main/assets/logic/smart-mixes.js: New module for AI-powered playlist orchestration
+[2026-03-02] EDITED app/src/main/assets/gui/pages/home.html: Added Smart Mixes section above genre rows
+[2026-03-02] EDITED app/src/main/assets/gui/index.css: Added premium glassmorphism styles and animations for Smart Mix cards
+[2026-03-02] EDITED app/src/main/assets/logic/pages.js: Integrated SmartMixes.refresh() into home page and Library playlist view
+[2026-03-02] EDITED app/src/main/assets/gui/lang/*.json: Added localization keys for Smart Mixes
+[2026-03-02] EDITED app/src/main/assets/logic/api.js: Removed search-based 90's genre section from Home page; enforced chart-only results
+[2026-03-02] EDITED app/src/main/assets/gui/pages/home.html: Updated genre rows to match official charts (added Jazz, Dance; removed 90's)
+[2026-03-02] EDITED app/src/main/assets/logic/player.js: Added playTracks method for AI playlist support
+[2026-03-02] EDITED app/src/main/assets/logic/smart-mixes.js: Added debug logs and forced section visibility
+[2026-03-02] EDITED app/src/main/assets/gui/index.html: Ensured PageSystem is imported and exposed globally

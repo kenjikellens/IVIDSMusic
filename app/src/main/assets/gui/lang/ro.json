@@ -69,5 +69,6 @@
    "view_artist": "Vezi artistul",
    "song": "Cântec",
    "song_no_track": "Nimic nu se redă",
-   "song_no_track_desc": "Redă mai întâi o melodie, apoi apasă pe Mai multe info."
+   "song_no_track_desc": "Redă o piesă mai întâi, apoi apasă pe Mai multe informații pentru a vedea detaliile.",
+   "smart_mixes": "Mixuri Inteligente"
 }

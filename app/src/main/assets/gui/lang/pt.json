@@ -69,5 +69,6 @@
    "view_artist": "Ver artista",
    "song": "Música",
    "song_no_track": "Nada está a tocar",
-   "song_no_track_desc": "Reproduza primeiro uma música, depois toque em Mais info."
+   "song_no_track_desc": "Reproduza uma faixa primeiro e toque em Mais Informações para ver seus detalhes.",
+   "smart_mixes": "Mixes Inteligentes"
 }

@@ -151,53 +151,31 @@ export const MusicAPI = {
     /**
      * Fetch genre categories using Deezer chart endpoints (proper genre filtering)
      */
-    async getCategories(genres = ['Pop', 'Rock', 'Hip-Hop', 'Hardcore', '90\'s', 'Electronic'], signal = null) {
+    async getCategories(genres = ['Pop', 'Rock', 'Hip-Hop', 'Hardcore', 'Electronic', 'Jazz', 'Dance'], signal = null) {
         const results = await Promise.all(
             genres.map(async (genre) => {
                 try {
                     let tracks = [];
 
-                    if (genre === '90\'s') {
-                        // Deezer has no "decade" genre, so use advanced search with dur_min to get variety
-                        // Search for popular tracks from the 90s era
-                        const queries = ['best of 90s', '90s dance hits', '90s rock hits', '90s pop classics'];
-                        const randomQuery = queries[Math.floor(Math.random() * queries.length)];
-                        const url = `${this.deezerUrl}/search?q=${encodeURIComponent(randomQuery)}&limit=30`;
+                    // Use Deezer chart endpoint for proper genre filtering
+                    const genreId = this.genreMap[genre];
+                    if (!genreId) return { title: genre, id: genre.toLowerCase(), tracks: [] };
 
-                        const response = await this._fetch(url, { signal });
-                        const data = await response.json();
-                        if (data.data) {
-                            tracks = data.data.map(item => ({
-                                type: 'song',
-                                id: item.id,
-                                title: item.title,
-                                artist: item.artist?.name || 'Unknown',
-                                album: item.album?.title || 'Unknown',
-                                cover: item.album?.cover_big || item.album?.cover_xl,
-                                previewUrl: item.preview
-                            }));
-                        }
-                    } else {
-                        // Use Deezer chart endpoint for proper genre filtering
-                        const genreId = this.genreMap[genre];
-                        if (!genreId) return { title: genre, id: genre.toLowerCase(), tracks: [] };
+                    const url = `${this.deezerUrl}/chart/${genreId}/tracks?limit=30`;
 
-                        const url = `${this.deezerUrl}/chart/${genreId}/tracks?limit=30`;
+                    const response = await this._fetch(url, { signal });
+                    const data = await response.json();
 
-                        const response = await this._fetch(url, { signal });
-                        const data = await response.json();
-
-                        if (data.data) {
-                            tracks = data.data.map(item => ({
-                                type: 'song',
-                                id: item.id,
-                                title: item.title_short || item.title,
-                                artist: item.artist?.name || 'Unknown',
-                                album: item.album?.title || 'Unknown',
-                                cover: item.album?.cover_big || item.album?.cover_xl,
-                                previewUrl: item.preview
-                            }));
-                        }
+                    if (data.data) {
+                        tracks = data.data.map(item => ({
+                            type: 'song',
+                            id: item.id,
+                            title: item.title_short || item.title,
+                            artist: item.artist?.name || 'Unknown',
+                            album: item.album?.title || 'Unknown',
+                            cover: item.album?.cover_big || item.album?.cover_xl,
+                            previewUrl: item.preview
+                        }));
                     }
 
                     // Variety filter: max 1 track per artist

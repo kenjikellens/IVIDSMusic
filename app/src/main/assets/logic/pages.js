@@ -3,12 +3,20 @@ import { YouTubePlayer } from './player.js';
 import { CardSystem } from './cards.js';
 import { HistorySystem } from './history.js';
 import { SettingsManager } from './settings-manager.js';
+import { SmartMixes } from './smart-mixes.js';
+
+// Expose to window for global access
+window.MusicAPI = MusicAPI;
+window.SmartMixes = SmartMixes;
 
 let isHeroDismissed = false;
 
 export const PageSystem = {
     async initHome() {
         if (window.Loader) window.Loader.init();
+
+        // Refresh Smart Mixes row
+        SmartMixes.refresh();
 
         try {
             const signal = window.Router.abortController?.signal;
@@ -330,6 +338,7 @@ export const PageSystem = {
 
         // Show history instantly (local data)
         this.renderRecentTracks();
+        this.renderLibraryPlaylists();
 
         container.innerHTML = `
             <div class="skeleton-list">
@@ -451,6 +460,48 @@ export const PageSystem = {
         if (confirm('Are you sure you want to clear your playback history?')) {
             HistorySystem.clear();
             this.renderRecentTracks();
+        }
+    },
+
+    /**
+     * Renders playlists in the Library (currently shows the Smart Mixes).
+     */
+    async renderLibraryPlaylists() {
+        const container = document.getElementById('library-playlists-list');
+        const emptyState = document.getElementById('playlists-empty-state');
+        if (!container || !emptyState) return;
+
+        try {
+            // Use same logic as Home page for consistency
+            const history = HistorySystem.get();
+            let mixes = [];
+
+            if (history.length === 0) {
+                mixes = await SmartMixes.getStarterMixes();
+            } else {
+                mixes = await MusicAPI.getSmartMixes(history);
+                if (!mixes || mixes.length === 0) mixes = await SmartMixes.getStarterMixes();
+            }
+
+            if (mixes && mixes.length > 0) {
+                container.innerHTML = '';
+                mixes.forEach(mix => {
+                    const card = CardSystem.createCard({
+                        ...mix,
+                        type: 'playlist', // This uses the playlist card style
+                        title: mix.name,
+                        artist: 'AI Mix'
+                    });
+                    container.appendChild(card);
+                });
+                container.classList.remove('is-hidden');
+                emptyState.classList.add('is-hidden');
+            } else {
+                container.classList.add('is-hidden');
+                emptyState.classList.remove('is-hidden');
+            }
+        } catch (e) {
+            console.error('[Library] Playlists failed', e);
         }
     },
 

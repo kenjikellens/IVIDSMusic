@@ -37,6 +37,8 @@
    "start_experience_title": "Empieza Tu Experiencia",
    "start_experience_desc": "Explora millones de canciones y descubre a tu próximo artista favorito.",
    "year": "Año",
+   "song_no_track_desc": "Reproduce una canción primero, luego pulsa Más Información para ver sus detalles.",
+   "smart_mixes": "Mixes Inteligentes",
    "library_desc": "Colección de tus canciones descargadas para reproducir sin conexión.",
    "play_all": "Reproducir Todo",
    "shuffle": "Aleatorio",

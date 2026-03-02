@@ -68,6 +68,7 @@
    "similar_tracks": "Brani simili",
    "view_artist": "Visualizza artista",
    "song": "Canzone",
-   "song_no_track": "Niente è in riproduzione",
-   "song_no_track_desc": "Riproduci prima un brano, poi tocca Più info."
+   "song_no_track": "Nessun brano in riproduzione",
+   "song_no_track_desc": "Riproduci prima un brano, quindi tocca Altre info per visualizzarne i dettagli.",
+   "smart_mixes": "Mix Intelligenti"
 }

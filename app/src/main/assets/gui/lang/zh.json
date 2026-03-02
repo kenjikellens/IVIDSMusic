@@ -69,5 +69,6 @@
    "view_artist": "查看艺人",
    "song": "歌曲",
    "song_no_track": "没有正在播放的内容",
-   "song_no_track_desc": "请先播放一首歌曲，然后点击更多信息。"
+   "song_no_track_desc": "先播放一首歌曲，然后点击“更多信息”查看其详细信息。",
+   "smart_mixes": "智能混音"
 }
