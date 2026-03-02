@@ -1,3 +1,4 @@
+[2026-03-01] EDITED app/src/main/assets/gui/index.css: Added standard background-clip property for text compatibility
 [2026-02-26] EDITED .agents/rules/ai-rules.md: Updated AI rules file per user request
 [2026-02-26] DELETED AI_RULES.md: Removed duplicate rules file
 [2026-02-26] ADDED CHANGELOG.md: Created initial changelog with entries for recent changes
