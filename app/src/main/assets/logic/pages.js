@@ -449,10 +449,8 @@ export const PageSystem = {
     },
 
     clearHistory() {
-        if (confirm('Are you sure you want to clear your playback history?')) {
-            HistorySystem.clear();
-            this.renderRecentTracks();
-        }
+        HistorySystem.clear();
+        this.renderRecentTracks();
     },
 
 

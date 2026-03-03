@@ -1,3 +1,4 @@
+[2026-03-03] EDITED app/src/main/assets/logic/pages.js: Removed native browser confirm() popup from clearHistory per user request
 [2026-03-03] EDITED app/src/main/assets/logic/pages.js: Exposed PageSystem to window to fix 'Clear All' button and library search inline handlers
 [2026-03-03] EDITED app/src/main/assets/logic/api.js: Fixed critical syntax error causing UI loading failure
 [2026-03-03] EDITED app/src/main/assets/logic/recommendations.js: Moved initRecommended logic into DiscoveryEngine module
