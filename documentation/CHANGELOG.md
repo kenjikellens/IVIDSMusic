@@ -124,3 +124,9 @@
 [2026-03-02] EDITED app/src/main/assets/logic/player.js: Added playTracks method for AI playlist support
 [2026-03-02] EDITED app/src/main/assets/logic/smart-mixes.js: Added debug logs and forced section visibility
 [2026-03-02] EDITED app/src/main/assets/gui/index.html: Ensured PageSystem is imported and exposed globally
+[2026-03-03] DELETED app/src/main/assets/logic/smart-mixes.js: Removed AI-powered Smart Mixes feature completely
+[2026-03-03] EDITED app/src/main/assets/gui/pages/home.html: Removed Smart Mixes section
+[2026-03-03] EDITED app/src/main/assets/logic/pages.js: Removed SmartMixes integration and Library playlist rendering
+[2026-03-03] EDITED app/src/main/assets/logic/config.js: Removed AI API keys and endpoints
+[2026-03-03] EDITED app/src/main/assets/logic/player.js: Removed playTracks method
+[2026-03-03] EDITED app/src/main/assets/gui/lang/*.json: Removed smart_mixes localization key

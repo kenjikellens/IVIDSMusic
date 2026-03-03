@@ -16,15 +16,6 @@ export const Config = {
     isNative: isNative,
     SERVER_URL: isNative ? "/api" : serverUrl,
 
-    // AI API Configuration (Populate these with your free keys)
-    GEMINI_API_KEY: 'YOUR_GEMINI_KEY_HERE',
-    GROQ_API_KEY: 'YOUR_GROQ_KEY_HERE',
-    OPENROUTER_API_KEY: 'YOUR_OPENROUTER_KEY_HERE',
-
-    // Endpoints
-    GEMINI_URL: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent',
-    GROQ_URL: 'https://api.groq.com/openai/v1/chat/completions',
-    OPENROUTER_URL: 'https://openrouter.ai/api/v1/chat/completions'
 };
 
 // Global access for easier debugging

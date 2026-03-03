@@ -24,7 +24,7 @@ You must ensure that your code works flawlessly in both primary environments:
 if the user says **"push to main"**, you may directly push ALL changes to main, if the user says **"push [file] to main"**, you only push this file.
 
 ## 4. Change Logging
-For every file you **edit**, **add**, or **delete**, you must append a new line to the project's `CHANGELOG.md` file (located at the root of the project). Each log entry must follow this format:
+For every file you **edit**, **add**, or **delete**, you must append a new line to the project's `CHANGELOG.md` file (located at the "./documentation/" of the project). Each log entry must follow this format:
 
 [YYYY-MM-DD] [ACTION] <filename>: <brief description of what was changed/added/deleted>
 

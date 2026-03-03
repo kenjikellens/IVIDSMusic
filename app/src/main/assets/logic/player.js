@@ -138,17 +138,6 @@ export const YouTubePlayer = {
     next() { console.log('Next track clicked'); },
     previous() { console.log('Previous track clicked'); },
 
-    /**
-     * Replaces the queue with a list of tracks and starts playing the first one.
-     * @param {Array} tracks 
-     */
-    playTracks(tracks) {
-        if (!tracks || tracks.length === 0) return;
-        this.init();
-        this.queue = [...tracks];
-        this.currentIndex = 0;
-        this.loadTrack(this.queue[this.currentIndex]);
-    },
 
     async loadTrack(track) {
         this.init();
