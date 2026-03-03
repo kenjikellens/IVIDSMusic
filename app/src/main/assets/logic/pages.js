@@ -687,3 +687,8 @@ window.applyYearFilter = () => {
     const p = window.Router.currentParams || {};
     window.Router.loadPage('search', { ...p, year });
 };
+
+// Export PageSystem for inline HTML handlers (like clearHistory and filterLibrary)
+if (typeof window !== 'undefined') {
+    window.PageSystem = PageSystem;
+}
