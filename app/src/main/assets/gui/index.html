@@ -33,6 +33,12 @@
                         </a>
                     </li>
                     <li>
+                        <a href="#" onclick="Router.loadPage('recommended')" id="nav-recommended">
+                            <img class="nav-icon" src="svg/brand.svg" alt="">
+                            <span data-i18n="nav_foryou">For You</span>
+                        </a>
+                    </li>
+                    <li>
                         <a href="#" onclick="Router.loadPage('search')" id="nav-search">
                             <img class="nav-icon" src="svg/search.svg" alt="">
                             <span data-i18n="search">Search</span>
@@ -104,6 +110,16 @@
                         style="margin-left:auto; margin-right: 8px;" onclick="YouTubePlayer.saveTrack()"
                         title="Download Track" data-i18n="download_track" disabled>
                         <img src="svg/download.svg" alt="Download">
+                    </button>
+                    <!-- Like Button -->
+                    <button id="like-track-btn" class="player-control-btn secondary" style="margin-right: 8px;"
+                        onclick="YouTubePlayer.toggleLike()" title="Like" data-i18n="like" disabled>
+                        <img src="svg/like.svg" alt="Like">
+                    </button>
+                    <!-- Dislike Button -->
+                    <button id="dislike-track-btn" class="player-control-btn secondary" style="margin-right: 15px;"
+                        onclick="YouTubePlayer.toggleDislike()" title="Dislike" data-i18n="dislike" disabled>
+                        <img src="svg/dislike.svg" alt="Dislike">
                     </button>
                     <!-- More Info Button -->
                     <button id="more-info-btn" class="player-control-btn secondary" style="margin-right: 15px;"

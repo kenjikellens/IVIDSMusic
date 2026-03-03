@@ -91,6 +91,7 @@ export const MusicAPI = {
                         id: item.id,
                         title: item.title,
                         artist: item.artist?.name || 'Unknown',
+                        artistId: item.artist?.id || null,
                         album: item.album?.title || 'Unknown',
                         cover: item.album?.cover_big || item.album?.cover_xl,
                         previewUrl: item.preview
@@ -502,5 +503,39 @@ export const MusicAPI = {
             console.error('[API] Failed to get related tracks', e);
         }
         return [];
+    },
+
+    /**
+     * Gets top tracks for a given artist ID.
+     */
+    async getArtistTopTracks(artistId, signal = null) {
+        try {
+            const url = `${this.deezerUrl}/artist/${artistId}/top?limit=10`;
+            const res = await this._fetch(url, { signal });
+            const data = await res.json();
+            if (data?.data) {
+                return data.data.map(item => ({
+                    type: 'song',
+                    id: item.id,
+                    title: item.title,
+                    artist: item.artist?.name || 'Unknown',
+                    album: item.album?.title || 'Unknown',
+                    cover: item.album?.cover_big || item.album?.cover_xl || '',
+                    previewUrl: item.preview
+                }));
+            }
+        } catch (e) {
+            console.error('[API] Failed to get artist top tracks', e);
+        }
+        return [];
+    },
+
+    /**
+     * Fetches popular tracks for a given genre.
+     */
+    async getGenreTracks(genreName, signal = null) {
+        // Deezer doesn't have a direct "search by genre name" endpoint that returns tracks easily
+        // but we can search for the genre name as a query which usually yields popular results.
+        return this.search(genreName, 10, 'song', null, 0, false, signal);
     }
 };

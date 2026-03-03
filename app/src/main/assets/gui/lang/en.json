@@ -3,6 +3,7 @@
     "search": "Search",
     "library": "Your Library",
     "you": "You",
+    "nav_foryou": "For You",
     "settings": "Settings",
     "search_placeholder": "Artists, songs, albums...",
     "appearance": "Appearance",
@@ -69,5 +70,11 @@
     "view_artist": "View Artist",
     "song": "Song",
     "song_no_track": "Nothing is playing",
-    "song_no_track_desc": "Play a song first, then tap More Info to see its details."
+    "song_no_track_desc": "Play a song first, then tap More Info to see its details.",
+    "foryou_desc": "Personalized picks based on what you listen to, like, and explore.",
+    "foryou_empty_title": "Start Listening!",
+    "foryou_empty_desc": "Play some songs or like artists to get personalized recommendations here.",
+    "loading_recommendations": "Analyzing your taste...",
+    "like": "Like",
+    "dislike": "Dislike"
 }

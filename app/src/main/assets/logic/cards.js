@@ -1,5 +1,6 @@
 import { MusicAPI } from './api.js';
 import { YouTubePlayer } from './player.js';
+import { DiscoveryEngine } from './recommendations.js';
 
 /**
  * Shared logic for creating and managing music cards across the app.
@@ -68,12 +69,14 @@ export const CardSystem = {
         card.onclick = (e) => {
             if (e.target.classList.contains('artist-link')) {
                 e.preventDefault(); e.stopPropagation();
+                DiscoveryEngine.recordArtistClick(track.artistId);
                 window.Router.loadPage('artist', { name: e.target.dataset.name });
                 return;
             }
 
             // Determine action based on type
             if (track.type === 'artist') {
+                DiscoveryEngine.recordArtistClick(track.id);
                 window.Router.loadPage('artist', { name: track.name });
             } else if (track.type === 'album') {
                 window.Router.loadPage('album', { id: track.id });

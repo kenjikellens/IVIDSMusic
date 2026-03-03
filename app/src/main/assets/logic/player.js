@@ -1,6 +1,7 @@
 import { MusicAPI } from './api.js';
 import { Config } from './config.js';
 import { HistorySystem } from './history.js';
+import { DiscoveryEngine } from './recommendations.js';
 
 export const YouTubePlayer = {
     audio: new Audio(),
@@ -11,6 +12,8 @@ export const YouTubePlayer = {
     currentIndex: -1,
     animationFrameId: null,
     isDraggingSlider: false,
+    _listenScored: false,
+    _completionScored: false,
 
     init() {
         if (this.isInitialized) return;
@@ -35,13 +38,17 @@ export const YouTubePlayer = {
             // Start smooth update loop
             this.updateProgressLoop();
         };
+
         this.audio.onpause = () => {
             this.isPlaying = false;
             playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
             if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
         };
+
         this.audio.onended = () => {
             if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
+            this.handleCompletion();
+            this.next();
         };
 
         this.audio.onloadedmetadata = () => {
@@ -97,6 +104,8 @@ export const YouTubePlayer = {
         const coverEl = document.getElementById('player-cover');
         const playerBar = document.getElementById('player-bar');
         const moreInfoBtn = document.getElementById('more-info-btn');
+        const likeBtn = document.getElementById('like-track-btn');
+        const dislikeBtn = document.getElementById('dislike-track-btn');
 
         if (titleEl) titleEl.textContent = track.title;
         if (artistEl) artistEl.textContent = track.artist;
@@ -104,11 +113,21 @@ export const YouTubePlayer = {
         if (playerBar) {
             playerBar.style.setProperty('--current-cover', `url(${track.cover})`);
         }
-        // Enable the More Info button whenever a track is set
+        // Enable buttons
         if (moreInfoBtn) {
             moreInfoBtn.disabled = false;
             moreInfoBtn.style.opacity = '1';
         }
+        if (likeBtn) likeBtn.disabled = false;
+        if (dislikeBtn) dislikeBtn.disabled = false;
+
+        // Visual check for liked state
+        const checkLikeState = () => {
+            const scores = DiscoveryEngine.getScores();
+            const score = scores.tracks[track.id] || 0;
+            if (likeBtn) likeBtn.style.color = score >= 5 ? 'var(--primary-color)' : '';
+        };
+        checkLikeState();
     },
 
     updateProgressLoop() {
@@ -120,6 +139,11 @@ export const YouTubePlayer = {
                 const percent = (this.audio.currentTime / this.audio.duration) * 100;
                 progressSlider.value = percent;
                 currentTimeEl.textContent = this.formatTime(this.audio.currentTime);
+
+                // Completion trigger (after 90%)
+                if (this.currentTrack && !this._completionScored && percent > 90) {
+                    this.handleCompletion();
+                }
             }
         }
 
@@ -135,8 +159,35 @@ export const YouTubePlayer = {
         return `${m}:${s < 10 ? '0' : ''}${s}`;
     },
 
-    next() { console.log('Next track clicked'); },
+    handleCompletion() {
+        if (!this._completionScored && this.currentTrack) {
+            this._completionScored = true;
+            DiscoveryEngine.recordCompletion(this.currentTrack.id);
+        }
+    },
+
+    next() {
+        if (this.currentTrack && !this._listenScored && this.audio.currentTime < 20) {
+            DiscoveryEngine.recordSkip(this.currentTrack.id);
+        }
+        console.log('Next track clicked');
+    },
     previous() { console.log('Previous track clicked'); },
+
+    toggleLike() {
+        if (!this.currentTrack) return;
+        DiscoveryEngine.recordLike(this.currentTrack);
+        const likeBtn = document.getElementById('like-track-btn');
+        if (likeBtn) likeBtn.style.color = 'var(--primary-color)';
+    },
+
+    toggleDislike() {
+        if (!this.currentTrack) return;
+        DiscoveryEngine.recordDislike(this.currentTrack);
+        const likeBtn = document.getElementById('like-track-btn');
+        if (likeBtn) likeBtn.style.color = ''; // Reset like visual
+        this.next(); // Go to next track gracefully
+    },
 
 
     async loadTrack(track) {
@@ -153,6 +204,12 @@ export const YouTubePlayer = {
 
         // Save to history using automated system
         HistorySystem.add(track);
+
+        // Score the listen immediately (+1 point)
+        DiscoveryEngine.recordListen(track);
+
+        // Reset scoring flags
+        this._completionScored = false;
 
         this.setUI(track);
 

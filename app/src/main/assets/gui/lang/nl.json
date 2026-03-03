@@ -3,6 +3,7 @@
     "search": "Zoeken",
     "library": "Je bibliotheek",
     "you": "Jij",
+    "nav_foryou": "Voor Jou",
     "settings": "Instellingen",
     "search_placeholder": "Artiesten, nummers, albums...",
     "appearance": "Uiterlijk",
@@ -69,5 +70,11 @@
     "view_artist": "Bekijk artiest",
     "song": "Nummer",
     "song_no_track": "Er speelt niets",
-    "song_no_track_desc": "Speel eerst een nummer af en tik vervolgens op Meer info om de details te bekijken."
+    "song_no_track_desc": "Speel eerst een nummer af en tik vervolgens op Meer info om de details te bekijken.",
+    "foryou_desc": "Gepersonaliseerde picks op basis van wat je luistert, liket en verkent.",
+    "foryou_empty_title": "Begin met luisteren!",
+    "foryou_empty_desc": "Speel nummers of like artiesten om hier persoonlijke aanbevelingen te krijgen.",
+    "loading_recommendations": "Je smaak analyseren...",
+    "like": "Vind ik leuk",
+    "dislike": "Vind ik niet leuk"
 }

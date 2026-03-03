@@ -56,10 +56,17 @@ export const Router = {
             });
 
             // Initialize Page Logic via PageSystem (NO JS IN HTML)
-            const { PageSystem } = await import('./pages.js');
-            const initMethod = `init${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
-            if (PageSystem[initMethod]) {
-                await PageSystem[initMethod](params || {});
+            if (pageName === 'recommended') {
+                const { DiscoveryEngine } = await import('./recommendations.js');
+                if (DiscoveryEngine.initRecommended) {
+                    await DiscoveryEngine.initRecommended(params || {});
+                }
+            } else {
+                const { PageSystem } = await import('./pages.js');
+                const initMethod = `init${pageName.charAt(0).toUpperCase() + pageName.slice(1)}`;
+                if (PageSystem[initMethod]) {
+                    await PageSystem[initMethod](params || {});
+                }
             }
 
             mainView.scrollTop = 0;
