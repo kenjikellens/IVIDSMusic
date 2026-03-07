@@ -13,7 +13,7 @@
 [2026-03-03] EDITED app/src/main/assets/logic/api.js: Added getArtistTopTracks and getGenreTracks methods for recommendation engine
 [2026-03-03] EDITED app/src/main/assets/logic/pages.js: Implemented initRecommended logic for personalized content rendering
 [2026-03-03] EDITED app/src/main/assets/gui/index.html: Added "For You" link to sidebar and Like/Dislike buttons to player bar
-[2026-03-03] EDITED app/src/main/assets/gui/lang/*.json: Added localization keys for recommendation engine and "For You" page
+[2026-03-03] EDITED app/src/main/assets/gui/lang/_.json: Added localization keys for recommendation engine and "For You" page
 [2026-03-03] EDITED documentation/algorithm.md: Refined scoring rules (immediate +1 for track clicks)
 [2026-03-01] EDITED app/src/main/assets/gui/index.css: Added standard background-clip property for text compatibility
 [2026-02-26] EDITED .agents/rules/ai-rules.md: Updated AI rules file per user request
@@ -57,7 +57,7 @@
 [2026-02-27] EDITED gui/pages/home.html: Wrapped hero buttons and titles in spans for safe translation
 [2026-02-27] EDITED gui/pages/search.html: Wrapped results labels and category titles in spans for localization
 [2026-02-27] EDITED logic/cards.js: Added `data-i18n` support for dynamic row headers on the home page
-[2026-02-27] EDITED gui/lang/*.json: Added missing keys for home page row headers and dynamic UI elements
+[2026-02-27] EDITED gui/lang/_.json: Added missing keys for home page row headers and dynamic UI elements
 [2026-02-27] EDITED logic/config.js: Improved environment detection and added explicit `isNative` property
 [2026-02-27] EDITED logic/api.js: Fixed typos in `isNative` check and converted `proxyUrl` to dynamic getter to resolve 'failed to fetch' errors
 [2026-02-27] EDITED logic/player.js: Switched to `MusicAPI._fetch` for playback and save requests to ensure consistent CORS/proxy handling
@@ -99,7 +99,7 @@
 [2026-02-28] EDITED app/src/main/assets/logic/pages.js: Implemented initSong for the new Song Detail page
 [2026-02-28] ADDED app/src/main/assets/gui/pages/song.html: Created template for Song Detail page with hero and metadata
 [2026-02-28] EDITED app/src/main/assets/gui/index.css: Added comprehensive styles for the Song Detail page
-[2026-02-28] EDITED app/src/main/assets/gui/lang/*.json: Added internationalization keys for the Song Detail page in all 13 languages
+[2026-02-28] EDITED app/src/main/assets/gui/lang/\*.json: Added internationalization keys for the Song Detail page in all 13 languages
 [2026-02-28] EDITED app/src/main/assets/logic/pages.js: Fixed bug where album metadata wasn't updating from the detailed API fetch.
 [2026-02-28] EDITED app/src/main/assets/logic/player.js: Fixed bug where the Song Detail page wouldn't refresh when a new track was played from within the page.
 [2026-02-28] EDITED app/src/main/assets/gui/temp_server.js: Updated static root to `assets/` and set default `/` route to `gui/index.html`.
@@ -135,7 +135,7 @@
 [2026-03-02] EDITED app/src/main/assets/gui/pages/home.html: Added Smart Mixes section above genre rows
 [2026-03-02] EDITED app/src/main/assets/gui/index.css: Added premium glassmorphism styles and animations for Smart Mix cards
 [2026-03-02] EDITED app/src/main/assets/logic/pages.js: Integrated SmartMixes.refresh() into home page and Library playlist view
-[2026-03-02] EDITED app/src/main/assets/gui/lang/*.json: Added localization keys for Smart Mixes
+[2026-03-02] EDITED app/src/main/assets/gui/lang/_.json: Added localization keys for Smart Mixes
 [2026-03-02] EDITED app/src/main/assets/logic/api.js: Removed search-based 90's genre section from Home page; enforced chart-only results
 [2026-03-02] EDITED app/src/main/assets/gui/pages/home.html: Updated genre rows to match official charts (added Jazz, Dance; removed 90's)
 [2026-03-02] EDITED app/src/main/assets/logic/player.js: Added playTracks method for AI playlist support
@@ -146,4 +146,7 @@
 [2026-03-03] EDITED app/src/main/assets/logic/pages.js: Removed SmartMixes integration and Library playlist rendering
 [2026-03-03] EDITED app/src/main/assets/logic/config.js: Removed AI API keys and endpoints
 [2026-03-03] EDITED app/src/main/assets/logic/player.js: Removed playTracks method
-[2026-03-03] EDITED app/src/main/assets/gui/lang/*.json: Removed smart_mixes localization key
+[2026-03-03] EDITED app/src/main/assets/gui/lang/_.json: Removed smart_mixes localization key
+
+[2026-03-07] EDITED app/src/main/assets/gui/index.css: Professional UI polish — refined color palette from neon aqua (#00d2ff) to softer teal (#4dd0e1/#0288d1), removed text-shadow glows on brand, reduced hero blobs from 4 to 2 with lower opacity, subtler card hover (scale 1.03 with bottom accent), calmer player bar (reduced saturation, neutral hover, inset highlight), search chip cleanup (removed scale/glow), profile avatar natural display, library track hover without translateX, stat-card hover transition, global focus-visible catch-all for accessibility, slower skeleton pulse, will-change on music cards, header/sidebar border refinement, browse title and typography improvements
+[2026-03-07] EDITED app/src/main/assets/gui/index.css: Mobile/portrait UI polish — enhanced bottom nav with deeper blur (`50px`), inset shadow, and active tab pill background; refined mini player bar spacing, border-radius, and padding; integrated compact top search bar; improved touch targets for settings and 'More' links; implemented edge-to-edge scrolling with snap alignment for horizontal music cards; centered and scaled language selector modal for screens under 400px; wrapped profile header in a glassmorphism card; adjusted optical sizing and line-heights globally for headings.
