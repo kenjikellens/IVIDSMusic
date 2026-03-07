@@ -1433,33 +1433,47 @@ header {
 /* ============================
    Responsive Breakpoints
    ============================ */
-@media (max-width: 1200px) {
+
+/* Widescreen — large monitors & TVs (1440p+) */
+@media (min-width: 1700px) {
+    :root {
+        --ui-base-scale: 1.1;
+    }
+}
+
+@media (max-width: 1400px) {
     :root {
         --ui-base-scale: 0.9;
     }
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
     :root {
         --ui-base-scale: 0.8;
     }
 }
 
-@media (max-width: 768px) {
-    :root {
-        --ui-base-scale: 0.75;
-    }
-}
-
-@media (max-width: 700px) {
+@media (max-width: 1000px) {
     :root {
         --ui-base-scale: 0.7;
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 800px) {
+    :root {
+        --ui-base-scale: 0.65;
+    }
+}
+
+@media (max-width: 700px) {
     :root {
         --ui-base-scale: 0.6;
+    }
+}
+
+@media (max-width: 600px) {
+    :root {
+        --ui-base-scale: 0.5;
     }
 }
 
@@ -1486,15 +1500,15 @@ header {
         right: 0;
         width: 100%;
         min-width: 100%;
-        height: var(--bottom-nav-height);
+        height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px));
         flex-direction: row;
         align-items: center;
         justify-content: space-around;
-        padding: 0;
+        padding: 0 0 env(safe-area-inset-bottom, 0px) 0;
         border-right: none;
         border-top: none;
         box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-        background: rgba(10, 10, 10, 0.85);
+        background: rgba(10, 10, 10, 0.88);
         backdrop-filter: blur(50px) saturate(1.5);
         -webkit-backdrop-filter: blur(50px) saturate(1.5);
         z-index: 300;
@@ -1556,7 +1570,7 @@ header {
     /* â”€â”€ Content Wrapper: full width + clear bottom space â”€â”€ */
     .content-wrapper {
         width: 100%;
-        padding-bottom: calc(var(--bottom-nav-height) + (10px * var(--ui-scale)));
+        padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + (10px * var(--ui-scale)));
     }
 
     /* â”€â”€ Header: compact â”€â”€ */
@@ -1606,7 +1620,12 @@ header {
         min-height: calc(180px * var(--ui-scale));
         padding: calc(24px * var(--ui-scale)) calc(12px * var(--ui-scale));
         margin-bottom: calc(24px * var(--ui-scale));
-        border-radius: calc(14px * var(--ui-scale));
+        border-radius: calc(16px * var(--ui-scale));
+    }
+
+    /* Hide extra blobs in portrait — cleaner + better performance */
+    .hero-blob:not(:first-child) {
+        display: none;
     }
 
     .hero-title {
@@ -1643,6 +1662,8 @@ header {
         scrollbar-width: none;
         margin-bottom: calc(6px * var(--ui-scale));
         gap: calc(12px * var(--ui-scale));
+        padding-left: calc(8px * var(--ui-scale));
+        padding-right: calc(8px * var(--ui-scale));
     }
 
     .row-posters::-webkit-scrollbar {
@@ -1657,8 +1678,12 @@ header {
         font-size: calc(1.1rem * var(--ui-scale));
     }
 
+    .row-header {
+        padding: 0 calc(8px * var(--ui-scale));
+    }
+
     .row-container {
-        margin-bottom: calc(16px * var(--ui-scale));
+        margin-bottom: calc(20px * var(--ui-scale));
     }
 
     /* Hide scroll arrows on touch */
@@ -1695,7 +1720,7 @@ header {
 
     /* ── Search/Browse: compact ── */
     .browse-hero {
-        padding: calc(40px * var(--ui-scale)) calc(16px * var(--ui-scale));
+        padding: calc(28px * var(--ui-scale)) calc(16px * var(--ui-scale));
     }
 
     .browse-hero-title {
@@ -1806,16 +1831,47 @@ header {
         width: calc(115px * var(--ui-scale));
         min-width: calc(115px * var(--ui-scale));
     }
+
+    /* ── Disable Hover Scaling on Touch (Mobile) ── 
+       Touch devices don't need hover scales, and they can cause jitter on tap.
+       We meticulously override :hover, :active, and :focus-visible.
+       Crucially, we also disable `transition` to prevent animation lag. */
+    .music-card:hover, .music-card:active, .music-card:focus-visible,
+    .music-card.type-artist:hover, .music-card.type-artist:active, .music-card.type-artist:focus-visible,
+    .playlist-card:hover, .playlist-card:active, .playlist-card:focus-visible,
+    .btn:hover, .btn:active, .btn:focus-visible,
+    .nav-links a:hover, .nav-links a:active, .nav-links a:focus-visible,
+    .library-item:hover, .library-item:active, .library-item:focus-visible,
+    .artist-card:hover, .artist-card:active, .artist-card:focus-visible,
+    .lang-modal-close:hover, .lang-modal-close:active, .lang-modal-close:focus-visible,
+    .close-btn:hover, .close-btn:active, .close-btn:focus-visible,
+    .settings-item:hover, .settings-item:active, .settings-item:focus-visible,
+    .player-control-btn.main:hover, .player-control-btn.main:active,
+    .player-control-btn.secondary:hover, .player-control-btn.secondary:active {
+        transform: scale(1) !important;
+        transition: none !important;
+    }
+    
+    /* Cancel the stacked disk hover effect specifically */
+    .music-card.type-album:hover .card-image-box::before,
+    .music-card.type-album:active .card-image-box::before,
+    .music-card.type-album:focus-visible .card-image-box::before {
+        transform: translate(6px, 6px) scale(0.98) !important;
+    }
+    .music-card.type-album:hover .card-image-box::after,
+    .music-card.type-album:active .card-image-box::after,
+    .music-card.type-album:focus-visible .card-image-box::after {
+        transform: translate(12px, 12px) scale(0.96) !important;
+    }
 }
 
-
-/* â”€â”€ Player Bar: compact stacked layout â”€â”€ */
+/* ── Player Bar: compact stacked layout ── */
 #player-bar {
     grid-template-columns: 1fr;
     grid-template-rows: auto auto;
-    gap: calc(6px * var(--ui-scale));
+    gap: calc(8px * var(--ui-scale));
     padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(16px * var(--ui-scale));
-    margin: 0 calc(24px * var(--ui-scale)) calc(88px * var(--ui-scale)) calc(24px * var(--ui-scale));
+    margin: 0 calc(16px * var(--ui-scale)) calc(calc(88px * var(--ui-scale)) + env(safe-area-inset-bottom, 0px)) calc(16px * var(--ui-scale));
     border-radius: calc(16px * var(--ui-scale));
     min-height: unset;
     height: auto;
@@ -1834,9 +1890,9 @@ header {
 }
 
 .player-cover {
-    width: calc(44px * var(--ui-scale));
-    height: calc(44px * var(--ui-scale));
-    border-radius: calc(8px * var(--ui-scale));
+    width: calc(52px * var(--ui-scale));
+    height: calc(52px * var(--ui-scale));
+    border-radius: calc(10px * var(--ui-scale));
 }
 
 .player-track-details {
@@ -1846,14 +1902,17 @@ header {
 }
 
 .player-title {
-    font-size: 0.85rem;
+    font-size: 0.88rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
 .player-artist {
-    font-size: 0.7rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.01em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -1891,6 +1950,7 @@ header {
 
 .player-progress {
     max-width: 100%;
+    padding: 0 calc(4px * var(--ui-scale));
 }
 
 .time-label {
