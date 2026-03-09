@@ -1,4 +1,4 @@
-{
+﻿{
     "home": "Inicio",
     "search": "Buscar",
     "library": "Tu Biblioteca",
@@ -63,5 +63,10 @@
     "top_albums_header": "Mejores Álbumes",
     "top_artists_header": "Mejores Artistas",
     "moods_header": "Explorar Estados de Ánimo",
-    "new_releases_header": "Nuevos Lanzamientos"
+    "new_releases_header": "Nuevos Lanzamientos",
+    "profile_edit_title": "Editar Perfil",
+    "profile_name_label": "Nombre",
+    "profile_bio_label": "Bio",
+    "profile_save": "Guardar",
+    "top_artists": "Artistas Principales"
 }

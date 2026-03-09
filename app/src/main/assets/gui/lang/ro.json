@@ -1,4 +1,4 @@
-{
+﻿{
     "home": "Acasă",
     "search": "Căutare",
     "library": "Biblioteca ta",
@@ -69,5 +69,10 @@
     "view_artist": "Vezi artistul",
     "song": "Cântec",
     "song_no_track": "Nimic nu se redă",
-    "song_no_track_desc": "Redă o piesă mai întâi, apoi apasă pe Mai multe informații pentru a vedea detaliile."
+    "song_no_track_desc": "Redă o piesă mai întâi, apoi apasă pe Mai multe informații pentru a vedea detaliile.",
+    "profile_edit_title": "Editare Profil",
+    "profile_name_label": "Nume",
+    "profile_bio_label": "Bio",
+    "profile_save": "Salvează",
+    "top_artists": "Artiști de Top"
 }

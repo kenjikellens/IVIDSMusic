@@ -1,52 +1,106 @@
 <div class="profile-container">
-    <div class="profile-header">
-        <div class="profile-avatar-wrapper">
-            <img src="svg/user.svg" alt="Avatar" class="profile-avatar">
-            <div class="profile-avatar-edit">
-                <img src="svg/search.svg" alt="Edit" style="filter: invert(1);">
-            </div>
-        </div>
-        <div class="profile-basic-info">
-            <h1 class="profile-name" id="profile-name-display" data-i18n="listener">Listener</h1>
-            <p class="profile-bio" id="profile-bio-display" data-i18n="no_bio">No bio yet.</p>
-            <div class="profile-actions">
-                <button class="btn btn-primary" data-i18n="edit_profile">Edit Profile</button>
-            </div>
-        </div>
+  <div class="profile-header">
+    <div class="profile-avatar-wrapper">
+      <img src="svg/user.svg" alt="Avatar" class="profile-avatar" />
+    </div>
+    <div class="profile-basic-info">
+      <h1 class="profile-name" id="profile-name-display" data-i18n="listener">
+        Listener
+      </h1>
+      <p class="profile-bio" id="profile-bio-display" data-i18n="no_bio">
+        No bio yet.
+      </p>
+      <div class="profile-actions">
+        <button class="btn btn-primary" data-i18n="edit_profile">
+          Edit Profile
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="profile-stats-grid">
+    <div class="stat-card">
+      <div class="stat-value" id="stat-liked-count">0</div>
+      <div class="stat-label" data-i18n="liked_songs">Liked Songs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-playlists-count">0</div>
+      <div class="stat-label" data-i18n="playlists">Playlists</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="stat-minutes-count">0</div>
+      <div class="stat-label" data-i18n="minutes_played">Minutes Played</div>
+    </div>
+  </div>
+
+  <div class="profile-content">
+    <div class="profile-section">
+      <div class="row-header">
+        <h2 class="row-title" data-i18n="recently_played">Recently Played</h2>
+      </div>
+      <div class="row-posters" id="profile-recent-list">
+        <!-- Populated by JS -->
+      </div>
     </div>
 
-    <div class="profile-stats-grid">
-        <div class="stat-card">
-            <div class="stat-value" id="stat-liked-count">0</div>
-            <div class="stat-label" data-i18n="liked_songs">Liked Songs</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-playlists-count">0</div>
-            <div class="stat-label" data-i18n="playlists">Playlists</div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-value" id="stat-minutes-count">0</div>
-            <div class="stat-label" data-i18n="minutes_played">Minutes Played</div>
-        </div>
+    <div class="profile-section">
+      <div class="row-header">
+        <h2 class="row-title" data-i18n="top_genres">Top Genres</h2>
+      </div>
+      <div class="genres-grid" id="profile-genres-list">
+        <p class="settings-desc" data-i18n="no_history">
+          No listening history yet.
+        </p>
+      </div>
     </div>
 
-    <div class="profile-content">
-        <div class="profile-section">
-            <div class="row-header">
-                <h2 class="row-title" data-i18n="recently_played">Recently Played</h2>
-            </div>
-            <div class="row-posters" id="profile-recent-list">
-                <!-- Populated by JS -->
-            </div>
-        </div>
-
-        <div class="profile-section">
-            <div class="row-header">
-                <h2 class="row-title" data-i18n="top_genres">Top Genres</h2>
-            </div>
-            <div class="genres-grid" id="profile-genres-list">
-                <p class="settings-desc" data-i18n="no_history">No listening history yet.</p>
-            </div>
-        </div>
+    <div class="profile-section is-hidden" id="profile-artists-section">
+      <div class="row-header">
+        <h2 class="row-title" data-i18n="top_artists">Top Artists</h2>
+      </div>
+      <div class="row-posters" id="profile-top-artists">
+        <!-- Populated by JS -->
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- Edit Profile Modal -->
+<div class="modal-overlay" id="profile-edit-modal">
+  <div class="modal-card profile-edit-card">
+    <button class="modal-close-btn" aria-label="Close">&times;</button>
+    <h2 class="modal-title" data-i18n="profile_edit_title">Edit Profile</h2>
+
+    <div class="profile-edit-form">
+      <label class="profile-edit-label" data-i18n="profile_name_label"
+        >Display Name</label
+      >
+      <input
+        type="text"
+        id="profile-edit-name"
+        class="profile-edit-input"
+        placeholder="Your name..."
+        maxlength="30"
+      />
+
+      <label class="profile-edit-label" data-i18n="profile_bio_label"
+        >Bio</label
+      >
+      <textarea
+        id="profile-edit-bio"
+        class="profile-edit-input profile-edit-textarea"
+        placeholder="Tell us about yourself..."
+        maxlength="120"
+        rows="3"
+      ></textarea>
+
+      <button
+        id="profile-save-btn"
+        class="btn btn-primary profile-save-btn"
+        data-i18n="profile_save"
+      >
+        Save
+      </button>
+    </div>
+  </div>
 </div>

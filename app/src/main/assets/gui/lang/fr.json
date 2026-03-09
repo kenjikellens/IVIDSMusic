@@ -1,4 +1,4 @@
-{
+﻿{
     "home": "Accueil",
     "search": "Recherche",
     "library": "Votre bibliothèque",
@@ -69,5 +69,10 @@
     "view_artist": "Voir l'artiste",
     "song": "Chanson",
     "song_no_track": "Rien ne joue",
-    "song_no_track_desc": "Jouez d'abord un morceau, puis appuyez sur Plus d'infos pour voir ses détails."
+    "song_no_track_desc": "Jouez d'abord un morceau, puis appuyez sur Plus d'infos pour voir ses détails.",
+    "profile_edit_title": "Modifier le profil",
+    "profile_name_label": "Nom d'affichage",
+    "profile_bio_label": "Bio",
+    "profile_save": "Enregistrer",
+    "top_artists": "Artistes Favoris"
 }

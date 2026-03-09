@@ -1,4 +1,4 @@
-{
+﻿{
     "home": "Startseite",
     "search": "Suchen",
     "library": "Deine Bibliothek",
@@ -69,5 +69,10 @@
     "view_artist": "Künstler ansehen",
     "song": "Lied",
     "song_no_track": "Nichts wird abgespielt",
-    "song_no_track_desc": "Spiele zuerst einen Song ab en tippe dann op Mehr Info, um Details anzuzeigen."
+    "song_no_track_desc": "Spiele zuerst einen Song ab en tippe dann op Mehr Info, um Details anzuzeigen.",
+    "profile_edit_title": "Profil bearbeiten",
+    "profile_name_label": "Anzeigename",
+    "profile_bio_label": "Bio",
+    "profile_save": "Speichern",
+    "top_artists": "Top-Künstler"
 }

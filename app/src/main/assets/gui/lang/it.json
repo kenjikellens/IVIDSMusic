@@ -1,4 +1,4 @@
-{
+﻿{
     "home": "Home",
     "search": "Cerca",
     "library": "La Tua Libreria",
@@ -69,5 +69,10 @@
     "view_artist": "Visualizza artista",
     "song": "Canzone",
     "song_no_track": "Nessun brano in riproduzione",
-    "song_no_track_desc": "Riproduci prima un brano, quindi tocca Altre info per visualizzarne i dettagli."
+    "song_no_track_desc": "Riproduci prima un brano, quindi tocca Altre info per visualizzarne i dettagli.",
+    "profile_edit_title": "Modifica Profilo",
+    "profile_name_label": "Nome visualizzato",
+    "profile_bio_label": "Bio",
+    "profile_save": "Salva",
+    "top_artists": "Artisti Principali"
 }

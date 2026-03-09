@@ -1,4 +1,4 @@
-{
+﻿{
     "home": "首页",
     "search": "搜索",
     "library": "媒体库",
@@ -69,5 +69,10 @@
     "view_artist": "查看艺人",
     "song": "歌曲",
     "song_no_track": "没有正在播放的内容",
-    "song_no_track_desc": "先播放一首歌曲，然后点击“更多信息”查看其详细信息。"
+    "song_no_track_desc": "先播放一首歌曲，然后点击“更多信息”查看其详细信息。",
+    "profile_edit_title": "编辑个人资料",
+    "profile_name_label": "显示名称",
+    "profile_bio_label": "简介",
+    "profile_save": "保存",
+    "top_artists": "热门艺术家"
 }

@@ -1,4 +1,4 @@
-{
+﻿{
     "home": "Início",
     "search": "Buscar",
     "library": "Sua Biblioteca",
@@ -69,5 +69,10 @@
     "view_artist": "Ver artista",
     "song": "Música",
     "song_no_track": "Nada está a tocar",
-    "song_no_track_desc": "Reproduza uma faixa primeiro e toque em Mais Informações para ver seus detalhes."
+    "song_no_track_desc": "Reproduza uma faixa primeiro e toque em Mais Informações para ver seus detalhes.",
+    "profile_edit_title": "Editar Perfil",
+    "profile_name_label": "Nome",
+    "profile_bio_label": "Bio",
+    "profile_save": "Guardar",
+    "top_artists": "Artistas Principais"
 }

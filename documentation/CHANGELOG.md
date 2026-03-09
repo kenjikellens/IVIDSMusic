@@ -1,3 +1,9 @@
+[2026-03-09] EDITED app/src/main/assets/logic/history.js: Added addListeningTime() and getTotalMinutes() methods for tracking total listening duration
+[2026-03-09] EDITED app/src/main/assets/logic/player.js: Integrated listening time tracking into onplay/onpause/onended events via _lastPlayTimestamp
+[2026-03-09] EDITED app/src/main/assets/logic/pages.js: Rewrote initProfile() with live stat counters, Top Genres, Top Artists, and Edit Profile modal logic
+[2026-03-09] EDITED app/src/main/assets/gui/pages/profile.html: Added Edit Profile modal, Top Artists section, and restructured layout
+[2026-03-09] EDITED app/src/main/assets/gui/index.css: Added Profile page styles (header, stats grid, genre chips, edit modal, responsive portrait)
+[2026-03-09] EDITED app/src/main/assets/gui/lang/\*.json: Added profile_edit_title, profile_name_label, profile_bio_label, profile_save, top_artists keys to all 13 languages
 [2026-03-09] EDITED gui/index.css: Overhauled responsive breakpoints with high-res support (up to 2.2x for 4K/8K) and strictly aligned mobile breakpoints with project rules
 [2026-03-03] EDITED app/src/main/assets/logic/pages.js: Removed native browser confirm() popup from clearHistory per user request
 [2026-03-03] EDITED app/src/main/assets/logic/pages.js: Exposed PageSystem to window to fix 'Clear All' button and library search inline handlers
@@ -18,7 +24,7 @@
 [2026-03-03] EDITED documentation/algorithm.md: Refined scoring rules (immediate +1 for track clicks)
 [2026-03-01] EDITED app/src/main/assets/gui/index.css: Added standard background-clip property for text compatibility
 [2026-02-26] EDITED .agents/rules/ai-rules.md: Updated AI rules file per user request
-[2026-02-26] DELETED AI_RULES.md: Removed duplicate rules file
+[2026-02-26] DELETED AI*RULES.md: Removed duplicate rules file
 [2026-02-26] ADDED CHANGELOG.md: Created initial changelog with entries for recent changes
 [2026-02-26] EDITED CHANGELOG.md: Added changelog entries for recent changes
 [2026-02-26] EDITED app/src/main/assets/gui/pages/home.html: Added close (X) button to hero section
@@ -58,7 +64,7 @@
 [2026-02-27] EDITED gui/pages/home.html: Wrapped hero buttons and titles in spans for safe translation
 [2026-02-27] EDITED gui/pages/search.html: Wrapped results labels and category titles in spans for localization
 [2026-02-27] EDITED logic/cards.js: Added `data-i18n` support for dynamic row headers on the home page
-[2026-02-27] EDITED gui/lang/_.json: Added missing keys for home page row headers and dynamic UI elements
+[2026-02-27] EDITED gui/lang/*.json: Added missing keys for home page row headers and dynamic UI elements
 [2026-02-27] EDITED logic/config.js: Improved environment detection and added explicit `isNative` property
 [2026-02-27] EDITED logic/api.js: Fixed typos in `isNative` check and converted `proxyUrl` to dynamic getter to resolve 'failed to fetch' errors
 [2026-02-27] EDITED logic/player.js: Switched to `MusicAPI._fetch` for playback and save requests to ensure consistent CORS/proxy handling

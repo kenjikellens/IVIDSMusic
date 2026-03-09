@@ -14,6 +14,7 @@ export const YouTubePlayer = {
     isDraggingSlider: false,
     _listenScored: false,
     _completionScored: false,
+    _lastPlayTimestamp: 0,
 
     init() {
         if (this.isInitialized) return;
@@ -33,6 +34,7 @@ export const YouTubePlayer = {
         // Audio events
         this.audio.onplay = () => {
             this.isPlaying = true;
+            this._lastPlayTimestamp = Date.now();
             playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>';
             playerBar.classList.remove('is-inactive');
             // Start smooth update loop
@@ -41,11 +43,23 @@ export const YouTubePlayer = {
 
         this.audio.onpause = () => {
             this.isPlaying = false;
+            // Track listening time
+            if (this._lastPlayTimestamp > 0) {
+                const elapsed = (Date.now() - this._lastPlayTimestamp) / 1000;
+                HistorySystem.addListeningTime(elapsed);
+                this._lastPlayTimestamp = 0;
+            }
             playBtn.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
             if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
         };
 
         this.audio.onended = () => {
+            // Track listening time
+            if (this._lastPlayTimestamp > 0) {
+                const elapsed = (Date.now() - this._lastPlayTimestamp) / 1000;
+                HistorySystem.addListeningTime(elapsed);
+                this._lastPlayTimestamp = 0;
+            }
             if (this.animationFrameId) cancelAnimationFrame(this.animationFrameId);
             this.handleCompletion();
             this.next();

@@ -1,4 +1,4 @@
-{
+﻿{
     "home": "ホーム",
     "search": "検索",
     "library": "ライブラリ",
@@ -69,5 +69,10 @@
     "view_artist": "アーティストを見る",
     "song": "曲",
     "song_no_track": "再生中の曲はありません",
-    "song_no_track_desc": "最初に曲を再生してから、「詳細情報」をタップして詳細を表示します。"
+    "song_no_track_desc": "最初に曲を再生してから、「詳細情報」をタップして詳細を表示します。",
+    "profile_edit_title": "プロフィール編集",
+    "profile_name_label": "表示名",
+    "profile_bio_label": "自己紹介",
+    "profile_save": "保存",
+    "top_artists": "トップアーティスト"
 }

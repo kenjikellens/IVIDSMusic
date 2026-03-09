@@ -3,6 +3,7 @@ import { YouTubePlayer } from './player.js';
 import { CardSystem } from './cards.js';
 import { HistorySystem } from './history.js';
 import { SettingsManager } from './settings-manager.js';
+import { DiscoveryEngine } from './recommendations.js';
 
 let isHeroDismissed = false;
 
@@ -299,25 +300,141 @@ export const PageSystem = {
 
     async initProfile() {
         const recentList = document.getElementById('profile-recent-list');
-        if (!recentList) return;
+        const genresList = document.getElementById('profile-genres-list');
 
-        // Load real recently played from centralized history
-        const history = HistorySystem.get();
+        // --- Load profile info from localStorage ---
+        const profile = JSON.parse(localStorage.getItem('iv_profile') || '{}');
+        const nameEl = document.getElementById('profile-name-display');
+        const bioEl = document.getElementById('profile-bio-display');
+        if (nameEl && profile.name) nameEl.textContent = profile.name;
+        if (bioEl && profile.bio) bioEl.textContent = profile.bio;
 
-        if (history.length === 0) {
-            recentList.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-icon">🎵</div>
-                    <p>Nothing played yet. Start listening!</p>
-                </div>`;
-            return;
+        // --- Populate stat counters ---
+        const scores = DiscoveryEngine.getScores();
+
+        // Liked Songs = tracks with score >= 3
+        const likedCount = Object.values(scores.tracks || {}).filter(s => s >= 3).length;
+        const likedEl = document.getElementById('stat-liked-count');
+        if (likedEl) likedEl.textContent = likedCount;
+
+        // Minutes Played
+        const minutesEl = document.getElementById('stat-minutes-count');
+        if (minutesEl) minutesEl.textContent = HistorySystem.getTotalMinutes();
+
+        // Playlists (none yet)
+        const playlistsEl = document.getElementById('stat-playlists-count');
+        if (playlistsEl) playlistsEl.textContent = '0';
+
+        // --- Recently Played ---
+        if (recentList) {
+            const history = HistorySystem.get();
+            if (history.length === 0) {
+                recentList.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🎵</div>
+                        <p>Nothing played yet. Start listening!</p>
+                    </div>`;
+            } else {
+                recentList.innerHTML = '';
+                history.slice(0, 8).forEach(track => {
+                    recentList.appendChild(CardSystem.createCard(track));
+                });
+            }
         }
 
-        history.slice(0, 6).forEach(track => {
-            recentList.appendChild(CardSystem.createCard(track));
-        });
+        // --- Top Genres ---
+        if (genresList) {
+            const interests = DiscoveryEngine.getInterests();
+            const topGenres = interests.genres.slice(0, 6);
+
+            if (topGenres.length === 0) {
+                genresList.innerHTML = '<p class="settings-desc" data-i18n="no_history">No listening history yet.</p>';
+            } else {
+                genresList.innerHTML = '';
+                const genreColors = [
+                    ['#ff6b6b', '#ee5a24'], ['#4dd0e1', '#0288d1'], ['#a29bfe', '#6c5ce7'],
+                    ['#ffeaa7', '#fdcb6e'], ['#55efc4', '#00b894'], ['#fd79a8', '#e84393']
+                ];
+                topGenres.forEach((genre, i) => {
+                    const chip = document.createElement('div');
+                    chip.className = 'profile-genre-chip';
+                    const colors = genreColors[i % genreColors.length];
+                    chip.style.background = `linear-gradient(135deg, ${colors[0]}22, ${colors[1]}22)`;
+                    chip.style.borderColor = `${colors[0]}44`;
+                    chip.innerHTML = `
+                        <span class="genre-chip-name" style="color: ${colors[0]}">${genre.name}</span>
+                        <span class="genre-chip-score">${genre.score} pts</span>
+                    `;
+                    genresList.appendChild(chip);
+                });
+            }
+        }
+
+        // --- Top Artists ---
+        const artistsList = document.getElementById('profile-top-artists');
+        if (artistsList) {
+            const interests = DiscoveryEngine.getInterests();
+            const topArtists = interests.artists.slice(0, 8);
+
+            if (topArtists.length > 0) {
+                const artistContainer = document.getElementById('profile-artists-section');
+                if (artistContainer) artistContainer.classList.remove('is-hidden');
+                artistsList.innerHTML = '';
+                topArtists.forEach(artist => {
+                    const card = document.createElement('div');
+                    card.className = 'music-card type-artist';
+                    card.tabIndex = 0;
+                    card.innerHTML = `
+                        <div class="card-image-box">
+                            <img src="svg/user.svg" class="poster" alt="${artist.name}" style="filter: invert(0.3); padding: 25%;">
+                        </div>
+                        <div class="card-info-box">
+                            <div class="card-title">${artist.name}</div>
+                        </div>
+                    `;
+                    card.onclick = () => window.Router.loadPage('artist', { name: artist.name });
+                    card.onkeydown = (e) => { if (e.key === 'Enter') card.click(); };
+                    artistsList.appendChild(card);
+                });
+            }
+        }
+
+        // --- Edit Profile Modal ---
+        const editBtn = document.querySelector('.profile-actions .btn-primary');
+        const modal = document.getElementById('profile-edit-modal');
+        if (editBtn && modal) {
+            editBtn.onclick = () => {
+                const stored = JSON.parse(localStorage.getItem('iv_profile') || '{}');
+                const nameInput = document.getElementById('profile-edit-name');
+                const bioInput = document.getElementById('profile-edit-bio');
+                if (nameInput) nameInput.value = stored.name || '';
+                if (bioInput) bioInput.value = stored.bio || '';
+                modal.classList.add('active');
+            };
+
+            // Close modal
+            const closeBtn = modal.querySelector('.modal-close-btn');
+            if (closeBtn) closeBtn.onclick = () => modal.classList.remove('active');
+            modal.onclick = (e) => { if (e.target === modal) modal.classList.remove('active'); };
+
+            // Save
+            const saveBtn = document.getElementById('profile-save-btn');
+            if (saveBtn) {
+                saveBtn.onclick = () => {
+                    const name = document.getElementById('profile-edit-name')?.value.trim();
+                    const bio = document.getElementById('profile-edit-bio')?.value.trim();
+                    const data = { name: name || 'Listener', bio: bio || '' };
+                    localStorage.setItem('iv_profile', JSON.stringify(data));
+
+                    if (nameEl) nameEl.textContent = data.name;
+                    if (bioEl) bioEl.textContent = data.bio || 'No bio yet.';
+                    modal.classList.remove('active');
+                };
+            }
+        }
 
         if (window.Loader) window.Loader.init();
+        if (window.LanguageManager) window.LanguageManager.translateUI(document.getElementById('main-view'));
     },
 
     async initLibrary() {

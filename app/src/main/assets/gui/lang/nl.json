@@ -1,4 +1,4 @@
-{
+﻿{
     "home": "Startpagina",
     "search": "Zoeken",
     "library": "Je bibliotheek",
@@ -76,5 +76,10 @@
     "foryou_empty_desc": "Speel nummers of like artiesten om hier persoonlijke aanbevelingen te krijgen.",
     "loading_recommendations": "Je smaak analyseren...",
     "like": "Vind ik leuk",
-    "dislike": "Vind ik niet leuk"
+    "dislike": "Vind ik niet leuk",
+    "profile_edit_title": "Profiel bewerken",
+    "profile_name_label": "Weergavenaam",
+    "profile_bio_label": "Bio",
+    "profile_save": "Opslaan",
+    "top_artists": "Topartiesten"
 }
