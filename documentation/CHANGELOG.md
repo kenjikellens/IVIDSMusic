@@ -1,3 +1,4 @@
+[2026-03-09] EDITED gui/index.css: Overhauled responsive breakpoints with high-res support (up to 2.2x for 4K/8K) and strictly aligned mobile breakpoints with project rules
 [2026-03-03] EDITED app/src/main/assets/logic/pages.js: Removed native browser confirm() popup from clearHistory per user request
 [2026-03-03] EDITED app/src/main/assets/logic/pages.js: Exposed PageSystem to window to fix 'Clear All' button and library search inline handlers
 [2026-03-03] EDITED app/src/main/assets/logic/api.js: Fixed critical syntax error causing UI loading failure
