@@ -37,3 +37,5 @@ For every file you **edit**, **add**, or **delete**, you must append a new line 
 - This log entry must be written **every time** a file operation occurs, without exception.
 
 Always follow these rules for every task you perform.
+
+P.S.: NEVER use translate X or Y unless specifically asked for, use preferbly a thick(er) border for buttons on hover/focus or backgroudn change instead!
