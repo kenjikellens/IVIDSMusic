@@ -1476,22 +1476,26 @@ header {
 
 /* 5K/8K Monitors & Large TVs */
 @media (min-width: 3800px) {
-    :root { --ui-base-scale: 2.2; }
+    /* Styles the document root scale for 5K/8K ultra-large displays and TVs to keep content legible */
+    :root { --ui-base-scale: 1.35; }
 }
 
 /* 4K Monitors / Large Displays */
 @media (min-width: 2500px) {
-    :root { --ui-base-scale: 1.9; }
+    /* Styles the document root scale for 4K high-resolution monitors to balance density and sizing */
+    :root { --ui-base-scale: 1.2; }
 }
 
 /* QHD / High-Res Desktop (1440p) */
 @media (min-width: 1900px) {
-    :root { --ui-base-scale: 1.65; }
+    /* Styles the document root scale for QHD displays to keep elements comfortable for close-up viewing */
+    :root { --ui-base-scale: 1.1; }
 }
 
 /* Standard Widescreen (1080p) */
 @media (min-width: 1600px) {
-    :root { --ui-base-scale: 1.4; }
+    /* Styles the document root scale for standard 1080p monitors at a comfortable, default scale */
+    :root { --ui-base-scale: 1.0; }
 }
 
 /* ── Standard & Mobile (Scale Down) ── */

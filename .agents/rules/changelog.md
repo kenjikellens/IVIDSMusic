@@ -12,5 +12,7 @@ Every single file modification (create, edit, or delete) MUST be logged in `CHAN
    `[YYYY-MM-DD] [ACTION] <filename>: <brief description of what was changed/added/deleted>`
    - **ACTION** must be one of: `EDITED`, `ADDED`, or `DELETED`.
    - Description must be concise but specific enough to understand what changed and why.
-4. **LOCATION**: Update the file located at [CHANGELOG.md](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/documentation/CHANGELOG.md).
-5. **SYNC REQUIREMENT**: If committing or pushing code, the changelog update must be included in the same commit.
+4. **CHRONOLOGICAL ORDER**: Every new entry MUST be appended to the **bottom** of the file, meaning the newest log is always at the bottom.
+5. **RESET ON RELEASE**: The `CHANGELOG.md` file must ONLY contain the latest changes since the last release. When a new release is published, the changelog starts fresh tracking only subsequent changes.
+6. **LOCATION**: Update the file located at [CHANGELOG.md](file:///c:/Users/kenji/Documents/PROJECTS/IVIDS%20Music/documentation/CHANGELOG.md).
+7. **SYNC REQUIREMENT**: If committing or pushing code, the changelog update must be included in the same commit.
