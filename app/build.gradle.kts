@@ -39,6 +39,7 @@ android {
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
+    implementation(libs.androidx.activity)
     implementation(libs.material)
     implementation(libs.androidx.constraintlayout)
     implementation("androidx.webkit:webkit:1.13.0")
