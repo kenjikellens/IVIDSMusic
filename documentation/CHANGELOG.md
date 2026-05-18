@@ -1,3 +1,10 @@
+[2026-05-18] EDITED IVIDSMusic.apk: Recompiled distribution package to compile and ship all v0.1.4 visual settings and options context menu fixes
+[2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Bumped visual version label to 0.1.4 (Beta) inside settings dashboard for UI consistency
+[2026-05-18] EDITED app/src/main/assets/logic/updater.js: Bumped CURRENT_VERSION constant to 0.1.4 to coordinate with v0.1.4 release
+[2026-05-18] EDITED app/build.gradle.kts: Bumped versionName to v0.1.4 and incremented versionCode to 6.
+[2026-05-18] EDITED IVIDSMusic.apk: Recompiled development binary to include the premium three-dots options context menu improvements
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Configured absolute-positioned .card-more-btn options styling, focus/hover triggers, and styled .popup-back-btn for nested popover menu transitions
+[2026-05-18] EDITED app/src/main/assets/logic/cards.js: Replaced song card playlist overlay (+) with absolute-positioned three-dots (⋮) Options menu button triggering multi-action play/queue/playlist popup
 [2026-05-18] EDITED app/src/main/assets/logic/pages.js: Disabled catastrophic search variety filtering by setting unique parameter to false, restoring multiple songs and albums per artist
 [2026-05-18] EDITED app/src/main/assets/logic/updater.js: Configured update checker request to use proxy-aware fetch helper, resolving Native WebView and browser CORS blockages
 [2026-05-18] EDITED app/src/main/assets/gui/index.css: Fixed search layout squishing on desktop by configuring search-filter-bar width to auto (default) and 100% (mobile portrait) and preventing Title/Subtitle wrapping on desktop

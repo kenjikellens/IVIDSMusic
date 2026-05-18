@@ -27,6 +27,15 @@ export const CardSystem = {
      * @param {Object} track - The data object containing track/artist details.
      * @returns {HTMLElement} The populated, interactive card element.
      */
+    /**
+     * Method: hydrateCard
+     * Description: Populates a card DOM container with track metadata, cover artwork, and event hooks.
+     *              Places an absolute-positioned three-dots options button at the top-right of the card,
+     *              allowing secondary play/queue/playlist controls to be loaded contextually.
+     * @param {HTMLElement} card - The DOM container element to populate.
+     * @param {Object} track - The data object containing track/artist details.
+     * @returns {HTMLElement} The populated, interactive card element.
+     */
     hydrateCard(card, track) {
         card.className = `music-card type-${track.type || 'song'}`;
         card.tabIndex = 0;
@@ -40,11 +49,13 @@ export const CardSystem = {
                     <div class="card-play-overlay">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     </div>
-                    <button class="card-add-to-playlist-btn" title="Add to Playlist" tabindex="-1">
-                        +
-                    </button>
                 ` : ''}
             </div>
+            ${track.type === 'song' ? `
+                <button class="card-more-btn" title="Options" tabindex="-1">
+                    ⋮
+                </button>
+            ` : ''}
             <div class="card-info-box">
                 <div class="card-title">${track.title || track.name}</div>
                 ${track.type === 'artist' ? '' : `
@@ -80,12 +91,12 @@ export const CardSystem = {
             });
         }
 
-        const addBtn = card.querySelector('.card-add-to-playlist-btn');
-        if (addBtn) {
-            addBtn.onclick = (e) => {
+        const moreBtn = card.querySelector('.card-more-btn');
+        if (moreBtn) {
+            moreBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                this.openAddToPlaylistPopover(e, track);
+                this.openOptionsPopover(e, track);
             };
         }
 
@@ -177,62 +188,175 @@ export const CardSystem = {
      * @param {Event} event - The triggering click event containing coordinate locations.
      * @param {Object} track - The track data object to add.
      */
-    openAddToPlaylistPopover(event, track) {
+    /**
+     * Method: openOptionsPopover
+     * Description: Spawns a premium glassmorphic contextual popover for track interaction,
+     *              supporting playing immediately, queueing next, appending to the active queue,
+     *              or transitioning into a nested menu for localized playlist addition.
+     * @param {Event} event - Triggering mouse/touch event containing client coordinates.
+     * @param {Object} track - The active song/track data object.
+     */
+    openOptionsPopover(event, track) {
         // Remove any existing popover first
         const existing = document.getElementById('add-to-playlist-popover');
         if (existing) existing.remove();
-
-        const playlists = window.PlaylistManager ? window.PlaylistManager.getPlaylists() : [];
 
         const popover = document.createElement('div');
         popover.id = 'add-to-playlist-popover';
         popover.className = 'glassmorphism add-to-playlist-popup';
         
-        // Calculate position relative to viewport
+        // Calculate position relative to document layout
         const rect = event.currentTarget.getBoundingClientRect();
-        popover.style.position = 'fixed';
+        popover.style.position = 'absolute';
         popover.style.top = `${rect.bottom + window.scrollY + 5}px`;
         popover.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 220)}px`;
         popover.style.zIndex = '9999';
 
-        let innerHTML = `<div class="popup-title">Add to Playlist</div>`;
-        
-        if (playlists.length === 0) {
-            innerHTML += `
-                <div class="popup-empty-state">
-                    <p>No playlists found.</p>
-                    <a href="#" onclick="event.preventDefault(); window.Router.loadPage('library')">Create in Library</a>
-                </div>
-            `;
-        } else {
-            innerHTML += `<div class="popup-list">`;
-            playlists.forEach(pl => {
-                innerHTML += `
-                    <button class="popup-item" data-playlist-id="${pl.id}">
-                        <span class="popup-icon">📂</span>
-                        <span class="popup-text">${pl.name}</span>
-                    </button>
-                `;
-            });
-            innerHTML += `</div>`;
-        }
-
-        popover.innerHTML = innerHTML;
         document.body.appendChild(popover);
 
-        // Bind clicks for playlist options
-        popover.querySelectorAll('.popup-item').forEach(btn => {
-            btn.onclick = (clickEvent) => {
-                clickEvent.preventDefault();
-                clickEvent.stopPropagation();
-                const plId = btn.dataset.playlistId;
-                if (window.PlaylistManager) {
-                    const result = window.PlaylistManager.addTrack(plId, track);
-                    alert(result.message);
-                }
-                popover.remove();
-            };
-        });
+        // Renders the main options list (Play Now, Play Next, Add to Queue, Add to Playlist...)
+        const showMainMenu = () => {
+            popover.innerHTML = `
+                <div class="popup-title">${track.title}</div>
+                <div class="popup-list">
+                    <button class="popup-item" id="opt-play-now">
+                        <span class="popup-icon">▶</span>
+                        <span class="popup-text">Play Now</span>
+                    </button>
+                    <button class="popup-item" id="opt-play-next">
+                        <span class="popup-icon">⏭</span>
+                        <span class="popup-text">Play Next</span>
+                    </button>
+                    <button class="popup-item" id="opt-add-to-queue">
+                        <span class="popup-icon">➕</span>
+                        <span class="popup-text">Add to Queue</span>
+                    </button>
+                    <button class="popup-item" id="opt-add-to-playlist">
+                        <span class="popup-icon">📂</span>
+                        <span class="popup-text">Add to Playlist...</span>
+                    </button>
+                </div>
+            `;
+
+            // Play Now Action
+            const optPlayNow = popover.querySelector('#opt-play-now');
+            if (optPlayNow) {
+                optPlayNow.onclick = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    if (window.YouTubePlayer) {
+                        window.YouTubePlayer.queue = [track];
+                        window.YouTubePlayer.currentIndex = 0;
+                        window.YouTubePlayer.loadTrack(track);
+                    }
+                    popover.remove();
+                };
+            }
+
+            // Play Next Action
+            const optPlayNext = popover.querySelector('#opt-play-next');
+            if (optPlayNext) {
+                optPlayNext.onclick = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    if (window.YouTubePlayer) {
+                        const currentIdx = window.YouTubePlayer.currentIndex;
+                        if (currentIdx === -1) {
+                            window.YouTubePlayer.queue = [track];
+                            window.YouTubePlayer.currentIndex = 0;
+                            window.YouTubePlayer.loadTrack(track);
+                        } else {
+                            window.YouTubePlayer.queue.splice(currentIdx + 1, 0, track);
+                        }
+                    }
+                    popover.remove();
+                };
+            }
+
+            // Add to Queue Action
+            const optAddToQueue = popover.querySelector('#opt-add-to-queue');
+            if (optAddToQueue) {
+                optAddToQueue.onclick = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    if (window.YouTubePlayer) {
+                        if (window.YouTubePlayer.queue.length === 0) {
+                            window.YouTubePlayer.queue = [track];
+                            window.YouTubePlayer.currentIndex = 0;
+                            window.YouTubePlayer.loadTrack(track);
+                        } else {
+                            window.YouTubePlayer.queue.push(track);
+                        }
+                    }
+                    popover.remove();
+                };
+            }
+
+            // Navigate to Playlist Submenu
+            const optAddToPlaylist = popover.querySelector('#opt-add-to-playlist');
+            if (optAddToPlaylist) {
+                optAddToPlaylist.onclick = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    showPlaylistMenu();
+                };
+            }
+        };
+
+        // Renders the sub-level playlist selector interface within the same popover
+        const showPlaylistMenu = () => {
+            const playlists = window.PlaylistManager ? window.PlaylistManager.getPlaylists() : [];
+            let html = `
+                <div class="popup-header-row" style="display:flex; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding: calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale)); margin-bottom: calc(4px * var(--ui-scale));">
+                    <button id="popup-back-btn" class="popup-back-btn" style="background:transparent; border:none; color:#fff; cursor:pointer; font-size: calc(1rem * var(--ui-scale)); margin-right: calc(6px * var(--ui-scale)); padding: 0 calc(4px * var(--ui-scale)); display:flex; align-items:center; justify-content:center;">❮</button>
+                    <div class="popup-title" style="border:none; padding:0; flex-grow:1;">Add to Playlist</div>
+                </div>
+            `;
+
+            if (playlists.length === 0) {
+                html += `
+                    <div class="popup-empty-state">
+                        <p>No playlists found.</p>
+                        <a href="#" onclick="event.preventDefault(); window.Router.loadPage('library')">Create in Library</a>
+                    </div>
+                `;
+            } else {
+                html += `<div class="popup-list">`;
+                playlists.forEach(pl => {
+                    html += `
+                        <button class="popup-item" data-playlist-id="${pl.id}">
+                            <span class="popup-icon">📂</span>
+                            <span class="popup-text">${pl.name}</span>
+                        </button>
+                    `;
+                });
+                html += `</div>`;
+            }
+
+            popover.innerHTML = html;
+
+            // Back Button click returns to Main Menu options
+            const backBtn = popover.querySelector('#popup-back-btn');
+            if (backBtn) {
+                backBtn.onclick = (e) => {
+                    e.preventDefault(); e.stopPropagation();
+                    showMainMenu();
+                };
+            }
+
+            // Bind click handlers for target playlist selections
+            popover.querySelectorAll('.popup-item').forEach(btn => {
+                btn.onclick = (clickEvent) => {
+                    clickEvent.preventDefault();
+                    clickEvent.stopPropagation();
+                    const plId = btn.dataset.playlistId;
+                    if (window.PlaylistManager) {
+                        const result = window.PlaylistManager.addTrack(plId, track);
+                        alert(result.message);
+                    }
+                    popover.remove();
+                };
+            });
+        };
+
+        // Initialize display to main options menu
+        showMainMenu();
 
         // Close on clicking outside
         const closeHandler = (e) => {

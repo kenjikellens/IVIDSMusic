@@ -4108,45 +4108,66 @@ svg.btn-icon {
    ========================================================================== */
 
 /*
- * .card-add-to-playlist-btn:
- * An absolute-positioned, glassmorphic circular "+" button rendered on music cards
- * that opens the playlist add popover. Appears smoothly when hovering or focusing the card.
+ * .card-more-btn:
+ * An absolute-positioned, glassmorphic circular three-dots options button rendered
+ * at the top-right of the entire music card container. Appears smoothly on hover/focus.
  */
-.card-add-to-playlist-btn {
+.card-more-btn {
     position: absolute;
-    top: calc(10px * var(--ui-scale));
-    right: calc(10px * var(--ui-scale));
-    width: calc(30px * var(--ui-scale));
-    height: calc(30px * var(--ui-scale));
+    top: calc(8px * var(--ui-scale));
+    right: calc(8px * var(--ui-scale));
+    width: calc(28px * var(--ui-scale));
+    height: calc(28px * var(--ui-scale));
     border-radius: 50%;
     background: rgba(0, 0, 0, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.15);
     color: #fff;
-    font-size: calc(1.1rem * var(--ui-scale));
+    font-size: calc(0.95rem * var(--ui-scale));
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     opacity: 0;
     transition: opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-    z-index: 5;
-    padding: 0;
+    z-index: 10;
+    padding: 0 0 calc(2px * var(--ui-scale)) 0; /* Align dots perfectly vertically */
 }
 
 /*
- * Show the "+" add button when hovering over the card-image-box container.
+ * Show the options button when hovering or keyboard/D-pad focusing the music card.
  */
-.music-card:hover .card-add-to-playlist-btn,
-.music-card:focus-within .card-add-to-playlist-btn {
+.music-card:hover .card-more-btn,
+.music-card:focus-within .card-more-btn {
     opacity: 1;
 }
 
 /*
  * Custom hover border highlight animation (No prohibited transforms!).
  */
-.card-add-to-playlist-btn:hover {
+.card-more-btn:hover {
     background: rgba(0, 0, 0, 0.9);
     border-color: #fff;
+}
+
+/*
+ * .popup-back-btn:
+ * A clean, circular glassmorphic back arrow button used inside the nested playlist popup menu.
+ */
+.popup-back-btn {
+    width: calc(24px * var(--ui-scale));
+    height: calc(24px * var(--ui-scale));
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.popup-back-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 /*
