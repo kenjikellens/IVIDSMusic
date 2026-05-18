@@ -1531,9 +1531,13 @@ header {
     /*
      * Block: :root portrait variables
      * Purpose: Shifts player heights and resets sidebar widths to accommodate a horizontal bottom tab bar.
-     * Note: Decoupled --ui-base-scale so standard responsive width-based breakpoints scale the UI down on small phones, as per ai-rules.md.
+     * Note: --ui-base-scale is forced to 0.85 in portrait mode regardless of viewport width. This overrides
+     *       the narrow-screen breakpoints (e.g. 0.55 at <600px) that caused microscopic text and icons on
+     *       mobile phones held in portrait orientation. All calc(... * var(--ui-scale)) values resolve
+     *       at a comfortable, readable physical size on mobile.
      */
     :root {
+        --ui-base-scale: 0.85;
         --player-height: auto;
         --sidebar-width: 0px;
         --bottom-nav-height: 60px !important;
@@ -1652,14 +1656,15 @@ header {
     }
 
     .user-profile {
-        width: 36px !important;
-        height: 36px !important;
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 20px !important;
     }
 
     .user-profile img,
     .user-profile svg {
-        width: 20px !important;
-        height: 20px !important;
+        width: 24px !important;
+        height: 24px !important;
     }
 
     .header-right {
@@ -1806,16 +1811,28 @@ header {
         display: none;
     }
 
-    /* ── Search/Browse: compact ── */
+    /* ── Search/Browse: compact hero ── */
+    /*
+     * Selector: .browse-hero (portrait)
+     * Purpose: Compact padding for the search landing page hero banner on mobile.
+     */
     .browse-hero {
         padding: calc(28px * var(--ui-scale)) calc(16px * var(--ui-scale));
     }
 
+    /*
+     * Selector: .browse-hero-title (portrait)
+     * Purpose: Scale-relative heading for the Search landing page at mobile sizes.
+     */
     .browse-hero-title {
         font-size: calc(2rem * var(--ui-scale));
         letter-spacing: -1px;
     }
 
+    /*
+     * Selector: .browse-search-input (portrait)
+     * Purpose: Keeps the landing-page search bar text and padding comfortable on mobile.
+     */
     .browse-search-input {
         padding: calc(14px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(14px * var(--ui-scale)) calc(48px * var(--ui-scale));
         font-size: calc(1rem * var(--ui-scale));
@@ -1829,40 +1846,138 @@ header {
         display: none !important;
     }
 
-    .search-page-title {
-        font-size: calc(1.6rem * var(--ui-scale));
-        white-space: normal !important;
-    }
+    /* ── Search Results Header ── */
 
-    .search-page-subtitle {
+    /*
+     * Selector: .search-page-title (portrait)
+     * Purpose: Scale-independent physical font size so "Search Results" is always clearly readable on phones.
+     *          Allows text to wrap rather than overflow off-screen.
+     */
+    .search-page-title {
+        font-size: 22px !important;
+        letter-spacing: -0.5px !important;
         white-space: normal !important;
+        line-height: 1.2 !important;
     }
 
     /*
-     * Selector: body[data-current-page="search"] .search-page-header
-     * Purpose: Forces the search results heading block and filter capsules to stack vertically, align symmetrically, and span 100% width in mobile portrait.
+     * Selector: .search-page-subtitle (portrait)
+     * Purpose: Legible scale-independent subtitle text below the "Search Results" heading.
      */
+    .search-page-subtitle {
+        font-size: 13px !important;
+        margin-top: 4px !important;
+        white-space: normal !important;
+        line-height: 1.4 !important;
+    }
+
+    /*
+     * Selector: .search-page-header (portrait) — covers both scoped and unscoped usage
+     * Purpose: Stacks the title-group and filter-bar vertically; removes desktop side-by-side alignment.
+     *          Top padding is trimmed to prevent wasted vertical space; bottom margin keeps content breathable.
+     */
+    .search-page-header,
     body[data-current-page="search"] .search-page-header {
         display: flex !important;
         flex-direction: column !important;
         align-items: stretch !important;
         width: 100% !important;
-        gap: calc(16px * var(--ui-scale)) !important;
-        margin-bottom: calc(24px * var(--ui-scale)) !important;
+        padding-top: 8px !important;
+        gap: 12px !important;
+        margin-bottom: 20px !important;
     }
-    /* ── Search/Grid Results: auto-fill responsive grid ── */
-    .grid-results {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fill, minmax(calc(220px * var(--ui-scale)), 1fr)) !important; /* ~120px min card width physically */
-        gap: calc(30px * var(--ui-scale)) !important;
+
+    /* ── Filter Chip Bar ── */
+
+    /*
+     * Selector: .search-filter-bar (portrait)
+     * Purpose: Full-width horizontally-scrollable chip bar, edge-flushed with the main-view 12px boundary.
+     *          No padding-left so chips sit at the very start; padding-right gives the last chip breathing room.
+     *          -webkit-overflow-scrolling enables momentum scrolling on iOS WebView.
+     */
+    .search-filter-bar,
+    body[data-current-page="search"] .search-filter-bar {
         width: 100% !important;
+        padding: 4px 0 !important;
+        gap: 8px !important;
+        overflow-x: auto !important;
+        overflow-y: visible !important;
+        scroll-snap-type: x proximity !important;
+        -webkit-overflow-scrolling: touch !important;
+        flex-shrink: 0 !important;
+        flex-wrap: nowrap !important;
+        scrollbar-width: none !important;
+        -ms-overflow-style: none !important;
+    }
+
+    .search-filter-bar::-webkit-scrollbar,
+    body[data-current-page="search"] .search-filter-bar::-webkit-scrollbar {
+        display: none !important;
     }
 
     /*
-     * Selector: body[data-current-page="search"] .search-filter-bar
-     * Purpose: Ensures search filter chip bar spans full width to allow clean overflow-x scrolling on mobile screens.
+     * Selector: .filter-chip (portrait)
+     * Purpose: Scale-independent physical chip dimensions ensuring each chip is a comfortable 36px tall
+     *          tap target with legible 14px text. Border-radius is a perfect capsule (100px).
+     *          flex-shrink: 0 prevents chips from being squeezed when the bar is full.
      */
-    body[data-current-page="search"] .search-filter-bar {
+    .filter-chip {
+        padding: 8px 16px !important;
+        font-size: 14px !important;
+        height: 36px !important;
+        border-radius: 100px !important;
+        white-space: nowrap !important;
+        flex-shrink: 0 !important;
+        scroll-snap-align: start !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /*
+     * Selector: .year-filter-wrapper (portrait)
+     * Purpose: Compact calendar + year input capsule that sits inline within the scrollable filter bar.
+     *          Uses flex-shrink: 0 so it never collapses. margin-left: auto pushes it to the far right naturally.
+     *          Physical padding and font ensure it stays readable and comfortable as a tap target.
+     */
+    .year-filter-wrapper {
+        padding: 7px 12px !important;
+        gap: 6px !important;
+        border-radius: 100px !important;
+        flex-shrink: 0 !important;
+        margin-left: 4px !important;
+    }
+
+    /*
+     * Selector: .year-filter-icon (portrait)
+     * Purpose: Physical 14px icon size, consistent with the chip row height.
+     */
+    .year-filter-icon {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    /*
+     * Selector: .year-filter-input (portrait)
+     * Purpose: Slightly wider touch-friendly year field with physical font-size for legibility.
+     */
+    .year-filter-input {
+        font-size: 14px !important;
+        width: 52px !important;
+    }
+
+    /* ── Search/Grid Results: responsive 2-column grid ── */
+
+    /*
+     * Selector: .grid-results (portrait)
+     * Purpose: Forces the search results grid into a clean 2-column auto-fill layout. minmax(140px, 1fr)
+     *          guarantees at least 2 columns on any phone viewport above 300px wide while allowing
+     *          wider phones to show 3+. Gap is a comfortable physical 16px.
+     */
+    .grid-results {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+        gap: 16px !important;
         width: 100% !important;
     }
 
@@ -1947,23 +2062,364 @@ header {
         width: 100%;
     }
 
-    /* ── Settings: spacious layout ── */
+    /* ══════════════════════════════════════════════════
+       Settings: Premium iOS-Inspired Stacked Card Layout
+       ══════════════════════════════════════════════════
+       In portrait mode the settings page is completely redesigned
+       into a vertically stacked, card-based system inspired by
+       iOS Settings. Each section has a small uppercase header,
+       and each item stacks its label + description above its
+       control widget for effortless one-handed use.
+       ══════════════════════════════════════════════════ */
+
+    /*
+     * Selector: .settings-container (portrait)
+     * Purpose: Full-bleed container with comfortable padding. Removes the max-width
+     *          desktop constraint so settings fill the entire screen width.
+     */
     .settings-container {
-        padding: calc(30px * var(--ui-scale)) !important;
+        padding: 16px 16px 40px 16px !important;
+        max-width: 100% !important;
     }
+
+    /*
+     * Selector: .settings-container > .row-title (portrait)
+     * Purpose: The main "Settings" page heading. Physically sized for mobile readability.
+     */
+    .settings-container > .row-title {
+        font-size: 30px !important;
+        margin-bottom: 24px !important;
+        letter-spacing: -0.5px !important;
+    }
+
+    /*
+     * Selector: .settings-section-title (portrait)
+     * Purpose: iOS-inspired section label — small, uppercase, muted text above each
+     *          settings group card. Resembles iOS grouped table section headers.
+     */
+    .settings-section-title {
+        font-size: 14px !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        color: var(--text-muted) !important;
+        opacity: 0.6 !important;
+        margin-top: 28px !important;
+        margin-bottom: 8px !important;
+        padding-left: 4px !important;
+    }
+
+    /*
+     * Selector: .settings-section-title:first-of-type (portrait)
+     * Purpose: Reduces the top spacing above the very first section (Appearance)
+     *          since it sits directly below the page heading.
+     */
+    .settings-section-title:first-of-type {
+        margin-top: 4px !important;
+    }
+
+    /*
+     * Selector: .settings-section-icon (portrait)
+     * Purpose: Slightly shrinks the section header icons to match the smaller
+     *          uppercase label aesthetic.
+     */
+    .settings-section-icon {
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    /*
+     * Selector: .settings-section (portrait)
+     * Purpose: Glassmorphic card container for each settings group. Deeper blur,
+     *          more prominent rounded corners, and softer borders create a premium
+     *          feel. No shadow — relies on backdrop-filter depth instead.
+     */
+    .settings-section {
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.07) !important;
+        border-radius: 16px !important;
+        padding: 0 !important;
+        margin-bottom: 12px !important;
+        box-shadow: none !important;
+        backdrop-filter: blur(20px) saturate(1.2) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(1.2) !important;
+        overflow: hidden !important;
+    }
+
+    /*
+     * Selector: .settings-item (portrait)
+     * Purpose: Transforms each setting row into a stacked vertical tile.
+     *          Label and description sit on top, the control widget sits below,
+     *          full-width. Padding is physical px for consistent tap spacing.
+     *          A subtle bottom border separates items within the same section card.
+     */
     .settings-item {
-        flex-direction: row !important;
-        flex-wrap: wrap !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        justify-content: flex-start !important;
+        gap: 12px !important;
+        padding: 16px 18px !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /*
+     * Selector: .settings-item:last-child (portrait)
+     * Purpose: Removes the bottom border on the last item within a section card
+     *          to prevent a double-line against the card's bottom edge.
+     */
+    .settings-item:last-child {
+        border-bottom: none !important;
+    }
+
+    /*
+     * Selector: .settings-info (portrait)
+     * Purpose: Ensures the label + description text block takes full width.
+     */
+    .settings-info {
+        width: 100% !important;
+    }
+
+    /*
+     * Selector: .settings-label (portrait)
+     * Purpose: Physical 17px font for the setting name. Large enough to be clearly
+     *          readable on high-DPI mobile screens.
+     */
+    .settings-label {
+        font-size: 17px !important;
+        font-weight: 600 !important;
+        margin-bottom: 2px !important;
+    }
+
+    /*
+     * Selector: .settings-desc (portrait)
+     * Purpose: Slightly smaller secondary text below the label.
+     */
+    .settings-desc {
+        font-size: 15px !important;
+        line-height: 1.4 !important;
+        opacity: 0.65 !important;
+    }
+
+    /* ── Scale Stepper: full-width horizontal control ── */
+
+    /*
+     * Selector: .scale-stepper (portrait)
+     * Purpose: Stretches the – 100% + control to full width. The stepper becomes
+     *          a prominent horizontal bar with generous tap targets. The background
+     *          blends into the card tile with a subtle inset look.
+     */
+    .scale-stepper {
+        width: 100% !important;
+        display: flex !important;
         align-items: center !important;
         justify-content: space-between !important;
-        gap: calc(24px * var(--ui-scale)) !important;
-        padding: calc(36px * var(--ui-scale)) 0 !important;
+        gap: 0 !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 12px !important;
+        padding: 4px !important;
+        flex-wrap: nowrap !important;
+    }
+
+    /*
+     * Selector: .scale-stepper-btn (portrait)
+     * Purpose: Large 44px square tap targets for – and + buttons. Apple HIG
+     *          recommends 44px minimum for touch targets.
+     */
+    .scale-stepper-btn {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        font-size: 20px !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        color: var(--text-main) !important;
+    }
+
+    /*
+     * Selector: .scale-value (portrait)
+     * Purpose: Center-aligned percentage display between the – and + buttons.
+     */
+    .scale-value {
+        font-size: 18px !important;
+        font-weight: 700 !important;
+        min-width: auto !important;
+        flex: 1 !important;
+        text-align: center !important;
+    }
+
+    /* ── Language Row: tappable block ── */
+
+    /*
+     * Selector: .lang-display (portrait)
+     * Purpose: Stretches the language name + edit button to full width with the
+     *          name on the left and the edit icon on the far right, creating a
+     *          natural iOS-style "tap to change" row.
+     */
+    .lang-display {
+        width: 100% !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        background: rgba(255, 255, 255, 0.04) !important;
+        border: 1px solid rgba(255, 255, 255, 0.06) !important;
+        border-radius: 12px !important;
+        padding: 10px 14px !important;
+        gap: 12px !important;
+    }
+
+    /*
+     * Selector: .lang-current-name (portrait)
+     * Purpose: Physical readable font size for the current language label.
+     */
+    .lang-current-name {
+        font-size: 17px !important;
+        font-weight: 600 !important;
+    }
+
+    /*
+     * Selector: .lang-edit-btn (portrait)
+     * Purpose: Compact circular edit button with physical dimensions.
+     */
+    .lang-edit-btn {
+        width: 34px !important;
+        height: 34px !important;
+        min-width: 34px !important;
+    }
+
+    /*
+     * Selector: .lang-edit-icon (portrait)
+     * Purpose: Physical icon size for the edit pencil icon.
+     */
+    .lang-edit-icon {
+        width: 15px !important;
+        height: 15px !important;
+    }
+
+    /* ── Check for Updates Button: full-width accent pill ── */
+
+    /*
+     * Selector: .check-updates-btn (portrait)
+     * Purpose: Transforms the inline "Check for Updates" button into a full-width
+     *          prominent pill CTA at the bottom of the About section. Uses the
+     *          primary accent color as a border highlight to draw attention without
+     *          being garish.
+     */
+    .check-updates-btn {
+        width: 100% !important;
+        padding: 12px 20px !important;
+        font-size: 16px !important;
+        border-radius: 12px !important;
+        text-align: center !important;
+        background: rgba(var(--primary-rgb), 0.08) !important;
+        border: 1px solid rgba(var(--primary-rgb), 0.25) !important;
+        color: var(--primary-color) !important;
+    }
+
+    /* ── Language Modal: bottom sheet ── */
+
+    /*
+     * Selector: .lang-modal (portrait)
+     * Purpose: In portrait the language modal becomes a bottom sheet that slides
+     *          up from the bottom edge, covering ~75% of the screen. This is the
+     *          standard iOS/Android pattern for selection modals.
+     */
+    .lang-modal {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 75vh !important;
+        max-height: 75vh !important;
+        border-radius: 20px 20px 0 0 !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        padding: 20px 16px 40px 16px !important;
+    }
+
+    /*
+     * Selector: .lang-modal-title (portrait)
+     * Purpose: Physical font size for the modal heading.
+     */
+    .lang-modal-title {
+        font-size: 20px !important;
+    }
+
+    /*
+     * Selector: .lang-modal-close (portrait)
+     * Purpose: Physical 36px tap target for the close X button.
+     */
+    .lang-modal-close {
+        width: 36px !important;
+        height: 36px !important;
+    }
+
+    .lang-modal-close img {
+        width: 14px !important;
+        height: 14px !important;
+    }
+
+    /*
+     * Selector: .lang-modal-list (portrait)
+     * Purpose: Single-column vertical list for language options in portrait.
+     *          Allows vertical scrolling when the list exceeds the sheet height.
+     */
+    .lang-modal-list {
+        grid-auto-flow: row !important;
+        grid-template-rows: none !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+        overflow-y: auto !important;
+    }
+
+    /*
+     * Selector: .lang-option (portrait)
+     * Purpose: Large, comfortable language selection rows with physical dimensions.
+     */
+    .lang-option {
+        padding: 14px 16px !important;
+        font-size: 17px !important;
+        border-radius: 12px !important;
     }
 
     /* ── Playlist cards: narrower ── */
     .playlist-card {
         width: calc(115px * var(--ui-scale));
         min-width: calc(115px * var(--ui-scale));
+    }
+
+    /* ── Profile Page Adjustments ── */
+    .profile-avatar-wrapper {
+        width: 140px !important;
+        height: 140px !important;
+        margin: 0 auto !important;
+    }
+    .profile-avatar {
+        width: 100% !important;
+        height: 100% !important;
+        border-width: 3px !important;
+        padding: 0 !important; /* Remove padding so injected images fill the circle */
+        font-size: 60px !important; /* In case it's an injected text element */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .profile-header {
+        flex-direction: column !important;
+        text-align: center !important;
+        gap: 20px !important;
+        padding: 30px 20px !important;
+    }
+    .profile-name {
+        font-size: 28px !important;
+    }
+    .profile-actions {
+        justify-content: center !important;
     }
 
     /* ── Disable Hover Scaling on Touch (Mobile) ── 
@@ -2848,11 +3304,13 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
 .profile-avatar {
     width: 100%;
     height: 100%;
+    min-width: 100%;
+    min-height: 100%;
     border-radius: 50%;
     object-fit: cover;
     border: 4px solid var(--surface-light);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
-    padding: 20px;
+    padding: 30px;
     background: var(--surface-color);
     opacity: 0.7;
 }
