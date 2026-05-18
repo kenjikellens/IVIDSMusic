@@ -14,24 +14,25 @@ body.tv-mode .scroll-arrow {
    TV Focus Rings 
    ============================ */
 
-/* Generic Focus Ring */
+/* Styles the generic TV focus state with a crisp, flush, thick white border outline */
 body.tv-mode a:focus-visible,
 body.tv-mode button:focus-visible,
 body.tv-mode input:focus-visible,
 body.tv-mode [tabindex="0"]:focus-visible {
-    outline: 3px solid var(--primary-color) !important;
-    outline-offset: 4px !important;
+    outline: 3px solid #ffffff !important;
+    outline-offset: 0px !important;
     z-index: 100;
 }
 
-/* Hide outline on cards since the image box gets it */
-body.tv-mode .music-card:focus-visible {
+/* Hide outline on artist cards since their circular image box gets it instead */
+body.tv-mode .music-card.type-artist:focus-visible {
     outline: none !important;
 }
 
-body.tv-mode .music-card:focus-visible .card-image-box {
-    outline: 3px solid var(--primary-color) !important;
-    outline-offset: 4px !important;
+/* Styles the music card image focus state with a flush white outline for clean alignment on artist cards */
+body.tv-mode .music-card.type-artist:focus-visible .card-image-box {
+    outline: 3px solid #ffffff !important;
+    outline-offset: 0px !important;
 }
 
 /* Circular elements */
@@ -49,9 +50,10 @@ body.tv-mode .ivids-slider:focus-visible {
     outline: none !important;
 }
 
+/* Styles the player slider thumb focus indicator with a thick, flush white outline */
 body.tv-mode .ivids-slider:focus-visible::-webkit-slider-thumb {
-    outline: 3px solid var(--primary-color) !important;
-    outline-offset: 4px !important;
+    outline: 3px solid #ffffff !important;
+    outline-offset: 0px !important;
 }
 
 /* Language Modal Focus */
@@ -60,8 +62,20 @@ body.tv-mode .lang-modal-close:focus-visible {
     border-radius: 50% !important;
 }
 
+/* Styles the language select modal items on D-pad focus with a thick white outline and dark highlight */
 body.tv-mode .lang-option:focus-visible {
-    outline: 3px solid var(--primary-color) !important;
-    outline-offset: 2px !important;
+    outline: 3px solid #ffffff !important;
+    outline-offset: 0px !important;
     background: rgba(255, 255, 255, 0.08);
+}
+
+/* Reveal the unified search bar when in TV Mode */
+body.tv-mode .unified-search-bar {
+    display: block !important;
+    padding: calc(24px * var(--ui-scale)) calc(40px * var(--ui-scale)) 0 calc(40px * var(--ui-scale));
+}
+
+/* Force full width on TV Mode browse search wrapper */
+body.tv-mode .unified-search-bar .browse-search-wrapper {
+    max-width: 100% !important;
 }

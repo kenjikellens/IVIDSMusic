@@ -1,16 +1,19 @@
-<!-- Search page content -->
-<!-- Nuclear Reconstruction (v12): Minimalist, flat structure to eliminate all flickering -->
-
-<!-- State 1: Browse Hero (No Query) -->
-<div id="browse-hero" class="browse-hero is-hidden">
-    <p class="browse-tagline" data-i18n="tagline">Your World of Music</p>
-    <h1 class="browse-hero-title" data-i18n="search">Search</h1>
+<!-- Unified Search Input Bar (Visible only on TV/Mobile, hidden on Desktop PC) -->
+<div class="unified-search-bar" id="unified-search-bar">
     <div class="browse-search-wrapper">
         <img class="browse-search-icon" src="svg/search.svg" alt="">
         <input id="browse-search-input" class="browse-search-input" type="text" placeholder="Artists, songs, albums..."
             autocomplete="off" data-i18n="search_placeholder"
             onkeydown="if(event.key==='Enter' && this.value.trim()) { this.blur(); window.performSearch(this.value.trim()); }">
+        <button id="search-clear-btn" class="search-clear-btn" style="display: none;">✕</button>
     </div>
+</div>
+
+<!-- State 1: Browse Hero (No Query) -->
+<div id="browse-hero" class="browse-hero is-hidden">
+    <p class="browse-tagline" data-i18n="tagline">Your World of Music</p>
+    <h1 class="browse-hero-title" data-i18n="search">Search</h1>
+</div>
 
     <!-- Search Promo (Mini Hero style) -->
     <div id="search-promo" class="search-hero-promo">

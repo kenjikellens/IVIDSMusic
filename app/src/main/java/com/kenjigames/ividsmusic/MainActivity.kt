@@ -28,6 +28,7 @@ import java.io.File
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    private var updateManager: UpdateManager? = null
     
     // OkHttpClient with extended 15-second timeouts to optimize large audio downloads
     private val client = OkHttpClient.Builder()
@@ -74,6 +75,9 @@ class MainActivity : AppCompatActivity() {
         settings.allowUniversalAccessFromFileURLs = true
 
         webView.addJavascriptInterface(AndroidAPI(), "AndroidAPI")
+
+        updateManager = UpdateManager(this, webView)
+        webView.addJavascriptInterface(updateManager!!, "AndroidUpdate")
 
         webView.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(view: WebView?, request: WebResourceRequest?): WebResourceResponse? {
@@ -318,6 +322,15 @@ class MainActivity : AppCompatActivity() {
         } else {
             super.onBackPressed()
         }
+    }
+
+    /**
+     * Overrides the activity's onDestroy lifecycle method to cleanly release updater resources.
+     * Shuts down the background executor service to prevent activity context leaks.
+     */
+    override fun onDestroy() {
+        updateManager?.shutdown()
+        super.onDestroy()
     }
 
     /**

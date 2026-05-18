@@ -46,6 +46,10 @@ def main():
     Starts the local development server (temp_server.js) in the background,
     verifies it starts successfully, and opens the GUI in the default browser.
     """
+    # Change current working directory to the directory of this script to ensure relative paths resolve correctly
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    os.chdir(script_dir)
+
     server_script = os.path.join('app', 'src', 'main', 'assets', 'gui', 'temp_server.js')
     port = 3000
     

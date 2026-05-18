@@ -118,32 +118,38 @@ export const CardSystem = {
             } else if (track.type === 'album') {
                 window.Router.loadPage('album', { id: track.id });
             } else {
-                // Sibling Queue Builder: Look up matching containers to group similar songs automatically
-                // Added '.row-posters' to include Home page category rows in sequential auto-play queue resolution
-                const parent = card.closest('.results-row, .row-posters, .profile-recent-list, .grid-results, #recommended-content');
-                if (parent) {
-                    const siblingCards = Array.from(parent.querySelectorAll('.music-card.type-song'));
-                    const siblingTracks = siblingCards.map(c => {
-                        try {
-                            return JSON.parse(c.dataset.trackJson || '{}');
-                        } catch (err) {
-                            return null;
-                        }
-                    }).filter(t => t && t.id);
-
-                    if (siblingTracks.length > 0) {
-                        YouTubePlayer.queue = siblingTracks;
-                        YouTubePlayer.currentIndex = siblingTracks.findIndex(t => t.id === track.id);
-                        console.log(`[Queue Builder] Populated queue with ${siblingTracks.length} tracks. Active index: ${YouTubePlayer.currentIndex}`);
-                    }
+                // TV or Phone interception: open song detail page instead of immediately starting playback
+                const isTv = document.body.classList.contains('tv-mode') || (window.TVNav && window.TVNav.isEnabled);
+                const isMobile = window.innerWidth <= 768;
+                if (isTv || isMobile) {
+                    window.Router.loadPage('song', { track: track });
                 } else {
-                    // Fallback to single item queue if container isn't recognized
-                    YouTubePlayer.queue = [track];
-                    YouTubePlayer.currentIndex = 0;
-                }
+                    // PC/Desktop behavior: build sibling queue and play immediately
+                    const parent = card.closest('.results-row, .row-posters, .profile-recent-list, .grid-results, #recommended-content');
+                    if (parent) {
+                        const siblingCards = Array.from(parent.querySelectorAll('.music-card.type-song'));
+                        const siblingTracks = siblingCards.map(c => {
+                            try {
+                                return JSON.parse(c.dataset.trackJson || '{}');
+                            } catch (err) {
+                                return null;
+                            }
+                        }).filter(t => t && t.id);
 
-                // Load and play the active track
-                YouTubePlayer.loadTrack(track);
+                        if (siblingTracks.length > 0) {
+                            YouTubePlayer.queue = siblingTracks;
+                            YouTubePlayer.currentIndex = siblingTracks.findIndex(t => t.id === track.id);
+                            console.log(`[Queue Builder] Populated queue with ${siblingTracks.length} tracks. Active index: ${YouTubePlayer.currentIndex}`);
+                        }
+                    } else {
+                        // Fallback to single item queue if container isn't recognized
+                        YouTubePlayer.queue = [track];
+                        YouTubePlayer.currentIndex = 0;
+                    }
+
+                    // Load and play the active track
+                    YouTubePlayer.loadTrack(track);
+                }
             }
         };
 

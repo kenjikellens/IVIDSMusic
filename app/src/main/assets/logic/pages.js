@@ -111,6 +111,31 @@ export const PageSystem = {
         if (get('browse-search-input')) get('browse-search-input').value = query;
         if (get('year-input')) get('year-input').value = params.year || '';
 
+        // Wire up the unified search clear (✕) button
+        const clearBtn = get('search-clear-btn');
+        if (clearBtn) {
+            clearBtn.style.display = query ? 'flex' : 'none';
+            clearBtn.onclick = () => {
+                const input = get('browse-search-input');
+                if (input) {
+                    input.value = '';
+                    input.focus();
+                }
+                clearBtn.style.display = 'none';
+                window.Router.loadPage('search');
+            };
+        }
+
+        // Show/hide clear button dynamically as user types
+        const searchInput = get('browse-search-input');
+        if (searchInput) {
+            searchInput.oninput = () => {
+                if (clearBtn) {
+                    clearBtn.style.display = searchInput.value.trim() ? 'flex' : 'none';
+                }
+            };
+        }
+
         // Dynamically toggle localized premium filter chip active states
         const activeType = params.type || null;
         ['all', 'track', 'artist', 'album'].forEach(type => {
@@ -138,7 +163,8 @@ export const PageSystem = {
 
         if (browseHero) browseHero.classList.add('is-hidden');
         if (resultsHeader) resultsHeader.classList.remove('is-hidden');
-        if (get('search-subtitle')) get('search-subtitle').textContent = `Results for "${query}"${params.year ? ` - ${params.year}` : ''}`;
+        const resultsFor = (window.LanguageManager && window.LanguageManager.translations['results_for']) || 'Results for';
+        if (get('search-subtitle')) get('search-subtitle').textContent = `${resultsFor} "${query}"${params.year ? ` - ${params.year}` : ''}`;
 
         // Add Load More Logic
         window.loadMoreResults = async () => {
@@ -146,16 +172,18 @@ export const PageSystem = {
             const grid = get('grid-results');
             if (!btn || !grid) return;
             currentOffset += PAGE_SIZE;
-            btn.disabled = true; btn.textContent = 'Loading...';
+            const loadMoreText = (window.LanguageManager && window.LanguageManager.translations['load_more']) || 'Load More';
+            const loadingText = (window.LanguageManager && window.LanguageManager.translations['loading']) || 'Loading...';
+            btn.disabled = true; btn.textContent = loadingText;
             try {
                 const data = await MusicAPI.search(query, PAGE_SIZE, params.type, params.year, currentOffset);
                 if (data.length === 0) get('load-more-container').classList.add('is-hidden');
                 else {
                     data.forEach(item => grid.appendChild(CardSystem.createCard(item)));
                     if (window.Loader) window.Loader.init();
-                    btn.disabled = false; btn.textContent = 'Load More';
+                    btn.disabled = false; btn.textContent = loadMoreText;
                 }
-            } catch (e) { btn.disabled = false; btn.textContent = 'Load More'; }
+            } catch (e) { btn.disabled = false; btn.textContent = loadMoreText; }
         };
 
         const SKELETON_CARD = `
@@ -801,8 +829,15 @@ export const PageSystem = {
         }
     },
 
-    async initSong() {
-        const track = window.YouTubePlayer?.currentTrack;
+    /**
+     * Method: initSong
+     * Description: Initializes the song details page. If a track is provided in params,
+     *              loads details for that specific track. Otherwise, falls back to the
+     *              currently active track in the player. Sets up play, queue, and playlist actions.
+     * @param {Object} [params] - Navigation parameters containing the target track object.
+     */
+    async initSong(params = {}) {
+        const track = params.track || window.YouTubePlayer?.currentTrack;
         const signal = window.Router.abortController?.signal;
 
         // If no track is playing, show an empty state
@@ -838,11 +873,79 @@ export const PageSystem = {
 
         // Wire up Play button
         const playBtn = document.getElementById('song-play-btn');
-        if (playBtn) playBtn.onclick = () => YouTubePlayer.loadTrack(track);
+        if (playBtn) {
+            playBtn.onclick = () => {
+                if (window.YouTubePlayer) {
+                    window.YouTubePlayer.queue = [track];
+                    window.YouTubePlayer.currentIndex = 0;
+                    window.YouTubePlayer.loadTrack(track);
+                }
+            };
+        }
 
-        // Wire up Save button (mirror player bar save)
+        // Wire up Play Next button
+        const playNextBtn = document.getElementById('song-play-next-btn');
+        if (playNextBtn) {
+            playNextBtn.onclick = () => {
+                if (window.YouTubePlayer) {
+                    const currentIdx = window.YouTubePlayer.currentIndex;
+                    if (currentIdx === -1) {
+                        window.YouTubePlayer.queue = [track];
+                        window.YouTubePlayer.currentIndex = 0;
+                        window.YouTubePlayer.loadTrack(track);
+                    } else {
+                        window.YouTubePlayer.queue.splice(currentIdx + 1, 0, track);
+                    }
+                    alert("Added to Play Next");
+                }
+            };
+        }
+
+        // Wire up Add to Queue button
+        const addToQueueBtn = document.getElementById('song-add-to-queue-btn');
+        if (addToQueueBtn) {
+            addToQueueBtn.onclick = () => {
+                if (window.YouTubePlayer) {
+                    if (window.YouTubePlayer.queue.length === 0) {
+                        window.YouTubePlayer.queue = [track];
+                        window.YouTubePlayer.currentIndex = 0;
+                        window.YouTubePlayer.loadTrack(track);
+                    } else {
+                        window.YouTubePlayer.queue.push(track);
+                    }
+                    alert("Added to Queue");
+                }
+            };
+        }
+
+        // Wire up Add to Playlist button
+        const addToPlaylistBtn = document.getElementById('song-add-to-playlist-btn');
+        if (addToPlaylistBtn) {
+            addToPlaylistBtn.onclick = (e) => {
+                e.preventDefault(); e.stopPropagation();
+                if (window.CardSystem) {
+                    window.CardSystem.openOptionsPopover(e, track);
+                }
+            };
+        }
+
+        // Wire up Save button
         const saveBtn = document.getElementById('song-save-btn');
-        if (saveBtn) saveBtn.onclick = () => YouTubePlayer.saveTrack();
+        if (saveBtn) {
+            saveBtn.onclick = () => {
+                if (window.YouTubePlayer) {
+                    if (window.YouTubePlayer.currentTrack && window.YouTubePlayer.currentTrack.id === track.id) {
+                        window.YouTubePlayer.saveTrack();
+                    } else {
+                        if (window.AndroidAPI && window.AndroidAPI.downloadTrack) {
+                            window.AndroidAPI.downloadTrack(track.id, track.title, track.artist, track.cover);
+                        } else {
+                            alert("Download only supported on mobile app.");
+                        }
+                    }
+                }
+            };
+        }
 
         // Wire up artist click
         const artistLink = document.getElementById('song-artist-link');

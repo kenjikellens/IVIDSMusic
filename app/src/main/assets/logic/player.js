@@ -263,6 +263,12 @@ export const YouTubePlayer = {
     },
 
 
+    /**
+     * Method: loadTrack
+     * Description: Initiates streaming of a new music track. Searches YouTube for the track's video ID,
+     *              requests the audio download and stream URL from the local server, and starts audio playback.
+     * @param {Object} track - The metadata of the track to load and play.
+     */
     async loadTrack(track) {
         this.init();
         this.currentTrack = track;
@@ -305,7 +311,8 @@ export const YouTubePlayer = {
             moreInfoBtn.style.opacity = '1';
         }
         if (statusEl) {
-            statusEl.textContent = 'Searching YouTube...';
+            const searchingText = (window.LanguageManager && window.LanguageManager.translations['searching_youtube']) || 'Searching YouTube...';
+            statusEl.textContent = searchingText;
             statusEl.style.color = 'var(--primary-color)';
         }
 
@@ -315,7 +322,10 @@ export const YouTubePlayer = {
 
             if (!videoId) throw new Error('Could not find song on YouTube');
 
-            if (statusEl) statusEl.textContent = 'Downloading MP3...';
+            if (statusEl) {
+                const downloadingText = (window.LanguageManager && window.LanguageManager.translations['downloading_mp3']) || 'Downloading MP3...';
+                statusEl.textContent = downloadingText;
+            }
 
             // Pass artist and title to handle the new naming format
             const params = new URLSearchParams({
@@ -347,7 +357,8 @@ export const YouTubePlayer = {
         } catch (error) {
             console.error('[Player Error]', error);
             if (statusEl) {
-                statusEl.textContent = 'Error: ' + error.message;
+                const errorText = (window.LanguageManager && window.LanguageManager.translations['error']) || 'Error';
+                statusEl.textContent = errorText + ': ' + error.message;
                 statusEl.style.color = 'red';
             }
             if (loaderEl) loaderEl.style.display = 'none';

@@ -1,5 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
+/* Disable default mobile browser blue tap-highlight boxes on all touchable elements */
+* {
+    -webkit-tap-highlight-color: transparent !important;
+}
+
 @property --ui-scale {
     syntax: '<number>';
     inherits: true;
@@ -250,16 +255,19 @@ img.player-volume-icon {
     margin-bottom: 2px;
 }
 
+/* Styles each navigation link in the sidebar, providing a premium flex layout and transition anchor */
 .nav-links a {
     display: flex;
     align-items: center;
     gap: calc(12px * var(--ui-scale));
-    padding: calc(10px * var(--ui-scale)) calc(16px * var(--ui-scale));
+    padding: calc(9px * var(--ui-scale)) calc(15px * var(--ui-scale));
     color: var(--text-secondary);
     text-decoration: none;
     font-weight: 500;
     border-radius: calc(8px * var(--ui-scale));
-    transition: all 0.2s ease;
+    position: relative;
+    border: 1px solid transparent;
+    transition: all 0.25s var(--ease-out-expo);
 }
 
 .nav-icon {
@@ -276,31 +284,37 @@ img.player-volume-icon {
     opacity: 1;
 }
 
+/* Styles the navigation link hover state with a premium glassmorphic glow and a subtle accent color border */
 .nav-links a:hover {
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.04);
+    background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-color: rgba(var(--primary-rgb), 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
+/* Styles the active navigation link state, applying a premium themed background highlight and a distinct themed border */
 .nav-links a.active {
     color: var(--primary-color);
-    background: rgba(var(--primary-rgb), 0.06);
+    background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.12) 0%, rgba(var(--primary-rgb), 0.03) 100%);
+    border-color: rgba(var(--primary-rgb), 0.45);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(var(--primary-rgb), 0.05);
     font-weight: 600;
 }
 
-/* Animated left accent bar */
+/* Styles the animated vertical accent bar on the left of each navigation link to emphasize the active state */
 .nav-links a::before {
     content: '';
     position: absolute;
-    left: -8px;
-    top: 22.5%;
-    /* (100% - 55%) / 2 */
+    left: 0;
+    top: 25%;
+    /* (100% - 50%) / 2 */
     width: 3px;
-    height: 55%;
+    height: 50%;
     background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
     border-radius: 0 3px 3px 0;
     transform: scaleY(0);
     transform-origin: center;
-    transition: transform 0.35s var(--ease-spring);
+    transition: transform 0.3s var(--ease-spring);
 }
 
 .nav-links a:hover::before,
@@ -658,6 +672,7 @@ header {
 /* ============================
    Music Card — Split Layout (Image + Info)
    ============================ */
+/* Styles the music card container (for songs, albums, and artists) as a rounded glassmorphic block */
 .music-card {
     position: relative;
     width: calc(140px * var(--ui-scale));
@@ -676,24 +691,19 @@ header {
     background: var(--card-color, rgba(255, 255, 255, 0.05));
     border: none;
 
-    /* Removed overflow: hidden so shadows and scaled pseudo-elements can escape the box */
-    overflow: hidden;
+    /* Set overflow to visible so custom outer focus rings and stacked album drop shadows are not clipped */
+    overflow: visible;
     z-index: 1;
     will-change: opacity, transform;
 }
 
 
-/*
- * Selector: .music-card:hover, .music-card:focus-visible
- * Purpose: Styling rules for song/album cards during user hover or remote keyboard/D-pad focus.
- * Design: Prohibits scale transforms and instead uses a glassy, high-end white border highlight
- * and increased glassmorphism background transparency.
- */
+/* Styles the music card on hover and focus to display a distinct translucent background and thick outer border glow */
 .music-card:hover,
 .music-card:focus-visible {
     background: var(--card-color, rgba(255, 255, 255, 0.06));
     box-shadow: inset 0 -2px 0 0 color-mix(in srgb, var(--card-color, var(--primary-color)), white 30%),
-                0 0 0 2px rgba(255, 255, 255, 0.2);
+                0 0 0 2px rgba(255, 255, 255, 0.35);
     z-index: 10;
     outline: none;
 }
@@ -2132,15 +2142,10 @@ header {
         height: 16px !important;
     }
 
-    /*
-     * Selector: .settings-section (portrait)
-     * Purpose: Glassmorphic card container for each settings group. Deeper blur,
-     *          more prominent rounded corners, and softer borders create a premium
-     *          feel. No shadow — relies on backdrop-filter depth instead.
-     */
+    /* Styles the mobile portrait settings group card with a premium translucent dark background */
     .settings-section {
-        background: rgba(255, 255, 255, 0.04) !important;
-        border: 1px solid rgba(255, 255, 255, 0.07) !important;
+        background: rgba(255, 255, 255, 0.065) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
         border-radius: 16px !important;
         padding: 0 !important;
         margin-bottom: 12px !important;
@@ -2736,6 +2741,39 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     max-width: calc(600px * var(--ui-scale));
 }
 
+/* Styles the unified root search bar container used in Mobile/TV layouts */
+.unified-search-bar {
+    display: none;
+    width: 100%;
+}
+
+/* Styles the absolute-positioned clear button to reset active search inputs */
+.search-clear-btn {
+    position: absolute;
+    right: calc(16px * var(--ui-scale));
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: calc(1.3rem * var(--ui-scale));
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(36px * var(--ui-scale));
+    height: calc(36px * var(--ui-scale));
+    border-radius: 50%;
+    z-index: 11;
+    transition: color 0.2s, background 0.2s;
+}
+
+/* Styles the hover and focus state for the search clear button */
+.search-clear-btn:hover, .search-clear-btn:focus-visible {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.1);
+}
+
 .browse-search-icon {
     position: absolute;
     left: calc(24px * var(--ui-scale));
@@ -2929,17 +2967,14 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     margin: 0 auto;
 }
 
-/*
- * Selector: .settings-section
- * Purpose: A translucent, rounded glassmorphic dashboard container that groups settings items.
- */
+/* Styles the global settings section cards with a premium translucent dark background different from the deep background */
 .settings-section {
     margin-bottom: calc(32px * var(--ui-scale));
-    background: rgba(255, 255, 255, 0.025);
+    background: rgba(255, 255, 255, 0.055);
     padding: calc(20px * var(--ui-scale)) calc(24px * var(--ui-scale));
     border-radius: calc(16px * var(--ui-scale));
-    border: 1px solid rgba(255, 255, 255, 0.04);
-    box-shadow: 0 calc(8px * var(--ui-scale)) calc(32px * var(--ui-scale)) rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    box-shadow: 0 calc(8px * var(--ui-scale)) calc(32px * var(--ui-scale)) rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 /*
@@ -3962,6 +3997,23 @@ svg.btn-icon {
 
 /* Media Query for mobile scaling of the Artist Hero */
 @media (max-width: 768px) {
+    /* Hide cramped global header search bar in mobile layouts */
+    .search-container {
+        display: none !important;
+    }
+
+    /* Styles the unified root search bar container used in Mobile/TV layouts */
+    .unified-search-bar {
+        display: block !important;
+        padding: calc(16px * var(--ui-scale)) calc(16px * var(--ui-scale)) 0 calc(16px * var(--ui-scale));
+        box-sizing: border-box;
+    }
+
+    /* Override wrapper width limit in mobile search page layout */
+    .unified-search-bar .browse-search-wrapper {
+        max-width: 100% !important;
+    }
+
     .artist-hero {
         padding: calc(24px * var(--ui-scale));
         min-height: auto;
@@ -5278,3 +5330,45 @@ svg.btn-icon {
     height: calc(20px * var(--ui-scale));
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
+
+/* Progress container layout that structures the download progress text and visual bar layout. */
+.update-progress-container {
+    width: 100%;
+    margin-bottom: calc(20px * var(--ui-scale));
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(12px * var(--ui-scale));
+}
+
+/* Background track representing progress bar 0-100% capacity with transparent boundaries. */
+.update-progress-bar-bg {
+    width: 100%;
+    height: calc(8px * var(--ui-scale));
+    border-radius: calc(4px * var(--ui-scale));
+    background: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Luminous neon theme color bar highlighting download completion percentage. */
+.update-progress-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 0%;
+    border-radius: calc(4px * var(--ui-scale));
+    background: var(--primary-color);
+    box-shadow: 0 0 calc(12px * var(--ui-scale)) rgba(var(--primary-rgb), 0.6);
+    transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Informative description detailing stage download status text. */
+.update-progress-text {
+    color: #fff;
+    font-size: calc(0.88rem * var(--ui-scale));
+    font-weight: 700;
+}
+

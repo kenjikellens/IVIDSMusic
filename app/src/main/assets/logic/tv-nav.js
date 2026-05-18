@@ -21,8 +21,29 @@ export const TVNav = {
         setTimeout(() => this.reinitFocus(), 500);
     },
 
+    /**
+     * Method: reinitFocus
+     * Description: Scans the active document for focusable elements, configures TV-mode input states
+     *              (making text inputs readOnly by default to suppress soft keyboard popups),
+     *              and restores focus to the active element or falls back to standard shell links.
+     */
     reinitFocus() {
         if (!this.isEnabled) return;
+
+        // Make all text inputs readOnly by default in TV mode to prevent auto-keyboard popups
+        document.querySelectorAll('input').forEach(input => {
+            if (input.type === 'text' || input.type === 'number' || input.type === 'search') {
+                input.readOnly = true;
+                
+                // Add blur listener if not already added to restore readOnly
+                if (!input.dataset.tvBound) {
+                    input.dataset.tvBound = 'true';
+                    input.addEventListener('blur', () => {
+                        if (this.isEnabled) input.readOnly = true;
+                    });
+                }
+            }
+        });
 
         // Find all focusable elements
         const elements = this.getFocusableElements();
@@ -154,6 +175,12 @@ export const TVNav = {
         }
     },
 
+    /**
+     * Method: handleKeyDown
+     * Description: Global keyboard event listener that intercepts spatial navigation direction keys,
+     *              handles input activation on Enter clicks, and maps hardware Back actions.
+     * @param {KeyboardEvent} e - The keydown event captured from the window.
+     */
     handleKeyDown(e) {
         if (!this.isEnabled) return;
 
@@ -175,9 +202,15 @@ export const TVNav = {
                 this.navigate('right');
                 break;
             case 'Enter':
-                // For input elements, Enter should keep focus and open keyboard
+                // For input elements, Enter should unlock readOnly to show soft keyboard
                 if (document.activeElement && document.activeElement.tagName.toLowerCase() === 'input') {
-                    // Do nothing, let default browser behavior (open keyboard) happen
+                    const input = document.activeElement;
+                    if (input.readOnly) {
+                        input.readOnly = false;
+                        input.focus();
+                        console.log('[TVNav] Input write-mode unlocked on Enter key.');
+                        e.preventDefault();
+                    }
                     return;
                 }
 
