@@ -170,6 +170,133 @@ export const DiscoveryEngine = {
       return { artists: sortedArtists, tracks: sortedTracks, genres: sortedGenres };
    },
 
+
+
+   /**
+    * Constructs a normalized mathematical feature vector for a track.
+    * Represents coordinates for genres, artist, era, and popularity.
+    * 
+    * @param {Object} track - Raw track object
+    * @returns {Object} Feature vector mapping dimension keys to coordinate values
+    */
+   createTrackVector(track) {
+      const vector = {};
+      
+      // 1. Artist dimension (one-hot coordinate weight 1.0)
+      if (track.artistId) {
+         vector[`artist_${track.artistId}`] = 1.0;
+      } else if (track.artist) {
+         // Fallback to name if ID is unavailable
+         vector[`artist_${track.artist.toLowerCase().trim()}`] = 1.0;
+      }
+
+      // 2. Genre dimension (one-hot weights)
+      if (track.genres && Array.isArray(track.genres)) {
+         track.genres.forEach(genre => {
+            vector[`genre_${genre.toLowerCase().trim()}`] = 1.0;
+         });
+      } else if (track.genre) {
+         vector[`genre_${track.genre.toLowerCase().trim()}`] = 1.0;
+      }
+
+      // 3. Era/Year dimension (one-hot binned coordinate weights)
+      if (track.year) {
+         const year = parseInt(track.year, 10);
+         if (!isNaN(year)) {
+            if (year < 1990) vector['era_classic'] = 1.0;
+            else if (year >= 1990 && year < 2005) vector['era_90s_00s'] = 1.0;
+            else if (year >= 2005 && year < 2018) vector['era_modern'] = 1.0;
+            else vector['era_recent'] = 1.0;
+         }
+      }
+
+      // 4. Popularity Proxy dimension (normalized between 0.0 and 1.0)
+      if (track.rank) {
+         const rank = parseFloat(track.rank);
+         vector['popularity'] = Math.min(1.0, Math.max(0.0, rank / 1000000.0));
+      } else {
+         vector['popularity'] = 0.5; // Default middle-ground weight
+      }
+
+      // Normalize the vector to unit length (Euclidean normalization)
+      let sumSq = 0;
+      for (const val of Object.values(vector)) {
+         sumSq += val * val;
+      }
+      const magnitude = Math.sqrt(sumSq);
+      
+      if (magnitude > 0) {
+         for (const key in vector) {
+            vector[key] /= magnitude;
+         }
+      }
+
+      return vector;
+   },
+
+   /**
+    * Builds a cumulative taste vector for the user by projecting weighted telemetry coordinates.
+    * 
+    * @param {Object} scores - Telemetry scores fetched from localStorage
+    * @returns {Object} Sparse vector representing the user's multi-dimensional preference coordinates
+    */
+   buildUserProfileVector(scores) {
+      const userVector = {};
+
+      // 1. Project Genre preferences
+      if (scores.genres) {
+         Object.entries(scores.genres).forEach(([genre, score]) => {
+            const coordinate = `genre_${genre.toLowerCase().trim()}`;
+            // Scale weights: Neutral threshold centered around 10
+            const weight = (score - 10) / 10.0;
+            userVector[coordinate] = (userVector[coordinate] || 0) + weight;
+         });
+      }
+
+      // 2. Project Artist preferences
+      if (scores.artists) {
+         Object.entries(scores.artists).forEach(([artistId, score]) => {
+            const coordinate = `artist_${artistId}`;
+            const weight = (score - 15) / 10.0;
+            userVector[coordinate] = (userVector[coordinate] || 0) + weight;
+         });
+      }
+
+      return userVector;
+   },
+
+   /**
+    * Calculates the Cosine Similarity between two sparse vectors.
+    * Projects the dot product divided by the product of their magnitudes.
+    * 
+    * @param {Object} vectorA - User taste vector
+    * @param {Object} vectorB - Track feature vector
+    * @returns {number} Value between -1.0 and 1.0 representing angular similarity
+    */
+   calculateCosineSimilarity(vectorA, vectorB) {
+      let dotProduct = 0;
+      let sumSqA = 0;
+      let sumSqB = 0;
+
+      const allKeys = new Set([...Object.keys(vectorA), ...Object.keys(vectorB)]);
+
+      allKeys.forEach(key => {
+         const valA = vectorA[key] || 0;
+         const valB = vectorB[key] || 0;
+
+         dotProduct += valA * valB;
+         sumSqA += valA * valA;
+         sumSqB += valB * valB;
+      });
+
+      const magnitudeA = Math.sqrt(sumSqA);
+      const magnitudeB = Math.sqrt(sumSqB);
+
+      if (magnitudeA === 0 || magnitudeB === 0) return 0.0;
+
+      return dotProduct / (magnitudeA * magnitudeB);
+   },
+
    /**
     * Initializes the "For You" page UI
     */
@@ -182,7 +309,7 @@ export const DiscoveryEngine = {
          const interests = this.getInterests();
          const signal = window.Router?.abortController?.signal;
 
-         // If no data, show a message
+         // If no telemetry history exists, show a localized empty state message
          if (interests.artists.length === 0 && interests.tracks.length === 0) {
             container.innerHTML = `
                <div style="text-align:center; padding: 60px; color: var(--text-secondary);">
@@ -195,37 +322,139 @@ export const DiscoveryEngine = {
             return;
          }
 
-         container.innerHTML = ''; // Clear loader
+         container.innerHTML = `
+            <div class="skeleton-list" style="padding: 20px;">
+               ${`<div class="skeleton-card track-skeleton" style="width: 100%; height: 80px; margin-bottom: 15px;"></div>`.repeat(3)}
+            </div>
+         `;
 
-         // We dynamically import CardSystem to avoid circular dependencies
+         // Dynamic import CardSystem to avoid circular imports
          const { CardSystem } = await import('./cards.js');
 
-         // 1. "Based on your top tracks" row
-         if (interests.tracks.length > 0) {
-            const topTrack = interests.tracks[0];
-            const related = await MusicAPI.getRelatedTracks(topTrack.id, signal);
-            if (related && related.length > 0) {
-               const row = CardSystem.createRow(`Based on ${topTrack.title || 'your taste'}`, 'foryou-tracks', related);
+         // 1. Gather a High-Fidelity Candidate Pool
+         const candidatePool = [];
+         const savedTracks = window.MusicAPI?.getSavedTracks ? await window.MusicAPI.getSavedTracks() : [];
+         const savedIds = new Set(savedTracks.map(t => t.id));
+
+         // Fetch charts for a solid popular fallback base
+         try {
+            const chartTracks = await MusicAPI.getArtistTopTracks('5390796', signal); // Deezer Editorial charts fallback
+            if (chartTracks) candidatePool.push(...chartTracks);
+         } catch (e) {}
+
+         // Gather candidates based on top 3 tracks
+         const topTracks = interests.tracks.slice(0, 3);
+         for (const t of topTracks) {
+            try {
+               const related = await MusicAPI.getRelatedTracks(t.id, signal);
+               if (related) candidatePool.push(...related);
+            } catch (e) {}
+         }
+
+         // Gather candidates based on top 3 artists
+         const topArtists = interests.artists.slice(0, 3);
+         for (const a of topArtists) {
+            try {
+               const artistTracks = await MusicAPI.getArtistTopTracks(a.id, signal);
+               if (artistTracks) candidatePool.push(...artistTracks);
+            } catch (e) {}
+         }
+
+         // Gather candidates based on top 3 genres
+         const topGenres = interests.genres.slice(0, 3);
+         for (const g of topGenres) {
+            try {
+               const genreTracks = await MusicAPI.getGenreTracks(g.name, signal);
+               if (genreTracks) candidatePool.push(...genreTracks);
+            } catch (e) {}
+         }
+
+         // Deduplicate candidate pool by unique Deezer IDs
+         const uniquePool = [];
+         const seenIds = new Set();
+         candidatePool.forEach(track => {
+            if (track && track.id && !seenIds.has(track.id)) {
+               seenIds.add(track.id);
+               uniquePool.push(track);
+            }
+         });
+
+         // 2. Perform Cosine Similarity Projections
+         const scores = this.getScores();
+         const userVector = this.buildUserProfileVector(scores);
+         const trackScores = scores.tracks || {};
+
+         const scoredPool = uniquePool.map(track => {
+            const trackVector = this.createTrackVector(track);
+            let similarity = this.calculateCosineSimilarity(userVector, trackVector);
+
+            // Apply penalty if the track is in history but has early skips
+            const historyScore = trackScores[track.id] || 0;
+            if (historyScore < 0) {
+               similarity -= 0.4;
+            }
+
+            return { track, similarity };
+         });
+
+         // Sort candidates in descending order of similarity
+         scoredPool.sort((a, b) => b.similarity - a.similarity);
+
+         // Filter out already saved tracks for the dynamic "Discovery Mix"
+         const discoveryMixCandidates = scoredPool
+            .filter(item => !savedIds.has(item.track.id))
+            .map(item => item.track);
+
+         container.innerHTML = '';
+
+         // --- Row 1: Discovery Mix For You ---
+         if (discoveryMixCandidates.length > 0) {
+            const discoveryList = discoveryMixCandidates.slice(0, 12);
+            // Dynamic Header Translation Match
+            const row = CardSystem.createRow('Discovery Mix For You', 'foryou-discovery-mix', discoveryList);
+            container.appendChild(row);
+         }
+
+         // --- Row 2: Dynamic Genre Fusion Mix ---
+         if (topGenres.length > 0) {
+            const genreA = topGenres[0].name;
+            const genreB = topGenres[1]?.name || topGenres[0].name;
+            
+            // Filter candidates that align closely with the user's top genres
+            const fusionCandidates = scoredPool
+               .filter(item => {
+                  const name = item.track.genre || '';
+                  return name.toLowerCase().includes(genreA.toLowerCase()) || 
+                         name.toLowerCase().includes(genreB.toLowerCase());
+               })
+               .map(item => item.track)
+               .slice(0, 10);
+
+            if (fusionCandidates.length > 0) {
+               const fusionTitle = genreA === genreB ? `${genreA} Fusion` : `${genreA} & ${genreB} Fusion`;
+               const row = CardSystem.createRow(fusionTitle, 'foryou-genre-fusion', fusionCandidates);
                container.appendChild(row);
             }
          }
 
-         // 2. "Because you like [Artist]" row
-         if (interests.artists.length > 0) {
-            const topArtist = interests.artists[0];
-            const artistTracks = await MusicAPI.getArtistTopTracks(topArtist.id, signal);
-            if (artistTracks && artistTracks.length > 0) {
-               const row = CardSystem.createRow(`More from ${topArtist.id}`, 'foryou-artist', artistTracks);
-               container.appendChild(row);
-            }
-         }
+         // --- Row 3: Taste Match (Top Artists Blend) ---
+         if (topArtists.length > 0) {
+            const artistA = topArtists[0];
+            const artistB = topArtists[1] || topArtists[0];
+            
+            const artistCandidates = scoredPool
+               .filter(item => {
+                  const t = item.track;
+                  return (t.artistId && (t.artistId === artistA.id || t.artistId === artistB.id)) ||
+                         (t.artist && (t.artist.toLowerCase() === artistA.name.toLowerCase() || 
+                                       t.artist.toLowerCase() === artistB.name.toLowerCase()));
+               })
+               .map(item => item.track)
+               .slice(0, 10);
 
-         // 3. "Genre Mixes" based on top genres
-         if (interests.genres.length > 0) {
-            const topGenre = interests.genres[0].name;
-            const genreTracks = await MusicAPI.getGenreTracks(topGenre, signal);
-            if (genreTracks && genreTracks.length > 0) {
-               const row = CardSystem.createRow(`${topGenre} Essentials`, 'foryou-genre', genreTracks);
+            if (artistCandidates.length > 0) {
+               const matchTitle = artistA.id === artistB.id ? `More from ${artistA.name}` : `Best of ${artistA.name} & ${artistB.name}`;
+               const row = CardSystem.createRow(matchTitle, 'foryou-taste-match', artistCandidates);
                container.appendChild(row);
             }
          }

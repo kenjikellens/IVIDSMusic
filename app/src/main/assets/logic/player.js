@@ -92,9 +92,20 @@ export const YouTubePlayer = {
         progressSlider.onmouseup = onSliderRelease;
         progressSlider.ontouchend = onSliderRelease;
 
+        // Save volume levels to localStorage on adjustment
         volumeSlider.oninput = () => {
             this.audio.volume = volumeSlider.value / 100;
+            localStorage.setItem('ivids_volume', volumeSlider.value);
         };
+
+        // Load and restore user's cached volume setting on startup, defaulting to 100% (1.0)
+        const savedVolume = localStorage.getItem('ivids_volume');
+        if (savedVolume !== null) {
+            volumeSlider.value = savedVolume;
+            this.audio.volume = parseFloat(savedVolume) / 100;
+        } else {
+            this.audio.volume = 1.0;
+        }
 
         // Load last track from persistence
         const lastTrack = localStorage.getItem('ivids_last_track');
@@ -180,13 +191,61 @@ export const YouTubePlayer = {
         }
     },
 
+    /**
+     * Navigates to and plays the next track in the current active queue if available.
+     * Triggers skip telemetry in DiscoveryEngine if the track is skipped before 20 seconds.
+     * Automatically handles both local saved tracks and online streaming.
+     */
     next() {
         if (this.currentTrack && !this._listenScored && this.audio.currentTime < 20) {
             DiscoveryEngine.recordSkip(this.currentTrack.id);
         }
-        console.log('Next track clicked');
+        
+        if (this.queue && this.queue.length > 0 && this.currentIndex !== -1) {
+            // Traverse queue circularly
+            this.currentIndex = (this.currentIndex + 1) % this.queue.length;
+            const nextTrack = this.queue[this.currentIndex];
+            if (nextTrack) {
+                console.log(`[Queue] Navigating forward to: ${nextTrack.title} - ${nextTrack.artist} (index ${this.currentIndex})`);
+                if (nextTrack.url) {
+                    this.playSavedTrack(nextTrack);
+                } else {
+                    this.loadTrack(nextTrack);
+                }
+            }
+        } else {
+            console.log('[Queue] Next clicked but no valid active queue found.');
+        }
     },
-    previous() { console.log('Previous track clicked'); },
+
+    /**
+     * Navigates to and plays the previous track in the current active queue if available.
+     * Restarts playback of the current track if it has played for more than 3 seconds.
+     * Automatically handles both local saved tracks and online streaming.
+     */
+    previous() {
+        if (this.audio && this.audio.currentTime > 3) {
+            console.log('[Queue] Previous clicked, restarting current track');
+            this.audio.currentTime = 0;
+            return;
+        }
+
+        if (this.queue && this.queue.length > 0 && this.currentIndex !== -1) {
+            // Traverse queue circularly backward
+            this.currentIndex = (this.currentIndex - 1 + this.queue.length) % this.queue.length;
+            const prevTrack = this.queue[this.currentIndex];
+            if (prevTrack) {
+                console.log(`[Queue] Navigating backward to: ${prevTrack.title} - ${prevTrack.artist} (index ${this.currentIndex})`);
+                if (prevTrack.url) {
+                    this.playSavedTrack(prevTrack);
+                } else {
+                    this.loadTrack(prevTrack);
+                }
+            }
+        } else {
+            console.log('[Queue] Previous clicked but no valid active queue found.');
+        }
+    },
 
     toggleLike() {
         if (!this.currentTrack) return;

@@ -19,14 +19,23 @@ import org.json.JSONArray
 import android.webkit.JavascriptInterface
 import java.io.File
 
+/**
+ * The main activity container that hosts the IVIDS Music web interface.
+ * Sets up a full-screen WebView with the required settings, coordinates custom javascript
+ * interfaces with the android environment, and intercepts web resource requests to perform
+ * native proxy networking, audio streaming resolution, and file download management.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var webView: WebView
+    
+    // OkHttpClient with extended 15-second timeouts to optimize large audio downloads
     private val client = OkHttpClient.Builder()
-        .connectTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
-        .readTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
-        .writeTimeout(5, java.util.concurrent.TimeUnit.SECONDS)
+        .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
         .build()
+
 
     private val assetLoader by lazy {
         val downloadDir = File(cacheDir, "downloads")
@@ -42,6 +51,12 @@ class MainActivity : AppCompatActivity() {
             .build()
     }
 
+    /**
+     * Called when the activity is starting. Configures full-screen layout settings,
+     * initializes WebView configurations, registers the native Android interface, and initiates loading the UI.
+     *
+     * @param savedInstanceState If the activity is being re-initialized after previously being shut down.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -79,10 +94,12 @@ class MainActivity : AppCompatActivity() {
                     if (videoId != null) return handlePlayRequest(videoId)
                 }
 
-                // 3. Onderschep de Save verzoeken
+                // 3. Onderschep de Save verzoeken (extract artist and title for formatted filename)
                 if (path.contains("/save")) {
                     val videoId = url.getQueryParameter("videoId")
-                    if (videoId != null) return handleSaveRequest(videoId)
+                    val artist = url.getQueryParameter("artist") ?: "Unknown Artist"
+                    val title = url.getQueryParameter("title") ?: "Unknown Title"
+                    if (videoId != null) return handleSaveRequest(videoId, artist, title)
                 }
 
                 // 4. Onderschep de Saved-tracks lijst verzoek
@@ -106,6 +123,13 @@ class MainActivity : AppCompatActivity() {
         webView.loadUrl("https://appassets.androidplatform.net/assets/gui/index.html")
     }
 
+    /**
+     * Intercepts and proxies standard external GET requests (such as Deezer searches) natively.
+     * Prevents browser CORS errors by routing external API calls through OkHttp.
+     *
+     * @param targetUrl The target URL to request natively.
+     * @return WebResourceResponse containing the direct response input stream.
+     */
     private fun handleProxyRequest(targetUrl: String): WebResourceResponse? {
         return try {
             val request = Request.Builder()
@@ -126,6 +150,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    /**
+     * Handles stream resolution and background audio caching for a given video ID.
+     * Queries redundant Invidious instances to find a valid adaptive audio stream,
+     * downloads it directly into the temporary downloads folder, and returns a local asset URL.
+     *
+     * @param videoId The YouTube Video ID of the track.
+     * @return WebResourceResponse with local URL JSON on success, or error details.
+     */
     private fun handlePlayRequest(videoId: String): WebResourceResponse? {
         Log.d("IVIDS", "Starting handlePlayRequest for videoId: $videoId")
         return try {
@@ -202,7 +235,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun handleSaveRequest(videoId: String): WebResourceResponse? {
+
+    /**
+     * Handles track saving requests by safely copying the cached track audio from temporary storage
+     * to the permanent library storage under filesDir. The destination file is named and saved using the
+     * format "Artist - Title.m4a" with safe characters, matching the structure getSavedTracks() expects.
+     *
+     * @param videoId The YouTube Video ID of the track.
+     * @param artist The name of the artist.
+     * @param title The title of the song.
+     * @return WebResourceResponse containing saved status details.
+     */
+    private fun handleSaveRequest(videoId: String, artist: String, title: String): WebResourceResponse? {
         return try {
             val downloadDir = File(cacheDir, "downloads")
             val sourceFile = File(downloadDir, "$videoId.m4a")
@@ -215,14 +259,18 @@ class MainActivity : AppCompatActivity() {
             val savedDir = File(filesDir, "saved")
             if (!savedDir.exists()) savedDir.mkdirs()
             
-            val destFile = File(savedDir, "$videoId.m4a")
+            // Clean illegal characters in filename while keeping standard spaces
+            val cleanArtist = artist.trim().replace(Regex("[/\\\\?%*:|\"<>]"), "")
+            val cleanTitle = title.trim().replace(Regex("[/\\\\?%*:|\"<>]"), "")
+            val filename = "$cleanArtist - $cleanTitle.m4a"
+            val destFile = File(savedDir, filename)
             
             // Move file (copy then delete source to handle potential cross-volume issues)
             sourceFile.copyTo(destFile, overwrite = true)
             
             val resultJson = JSONObject()
             if (destFile.exists() && destFile.length() > 0) {
-                val localUrl = "https://appassets.androidplatform.net/saved/$videoId.m4a"
+                val localUrl = "https://appassets.androidplatform.net/saved/${Uri.encode(filename)}"
                 resultJson.put("status", "saved")
                 resultJson.put("message", "Track saved successfully")
                 resultJson.put("url", localUrl)
@@ -242,6 +290,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+
+    /**
+     * Utility method to generate a serialized JSON error response block.
+     *
+     * @param message The detailed error message to return.
+     * @return WebResourceResponse containing the error JSON payload.
+     */
     private fun createErrorResponse(message: String): WebResourceResponse {
         val errorJson = JSONObject()
         errorJson.put("status", "error")
@@ -253,6 +308,10 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    /**
+     * Intercepts the back button event to navigate back inside the WebView history.
+     * If the web interface has no back history, closes the activity/app.
+     */
     override fun onBackPressed() {
         if (webView.canGoBack()) {
             webView.goBack()
@@ -261,7 +320,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * JavaScript Interface Bridge exposed to the WebView context.
+     * Declares custom interfaces mapped under window.AndroidAPI.
+     */
     inner class AndroidAPI {
+        
+        /**
+         * Scans the native filesDir/saved directory for downloaded audio tracks (.mp3 or .m4a)
+         * and returns them serialized in a JSON array format to the frontend library page.
+         *
+         * @return String representing a JSON array of saved track details.
+         */
         @JavascriptInterface
         fun getSavedTracks(): String {
             return try {
@@ -294,3 +364,4 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
+

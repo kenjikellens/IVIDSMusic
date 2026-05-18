@@ -168,11 +168,17 @@
         import { SettingsManager } from '../logic/settings-manager.js';
         import '../logic/player.js';
         import { TVNav } from '../logic/tv-nav.js';
+        import { Updater } from '../logic/updater.js';
 
         window.onload = () => {
             SettingsManager.init();
             TVNav.init();
             Router.loadPage('home');
+
+            // Silent daily auto update check on app boot (delayed to avoid network bottleneck)
+            setTimeout(() => {
+                if (window.Updater) window.Updater.initAutoCheck();
+            }, 3000);
         };
 
         // Screensaver logic
@@ -184,9 +190,12 @@
                 document.getElementById('screensaver-overlay').classList.add('active');
             }, 60000);
         };
+        // Event listeners to detect activity and prevent the screensaver overlay from triggering
         document.onmousemove = resetTimer;
         document.onkeypress = resetTimer;
         document.onkeydown = resetTimer; // Added for TV remote support
+        document.ontouchstart = resetTimer; // Added for touchscreen touch scroll/tap support
+        document.onclick = resetTimer; // Added for mouse click support
         resetTimer();
     </script>
 </body>

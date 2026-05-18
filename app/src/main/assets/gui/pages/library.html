@@ -57,6 +57,9 @@
     <div id="playlists-row-container" class="row-scroll-wrapper">
         <div class="row-header">
             <h2 class="row-title" data-i18n="playlists">Playlists</h2>
+            <button id="playlist-create-btn" class="btn btn-secondary small" onclick="PageSystem.openCreatePlaylistModal()">
+                <span data-i18n="create_playlist">+ Create</span>
+            </button>
         </div>
 
         <!-- Playlist Empty State -->
@@ -69,6 +72,30 @@
 
         <div id="library-playlists-list" class="results-row is-hidden">
             <!-- Rendered by pages.js -->
+        </div>
+    </div>
+
+    <!-- Create Playlist Modal -->
+    <div id="playlist-modal-overlay" class="modal-overlay is-hidden" onclick="PageSystem.closeCreatePlaylistModal(event)">
+        <div class="modal-content glassmorphism">
+            <div class="modal-header">
+                <h3 data-i18n="create_playlist">Create Playlist</h3>
+                <button class="modal-close-btn" onclick="PageSystem.closeCreatePlaylistModal(event, true)">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <label for="playlist-new-name" data-i18n="playlist_name">Playlist Name</label>
+                    <input type="text" id="playlist-new-name" placeholder="My Playlist" data-i18n-placeholder="playlist_name">
+                </div>
+                <div class="input-group" style="margin-top: 15px;">
+                    <label for="playlist-new-desc" data-i18n="playlist_desc">Description (Optional)</label>
+                    <textarea id="playlist-new-desc" rows="3" placeholder="Description (Optional)" data-i18n-placeholder="playlist_desc" style="width: 100%; resize: none; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; color: #fff; padding: 10px; font-family: inherit; font-size: 0.95rem; box-sizing: border-box;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="PageSystem.closeCreatePlaylistModal(event, true)" data-i18n="close">Close</button>
+                <button class="btn btn-primary" onclick="PageSystem.submitCreatePlaylist()" data-i18n="profile_save">Save</button>
+            </div>
         </div>
     </div>
 

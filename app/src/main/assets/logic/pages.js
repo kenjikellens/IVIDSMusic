@@ -74,6 +74,11 @@ export const PageSystem = {
         }
     },
 
+    /**
+     * Initializes the Settings page view.
+     * Refreshes and updates the user-facing stepper display for interface scaling
+     * and coordinates with the LanguageManager to display the active preferred language.
+     */
     async initSettings() {
         try {
             // Update the display text to match current persistence state
@@ -270,33 +275,7 @@ export const PageSystem = {
         }
     },
 
-    async initSettings() {
-        const { SettingsManager } = await import('./settings-manager.js');
-        const { LanguageManager } = await import('./language-manager.js');
 
-        // 1. Scale UI Binding
-        const scaleContainer = document.getElementById('scale-options-container');
-        if (scaleContainer) {
-            const currentScale = SettingsManager.getScale();
-            const buttons = scaleContainer.querySelectorAll('.scale-btn');
-
-            buttons.forEach(btn => {
-                const scale = parseFloat(btn.dataset.scale);
-                if (scale === currentScale) {
-                    btn.classList.add('active');
-                }
-
-                btn.onclick = () => {
-                    buttons.forEach(b => b.classList.remove('active'));
-                    btn.classList.add('active');
-                    SettingsManager.setScale(scale);
-                };
-            });
-        }
-
-        // 2. Language UI Binding
-        LanguageManager.bindLanguageUI();
-    },
 
     async initProfile() {
         const recentList = document.getElementById('profile-recent-list');
@@ -321,9 +300,11 @@ export const PageSystem = {
         const minutesEl = document.getElementById('stat-minutes-count');
         if (minutesEl) minutesEl.textContent = HistorySystem.getTotalMinutes();
 
-        // Playlists (none yet)
+        // Playlists (queried from local PlaylistManager)
         const playlistsEl = document.getElementById('stat-playlists-count');
-        if (playlistsEl) playlistsEl.textContent = '0';
+        if (playlistsEl) {
+            playlistsEl.textContent = window.PlaylistManager ? window.PlaylistManager.getPlaylists().length : '0';
+        }
 
         // --- Recently Played ---
         if (recentList) {
@@ -449,6 +430,9 @@ export const PageSystem = {
         // Show history instantly (local data)
         this.renderRecentTracks();
 
+        // Render user custom playlists
+        this.renderPlaylists();
+
         container.innerHTML = `
             <div class="skeleton-list">
                 ${`<div class="skeleton-card track-skeleton" style="width: 100%; height: 60px; margin-bottom: 10px;"></div>`.repeat(5)}
@@ -471,6 +455,13 @@ export const PageSystem = {
         }
     },
 
+    /**
+     * Renders a given list of saved tracks in the library list container.
+     * serializes track metadata directly on each DOM row, and hooks the click and key events
+     * to dynamically populate the player queue from sibling tracks upon playback initiation.
+     *
+     * @param {Array<Object>} tracks - The list of saved tracks to display in the library.
+     */
     renderLibrary(tracks) {
         const container = document.getElementById('library-list-container');
         const emptyState = document.getElementById('library-empty-state');
@@ -491,6 +482,7 @@ export const PageSystem = {
             const itemDiv = document.createElement('div');
             itemDiv.className = 'library-track-item';
             itemDiv.tabIndex = 0; // Added for TV Nav
+            itemDiv.dataset.trackJson = JSON.stringify(track);
             itemDiv.innerHTML = `
                 <div class="track-info">
                     <div class="track-title">${track.title}</div>
@@ -501,7 +493,30 @@ export const PageSystem = {
                 </button>
             `;
 
-            const playTrack = () => YouTubePlayer.playSavedTrack(track);
+            const playTrack = () => {
+                const parent = itemDiv.closest('#library-list-container');
+                if (parent) {
+                    const siblingDivs = Array.from(parent.querySelectorAll('.library-track-item'));
+                    const siblingTracks = siblingDivs.map(d => {
+                        try {
+                            return JSON.parse(d.dataset.trackJson || '{}');
+                        } catch (err) {
+                            return null;
+                        }
+                    }).filter(t => t && t.title);
+
+                    if (siblingTracks.length > 0) {
+                        YouTubePlayer.queue = siblingTracks;
+                        YouTubePlayer.currentIndex = siblingTracks.findIndex(t => t.title === track.title && t.artist === track.artist);
+                        console.log(`[Library Queue] Populated queue with ${siblingTracks.length} saved tracks. Active index: ${YouTubePlayer.currentIndex}`);
+                    }
+                } else {
+                    YouTubePlayer.queue = [track];
+                    YouTubePlayer.currentIndex = 0;
+                }
+                YouTubePlayer.playSavedTrack(track);
+            };
+
             itemDiv.onclick = playTrack;
             itemDiv.onkeydown = (e) => {
                 if (e.key === 'Enter') {
@@ -514,6 +529,10 @@ export const PageSystem = {
         });
     },
 
+    /**
+     * Renders a list of recently played tracks from history storage inside the Library view.
+     * Serializes history data on DOM cards and setups sibling navigation queues.
+     */
     renderRecentTracks() {
         const container = document.getElementById('library-recent-list');
         const rowWrapper = document.getElementById('recent-row-container');
@@ -535,6 +554,7 @@ export const PageSystem = {
             const card = document.createElement('div');
             card.className = 'music-card';
             card.tabIndex = 0; // Added for TV Nav
+            card.dataset.trackJson = JSON.stringify(track);
             card.innerHTML = `
                 <div class="card-image-box">
                     <img src="${track.cover}" class="poster" alt="${track.title}">
@@ -546,6 +566,27 @@ export const PageSystem = {
             `;
 
             const playRecent = () => {
+                const parent = card.closest('#library-recent-list');
+                if (parent) {
+                    const siblingCards = Array.from(parent.querySelectorAll('.music-card'));
+                    const siblingTracks = siblingCards.map(c => {
+                        try {
+                            return JSON.parse(c.dataset.trackJson || '{}');
+                        } catch (err) {
+                            return null;
+                        }
+                    }).filter(t => t && t.title);
+
+                    if (siblingTracks.length > 0) {
+                        YouTubePlayer.queue = siblingTracks;
+                        YouTubePlayer.currentIndex = siblingTracks.findIndex(t => t.title === track.title && t.artist === track.artist);
+                        console.log(`[Recent Queue] Populated queue with ${siblingTracks.length} history tracks. Active index: ${YouTubePlayer.currentIndex}`);
+                    }
+                } else {
+                    YouTubePlayer.queue = [track];
+                    YouTubePlayer.currentIndex = 0;
+                }
+
                 if (track.url) {
                     YouTubePlayer.playSavedTrack(track);
                 } else {
@@ -580,6 +621,14 @@ export const PageSystem = {
         );
         this.renderLibrary(filtered);
     },
+    /**
+     * Initializes the album view by fetching metadata and track listing for a specific album ID.
+     * Hydrates the album hero layout, sets dynamic brand accent colors, wires up the big "Play Album"
+     * action button (populates complete sequential tracks in player), and renders the individual track rows
+     * with serialized context-aware click triggers to easily navigate back/forward in the queue.
+     *
+     * @param {Object} params - The routing parameters containing the active 'id' of the album.
+     */
     async initAlbum(params) {
         if (!params || !params.id) return;
 
@@ -620,14 +669,19 @@ export const PageSystem = {
                     if (hero) hero.style.setProperty('--primary-color', color);
                 });
 
-                // Play Button
+                // Play Button - Populates the entire album tracks into active player queue
                 const playBtn = document.getElementById('play-album-btn');
                 if (playBtn && album.tracks.length > 0) {
                     playBtn.disabled = false;
-                    playBtn.onclick = () => YouTubePlayer.loadTrack(album.tracks[0]);
+                    playBtn.onclick = () => {
+                        YouTubePlayer.queue = [...album.tracks];
+                        YouTubePlayer.currentIndex = 0;
+                        YouTubePlayer.loadTrack(album.tracks[0]);
+                        console.log(`[Album Play] Started album playback with ${album.tracks.length} tracks.`);
+                    };
                 }
 
-                // Render Tracks
+                // Render Tracks with contextual queue binding
                 const tracklistCont = document.getElementById('album-tracklist');
                 if (tracklistCont) {
                     tracklistCont.innerHTML = '';
@@ -635,6 +689,7 @@ export const PageSystem = {
                         const trackRow = document.createElement('div');
                         trackRow.className = 'album-track-row';
                         trackRow.tabIndex = 0;
+                        trackRow.dataset.trackJson = JSON.stringify(track);
                         trackRow.innerHTML = `
                             <div class="track-number">${index + 1}</div>
                             <div class="track-details">
@@ -643,7 +698,31 @@ export const PageSystem = {
                             </div>
                             <div class="track-duration">--:--</div>
                         `;
-                        trackRow.onclick = () => YouTubePlayer.loadTrack(track);
+
+                        trackRow.onclick = () => {
+                            const parent = trackRow.closest('#album-tracklist');
+                            if (parent) {
+                                const siblingRows = Array.from(parent.querySelectorAll('.album-track-row'));
+                                const siblingTracks = siblingRows.map(r => {
+                                    try {
+                                        return JSON.parse(r.dataset.trackJson || '{}');
+                                    } catch (err) {
+                                        return null;
+                                    }
+                                }).filter(t => t && t.id);
+
+                                if (siblingTracks.length > 0) {
+                                    YouTubePlayer.queue = siblingTracks;
+                                    YouTubePlayer.currentIndex = siblingTracks.findIndex(t => t.id === track.id);
+                                    console.log(`[Album Queue] Populated queue with ${siblingTracks.length} tracks. Active index: ${YouTubePlayer.currentIndex}`);
+                                }
+                            } else {
+                                YouTubePlayer.queue = [track];
+                                YouTubePlayer.currentIndex = 0;
+                            }
+                            YouTubePlayer.loadTrack(track);
+                        };
+
                         trackRow.onkeydown = (e) => {
                             if (e.key === 'Enter') trackRow.click();
                         };
@@ -787,6 +866,260 @@ export const PageSystem = {
         } catch (e) {
             console.error('[initSong] Error:', e);
         }
+    },
+
+    /**
+     * Renders user created local playlists inside the Library view.
+     * Uses standard PlaylistManager data model, hiding empty states and
+     * registering card click navigation details.
+     */
+    renderPlaylists() {
+        const list = document.getElementById('library-playlists-list');
+        const emptyState = document.getElementById('playlists-empty-state');
+        if (!list) return;
+
+        const playlists = window.PlaylistManager ? window.PlaylistManager.getPlaylists() : [];
+
+        if (playlists.length === 0) {
+            if (emptyState) emptyState.classList.remove('is-hidden');
+            list.classList.add('is-hidden');
+            return;
+        }
+
+        if (emptyState) emptyState.classList.add('is-hidden');
+        list.classList.remove('is-hidden');
+        list.innerHTML = '';
+
+        playlists.forEach(pl => {
+            const card = document.createElement('div');
+            card.className = 'music-card playlist-card';
+            card.tabIndex = 0;
+            card.dataset.playlistId = pl.id;
+            card.innerHTML = `
+                <div class="card-image-box" style="background: ${pl.cover}; display: flex; align-items: center; justify-content: center; border-radius: 8px; position: relative;">
+                    <span style="font-size: 2.8rem;">📂</span>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title">${pl.name}</div>
+                    <div class="card-artist">${pl.tracks.length} ${pl.tracks.length === 1 ? 'song' : 'songs'}</div>
+                </div>
+                <button class="delete-playlist-btn" onclick="event.stopPropagation(); PageSystem.deletePlaylist('${pl.id}')" title="Delete Playlist" tabindex="-1" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; color: #fff; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; opacity: 0; transition: opacity 0.2s;">
+                    &times;
+                </button>
+            `;
+
+            card.onclick = () => {
+                window.Router.loadPage('playlist', { id: pl.id });
+            };
+
+            card.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    window.Router.loadPage('playlist', { id: pl.id });
+                }
+            };
+
+            list.appendChild(card);
+        });
+    },
+
+    /**
+     * Deletes a playlist and refreshes the current UI view instantly.
+     * @param {string} id - The playlist unique ID
+     */
+    deletePlaylist(id) {
+        if (confirm("Are you sure you want to delete this playlist?")) {
+            if (window.PlaylistManager) {
+                window.PlaylistManager.deletePlaylist(id);
+                this.renderPlaylists();
+            }
+        }
+    },
+
+    /**
+     * Opens the Create Playlist dialog overlay.
+     */
+    openCreatePlaylistModal() {
+        const overlay = document.getElementById('playlist-modal-overlay');
+        if (overlay) {
+            overlay.classList.remove('is-hidden');
+            const input = document.getElementById('playlist-new-name');
+            if (input) {
+                input.value = '';
+                setTimeout(() => input.focus(), 50);
+            }
+            const desc = document.getElementById('playlist-new-desc');
+            if (desc) desc.value = '';
+        }
+    },
+
+    /**
+     * Closes the Create Playlist dialog overlay.
+     */
+    closeCreatePlaylistModal(event, force = false) {
+        if (force || event.target.id === 'playlist-modal-overlay') {
+            const overlay = document.getElementById('playlist-modal-overlay');
+            if (overlay) overlay.classList.add('is-hidden');
+        }
+    },
+
+    /**
+     * Submits the create playlist input fields to the manager and refreshes views.
+     */
+    submitCreatePlaylist() {
+        const nameInput = document.getElementById('playlist-new-name');
+        const descInput = document.getElementById('playlist-new-desc');
+        const name = nameInput ? nameInput.value.trim() : '';
+        const desc = descInput ? descInput.value.trim() : '';
+
+        if (!name) {
+            alert('Please enter a playlist name.');
+            return;
+        }
+
+        if (window.PlaylistManager) {
+            window.PlaylistManager.createPlaylist(name, desc);
+            this.renderPlaylists();
+            const overlay = document.getElementById('playlist-modal-overlay');
+            if (overlay) overlay.classList.add('is-hidden');
+        }
+    },
+
+    /**
+     * Initializes the playlist detail view.
+     * Loads the target custom playlist from storage, updates the HTML elements
+     * (name, description, cover gradient, song count), and lists all tracks.
+     * Sets up play-all queue triggers and track remove helpers.
+     * 
+     * @param {Object} params - Routing parameters containing { id: string }
+     */
+    async initPlaylist(params) {
+        const id = params.id;
+        if (!id) return;
+
+        const playlist = window.PlaylistManager ? window.PlaylistManager.getPlaylist(id) : null;
+        if (!playlist) {
+            console.error('[PlaylistDetails] Playlist not found', id);
+            return;
+        }
+
+        // 1. Render Playlist Metadata
+        const nameEl = document.getElementById('playlist-details-name');
+        const descEl = document.getElementById('playlist-details-desc');
+        const countEl = document.getElementById('playlist-track-count');
+        const coverEl = document.getElementById('playlist-cover-wrapper');
+        const heroBgEl = document.getElementById('playlist-hero-bg');
+
+        if (nameEl) nameEl.textContent = playlist.name;
+        if (descEl) descEl.textContent = playlist.description || '';
+        if (countEl) countEl.textContent = `${playlist.tracks.length} ${playlist.tracks.length === 1 ? 'song' : 'songs'}`;
+        if (coverEl) {
+            coverEl.style.background = playlist.cover;
+        }
+        if (heroBgEl) {
+            heroBgEl.style.setProperty('--accent-glow', playlist.cover.match(/#\w+/)?.[0] || '#fff');
+        }
+
+        // 2. Setup Actions
+        const playBtn = document.getElementById('play-playlist-btn');
+        const deleteBtn = document.getElementById('delete-playlist-detail-btn');
+
+        if (playBtn) {
+            if (playlist.tracks.length > 0) {
+                playBtn.disabled = false;
+                playBtn.onclick = () => {
+                    if (window.YouTubePlayer) {
+                        window.YouTubePlayer.queue = [...playlist.tracks];
+                        window.YouTubePlayer.currentIndex = 0;
+                        window.YouTubePlayer.playSavedTrack(playlist.tracks[0]);
+                    }
+                };
+            } else {
+                playBtn.disabled = true;
+            }
+        }
+
+        if (deleteBtn) {
+            deleteBtn.onclick = () => {
+                if (confirm("Are you sure you want to delete this playlist?")) {
+                    if (window.PlaylistManager) {
+                        window.PlaylistManager.deletePlaylist(id);
+                        window.Router.loadPage('library');
+                    }
+                }
+            };
+        }
+
+        // 3. Render Tracks List
+        const listContainer = document.getElementById('playlist-tracks-list');
+        const emptyState = document.getElementById('playlist-tracks-empty');
+        if (!listContainer) return;
+
+        listContainer.innerHTML = '';
+
+        if (!playlist.tracks || playlist.tracks.length === 0) {
+            if (emptyState) emptyState.classList.remove('is-hidden');
+            listContainer.classList.add('is-hidden');
+            return;
+        }
+
+        if (emptyState) emptyState.classList.add('is-hidden');
+        listContainer.classList.remove('is-hidden');
+
+        playlist.tracks.forEach((track, index) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'library-track-item playlist-track-item';
+            itemDiv.tabIndex = 0;
+            itemDiv.dataset.trackJson = JSON.stringify(track);
+            itemDiv.innerHTML = `
+                <div class="track-info" style="flex: 1;">
+                    <div class="track-title" style="font-weight: 600; color: #fff; font-size: 1.05rem;">${track.title}</div>
+                    <div class="track-artist" style="color: rgba(255,255,255,0.5); font-size: 0.9rem; margin-top: 3px;">${track.artist}</div>
+                </div>
+                <div style="display: flex; gap: 12px; align-items: center;">
+                    <button class="remove-playlist-track-btn" title="Remove from Playlist" style="background: transparent; border: none; color: rgba(255,50,50,0.6); font-size: 1.4rem; cursor: pointer; padding: 5px 10px;" tabindex="-1">
+                        &times;
+                    </button>
+                    <button class="play-local-btn player-control-btn main small" tabindex="-1" style="width: 32px; height: 32px; border-radius: 50%; background: var(--ui-accent, #fff); display: flex; align-items: center; justify-content: center; border: none; cursor: pointer;">
+                        <img src="svg/play.svg" alt="Play" style="width: 14px; height: 14px; filter: brightness(0);">
+                    </button>
+                </div>
+            `;
+
+            // Setup Play Item
+            const playTrack = () => {
+                if (window.YouTubePlayer) {
+                    window.YouTubePlayer.queue = [...playlist.tracks];
+                    window.YouTubePlayer.currentIndex = index;
+                    window.YouTubePlayer.playSavedTrack(track);
+                }
+            };
+
+            // Setup Remove Item
+            const removeBtn = itemDiv.querySelector('.remove-playlist-track-btn');
+            if (removeBtn) {
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (window.PlaylistManager) {
+                        window.PlaylistManager.removeTrack(id, track.id);
+                        this.initPlaylist(params); // Refresh view
+                    }
+                };
+            }
+
+            itemDiv.onclick = playTrack;
+            itemDiv.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    playTrack();
+                }
+            };
+
+            listContainer.appendChild(itemDiv);
+        });
+
+        if (window.Loader) window.Loader.init();
+        if (window.LanguageManager) window.LanguageManager.translateUI(document.getElementById('main-view'));
     }
 };
 

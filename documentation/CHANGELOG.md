@@ -1,3 +1,63 @@
+[2026-05-18] EDITED .gitignore: Excluded /tmp/ directory from version control tracking
+[2026-05-18] ADDED IVIDSMusic.apk: Placed compiled prerelease APK at workspace root directory for distribution.
+[2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Updated Version label description text to v0.1.0 to ensure interface consistency
+[2026-05-18] EDITED app/src/main/assets/logic/updater.js: Adjusted CURRENT_VERSION to '0.1.0' to coordinate with target v0.1.0 release configuration
+[2026-05-18] EDITED app/build.gradle.kts: Bumped versionName to v0.1.0 and incremented versionCode to 2.
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Engineered premium glassmorphic hover and focus state glow transitions for manual and automated update buttons
+[2026-05-18] EDITED app/src/main/assets/logic/pages.js: Corrected an extra duplicate closing bracket in initPlaylist to resolve browser syntax errors
+[2026-05-18] EDITED app/src/main/assets/logic/recommendations.js: Cleaned up legacy duplicate initRecommended declaration to ensure syntactical perfection
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Added premium glassmorphic styling for automated and manual update modal overlays
+[2026-05-18] EDITED app/src/main/assets/gui/index.html: Hooked up daily automated update checks on application boot with a non-blocking delay
+[2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Added the "Check for Updates" button to the About section
+[2026-05-18] ADDED app/src/main/assets/logic/updater.js: Created the release update manager class supporting automated and manual version checking against GitHub Releases
+[2026-05-18] EDITED app/src/main/assets/logic/recommendations.js: Programmed the advanced multi-dimensional Content-Based Filtering Vector Space Cosine Similarity Recommendation Algorithm and dynamic UI mix renderers
+[2026-05-18] EDITED app/src/main/assets/gui/lang/en.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/nl.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/de.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/fr.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/es.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/it.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/pt.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/ro.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/ru.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/zh.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/hi.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/ar.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/ja.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/tr.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/ko.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/lang/pl.json: Added playlist-related localization keys (create_playlist, playlist_name, playlist_desc)
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Added premium glassmorphic CSS rules for "+" card buttons, dropdown list items, and empty states
+[2026-05-18] EDITED app/src/main/assets/logic/cards.js: Added dynamic "+" card playlist add button and floating "Add to Playlist" popover selection menu
+[2026-05-18] EDITED app/src/main/assets/logic/pages.js: Added playlist detail page initialization, library rendering, profile statistics, and popup modal submit helpers
+[2026-05-18] ADDED app/src/main/assets/gui/pages/playlist.html: Created custom dynamic sub-page layout view displaying playlist details, gradient backdrop, actions, and tracks
+[2026-05-18] EDITED app/src/main/assets/gui/pages/library.html: Added "+ Create" playlist button and a sleek glassmorphic Create Playlist popup modal structure
+[2026-05-18] ADDED app/src/main/assets/logic/playlists.js: Created local storage playlist core helper system handling create, delete, track add, and track remove
+[2026-05-18] ADDED app/src/main/assets/gui/lang/pl.json: Created Polish translation asset file containing all 84 dynamic UI elements
+[2026-05-18] ADDED app/src/main/assets/gui/lang/ko.json: Created Korean translation asset file containing all 84 dynamic UI elements
+[2026-05-18] ADDED app/src/main/assets/gui/lang/tr.json: Created Turkish translation asset file containing all 84 dynamic UI elements
+[2026-05-18] EDITED app/src/main/assets/logic/language-manager.js: Registered support for Turkish (tr), Korean (ko), and Polish (pl) in the LanguageManager config
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Removed prohibited card hover scale transforms and replaced them with standard thick glassy focus highlights and circular artist avatar rings
+[2026-05-18] EDITED app/src/main/assets/gui/index.html: Added touchscreen touchstart and mouse click event listeners to prevent the screensaver from turning on while scrolling or tapping elements on touchscreen devices
+[2026-05-18] EDITED app/src/main/assets/logic/player.js: Implemented volume state persistence using localStorage to save and restore player volume levels across app launches and reloads
+[2026-05-18] EDITED app/src/main/assets/logic/recommendations.js: Corrected the dynamic personalized recommendation row title to use the top artist human-readable name instead of their raw Deezer ID
+[2026-05-18] EDITED app/src/main/assets/logic/api.js: Extract and map artistId across getCategories, getArtistTopTracks, and getAlbumDetails responses to facilitate accurate discovery and recommendation telemetry
+[2026-05-18] EDITED app/src/main/assets/logic/cards.js: Include .row-posters in queue resolution to enable queue auto-play for Home page tracks, and pass human-readable artist names in recordArtistClick telemetry calls
+[2026-05-18] EDITED app/src/main/assets/logic/pages.js: Resolved duplicate initSettings declaration, added clear descriptive comments, and restored correct scale stepper and language display updates
+[2026-05-18] DELETED .agents/rules/no-translate-x-or-y.md: Removed redundant rule file replaced by animations.md
+[2026-05-18] ADDED .agents/rules/changelog.md: Created changelog post-edit hook and template rule file
+[2026-05-18] ADDED .agents/rules/no-autonomous-github-pushes.md: Created Git commit and remote push permission rules
+[2026-05-18] ADDED .agents/rules/languages.md: Created internationalization and translation rules
+[2026-05-18] ADDED .agents/rules/code-style.md: Created layout and container code style rules
+[2026-05-18] ADDED .agents/rules/animations.md: Created animation and hover/focus rule file
+[2026-05-18] ADDED .agents/rules/accent-colors.md: Created accent color rule file
+[2026-05-18] ADDED .agents/workflows/guides.md: Created customized development guides workflow file based on IVIDS structure
+[2026-05-18] ADDED .agents/workflows/version-and-release-update.md: Created version and release update workflow file based on the IVIDS system
+[2026-05-18] EDITED app/src/main/assets/logic/pages.js: Enabled custom queue extraction on album, library, and recently played lists, and updated JSDoc method descriptions
+[2026-05-18] EDITED app/src/main/assets/logic/cards.js: Enabled automatic dynamic queue construction on song card clicks by synchronizing serialized data-track-json on DOM nodes, and updated JSDoc method comments
+[2026-05-18] EDITED app/src/main/assets/logic/player.js: Implemented next() and previous() queue navigation for online/offline tracks, added circular traversal, and added robust JSDoc comments
+[2026-05-18] EDITED app/src/main/assets/logic/api.js: Removed duplicate getArtistTopTracks declaration, resolved limit and AbortSignal signature mismatch bug, and enhanced JSDoc method explanations
+[2026-05-18] EDITED app/src/main/java/com/kenjigames/ividsmusic/MainActivity.kt: Extended client timeouts, added parameter extraction and sanitized format rename for saved tracks, and documented all methods/classes
 [2026-03-09] EDITED app/src/main/assets/logic/history.js: Added addListeningTime() and getTotalMinutes() methods for tracking total listening duration
 [2026-03-09] EDITED app/src/main/assets/logic/player.js: Integrated listening time tracking into onplay/onpause/onended events via _lastPlayTimestamp
 [2026-03-09] EDITED app/src/main/assets/logic/pages.js: Rewrote initProfile() with live stat counters, Top Genres, Top Artists, and Edit Profile modal logic

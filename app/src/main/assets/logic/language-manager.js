@@ -3,7 +3,10 @@
  * Handles internationalization and dynamic UI translation.
  */
 export const LanguageManager = {
-    SUPPORTED_LANGUAGES: ['en', 'nl', 'fr', 'de', 'es', 'pt', 'it', 'zh', 'hi', 'ar', 'ru', 'ro', 'ja'],
+    // List of active language codes supported by IVIDS Music
+    SUPPORTED_LANGUAGES: ['en', 'nl', 'fr', 'de', 'es', 'pt', 'it', 'zh', 'hi', 'ar', 'ru', 'ro', 'ja', 'tr', 'ko', 'pl'],
+    
+    // Mapping of language codes to their native, human-readable display names
     LANGUAGE_NAMES: {
         en: 'English',
         nl: 'Nederlands',
@@ -17,7 +20,10 @@ export const LanguageManager = {
         ar: 'Arabic (العربية)',
         ru: 'Russian (Русский)',
         ro: 'Romanian (Română)',
-        ja: 'Japanese (日本語)'
+        ja: 'Japanese (日本語)',
+        tr: 'Turkish (Türkçe)',
+        ko: 'Korean (한국어)',
+        pl: 'Polish (Polski)'
     },
     defaultLanguage: 'en',
     currentLanguage: 'en',

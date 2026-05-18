@@ -173,6 +173,7 @@ export const MusicAPI = {
                             id: item.id,
                             title: item.title_short || item.title,
                             artist: item.artist?.name || 'Unknown',
+                            artistId: item.artist?.id || null, // Capture artist ID for recommendation scoring telemetry
                             album: item.album?.title || 'Unknown',
                             cover: item.album?.cover_big || item.album?.cover_xl,
                             previewUrl: item.preview
@@ -336,7 +337,14 @@ export const MusicAPI = {
     },
 
     /**
-     * Gets artist's top tracks formatted for CardSystem.
+     * Fetches the top tracks for a given artist from the Deezer API.
+     * Extracts and transforms track, album, and artist metadata into a standard unified format
+     * used by the application CardSystem and Player queue.
+     *
+     * @param {string|number} id - The unique identifier of the artist.
+     * @param {number} [limit=10] - The maximum number of top tracks to retrieve.
+     * @param {AbortSignal} [signal=null] - An optional signal to abort the fetch request.
+     * @returns {Promise<Array<Object>>} A promise resolving to an array of unified track objects.
      */
     async getArtistTopTracks(id, limit = 10, signal = null) {
         try {
@@ -350,6 +358,7 @@ export const MusicAPI = {
                     id: item.id,
                     title: item.title_short || item.title,
                     artist: item.artist?.name || 'Unknown',
+                    artistId: item.artist?.id || id || null, // Capture artist ID for recommendation scoring telemetry
                     album: item.album?.title || 'Unknown',
                     cover: item.album?.cover_big || item.album?.cover_xl,
                     previewUrl: item.preview
@@ -410,6 +419,7 @@ export const MusicAPI = {
                         id: item.id,
                         title: item.title_short || item.title,
                         artist: item.artist?.name || album.artist.name,
+                        artistId: item.artist?.id || album.artist?.id || null, // Capture artist ID for recommendation scoring telemetry
                         album: album.title,
                         cover: album.cover_big || album.cover_xl,
                         previewUrl: item.preview
@@ -505,30 +515,6 @@ export const MusicAPI = {
         return [];
     },
 
-    /**
-     * Gets top tracks for a given artist ID.
-     */
-    async getArtistTopTracks(artistId, signal = null) {
-        try {
-            const url = `${this.deezerUrl}/artist/${artistId}/top?limit=10`;
-            const res = await this._fetch(url, { signal });
-            const data = await res.json();
-            if (data?.data) {
-                return data.data.map(item => ({
-                    type: 'song',
-                    id: item.id,
-                    title: item.title,
-                    artist: item.artist?.name || 'Unknown',
-                    album: item.album?.title || 'Unknown',
-                    cover: item.album?.cover_big || item.album?.cover_xl || '',
-                    previewUrl: item.preview
-                }));
-            }
-        } catch (e) {
-            console.error('[API] Failed to get artist top tracks', e);
-        }
-        return [];
-    },
 
     /**
      * Fetches popular tracks for a given genre.
