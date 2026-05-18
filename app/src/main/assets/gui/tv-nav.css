@@ -79,3 +79,11 @@ body.tv-mode .unified-search-bar {
 body.tv-mode .unified-search-bar .browse-search-wrapper {
     max-width: 100% !important;
 }
+
+/* Styles the search input on TV D-pad focus with a flush thick white border highlight */
+body.tv-mode .browse-search-input:focus-visible {
+    outline: 3px solid #ffffff !important;
+    outline-offset: 0px !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    border-color: #ffffff !important;
+}

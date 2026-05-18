@@ -838,12 +838,15 @@ header {
     transition: filter 0.3s ease;
 }
 
+/* Styles the bottom info text panel of a music card, aligning its corners with the parent radius */
 .music-card .card-info-box {
     padding: calc(12px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
     background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
     margin: 0 calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale));
     /* Pull precisely by the padding amount to fill the box */
     z-index: 2;
+    border-bottom-left-radius: calc(12px * var(--ui-scale));
+    border-bottom-right-radius: calc(12px * var(--ui-scale));
 }
 
 .card-title {
@@ -911,12 +914,13 @@ header {
     bottom: 0;
 }
 
+/* Creates the overlay play button centered on music cards, fading in smoothly on hover */
 .music-card::after {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
-    transform: translate(-50%, -50%) scale(0.8);
+    transform: translate(-50%, -50%);
     width: calc(48px * var(--ui-scale));
     height: calc(48px * var(--ui-scale));
     background-color: var(--primary-color);
@@ -929,16 +933,16 @@ header {
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.3s var(--ease-spring), transform 0.3s var(--ease-spring);
+    transition: opacity 0.25s ease;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     z-index: 2;
     /* Adjust position relative to the image box */
     margin-top: -15px;
 }
 
+/* Fades in the card play button overlay on hover */
 .music-card:hover::after {
     opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
 }
 
 /* ============================
@@ -1889,9 +1893,10 @@ header {
      * Selector: .search-page-header (portrait) — covers both scoped and unscoped usage
      * Purpose: Stacks the title-group and filter-bar vertically; removes desktop side-by-side alignment.
      *          Top padding is trimmed to prevent wasted vertical space; bottom margin keeps content breathable.
+     *          Only applies when the header is not hidden, preserving search empty state integrity.
      */
-    .search-page-header,
-    body[data-current-page="search"] .search-page-header {
+    .search-page-header:not(.is-hidden),
+    body[data-current-page="search"] .search-page-header:not(.is-hidden) {
         display: flex !important;
         flex-direction: column !important;
         align-items: stretch !important;
@@ -2630,13 +2635,14 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
    Search Page
    ============================ */
 
+/* Container for search landing page hero, centered horizontally */
 .browse-hero {
     position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    padding: calc(100px * var(--ui-scale)) calc(40px * var(--ui-scale));
+    padding: calc(40px * var(--ui-scale)) calc(40px * var(--ui-scale));
     gap: calc(12px * var(--ui-scale));
     margin: 0;
     box-sizing: border-box;
@@ -2664,24 +2670,25 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     background-clip: text;
 }
 
+/* Styles the search page onboarding card with elegant glassmorphism and balanced centering */
 .search-hero-promo {
     position: relative;
     width: 90%;
-    max-width: calc(35rem * var(--ui-scale));
+    max-width: calc(32rem * var(--ui-scale));
     background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(40px);
-    -webkit-backdrop-filter: blur(40px);
-    border-radius: calc(1.2rem * var(--ui-scale));
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    margin-top: calc(1.5rem * var(--ui-scale));
+    backdrop-filter: blur(45px);
+    -webkit-backdrop-filter: blur(45px);
+    border-radius: calc(1.5rem * var(--ui-scale));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    margin: calc(2rem * var(--ui-scale)) auto 0 auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: calc(1.2rem * var(--ui-scale)) calc(2rem * var(--ui-scale));
+    padding: calc(2rem * var(--ui-scale)) calc(2.5rem * var(--ui-scale));
     overflow: hidden;
     text-align: center;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
 }
 
 .promo-close-btn {
@@ -2701,9 +2708,10 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     transition: all 0.3s var(--ease-out-expo);
 }
 
+/* Styles the hover state for the close button, replacing scale with high-fidelity glass highlight */
 .promo-close-btn:hover {
-    background: rgba(255, 255, 255, 0.1);
-    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .promo-close-btn img {
@@ -2727,6 +2735,7 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     background-clip: text;
 }
 
+/* Styles the description text of the onboarding search card */
 .search-hero-promo .hero-desc {
     font-size: calc(0.9rem * var(--ui-scale));
     color: var(--text-secondary);
@@ -2735,16 +2744,137 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     margin-bottom: 0;
 }
 
+/* Container for browse categories grid on the search landing page */
+.search-categories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(calc(180px * var(--ui-scale)), 1fr));
+    gap: calc(20px * var(--ui-scale));
+    width: 100%;
+    max-width: calc(900px * var(--ui-scale));
+    margin: calc(3rem * var(--ui-scale)) auto 0 auto;
+    padding: 0 calc(20px * var(--ui-scale));
+    box-sizing: border-box;
+}
+
+/* Individual browse category card with glassmorphism, dynamic gradients, and smooth border highlights */
+.search-category-card {
+    position: relative;
+    height: calc(120px * var(--ui-scale));
+    border-radius: calc(16px * var(--ui-scale));
+    padding: calc(16px * var(--ui-scale));
+    overflow: hidden;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+/* Hover highlights for category cards using a white thicker border per rule 2 */
+.search-category-card:hover {
+    border-color: rgba(255, 255, 255, 0.4);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Focused state highlight for TV spatial navigation */
+.search-category-card:focus-visible {
+    outline: 3px solid #ffffff !important;
+    outline-offset: 0px !important;
+    border-color: #ffffff !important;
+}
+
+/* Title text for browse category card */
+.search-category-card .category-title {
+    font-size: calc(1.3rem * var(--ui-scale));
+    font-weight: 700;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    z-index: 2;
+}
+
+/* Decorative visual background icon/art for the category card */
+.search-category-card .category-bg-art {
+    position: absolute;
+    bottom: calc(-10px * var(--ui-scale));
+    right: calc(-10px * var(--ui-scale));
+    font-size: calc(4.5rem * var(--ui-scale));
+    opacity: 0.25;
+    z-index: 1;
+    transition: opacity 0.3s ease;
+}
+
+/* Increases visibility of background art on hover */
+.search-category-card:hover .category-bg-art {
+    opacity: 0.4;
+}
+
+/* Pop category card gradient styling */
+.search-category-card.pop {
+    background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
+}
+
+/* Hip-hop category card gradient styling */
+.search-category-card.hiphop {
+    background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
+}
+
+/* Rock category card gradient styling */
+.search-category-card.rock {
+    background: linear-gradient(135deg, #8b5cf6 0%, #5b21b6 100%);
+}
+
+/* Electronic category card gradient styling */
+.search-category-card.electronic {
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+}
+
+/* Jazz category card gradient styling */
+.search-category-card.jazz {
+    background: linear-gradient(135deg, #10b981 0%, #047857 100%);
+}
+
+/* Classical category card gradient styling */
+.search-category-card.classical {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+}
+
+/* Chill category card gradient styling */
+.search-category-card.chill {
+    background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
+}
+
+/* Workout category card gradient styling */
+.search-category-card.workout {
+    background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
+}
+
+/* Styles the unified search input wrapper to be centered on PC/TV/Mobile layout */
 .browse-search-wrapper {
     position: relative;
     width: 100%;
     max-width: calc(600px * var(--ui-scale));
+    margin: 0 auto;
+}
+
+/* Hides the global header search input container on the search page to avoid duplicate inputs */
+body[data-current-page="search"] header .search-container {
+    display: none !important;
 }
 
 /* Styles the unified root search bar container used in Mobile/TV layouts */
 .unified-search-bar {
     display: none;
     width: 100%;
+}
+
+/* Prominently displays the unified search bar globally when active on the search page */
+body[data-current-page="search"] .unified-search-bar {
+    display: block !important;
+    margin-bottom: calc(24px * var(--ui-scale));
 }
 
 /* Styles the absolute-positioned clear button to reset active search inputs */
@@ -2815,10 +2945,11 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     color: var(--text-muted);
 }
 
+/* Increases visibility and updates icon color of the search icon on input focus */
 .browse-search-wrapper:focus-within .browse-search-icon {
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
     opacity: 1;
-    transform: translateY(-50%) scale(1.15);
+    transform: translateY(-50%);
 }
 
 .search-page-header {
@@ -3523,15 +3654,15 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     color: var(--text-secondary);
 }
 
+/* Styles the play button of library track items, fading in on item hover */
 .library-track-item .play-local-btn {
     opacity: 0;
-    transform: scale(0.9);
-    transition: opacity 0.2s ease, transform 0.2s ease;
+    transition: opacity 0.2s ease;
 }
 
+/* Fades in the track play button on item hover */
 .library-track-item:hover .play-local-btn {
     opacity: 1;
-    transform: scale(1);
 }
 
 /* Consolidated Library Styles */
@@ -3718,15 +3849,15 @@ svg.btn-icon {
     color: var(--text-secondary);
 }
 
+/* Styles the play button for library track items in consolidated layout, fading in on item hover */
 .library-track-item .play-local-btn {
     opacity: 0;
-    transform: scale(0.8) rotate(-10deg);
-    transition: all 0.3s var(--ease-spring);
+    transition: opacity 0.25s ease;
 }
 
+/* Fades in the consolidated track play button on item hover */
 .library-track-item:hover .play-local-btn {
     opacity: 1;
-    transform: scale(1) rotate(0deg);
 }
 
 /* Empty State */

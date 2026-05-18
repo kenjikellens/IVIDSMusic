@@ -13,7 +13,6 @@
 <div id="browse-hero" class="browse-hero is-hidden">
     <p class="browse-tagline" data-i18n="tagline">Your World of Music</p>
     <h1 class="browse-hero-title" data-i18n="search">Search</h1>
-</div>
 
     <!-- Search Promo (Mini Hero style) -->
     <div id="search-promo" class="search-hero-promo">
@@ -26,8 +25,51 @@
         </div>
         <div class="hero-content">
             <h2 class="hero-title" data-i18n="start_experience_title">Start Your Experience</h2>
-            <p class="hero-desc" data-i18n="start_experience_desc">Explore millions of tracks and discover your next
-                favorite artist.</p>
+            <p class="hero-desc" data-i18n="start_experience_desc">Explore millions of tracks and discover your next favorite artist.</p>
+        </div>
+    </div>
+
+    <!-- Browse Categories Grid -->
+    <div class="search-categories-grid">
+        <!-- Pop -->
+        <div class="search-category-card pop" onclick="window.performSearch('Pop')">
+            <span class="category-title">Pop</span>
+            <div class="category-bg-art">✨</div>
+        </div>
+        <!-- Hip-Hop -->
+        <div class="search-category-card hiphop" onclick="window.performSearch('Hip Hop')">
+            <span class="category-title">Hip-Hop</span>
+            <div class="category-bg-art">🎤</div>
+        </div>
+        <!-- Rock -->
+        <div class="search-category-card rock" onclick="window.performSearch('Rock')">
+            <span class="category-title">Rock</span>
+            <div class="category-bg-art">🎸</div>
+        </div>
+        <!-- Dance & Electronic -->
+        <div class="search-category-card electronic" onclick="window.performSearch('Dance')">
+            <span class="category-title">Dance</span>
+            <div class="category-bg-art">🎧</div>
+        </div>
+        <!-- Jazz -->
+        <div class="search-category-card jazz" onclick="window.performSearch('Jazz')">
+            <span class="category-title">Jazz</span>
+            <div class="category-bg-art">🎷</div>
+        </div>
+        <!-- Classical -->
+        <div class="search-category-card classical" onclick="window.performSearch('Classical')">
+            <span class="category-title">Classical</span>
+            <div class="category-bg-art">🎻</div>
+        </div>
+        <!-- Chill & Acoustic -->
+        <div class="search-category-card chill" onclick="window.performSearch('Chill')">
+            <span class="category-title">Chill</span>
+            <div class="category-bg-art">☕</div>
+        </div>
+        <!-- Workout -->
+        <div class="search-category-card workout" onclick="window.performSearch('Workout')">
+            <span class="category-title">Workout</span>
+            <div class="category-bg-art">⚡</div>
         </div>
     </div>
 </div>

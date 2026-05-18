@@ -10,7 +10,22 @@ export const TVNav = {
     // Focusable selector
     selector: 'a, button, input, [tabindex="0"]',
 
+    /**
+     * Method: init
+     * Description: Auto-detects the TV environment and, if present, registers the global keydown event listener
+     *              for spatial D-pad navigation and applies the TV-mode body styling classes.
+     */
     init() {
+        // Auto-detect TV environment via UserAgent or explicit developer URL overrides
+        const isTV = /tv|smarttv|googletv|appletv|hbbtv|nintendo|playstation/i.test(navigator.userAgent) || 
+                     window.location.search.includes('tvMode=true');
+        
+        if (!isTV) {
+            console.log('[TVNav] Non-TV environment detected. Spatial navigation disabled.');
+            this.isEnabled = false;
+            return;
+        }
+
         console.log('[TVNav] Initializing Spatial Navigation');
         this.isEnabled = true;
         document.body.classList.add('tv-mode');

@@ -35,3 +35,14 @@ All notable changes to the **IVIDS Music** project will be documented in this fi
   - Solved spatial navigation keyboard triggers in `tv-nav.js` by enforcing `readOnly = true` constraints on all inputs during D-pad navigation. Clicking `Enter` on the focused input unlocks the write mode and opens the soft keyboard.
 - **Focus Rings and Glow Styling**:
   - Corrected border overlaps and glow highlights for settings cards, sidebar links, and song cover thumbnails under TV focus and PC hover states.
+
+[2026-05-19] [EDITED] app/src/main/assets/gui/pages/search.html: Fixed invalid duplicate closing div tag in the search promo layout.
+[2026-05-19] [EDITED] app/src/main/assets/gui/index.css: Added matching bottom border radii to card info box to eliminate bottom corner bleeding.
+[2026-05-19] [EDITED] app/src/main/assets/gui/index.css: Refactored music card play button overlays and library track item buttons to strip rule-violating scale and rotate hover transitions.
+[2026-05-19] [EDITED] app/src/main/assets/gui/index.css: Added header search container auto-hiding on the search page and enabled page-level unified search bar visibility on all platforms.
+[2026-05-19] [EDITED] app/src/main/assets/gui/index.css: Refactored search promo close button and search icon transitions to strip rule-violating hover/focus scale values and center-aligned search input wrapper.
+[2026-05-19] [EDITED] app/src/main/assets/gui/tv-nav.css: Added TV mode D-pad spatial navigation focus styles with thick flush white border outline for the search page input.
+[2026-05-19] [EDITED] app/src/main/assets/gui/index.css: Redesigned the search landing page layout, centered the onboarding promo card, adjusted hero padding, and added a premium grid layout for browse categories.
+[2026-05-19] [EDITED] app/src/main/assets/gui/pages/search.html: Redesigned the search landing page structure by grouping the title, tagline, onboarding promo card, and browse categories grid inside the browse-hero container for unified toggling.
+[2026-05-19] [EDITED] app/src/main/assets/logic/tv-nav.js: Added auto-detection for TV mode to disable spatial navigation and locked readOnly inputs on PC/Mobile.
+[2026-05-19] [EDITED] app/src/main/assets/gui/index.css: Scoped portrait media query search page header styles to only apply when not hidden, preventing empty state results display on mobile.
