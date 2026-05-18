@@ -1,3 +1,8 @@
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Implemented scale-independent physical dimensions for the search header, input field, bottom nav icons, card sizes, metadata text, and hero banner container/text/buttons in mobile portrait viewports to fix microscopic readability issues
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Fully restored the exact, original bottom navigation bar selectors and styling from version 0.1.3 to perfectly recreate the pristine, icon-only mobile portrait view
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Hid bottom navigation text labels and adjusted bottom bar height to 80px in mobile portrait, matching the pristine, icon-only layout of version 0.1.3
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Implemented premium mathematical scaling and layout offsets in portrait orientation, restoring large card sizes, Spotify-styled horizontal bottom tab bar with visible labels, spacious paddings, and auto-grid search columns
+[2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Replaced manual inline styles on header icons with clean CSS classes and added a premium visual info icon next to the About section title
 [2026-05-18] EDITED IVIDSMusic.apk: Recompiled distribution package to build and package v0.1.5 including the premium glassmorphic toast notification upgrades
 [2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Bumped visual version label to 0.1.5 (Beta) inside settings dashboard for UI consistency
 [2026-05-18] EDITED app/src/main/assets/logic/updater.js: Bumped CURRENT_VERSION constant to 0.1.5 to coordinate with v0.1.5 release
