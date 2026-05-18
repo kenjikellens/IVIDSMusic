@@ -1,3 +1,4 @@
+[2026-05-18] EDITED app/src/main/assets/logic/pages.js: Disabled catastrophic search variety filtering by setting unique parameter to false, restoring multiple songs and albums per artist
 [2026-05-18] EDITED app/src/main/assets/logic/updater.js: Configured update checker request to use proxy-aware fetch helper, resolving Native WebView and browser CORS blockages
 [2026-05-18] EDITED app/src/main/assets/gui/index.css: Fixed search layout squishing on desktop by configuring search-filter-bar width to auto (default) and 100% (mobile portrait) and preventing Title/Subtitle wrapping on desktop
 [2026-05-18] ADDED IVIDSMusic.apk: Placed compiled prerelease APK at workspace root directory for distribution.

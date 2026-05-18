@@ -177,14 +177,14 @@ export const PageSystem = {
             grid.innerHTML = SKELETON_CARD.repeat(12);
             if (window.Loader) window.Loader.init();
 
-            let data = await MusicAPI.search(query, PAGE_SIZE, params.type, params.year, 0, true);
+            let data = await MusicAPI.search(query, PAGE_SIZE, params.type, params.year, 0, false);
 
             // Smart Album Search Association (Grid View)
             // If we are looking specifically at Songs ('all') and the search query matches the top album exactly,
             // we load the album tracklist and prepended it to ensure its hits are discoverable.
             if (params.type === 'all') {
                 try {
-                    const albums = await MusicAPI.search(query, 1, 'album', params.year, 0, true).catch(() => []);
+                    const albums = await MusicAPI.search(query, 1, 'album', params.year, 0, false).catch(() => []);
                     if (albums.length > 0 && albums[0].title.toLowerCase().trim() === query.toLowerCase().trim()) {
                         const albumDetails = await MusicAPI.getAlbumDetails(albums[0].id);
                         if (albumDetails && albumDetails.tracks) {
@@ -215,9 +215,9 @@ export const PageSystem = {
             if (window.Loader) window.Loader.init();
 
             const [artists, rawSongs, albums] = await Promise.all([
-                MusicAPI.search(query, 12, 'artist', params.year, 0, true).catch(() => []),
-                MusicAPI.search(query, 12, 'all', params.year, 0, true).catch(() => []),
-                MusicAPI.search(query, 12, 'album', params.year, 0, true).catch(() => [])
+                MusicAPI.search(query, 12, 'artist', params.year, 0, false).catch(() => []),
+                MusicAPI.search(query, 12, 'all', params.year, 0, false).catch(() => []),
+                MusicAPI.search(query, 12, 'album', params.year, 0, false).catch(() => [])
             ]);
 
             let songs = [...rawSongs];
