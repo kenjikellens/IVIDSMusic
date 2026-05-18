@@ -1,3 +1,4 @@
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Fixed search layout squishing on desktop by configuring search-filter-bar width to auto (default) and 100% (mobile portrait) and preventing Title/Subtitle wrapping on desktop
 [2026-05-18] ADDED IVIDSMusic.apk: Placed compiled prerelease APK at workspace root directory for distribution.
 [2026-05-18] EDITED app/build.gradle.kts: Bumped versionName to v0.1.3 and incremented versionCode to 5.
 [2026-05-18] EDITED app/src/main/assets/logic/updater.js: Bumped CURRENT_VERSION constant to 0.1.3 to coordinate with v0.1.3 release

@@ -1802,6 +1802,11 @@ header {
 
     .search-page-title {
         font-size: calc(1.6rem * var(--ui-scale));
+        white-space: normal !important;
+    }
+
+    .search-page-subtitle {
+        white-space: normal !important;
     }
 
     /*
@@ -1815,6 +1820,14 @@ header {
         width: 100% !important;
         gap: calc(16px * var(--ui-scale)) !important;
         margin-bottom: calc(24px * var(--ui-scale)) !important;
+    }
+
+    /*
+     * Selector: body[data-current-page="search"] .search-filter-bar
+     * Purpose: Ensures search filter chip bar spans full width to allow clean overflow-x scrolling on mobile screens.
+     */
+    body[data-current-page="search"] .search-filter-bar {
+        width: 100% !important;
     }
 
     /*
@@ -2285,18 +2298,28 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     flex: 1;
 }
 
+/*
+ * Selector: .search-page-title
+ * Purpose: Beautifully renders the main search results title, avoiding text wrapping on desktop viewports.
+ */
 .search-page-title {
     font-size: calc(2.5rem * var(--ui-scale));
     font-weight: 800;
     margin: 0;
     letter-spacing: -1px;
+    white-space: nowrap;
 }
 
+/*
+ * Selector: .search-page-subtitle
+ * Purpose: Displays the dynamic search query subtitle on a single line on desktop viewports.
+ */
 .search-page-subtitle {
     color: var(--text-muted);
     margin-top: 8px;
     font-size: calc(1rem * var(--ui-scale));
     opacity: 0.8;
+    white-space: nowrap;
 }
 
 .search-filter-bar {
@@ -4563,6 +4586,7 @@ svg.btn-icon {
 /*
  * Selector: .search-filter-bar
  * Purpose: Formats the category filter chips container, permitting smooth horizontal kinetic scrolling on touch screen viewports.
+ *          Has width: auto and does not shrink on desktop to prevent title squishing.
  */
 .search-filter-bar {
     display: flex;
@@ -4572,7 +4596,8 @@ svg.btn-icon {
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    width: 100%;
+    width: auto;
+    flex-shrink: 0;
 }
 .search-filter-bar::-webkit-scrollbar {
     display: none;
