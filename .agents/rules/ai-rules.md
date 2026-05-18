@@ -31,8 +31,9 @@ For every file you **edit**, **add**, or **delete**, you must append a new line 
 - **ACTION** must be one of: `EDITED`, `ADDED`, or `DELETED`.
 - The description must be concise but specific enough to understand what changed and why.
 - **Chronological Order**: Always append new log entries to the bottom of the file (newest changes at the bottom).
-- **Reset on Release**: The changelog only contains changes since the last release. It starts fresh after each release build.
-- This log entry must be written **every time** a file operation occurs, without exception.
+- **Reset on Release**: The changelog only contains changes since the last release. As soon as a new release is published, tagged, or pushed, the `CHANGELOG.md` file must be cleared (started fresh), and this cleared state must be pushed to `main` immediately to prepare for the next release cycle.
+- **Excluded Files**: Do NOT log modifications to agent-internal files (e.g., `.agents/` folder, workflows, system rules) or documentation files (e.g., `documentation/` folder, `CHANGELOG.md` itself) in `CHANGELOG.md`. The changelog tracks codebase/application changes only.
+- This log entry must be written **every time** a codebase file operation occurs, without exception.
 
 Always follow these rules for every task you perform.
 

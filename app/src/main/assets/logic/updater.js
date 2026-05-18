@@ -1,6 +1,6 @@
 import { Config } from './config.js';
 
-const CURRENT_VERSION = '0.1.5';
+const CURRENT_VERSION = '0.1.6';
 const REPO = 'kenjikellens/IVIDSMusic';
 const API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
 const STORAGE_KEY = 'iv_last_update_check';
@@ -24,7 +24,7 @@ export const Updater = {
                 finalUrl = `/api/proxy?url=` + encodeURIComponent(url);
             }
         } else {
-            if (isExternal && !url.includes(':3000')) {
+            if (isExternal && !url.includes(':3000') && !url.includes('api.github.com')) {
                 finalUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
             }
         }
@@ -74,6 +74,9 @@ export const Updater = {
             const response = await this._fetch(API_URL, {
                 headers: { 'Accept': 'application/vnd.github.v3+json' }
             });
+            if (response.status === 404) {
+                return { tag_name: CURRENT_VERSION, name: 'No Releases Published', body: 'No remote releases found.' };
+            }
             if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
             return await response.json();
         } catch (e) {

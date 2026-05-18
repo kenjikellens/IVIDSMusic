@@ -46,3 +46,13 @@ This document defines the strict, standardized protocol for launching new releas
   git push origin vX.Y.Z
   ```
 - **GitHub Release Entry**: Draft a new release on GitHub using the pushed tag, applying the high-quality title and description formulated in Step 1.
+
+### 6. Reset Changelog Post-Release
+- **ACTION**: Immediately after the release version tag is pushed, clear the `CHANGELOG.md` file (making it completely blank or starting fresh), commit this change, and push it to `main` to prepare for the next release cycle:
+  ```powershell
+  Clear-Content -Path "documentation/CHANGELOG.md"
+  git add documentation/CHANGELOG.md
+  git commit -m "chore: clear changelog post-release vX.Y.Z"
+  git push origin main
+  ```
+

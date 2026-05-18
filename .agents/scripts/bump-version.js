@@ -131,8 +131,8 @@ if (fs.existsSync(CHANGELOG_PATH)) {
         `[${today}] EDITED app/build.gradle.kts: Bumped versionName to v${targetVersionName} and incremented versionCode to ${targetVersionCode}.`
     ];
 
-    const prependedText = logEntries.join('\n') + '\n';
-    changelogContent = prependedText + changelogContent;
+    const appendedText = '\n' + logEntries.join('\n') + '\n';
+    changelogContent = changelogContent.trim() + appendedText;
     
     fs.writeFileSync(CHANGELOG_PATH, changelogContent, 'utf8');
     console.log('\x1b[32m✔ Appended granular version log entries to CHANGELOG.md successfully.\x1b[0m');

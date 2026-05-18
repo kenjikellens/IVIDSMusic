@@ -16,5 +16,9 @@
 [2026-05-18] EDITED .vscode/settings.json: Added java.import.gradle.java.home pointing to JDK 17 to fix VS Code Java extension sync errors with system Java 25
 [2026-05-19] EDITED StartUp.py: Upgraded script to support self-healing background server launch with automatic port termination, crash monitoring, and window close controls
 [2026-05-19] EDITED app/src/main/assets/gui/index.css: Optimized desktop media query scales (1.0 for 1080p, 1.1 for QHD, 1.2 for 4K, 1.35 for 5K/8K) to prevent oversized PC UI
-[2026-05-19] EDITED .agents/rules/changelog.md: Upgraded changelog rules to require chronological ordering (newest at bottom) and reset-on-release tracking
-[2026-05-19] EDITED .agents/rules/ai-rules.md: Updated change logging rules to specify chronological ordering and reset-on-release tracking
+[2026-05-19] EDITED app/src/main/assets/logic/updater.js: Bypassed CORS proxy for api.github.com to prevent 403 Forbidden errors and added graceful 404 handling when no remote releases are published
+[2026-05-19] EDITED app/src/main/assets/gui/pages/settings.html: Bumped visual version label to 0.1.6 (Beta) inside settings dashboard for UI consistency
+[2026-05-19] EDITED app/src/main/assets/logic/updater.js: Bumped CURRENT_VERSION constant to 0.1.6 to coordinate with v0.1.6 release
+[2026-05-19] EDITED app/build.gradle.kts: Bumped versionName to v0.1.6 and incremented versionCode to 8.
+[2026-05-19] EDITED gradle/libs.versions.toml: Downgraded coreKtx (1.13.1) and activity (1.9.3) to resolve build compatibility errors with AGP 8.5.2
+[2026-05-19] EDITED IVIDSMusic.apk: Placed compiled prerelease APK at workspace root directory for distribution.
