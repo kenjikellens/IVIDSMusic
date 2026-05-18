@@ -20,6 +20,7 @@ You must ensure that your code works flawlessly in both primary environments:
 ## 3. Git & GitHub Protocol
 - **No Autonomous Pushing**: You must NEVER push changes to the GitHub repository on your own initiative.
 - **Explicit Permission Required**: You must always ask for explicit permission from the user before using `git push`. Keep your changes in the local workspace until you are instructed to push them to the cloud.
+- **Obligatory Release Metadata**: When creating, tagging, or pushing a new release, you are strictly OBLIGATED to formulate a professional, high-quality release title (e.g., `Release v0.1.6 (Beta)`) and a detailed, feature-rich release description highlighting all visual, architectural, compilation, and core improvements included in this build.
 
 if the user says **"push to main"**, you may directly push ALL changes to main, if the user says **"push [file] to main"**, you only push this file.
 
