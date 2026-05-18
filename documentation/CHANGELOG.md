@@ -1,3 +1,4 @@
+[2026-05-18] EDITED app/src/main/assets/gui/pages/recommended.html: Added a premium glassmorphic Refresh Taste button in the header of the For You page
 [2026-05-18] EDITED .gitignore: Excluded /tmp/ directory from version control tracking
 [2026-05-18] ADDED IVIDSMusic.apk: Placed compiled prerelease APK at workspace root directory for distribution.
 [2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Updated Version label description text to v0.1.0 to ensure interface consistency

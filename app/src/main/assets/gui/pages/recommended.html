@@ -1,5 +1,11 @@
-<div class="row-header" style="margin-top:20px; margin-bottom: 20px;">
-   <h1 class="row-title" style="font-size: 2rem;">✨ <span data-i18n="nav_foryou">For You</span></h1>
+<div class="row-header" style="margin-top:20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
+   <h1 class="row-title" style="font-size: 2rem; margin: 0;">✨ <span data-i18n="nav_foryou">For You</span></h1>
+   <button id="refresh-recs-btn" class="btn secondary check-updates-btn" onclick="if (window.DiscoveryEngine) window.DiscoveryEngine.initRecommended({ forceRefresh: true })" style="padding: calc(6px * var(--ui-scale)) calc(14px * var(--ui-scale)); font-size: calc(0.85rem * var(--ui-scale)); border-radius: calc(8px * var(--ui-scale)); cursor: pointer; display: flex; align-items: center; gap: 6px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
+         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.57-.57"/>
+      </svg>
+      Refresh Taste
+   </button>
 </div>
 <p style="color: var(--text-secondary); margin-bottom: 30px;" data-i18n="foryou_desc">Personalized picks based on what
    you listen to, like, and explore.</p>
