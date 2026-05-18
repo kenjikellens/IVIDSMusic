@@ -84,5 +84,6 @@
   "top_artists": "Topartiesten",
   "create_playlist": "Afspeellijst maken",
   "playlist_name": "Afspeellijst naam",
-  "playlist_desc": "Beschrijving (optioneel)"
+  "playlist_desc": "Beschrijving (optioneel)",
+  "filter_all": "Alle"
 }

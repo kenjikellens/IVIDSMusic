@@ -726,19 +726,17 @@ header {
 /* Artist: Minimalist Circular Look */
 /*
  * Selector: .music-card.type-artist
- * Purpose: Formats artist profile cards into a minimalist circular avatar structure.
+ * Purpose: Formats artist profile cards, disabling background and container padding to maintain standard card sizes without layout shift.
  */
 .music-card.type-artist {
     background: transparent !important;
     box-shadow: none !important;
-    padding: 0;
-    border-radius: 50%;
-    /* Ensure container shape match for focus/hover */
+    /* Removed padding: 0 and border-radius: 50% from the container itself */
 }
 
 /*
  * Selector: .music-card.type-artist .card-image-box
- * Purpose: Adjusts the card poster container into a circular shape for artist avatars.
+ * Purpose: Formats the cover image box as a perfect circle for a high-end, clean profile avatar look.
  */
 .music-card.type-artist .card-image-box {
     border-radius: 50%;
@@ -746,17 +744,26 @@ header {
 
 /*
  * Selector: .music-card.type-artist:hover, .music-card.type-artist:focus-visible
- * Purpose: Keeps the card container background transparent during hover/focus on artist profiles.
+ * Purpose: Suppresses browser focus-visible outline and maintains background transparency during focus/hover.
  */
 .music-card.type-artist:hover,
 .music-card.type-artist:focus-visible {
     background: transparent !important;
     box-shadow: none !important;
+    outline: none !important;
+}
+
+/*
+ * Selector: .music-card.type-artist::after
+ * Purpose: Prevents showing the standard play overlay overlay button on artist cards.
+ */
+.music-card.type-artist::after {
+    display: none !important;
 }
 
 /*
  * Selector: .music-card.type-artist:hover .card-image-box, .music-card.type-artist:focus-visible .card-image-box
- * Purpose: Applies an elegant white circular glow rings around the artist's circular avatar on hover/focus.
+ * Purpose: Adds a gorgeous high-end white circular glow ring strictly around the circular profile photo on focus or hover.
  */
 .music-card.type-artist:hover .card-image-box,
 .music-card.type-artist:focus-visible .card-image-box {
@@ -1524,8 +1531,12 @@ header {
 
 
 @media (orientation: portrait) {
+    /*
+     * Block: :root portrait variables
+     * Purpose: Shifts player heights and resets sidebar widths to accommodate a horizontal bottom tab bar.
+     * Note: Decoupled --ui-base-scale so standard responsive width-based breakpoints scale the UI down on small phones, as per ai-rules.md.
+     */
     :root {
-        --ui-base-scale: 0.9;
         --player-height: auto;
         --sidebar-width: 0px;
         --bottom-nav-height: calc(60px * var(--ui-scale));
@@ -1698,7 +1709,8 @@ header {
         min-width: calc(115px * var(--ui-scale));
     }
 
-    .row-posters {
+    .row-posters,
+    .results-row {
         flex-wrap: nowrap;
         overflow-x: auto;
         scroll-snap-type: x mandatory;
@@ -1711,11 +1723,13 @@ header {
         padding-right: calc(8px * var(--ui-scale));
     }
 
-    .row-posters::-webkit-scrollbar {
+    .row-posters::-webkit-scrollbar,
+    .results-row::-webkit-scrollbar {
         display: none;
     }
 
-    .row-posters>.music-card {
+    .row-posters>.music-card,
+    .results-row>.music-card {
         scroll-snap-align: start;
     }
 
@@ -1778,14 +1792,39 @@ header {
         font-size: calc(1rem * var(--ui-scale));
     }
 
+    /*
+     * Selector: body[data-current-page="search"]:not([data-search-has-query="true"]) .search-container
+     * Purpose: Hides the redundant header search bar in mobile portrait view when browsing the search landing page with no query.
+     */
+    body[data-current-page="search"]:not([data-search-has-query="true"]) .search-container {
+        display: none !important;
+    }
+
     .search-page-title {
         font-size: calc(1.6rem * var(--ui-scale));
     }
 
-    .search-page-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
+    /*
+     * Selector: body[data-current-page="search"] .search-page-header
+     * Purpose: Forces the search results heading block and filter capsules to stack vertically, align symmetrically, and span 100% width in mobile portrait.
+     */
+    body[data-current-page="search"] .search-page-header {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
+        width: 100% !important;
+        gap: calc(16px * var(--ui-scale)) !important;
+        margin-bottom: calc(24px * var(--ui-scale)) !important;
+    }
+
+    /*
+     * Selector: body[data-current-page="search"] header .search-container
+     * Purpose: Stretches the top header search input capsule to fill all available horizontal header space on mobile.
+     */
+    body[data-current-page="search"] header .search-container {
+        max-width: none !important;
+        width: 100% !important;
+        flex: 1 !important;
     }
 
     /* ── Profile: stacked ── */
@@ -2370,21 +2409,37 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
     margin: 0 auto;
 }
 
+/*
+ * Selector: .settings-section
+ * Purpose: A translucent, rounded glassmorphic dashboard container that groups settings items.
+ */
 .settings-section {
-    margin-bottom: calc(40px * var(--ui-scale));
-    background: rgba(255, 255, 255, 0.03);
-    padding: calc(24px * var(--ui-scale));
+    margin-bottom: calc(32px * var(--ui-scale));
+    background: rgba(255, 255, 255, 0.025);
+    padding: calc(20px * var(--ui-scale)) calc(24px * var(--ui-scale));
     border-radius: calc(16px * var(--ui-scale));
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+    box-shadow: 0 calc(8px * var(--ui-scale)) calc(32px * var(--ui-scale)) rgba(0, 0, 0, 0.15);
 }
 
+/*
+ * Selector: .settings-section-title
+ * Purpose: Titles of the settings sections, positioned elegantly outside the containers.
+ *          Applies a top margin for vertical spacing between groups, except for the first block.
+ */
 .settings-section-title {
-    font-size: calc(1.2rem * var(--ui-scale));
+    font-size: calc(1.15rem * var(--ui-scale));
     font-weight: 700;
-    margin-bottom: calc(20px * var(--ui-scale));
+    color: var(--text-main);
+    margin-top: calc(32px * var(--ui-scale));
+    margin-bottom: calc(12px * var(--ui-scale));
     display: flex;
     align-items: center;
     gap: calc(10px * var(--ui-scale));
+    opacity: 0.9;
+}
+.settings-section-title:first-of-type {
+    margin-top: calc(16px * var(--ui-scale));
 }
 
 .settings-item {
@@ -4499,4 +4554,127 @@ svg.btn-icon {
     color: #fff !important;
     box-shadow: 0 0 calc(12px * var(--ui-scale)) rgba(var(--primary-rgb), 0.4) !important;
     outline: none;
+}
+
+/* ============================
+   Premium Search Filter Bar & Chips
+   ============================ */
+
+/*
+ * Selector: .search-filter-bar
+ * Purpose: Formats the category filter chips container, permitting smooth horizontal kinetic scrolling on touch screen viewports.
+ */
+.search-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: calc(8px * var(--ui-scale));
+    padding: calc(8px * var(--ui-scale)) 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    width: 100%;
+}
+.search-filter-bar::-webkit-scrollbar {
+    display: none;
+}
+
+/*
+ * Selector: .filter-chip
+ * Purpose: Elegant glassmorphic capsule design for music category filter chips. Highlight transitions use background variations.
+ */
+.filter-chip {
+    padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: calc(100px * var(--ui-scale));
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: calc(0.9rem * var(--ui-scale));
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    outline: none;
+    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
+}
+
+/*
+ * Selector: .filter-chip:hover, .filter-chip:focus-visible
+ * Purpose: Applies a modern glassmorphic highlight on hover or keyboard focus, complying with the "No Prohibited Transforms" rule.
+ */
+.filter-chip:hover,
+.filter-chip:focus-visible {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-main);
+}
+
+/*
+ * Selector: .filter-chip.active
+ * Purpose: Highlights the currently selected category filter chip with a solid high-contrast theme primary accent color.
+ */
+.filter-chip.active {
+    background: var(--primary-color) !important;
+    border-color: var(--primary-color) !important;
+    color: #000000 !important;
+    font-weight: 600;
+}
+
+/*
+ * Selector: .year-filter-wrapper
+ * Purpose: Premium capsule wrapper that perfectly aligns the calendar svg icon and year input field.
+ */
+.year-filter-wrapper {
+    display: flex;
+    align-items: center;
+    gap: calc(8px * var(--ui-scale));
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: calc(100px * var(--ui-scale));
+    padding: calc(6px * var(--ui-scale)) calc(14px * var(--ui-scale));
+    margin-left: auto;
+    transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+/*
+ * Selector: .year-filter-wrapper:focus-within
+ * Purpose: Highlights the year capsule border and background when the internal number field is focused.
+ */
+.year-filter-wrapper:focus-within {
+    border-color: var(--primary-color);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+/*
+ * Selector: .year-filter-icon
+ * Purpose: Minimalist calendar symbol styling with high opacity.
+ */
+.year-filter-icon {
+    width: calc(14px * var(--ui-scale));
+    height: calc(14px * var(--ui-scale));
+    opacity: 0.6;
+    filter: invert(1);
+}
+
+/*
+ * Selector: .year-filter-input
+ * Purpose: Styles the clean year number input field, suppressing default browser spinner arrows.
+ */
+.year-filter-input {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: calc(0.9rem * var(--ui-scale));
+    font-weight: 500;
+    width: calc(60px * var(--ui-scale));
+    outline: none;
+    text-align: center;
+}
+.year-filter-input::-webkit-outer-spin-button,
+.year-filter-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+.year-filter-input::placeholder {
+    color: var(--text-muted);
 }

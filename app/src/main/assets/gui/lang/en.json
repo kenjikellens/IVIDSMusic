@@ -84,5 +84,6 @@
   "top_artists": "Top Artists",
   "create_playlist": "Create Playlist",
   "playlist_name": "Playlist Name",
-  "playlist_desc": "Description (Optional)"
+  "playlist_desc": "Description (Optional)",
+  "filter_all": "All"
 }

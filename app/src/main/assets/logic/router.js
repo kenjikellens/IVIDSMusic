@@ -30,6 +30,14 @@ export const Router = {
             this.currentParams = params;
             this.currentPage = pageName;
 
+            // Set current page and active query status as body attributes for clean responsive styling
+            document.body.setAttribute('data-current-page', pageName);
+            if (pageName === 'search' && params && params.query && params.query.trim()) {
+                document.body.setAttribute('data-search-has-query', 'true');
+            } else {
+                document.body.removeAttribute('data-search-has-query');
+            }
+
             // Parse HTML safely
             const temp = document.createElement('div');
             temp.innerHTML = html;

@@ -1,55 +1,72 @@
 <div class="settings-container">
     <h1 class="row-title" data-i18n="settings">Settings</h1>
 
-    <div class="settings-section">
-        <h2 class="settings-section-title">
-            <img class="nav-icon" src="svg/user.svg" alt=""
-                style="width: 20px; filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);">
-            <span data-i18n="appearance">Appearance</span>
-        </h2>
+<!-- 
+  Class: settings-section-title
+  Purpose: Displays the section headings (e.g. Appearance) outside container cards for a modern dashboard style.
+-->
+<h2 class="settings-section-title">
+    <img class="nav-icon" src="svg/user.svg" alt=""
+        style="width: 20px; filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);">
+    <span data-i18n="appearance">Appearance</span>
+</h2>
 
-        <div class="settings-item">
-            <div class="settings-info">
-                <div class="settings-label" data-i18n="interface_scale">Interface Scale</div>
-                <div class="settings-desc" data-i18n="interface_scale_desc">Adjust the size of the UI elements.</div>
-            </div>
-            <div class="scale-stepper" id="scale-options-container">
-                <button class="scale-stepper-btn" id="scale-decrease">-</button>
-                <div class="scale-value" id="current-scale-display">100%</div>
-                <button class="scale-stepper-btn" id="scale-increase">+</button>
-            </div>
+<!-- 
+  Class: settings-section
+  Purpose: Translucent, glassmorphic card container housing individual settings rows.
+-->
+<div class="settings-section">
+    <!-- 
+      Class: settings-item
+      Purpose: Elegant horizontal layout row matching the label/description with control widgets.
+    -->
+    <div class="settings-item">
+        <div class="settings-info">
+            <div class="settings-label" data-i18n="interface_scale">Interface Scale</div>
+            <div class="settings-desc" data-i18n="interface_scale_desc">Adjust the size of the UI elements.</div>
         </div>
-
-        <div class="settings-item">
-            <div class="settings-info">
-                <div class="settings-label" data-i18n="language">Language</div>
-                <div class="settings-desc" data-i18n="language_desc">Choose your preferred language.</div>
-            </div>
-            <div class="lang-display">
-                <span class="lang-current-name" id="current-lang-display">English</span>
-                <button class="lang-edit-btn" id="lang-edit-btn" tabindex="0" aria-label="Change language">
-                    <img src="svg/edit.svg" alt="Edit" class="lang-edit-icon">
-                </button>
-            </div>
+        <div class="scale-stepper" id="scale-options-container">
+            <button class="scale-stepper-btn" id="scale-decrease">-</button>
+            <div class="scale-value" id="current-scale-display">100%</div>
+            <button class="scale-stepper-btn" id="scale-increase">+</button>
         </div>
     </div>
 
-    <div class="settings-section">
-        <h2 class="settings-section-title" data-i18n="about">About</h2>
-        <div class="settings-item">
-            <div class="settings-info">
-                <div class="settings-label" data-i18n="version">Version</div>
-                <div class="settings-desc">0.1.2 (Beta)</div>
-            </div>
-            <button class="btn secondary check-updates-btn" id="check-updates-btn" onclick="if (window.Updater) window.Updater.checkManual()" style="padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale)); font-size: calc(0.8rem * var(--ui-scale)); border-radius: calc(8px * var(--ui-scale)); cursor: pointer;">Check for Updates</button>
+    <div class="settings-item">
+        <div class="settings-info">
+            <div class="settings-label" data-i18n="language">Language</div>
+            <div class="settings-desc" data-i18n="language_desc">Choose your preferred language.</div>
         </div>
-        <div class="settings-item">
-            <div class="settings-info">
-                <div class="settings-label" data-i18n="powered_by">Powered by</div>
-                <div class="settings-desc">IVIDS Engine &amp; YouTube Music</div>
-            </div>
+        <div class="lang-display">
+            <span class="lang-current-name" id="current-lang-display">English</span>
+            <button class="lang-edit-btn" id="lang-edit-btn" tabindex="0" aria-label="Change language">
+                <img src="svg/edit.svg" alt="Edit" class="lang-edit-icon">
+            </button>
         </div>
     </div>
+</div>
+
+<!-- 
+  Class: settings-section-title
+  Purpose: Displays the 'About' section heading outside its glass container.
+-->
+<h2 class="settings-section-title" data-i18n="about">About</h2>
+
+<div class="settings-section">
+    <div class="settings-item">
+        <div class="settings-info">
+            <div class="settings-label" data-i18n="version">Version</div>
+            <div class="settings-desc">0.1.3 (Beta)</div>
+        </div>
+        <button class="btn secondary check-updates-btn" id="check-updates-btn" onclick="if (window.Updater) window.Updater.checkManual()" style="padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale)); font-size: calc(0.8rem * var(--ui-scale)); border-radius: calc(8px * var(--ui-scale)); cursor: pointer;">Check for Updates</button>
+    </div>
+    <div class="settings-item">
+        <div class="settings-info">
+            <div class="settings-label" data-i18n="powered_by">Powered by</div>
+            <div class="settings-desc">IVIDS Engine &amp; YouTube Music</div>
+        </div>
+    </div>
+</div>
 </div>
 
 <!-- Language Selection Modal -->

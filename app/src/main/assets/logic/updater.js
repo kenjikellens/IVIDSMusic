@@ -3,7 +3,7 @@
  * Manages automated and manual checks against the GitHub Releases API.
  */
 
-const CURRENT_VERSION = '0.1.2';
+const CURRENT_VERSION = '0.1.3';
 const REPO = 'kenjikellens/IVIDSMusic';
 const API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
 const STORAGE_KEY = 'iv_last_update_check';

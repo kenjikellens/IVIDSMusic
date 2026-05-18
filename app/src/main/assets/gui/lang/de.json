@@ -77,5 +77,6 @@
   "top_artists": "Top-Künstler",
   "create_playlist": "Wiedergabeliste erstellen",
   "playlist_name": "Wiedergabelistename",
-  "playlist_desc": "Beschreibung (optional)"
+  "playlist_desc": "Beschreibung (optional)",
+  "filter_all": "Alle"
 }

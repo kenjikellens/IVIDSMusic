@@ -84,5 +84,6 @@
   "top_artists": "En Popüler Sanatçılar",
   "create_playlist": "Çalma Listesi Oluştur",
   "playlist_name": "Çalma Listesi Adı",
-  "playlist_desc": "Açıklama (İsteğe Bağlı)"
+  "playlist_desc": "Açıklama (İsteğe Bağlı)",
+  "filter_all": "Hepsi"
 }

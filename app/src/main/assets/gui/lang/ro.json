@@ -77,5 +77,6 @@
   "top_artists": "Artiști de Top",
   "create_playlist": "Creează playlist",
   "playlist_name": "Nume playlist",
-  "playlist_desc": "Descriere (opțional)"
+  "playlist_desc": "Descriere (opțional)",
+  "filter_all": "Toate"
 }

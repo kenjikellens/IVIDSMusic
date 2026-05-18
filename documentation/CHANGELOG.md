@@ -1,3 +1,16 @@
+[2026-05-18] ADDED IVIDSMusic.apk: Placed compiled prerelease APK at workspace root directory for distribution.
+[2026-05-18] EDITED app/build.gradle.kts: Bumped versionName to v0.1.3 and incremented versionCode to 5.
+[2026-05-18] EDITED app/src/main/assets/logic/updater.js: Bumped CURRENT_VERSION constant to 0.1.3 to coordinate with v0.1.3 release
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Adjusted margins for settings-section-title to visually optimize dashboard spacing now that titles reside outside container cards
+[2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Moved section titles (Appearance, About) outside section containers to create a cleaner, modern layout, and bumped Beta version label to 0.1.3
+[2026-05-18] EDITED app/src/main/assets/logic/pages.js: Implemented Smart Album Search Association parser inside grid and categorized results to automatically retrieve and promote exact-match album tracks
+[2026-05-18] EDITED app/src/main/assets/logic/pages.js: Implemented JSDoc for initSearch, and added active search filter chip toggles to dynamically update UI state on category changes
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Decoupled --ui-base-scale from portrait media query to restore responsive width-based scaling down to 0.55 on mobile, created specific overrides to stretch search header containers, and added premium horizontal filter chips styling
+[2026-05-18] EDITED app/src/main/assets/gui/pages/search.html: Replaced basic year input with a premium localized search filter chips bar and calendar-style year filter capsule
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Redesigned artist cards so only the photo is circular, aligned search page results row layout/scrolling with Home page on mobile portrait, and conditionally hid mobile header search container to resolve double inputs
+[2026-05-18] EDITED app/src/main/assets/gui/pages/search.html: Added soft keyboard dismissal (this.blur()) on Enter in the main browse search page input to improve mobile user experience
+[2026-05-18] EDITED app/src/main/assets/gui/index.html: Added soft keyboard dismissal (this.blur()) on Enter in the header search input for mobile viewports
+[2026-05-18] EDITED app/src/main/assets/logic/router.js: Set current page and query status attributes on document.body during routing to enable advanced, clean responsive styling
 [2026-05-18] ADDED IVIDSMusic.apk: Placed compiled v0.1.2 prerelease APK at workspace root directory for distribution.
 [2026-05-18] EDITED app/build.gradle.kts, app/src/main/assets/logic/updater.js, app/src/main/assets/gui/pages/settings.html: Bumped versions to 0.1.2 and incremented versionCode to 4 for new release.
 [2026-05-18] EDITED app/src/main/assets/gui/index.css: Fixed a critical CSS media query leakage bug where mobile player bar layouts leaked into desktop, and increased mobile music card touch sizes from 95px to 115px

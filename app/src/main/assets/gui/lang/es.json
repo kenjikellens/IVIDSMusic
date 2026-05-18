@@ -71,5 +71,6 @@
   "top_artists": "Artistas Principales",
   "create_playlist": "Crear lista de reproducción",
   "playlist_name": "Nombre de la lista",
-  "playlist_desc": "Descripción (opcional)"
+  "playlist_desc": "Descripción (opcional)",
+  "filter_all": "Todos"
 }

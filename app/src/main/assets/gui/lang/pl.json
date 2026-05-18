@@ -84,5 +84,6 @@
   "top_artists": "Najpopularniejsi wykonawcy",
   "create_playlist": "Utwórz playlistę",
   "playlist_name": "Nazwa playlisty",
-  "playlist_desc": "Opis (opcjonalnie)"
+  "playlist_desc": "Opis (opcjonalnie)",
+  "filter_all": "Wszystko"
 }

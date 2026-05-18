@@ -77,5 +77,6 @@
   "top_artists": "トップアーティスト",
   "create_playlist": "プレイリストを作成",
   "playlist_name": "プレイリスト名",
-  "playlist_desc": "説明（任意）"
+  "playlist_desc": "説明（任意）",
+  "filter_all": "すべて"
 }

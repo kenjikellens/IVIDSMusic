@@ -77,5 +77,6 @@
   "top_artists": "热门艺术家",
   "create_playlist": "创建播放列表",
   "playlist_name": "播放列表名称",
-  "playlist_desc": "描述（选填）"
+  "playlist_desc": "描述（选填）",
+  "filter_all": "全部"
 }

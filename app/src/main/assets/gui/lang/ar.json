@@ -77,5 +77,6 @@
   "top_artists": "أفضل الفنانين",
   "create_playlist": "إنشاء قائمة تشغيل",
   "playlist_name": "اسم قائمة التشغيل",
-  "playlist_desc": "الوصف (اختياري)"
+  "playlist_desc": "الوصف (اختياري)",
+  "filter_all": "الكل"
 }

@@ -78,7 +78,7 @@
                     <img class="search-icon" src="svg/search.svg" alt="">
                     <input type="text" placeholder="Artists, songs, albums..." id="header-search-input"
                         data-i18n="search_placeholder"
-                        onkeydown="if(event.key === 'Enter') { Router.loadPage('search', { query: this.value }); }">
+                        onkeydown="if(event.key === 'Enter') { this.blur(); Router.loadPage('search', { query: this.value }); }">
                 </div>
                 <div class="header-right">
                     <div class="user-profile" title="User Profile" data-i18n="you" onclick="Router.loadPage('profile')"

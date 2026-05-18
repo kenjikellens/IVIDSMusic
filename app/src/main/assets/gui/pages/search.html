@@ -9,7 +9,7 @@
         <img class="browse-search-icon" src="svg/search.svg" alt="">
         <input id="browse-search-input" class="browse-search-input" type="text" placeholder="Artists, songs, albums..."
             autocomplete="off" data-i18n="search_placeholder"
-            onkeydown="if(event.key==='Enter' && this.value.trim()) window.performSearch(this.value.trim())">
+            onkeydown="if(event.key==='Enter' && this.value.trim()) { this.blur(); window.performSearch(this.value.trim()); }">
     </div>
 
     <!-- Search Promo (Mini Hero style) -->
@@ -30,16 +30,41 @@
 </div>
 
 <!-- State 2: Results Header -->
+<!-- 
+  ID: results-header
+  Class: search-page-header
+  Purpose: Main container for search page heading titles and filtering controls.
+-->
 <div id="results-header" class="search-page-header is-hidden">
+    <!-- 
+      Class: search-page-title-group
+      Purpose: Groups the primary 'Search Results' text and the 'Results for [query]' dynamic subtitle.
+    -->
     <div class="search-page-title-group">
         <h1 id="search-title" class="search-page-title" data-i18n="results_title">Search Results</h1>
         <p id="search-subtitle" class="search-page-subtitle"></p>
     </div>
+    <!-- 
+      ID: search-filters
+      Class: search-filter-bar
+      Purpose: Houses the horizontal categories filter chips and year capsule, supporting overflow-x scrolling.
+    -->
     <div id="search-filters" class="search-filter-bar">
-        <input type="number" id="year-input" placeholder="Year" class="year-input" onchange="applyYearFilter()"
-            data-i18n="year">
+        <button class="filter-chip active" id="filter-chip-all" onclick="window.setSearchFilter(null)" data-i18n="filter_all">All</button>
+        <button class="filter-chip" id="filter-chip-track" onclick="window.setSearchFilter('all')" data-i18n="songs">Songs</button>
+        <button class="filter-chip" id="filter-chip-artist" onclick="window.setSearchFilter('artist')" data-i18n="artists">Artists</button>
+        <button class="filter-chip" id="filter-chip-album" onclick="window.setSearchFilter('album')" data-i18n="albums">Albums</button>
+        <!-- 
+          Class: year-filter-wrapper
+          Purpose: Premium pill wrapper that houses the year calendar icon and input to filter results by year.
+        -->
+        <div class="year-filter-wrapper">
+            <img class="year-filter-icon" src="svg/library.svg" alt="Calendar">
+            <input type="number" id="year-input" placeholder="Year" class="year-filter-input" onchange="applyYearFilter()" data-i18n="year">
+        </div>
     </div>
 </div>
+
 
 <!-- State 3: Dynamic Results container -->
 <div id="results-rows-container" class="is-hidden">

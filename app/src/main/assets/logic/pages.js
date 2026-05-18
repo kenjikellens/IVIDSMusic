@@ -91,6 +91,14 @@ export const PageSystem = {
         }
     },
 
+    /**
+     * Method: initSearch
+     * Description: Initializes the search interface and triggers query execution based on user inputs.
+     *              Handles the Browse Hero visual state transitions, populates query parameters,
+     *              synchronizes localized horizontal category filter chips, and requests segmented
+     *              or grid-based track, artist, and album results from the MusicAPI.
+     * @param {Object} params - Contains search constraints: query string, type filters, and release year.
+     */
     async initSearch(params) {
         const get = (id) => document.getElementById(id);
         const query = (params.query || '').trim();
@@ -102,6 +110,23 @@ export const PageSystem = {
         if (get('header-search-input')) get('header-search-input').value = query;
         if (get('browse-search-input')) get('browse-search-input').value = query;
         if (get('year-input')) get('year-input').value = params.year || '';
+
+        // Dynamically toggle localized premium filter chip active states
+        const activeType = params.type || null;
+        ['all', 'track', 'artist', 'album'].forEach(type => {
+            const chip = get(`filter-chip-${type}`);
+            if (chip) {
+                if (type === 'all' && activeType === null) {
+                    chip.classList.add('active');
+                } else if (type === 'track' && activeType === 'all') {
+                    chip.classList.add('active');
+                } else if (type === activeType) {
+                    chip.classList.add('active');
+                } else {
+                    chip.classList.remove('active');
+                }
+            }
+        });
 
         if (!query) {
             if (browseHero) browseHero.classList.remove('is-hidden');
@@ -152,9 +177,28 @@ export const PageSystem = {
             grid.innerHTML = SKELETON_CARD.repeat(12);
             if (window.Loader) window.Loader.init();
 
-            const data = await MusicAPI.search(query, PAGE_SIZE, params.type, params.year, 0, true);
-            grid.innerHTML = '';
+            let data = await MusicAPI.search(query, PAGE_SIZE, params.type, params.year, 0, true);
 
+            // Smart Album Search Association (Grid View)
+            // If we are looking specifically at Songs ('all') and the search query matches the top album exactly,
+            // we load the album tracklist and prepended it to ensure its hits are discoverable.
+            if (params.type === 'all') {
+                try {
+                    const albums = await MusicAPI.search(query, 1, 'album', params.year, 0, true).catch(() => []);
+                    if (albums.length > 0 && albums[0].title.toLowerCase().trim() === query.toLowerCase().trim()) {
+                        const albumDetails = await MusicAPI.getAlbumDetails(albums[0].id);
+                        if (albumDetails && albumDetails.tracks) {
+                            const existingIds = new Set(data.map(s => s.id));
+                            const albumSongs = albumDetails.tracks.filter(s => !existingIds.has(s.id));
+                            data = [...albumSongs, ...data].slice(0, PAGE_SIZE);
+                        }
+                    }
+                } catch (e) {
+                    console.error('[Search Grid] Smart Album Association failed:', e);
+                }
+            }
+
+            grid.innerHTML = '';
             data.forEach(item => grid.appendChild(CardSystem.createCard(item)));
             if (window.Loader) window.Loader.init();
 
@@ -170,11 +214,33 @@ export const PageSystem = {
             });
             if (window.Loader) window.Loader.init();
 
-            const [artists, songs, albums] = await Promise.all([
+            const [artists, rawSongs, albums] = await Promise.all([
                 MusicAPI.search(query, 12, 'artist', params.year, 0, true).catch(() => []),
                 MusicAPI.search(query, 12, 'all', params.year, 0, true).catch(() => []),
                 MusicAPI.search(query, 12, 'album', params.year, 0, true).catch(() => [])
             ]);
+
+            let songs = [...rawSongs];
+
+            // Smart Album Search Association (Categorized View)
+            // If the query text matches the name of our top returned album exactly (e.g. searching "Currents"),
+            // we retrieve that album's actual tracklist and inject its hits (which don't share search words)
+            // right at the beginning of the Songs row to meet premium musical expectations.
+            if (albums.length > 0) {
+                const topAlbum = albums[0];
+                if (topAlbum.title.toLowerCase().trim() === query.toLowerCase().trim()) {
+                    try {
+                        const albumDetails = await MusicAPI.getAlbumDetails(topAlbum.id);
+                        if (albumDetails && albumDetails.tracks) {
+                            const existingIds = new Set(songs.map(s => s.id));
+                            const albumSongs = albumDetails.tracks.filter(s => !existingIds.has(s.id));
+                            songs = [...albumSongs, ...songs].slice(0, 12);
+                        }
+                    } catch (e) {
+                        console.error('[Search] Smart Album Association failed:', e);
+                    }
+                }
+            }
 
             const fill = (id, data, contId) => {
                 const el = get(id); if (!el) return;

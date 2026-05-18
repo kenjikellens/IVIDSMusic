@@ -84,5 +84,6 @@
   "top_artists": "인기 아티스트",
   "create_playlist": "플레이리스트 만들기",
   "playlist_name": "플레이리스트 이름",
-  "playlist_desc": "설명 (선택 사항)"
+  "playlist_desc": "설명 (선택 사항)",
+  "filter_all": "전체"
 }

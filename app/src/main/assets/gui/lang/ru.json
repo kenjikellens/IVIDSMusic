@@ -77,5 +77,6 @@
   "top_artists": "Топ артистов",
   "create_playlist": "Создать плейлист",
   "playlist_name": "Название плейлиста",
-  "playlist_desc": "Описание (необязательно)"
+  "playlist_desc": "Описание (необязательно)",
+  "filter_all": "Все"
 }
