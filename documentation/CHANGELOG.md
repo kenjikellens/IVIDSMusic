@@ -1,3 +1,6 @@
+[2026-05-18] ADDED IVIDSMusic.apk: Placed compiled v0.1.2 prerelease APK at workspace root directory for distribution.
+[2026-05-18] EDITED app/build.gradle.kts, app/src/main/assets/logic/updater.js, app/src/main/assets/gui/pages/settings.html: Bumped versions to 0.1.2 and incremented versionCode to 4 for new release.
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Fixed a critical CSS media query leakage bug where mobile player bar layouts leaked into desktop, and increased mobile music card touch sizes from 95px to 115px
 [2026-05-18] EDITED IVIDSMusic.apk: Placed compiled v0.1.1 prerelease APK at workspace root directory for distribution.
 [2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Updated Version label description text to v0.1.1 to ensure interface consistency
 [2026-05-18] EDITED app/src/main/assets/logic/updater.js: Adjusted CURRENT_VERSION to '0.1.1' to coordinate with target v0.1.1 test release

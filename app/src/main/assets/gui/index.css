@@ -1694,8 +1694,8 @@ header {
 
     /* â”€â”€ Music Cards: narrower â”€â”€ */
     .music-card {
-        width: calc(95px * var(--ui-scale));
-        min-width: calc(95px * var(--ui-scale));
+        width: calc(115px * var(--ui-scale));
+        min-width: calc(115px * var(--ui-scale));
     }
 
     .row-posters {
@@ -1738,8 +1738,8 @@ header {
 
     /* â”€â”€ Skeletons: match card sizing â”€â”€ */
     .skeleton-card {
-        width: calc(95px * var(--ui-scale));
-        min-width: calc(95px * var(--ui-scale));
+        width: calc(115px * var(--ui-scale));
+        min-width: calc(115px * var(--ui-scale));
     }
 
     .skeleton-info-box {
@@ -1748,8 +1748,8 @@ header {
     }
 
     .skeleton-poster {
-        width: calc(95px * var(--ui-scale));
-        height: calc(95px * var(--ui-scale));
+        width: calc(115px * var(--ui-scale));
+        height: calc(115px * var(--ui-scale));
     }
 
     .skeleton-row {
@@ -1908,7 +1908,6 @@ header {
     .music-card.type-album:focus-visible .card-image-box::after {
         transform: translate(12px, 12px) scale(0.96) !important;
     }
-}
 
 /* ── Player Bar: compact stacked layout ── */
 #player-bar {
@@ -2028,6 +2027,7 @@ h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .pr
 /* â”€â”€ Load more â”€â”€ */
 .load-more-container {
     padding: 20px 0;
+}
 }
 
 @keyframes fadeIn {
