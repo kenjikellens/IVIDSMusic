@@ -4724,3 +4724,47 @@ svg.btn-icon {
 .year-filter-input::placeholder {
     color: var(--text-muted);
 }
+
+/* ==========================================================================
+   Toast Notifications System Style
+   ========================================================================== */
+
+/*
+ * Selector: .ivids-toast
+ * Purpose: Styles the floating glassmorphic toast notification popup container.
+ *          Centered horizontally across devices without using prohibited transforms.
+ */
+.ivids-toast {
+    position: fixed;
+    bottom: calc(100px * var(--ui-scale));
+    left: 10%;
+    right: 10%;
+    width: fit-content;
+    margin: 0 auto;
+    background: rgba(18, 18, 18, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    padding: calc(12px * var(--ui-scale)) calc(24px * var(--ui-scale));
+    border-radius: calc(30px * var(--ui-scale));
+    color: #fff;
+    font-size: calc(0.95rem * var(--ui-scale));
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, bottom 0.3s ease;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    max-width: 80%;
+    text-align: center;
+    line-height: 1.4;
+}
+
+/*
+ * Selector: .ivids-toast.visible
+ * Purpose: Reveals the toast smoothly and shifts its position slightly upward.
+ */
+.ivids-toast.visible {
+    opacity: 1;
+    pointer-events: auto;
+    bottom: calc(115px * var(--ui-scale));
+}

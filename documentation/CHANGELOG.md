@@ -1,3 +1,11 @@
+[2026-05-18] EDITED IVIDSMusic.apk: Recompiled distribution package to build and package v0.1.5 including the premium glassmorphic toast notification upgrades
+[2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Bumped visual version label to 0.1.5 (Beta) inside settings dashboard for UI consistency
+[2026-05-18] EDITED app/src/main/assets/logic/updater.js: Bumped CURRENT_VERSION constant to 0.1.5 to coordinate with v0.1.5 release
+[2026-05-18] EDITED app/build.gradle.kts: Bumped versionName to v0.1.5 and incremented versionCode to 7.
+[2026-05-18] EDITED app/src/main/assets/gui/index.css: Configured .ivids-toast and .ivids-toast.visible classes for premium glassmorphic toast notifications centered without prohibited transforms
+[2026-05-18] EDITED app/src/main/assets/gui/index.html: Imported the new toast.js module on bootstrap to automatically hijack and upgrade global alert calls
+[2026-05-18] ADDED app/src/main/assets/logic/toast.js: Created premium glassmorphic Toast notification system to replace standard browser window.alert popups with mobile-friendly physical UI alerts
+[2026-05-18] ADDED .agents/scripts/bump-version.js: Created automated Release Version Auto-Bumper script to synchronize and log version numbers across all codebases in a single command
 [2026-05-18] EDITED IVIDSMusic.apk: Recompiled distribution package to compile and ship all v0.1.4 visual settings and options context menu fixes
 [2026-05-18] EDITED app/src/main/assets/gui/pages/settings.html: Bumped visual version label to 0.1.4 (Beta) inside settings dashboard for UI consistency
 [2026-05-18] EDITED app/src/main/assets/logic/updater.js: Bumped CURRENT_VERSION constant to 0.1.4 to coordinate with v0.1.4 release
