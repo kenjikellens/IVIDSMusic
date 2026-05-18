@@ -1,7 +1,4 @@
-/**
- * IVIDS Music - Release Update System
- * Manages automated and manual checks against the GitHub Releases API.
- */
+import { Config } from './config.js';
 
 const CURRENT_VERSION = '0.1.3';
 const REPO = 'kenjikellens/IVIDSMusic';
@@ -10,6 +7,30 @@ const STORAGE_KEY = 'iv_last_update_check';
 
 export const Updater = {
     currentVersion: CURRENT_VERSION,
+
+    /**
+     * Proxy-aware fetch helper to resolve CORS/security blocks in Native WebView.
+     * 
+     * @param {string} url - Target URL.
+     * @param {Object} options - Fetch options.
+     * @returns {Promise<Response>} Fetch Response object.
+     */
+    async _fetch(url, options = {}) {
+        let finalUrl = url;
+        const isExternal = url.startsWith('http') && typeof window !== 'undefined' && !url.startsWith(window.location.origin);
+
+        if (Config.isNative) {
+            if (isExternal && !url.includes('appassets.androidplatform.net')) {
+                finalUrl = `/api/proxy?url=` + encodeURIComponent(url);
+            }
+        } else {
+            if (isExternal && !url.includes(':3000')) {
+                finalUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+            }
+        }
+
+        return await fetch(finalUrl, options);
+    },
 
     /**
      * Parses a version string into an array of integers for comparison.
@@ -50,7 +71,7 @@ export const Updater = {
      */
     async fetchLatestRelease() {
         try {
-            const response = await fetch(API_URL, {
+            const response = await this._fetch(API_URL, {
                 headers: { 'Accept': 'application/vnd.github.v3+json' }
             });
             if (!response.ok) throw new Error(`HTTP Error ${response.status}`);
