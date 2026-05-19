@@ -32,6 +32,15 @@ function runCommand(command, errorMessage) {
     }
 }
 
+function hasStagedChanges() {
+    try {
+        execSync('git diff --cached --quiet', { cwd: ROOT_DIR, stdio: 'ignore' });
+        return false;
+    } catch (error) {
+        return true;
+    }
+}
+
 function main() {
     const args = process.argv.slice(2);
     if (args.length === 0 || args[0] === '--help' || args[0] === '-h') {
@@ -105,8 +114,15 @@ function main() {
 
     // Commit changes on main
     console.log('\nCommitting version synchronization updates on main branch...');
-    runCommand('git add .', 'Failed to stage version configuration updates');
-    runCommand(`git commit -m "chore: bump version configurations to v${targetVersionName}"`, 'Failed to commit version updates');
+    runCommand(
+        'git add app/build.gradle.kts package.json app/src/main/assets/logic/updater.js app/src/main/assets/gui/pages/settings.html',
+        'Failed to stage version configuration updates'
+    );
+    if (hasStagedChanges()) {
+        runCommand(`git commit -m "chore: bump version configurations to v${targetVersionName}"`, 'Failed to commit version updates');
+    } else {
+        console.log('No version configuration changes to commit.');
+    }
 
     // ==========================================
     // 2. Compile Release Build Variants
