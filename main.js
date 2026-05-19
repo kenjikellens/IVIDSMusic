@@ -1,13 +1,99 @@
 const { app, BrowserWindow, ipcMain, protocol, net } = require('electron');
 const path = require('path');
 const fs = require('fs');
-const { exec } = require('child_process');
+const { exec, spawn } = require('child_process');
 const { pathToFileURL } = require('url');
+const http = require('http');
+const https = require('https');
+
+const GITHUB_RELEASE_API_URL = 'https://api.github.com/repos/kenjikellens/IVIDSMusic/releases/latest';
 
 // Determine local directories for cached/downloaded files inside User Data
 const savedDir = path.join(app.getPath('userData'), 'saved');
 if (!fs.existsSync(savedDir)) {
     fs.mkdirSync(savedDir, { recursive: true });
+}
+
+const updateDir = path.join(app.getPath('userData'), 'updates');
+if (!fs.existsSync(updateDir)) {
+    fs.mkdirSync(updateDir, { recursive: true });
+}
+
+function requestUrl(url, redirects = 0) {
+    return new Promise((resolve, reject) => {
+        const client = url.startsWith('https:') ? https : http;
+        const request = client.get(url, {
+            headers: {
+                'Accept': 'application/vnd.github.v3+json',
+                'User-Agent': 'IVIDS-Music-PC-App'
+            }
+        }, (response) => {
+            if (response.statusCode >= 300 && response.statusCode <= 308 && response.headers.location && redirects < 5) {
+                response.resume();
+                const nextUrl = new URL(response.headers.location, url).toString();
+                requestUrl(nextUrl, redirects + 1).then(resolve).catch(reject);
+                return;
+            }
+
+            resolve(response);
+        });
+
+        request.on('error', reject);
+    });
+}
+
+async function fetchJson(url) {
+    const response = await requestUrl(url);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+        response.resume();
+        throw new Error(`HTTP ${response.statusCode}`);
+    }
+
+    return new Promise((resolve, reject) => {
+        let body = '';
+        response.setEncoding('utf8');
+        response.on('data', chunk => { body += chunk; });
+        response.on('end', () => {
+            try {
+                resolve(JSON.parse(body));
+            } catch (error) {
+                reject(error);
+            }
+        });
+        response.on('error', reject);
+    });
+}
+
+async function downloadFile(url, outputPath, onProgress) {
+    const response = await requestUrl(url);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+        response.resume();
+        throw new Error(`HTTP ${response.statusCode}`);
+    }
+
+    const totalBytes = parseInt(response.headers['content-length'] || '0', 10);
+    let downloadedBytes = 0;
+
+    return new Promise((resolve, reject) => {
+        const output = fs.createWriteStream(outputPath);
+
+        response.on('data', chunk => {
+            downloadedBytes += chunk.length;
+            if (totalBytes > 0 && onProgress) {
+                onProgress(Math.min(100, Math.round(downloadedBytes * 100 / totalBytes)));
+            }
+        });
+
+        response.pipe(output);
+        output.on('finish', () => {
+            output.close(() => {
+                if (onProgress) onProgress(100);
+                resolve(outputPath);
+            });
+        });
+        output.on('error', reject);
+        response.on('error', reject);
+    });
 }
 
 /**
@@ -161,4 +247,49 @@ ipcMain.handle('delete-track', async (event, filename) => {
             }
         });
     });
+});
+
+ipcMain.handle('check-pc-update', async () => {
+    try {
+        const release = await fetchJson(GITHUB_RELEASE_API_URL);
+        return { status: 'ok', release };
+    } catch (error) {
+        console.error('Failed to check PC update', error);
+        return { status: 'error', message: error.message };
+    }
+});
+
+ipcMain.handle('download-pc-update', async (event, downloadUrl, version) => {
+    try {
+        const safeVersion = String(version || 'latest').replace(/[^a-zA-Z0-9._-]/g, '');
+        const outputPath = path.join(updateDir, `IVIDSMusic_PC_${safeVersion}.exe`);
+        await downloadFile(downloadUrl, outputPath, (progress) => {
+            event.sender.send('pc-update-progress', progress);
+        });
+        return { status: 'downloaded', filePath: outputPath };
+    } catch (error) {
+        console.error('Failed to download PC update', error);
+        return { status: 'error', message: error.message };
+    }
+});
+
+ipcMain.handle('install-pc-update', async (event, filePath) => {
+    try {
+        const resolvedUpdateDir = path.resolve(updateDir);
+        const resolvedFilePath = path.resolve(filePath);
+        if (!resolvedFilePath.startsWith(resolvedUpdateDir + path.sep) || !fs.existsSync(resolvedFilePath)) {
+            throw new Error('Invalid update executable path.');
+        }
+
+        const child = spawn(resolvedFilePath, [], {
+            detached: true,
+            stdio: 'ignore'
+        });
+        child.unref();
+        setTimeout(() => app.quit(), 500);
+        return { status: 'launching' };
+    } catch (error) {
+        console.error('Failed to install PC update', error);
+        return { status: 'error', message: error.message };
+    }
 });

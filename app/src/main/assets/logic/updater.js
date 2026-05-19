@@ -3,6 +3,7 @@ import { Config } from './config.js';
 const CURRENT_VERSION = '0.2.1';
 const REPO = 'kenjikellens/IVIDSMusic';
 const API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
+const RAW_MAIN_URL = `https://github.com/${REPO}/raw/main`;
 const STORAGE_KEY = 'iv_last_update_check';
 
 export const Updater = {
@@ -89,6 +90,13 @@ export const Updater = {
      */
     async fetchLatestRelease() {
         try {
+            if (Config.isElectron && window.ElectronAPI && window.ElectronAPI.checkPcUpdate) {
+                const nativeRelease = await window.ElectronAPI.checkPcUpdate();
+                if (nativeRelease && nativeRelease.status === 'ok') {
+                    return nativeRelease.release;
+                }
+            }
+
             const response = await this._fetch(API_URL, {
                 headers: { 'Accept': 'application/vnd.github.v3+json' }
             });
@@ -101,6 +109,55 @@ export const Updater = {
             console.error('[Updater] Failed to fetch latest release:', e);
             return null;
         }
+    },
+
+    getPlatformTarget() {
+        if (Config.isElectron) return 'pc';
+
+        const userAgent = navigator.userAgent || '';
+        const isTv = document.body.classList.contains('tv-mode') ||
+            (window.TVNav && window.TVNav.isEnabled) ||
+            /tv|smarttv|googletv|appletv|hbbtv|nintendo|playstation/i.test(userAgent);
+
+        return isTv ? 'tv' : 'mobile';
+    },
+
+    getFallbackDownloadUrl(target = this.getPlatformTarget()) {
+        if (target === 'pc') return `${RAW_MAIN_URL}/IVIDSMusic_PC.exe`;
+        if (target === 'tv') return `${RAW_MAIN_URL}/IVIDSMusic_TV.apk`;
+        return `${RAW_MAIN_URL}/IVIDSMusic_Mobile.apk`;
+    },
+
+    findReleaseAsset(release, target = this.getPlatformTarget()) {
+        const assets = release && Array.isArray(release.assets) ? release.assets : [];
+        const lowerName = asset => (asset.name || '').toLowerCase();
+
+        if (target === 'pc') {
+            return assets.find(a => lowerName(a) === 'ividsmusic_pc.exe') ||
+                assets.find(a => lowerName(a).endsWith('.exe') && lowerName(a).includes('pc')) ||
+                assets.find(a => lowerName(a).endsWith('.exe')) ||
+                null;
+        }
+
+        if (target === 'tv') {
+            return assets.find(a => lowerName(a) === 'ividsmusic_tv.apk') ||
+                assets.find(a => lowerName(a).endsWith('.apk') && lowerName(a).includes('tv')) ||
+                assets.find(a => lowerName(a).endsWith('.apk') && !lowerName(a).includes('mobile')) ||
+                assets.find(a => lowerName(a).endsWith('.apk')) ||
+                null;
+        }
+
+        return assets.find(a => lowerName(a) === 'ividsmusic_mobile.apk') ||
+            assets.find(a => lowerName(a).endsWith('.apk') && lowerName(a).includes('mobile')) ||
+            assets.find(a => lowerName(a).endsWith('.apk') && !lowerName(a).includes('tv')) ||
+            assets.find(a => lowerName(a).endsWith('.apk')) ||
+            null;
+    },
+
+    getDownloadUrl(release) {
+        const target = this.getPlatformTarget();
+        const asset = this.findReleaseAsset(release, target);
+        return asset ? asset.browser_download_url : this.getFallbackDownloadUrl(target);
     },
 
     /**
@@ -187,12 +244,7 @@ export const Updater = {
         overlay.id = 'update-overlay';
         overlay.className = 'update-modal-overlay';
         
-        let apkAsset = null;
-        if (release.assets && Array.isArray(release.assets)) {
-            apkAsset = release.assets.find(a => a.name.endsWith('.apk'));
-        }
-        
-        const downloadUrl = apkAsset ? apkAsset.browser_download_url : `https://github.com/${REPO}/raw/main/IVIDSMusic.apk`;
+        const downloadUrl = this.getDownloadUrl(release);
 
         // Format raw markdown bodies to simple bullet points
         const cleanBody = release.body 
@@ -251,7 +303,34 @@ export const Updater = {
 
         if (downloadBtn) {
             downloadBtn.onclick = () => {
-                if (window.AndroidUpdate) {
+                if (Config.isElectron && window.ElectronAPI && window.ElectronAPI.downloadPcUpdate) {
+                    if (actionsContainer) actionsContainer.style.display = 'none';
+                    if (progressContainer) progressContainer.style.display = 'flex';
+                    if (progressBar) progressBar.style.width = '0%';
+                    if (progressText) progressText.textContent = 'Downloading (0%)...';
+
+                    window.ElectronAPI.downloadPcUpdate(downloadUrl, release.tag_name)
+                        .then(result => {
+                            if (!result || result.status !== 'downloaded') {
+                                throw new Error(result && result.message ? result.message : 'Download failed.');
+                            }
+                            if (progressText) progressText.textContent = 'Launching updated version...';
+                            return window.ElectronAPI.installPcUpdate(result.filePath);
+                        })
+                        .then(result => {
+                            if (result && result.status === 'error') {
+                                throw new Error(result.message || 'Failed to launch update.');
+                            }
+                        })
+                        .catch(e => {
+                            console.error('[Updater] Failed to update PC build:', e);
+                            if (progressText) {
+                                progressText.textContent = 'Failed to update PC build.';
+                                progressText.style.color = '#ef4444';
+                            }
+                            if (actionsContainer) actionsContainer.style.display = 'flex';
+                        });
+                } else if (window.AndroidUpdate) {
                     if (actionsContainer) actionsContainer.style.display = 'none';
                     if (progressContainer) progressContainer.style.display = 'flex';
                     if (progressBar) progressBar.style.width = '0%';
@@ -278,6 +357,12 @@ export const Updater = {
 
 if (typeof window !== 'undefined') {
     window.Updater = Updater;
+
+    if (window.ElectronAPI && window.ElectronAPI.onPcUpdateProgress) {
+        window.ElectronAPI.onPcUpdateProgress((progress) => {
+            window.onUpdateProgress(progress);
+        });
+    }
 
     /**
      * Global bridge callback called by Android native code when a new release version is discovered.

@@ -31,7 +31,7 @@ public class UpdateManager {
 
     private static final String TAG = "UpdateManager";
     private static final String GITHUB_API_URL = "https://api.github.com/repos/kenjikellens/IVIDSMusic/releases/latest";
-    private static final String REPO_APK_URL = "https://github.com/kenjikellens/IVIDSMusic/raw/main/IVIDSMusic.apk";
+    private static final String REPO_APK_URL = "https://github.com/kenjikellens/IVIDSMusic/raw/main/IVIDSMusic_Mobile.apk";
 
     private final Activity mActivity;
     private final WebView mWebView;

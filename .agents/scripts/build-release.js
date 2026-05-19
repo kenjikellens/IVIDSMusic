@@ -227,6 +227,23 @@ function main() {
     // Switch back to main
     console.log('\nRestoring main branch codebase...');
     runCommand('git checkout main', 'Failed to restore main branch');
+
+    console.log('\nMirroring release binaries to main branch root...');
+    fs.copyFileSync(tempMobile, path.join(ROOT_DIR, 'IVIDSMusic_Mobile.apk'));
+    fs.copyFileSync(tempTv, path.join(ROOT_DIR, 'IVIDSMusic_TV.apk'));
+    fs.copyFileSync(tempPc, path.join(ROOT_DIR, 'IVIDSMusic_PC.exe'));
+    fs.copyFileSync(tempMobile, path.join(ROOT_DIR, 'IVIDSMusic.apk'));
+
+    runCommand(
+        'git add IVIDSMusic.apk IVIDSMusic_Mobile.apk IVIDSMusic_TV.apk IVIDSMusic_PC.exe',
+        'Failed to stage main branch release binaries'
+    );
+    if (hasStagedChanges()) {
+        runCommand(`git commit -m "chore: mirror release binaries for v${targetVersionName}"`, 'Failed to commit main branch release binaries');
+    } else {
+        console.log('Main branch release binaries are already current.');
+    }
+
     runCommand('git branch -D temp-release-run', 'Failed to delete temporary packaging branch');
 
     // Clean temporary storage directory

@@ -35,7 +35,7 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
     companion object {
         private const val TAG = "UpdateManager"
         private const val GITHUB_API_URL = "https://api.github.com/repos/kenjikellens/IVIDSMusic/releases/latest"
-        private const val REPO_APK_URL = "https://github.com/kenjikellens/IVIDSMusic/raw/main/IVIDSMusic.apk"
+        private const val REPO_APK_URL = "https://github.com/kenjikellens/IVIDSMusic/raw/main/IVIDSMusic_TV.apk"
     }
 
     @JavascriptInterface
