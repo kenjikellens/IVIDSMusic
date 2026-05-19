@@ -123,7 +123,7 @@ public class UpdateManager {
     @JavascriptInterface
     public String getCurrentVersion() {
         try {
-            return mActivity.getPackageManager().getPackageInfo(mActivity.packageName, 0).versionName;
+            return mActivity.getPackageManager().getPackageInfo(mActivity.getPackageName(), 0).versionName;
         } catch (Exception e) {
             return "0.2.0";
         }
