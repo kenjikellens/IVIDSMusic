@@ -22,10 +22,10 @@ You must ensure the codebase respects and handles the four distinct runtimes:
 
 ## 3. Git & GitHub Protocol
 - **No Autonomous Pushing**: You must NEVER push changes to the GitHub repository on your own initiative.
-- **Explicit Permission Required**: You must always ask for explicit permission from the user before using `git push`. Keep your changes in the local workspace until you are instructed to push them to the cloud.
+- **Explicit Permission Required**: You must always ask for explicit permission from the user before using `git push`. Keep your changes in the local workspace until the user clearly asks to push, upload, sync, publish, or otherwise put the local branch/ref on GitHub.
 - **Obligatory Release Metadata**: When creating, tagging, or pushing a new release, you are strictly OBLIGATED to formulate a professional, high-quality release title (e.g., `Release v0.1.6 (Beta)`) and a detailed, feature-rich release description highlighting all visual, architectural, compilation, and core improvements included in this build.
 
-if the user says **"push to main"**, you may directly push ALL changes to main, if the user says **"push [file] to main"**, you only push this file.
+If the user clearly asks to push/upload/sync the current branch, you may push the current branch and its local commits. If the user limits the push to a specific file, commit, branch, tag, or ref, push only that requested scope.
 
 ## 4. Multi-Platform Release Packaging
 - **Release Target Isolation**: Every target release build must package ONLY the three compiled distribution binaries (`IVIDSMusic_Mobile.apk`, `IVIDSMusic_TV.apk`, and `IVIDSMusic_PC.exe`) at its root. The source codebase must remain entirely on the `main` branch.

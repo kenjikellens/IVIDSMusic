@@ -23,8 +23,8 @@ This document defines the strict, standardized protocol for launching new releas
 
 ### 3. Publish Scope Selection
 - **Release-only request**: If the developer/user only asks to make, create, publish, or draft a new release for `vX.Y.Z`, publish only the release tag and GitHub Release. Do **not** push `main`.
-- **Combined main + release request**: If the developer/user explicitly says both **"push to main"** and asks for a release in the same active request, then push `main`, push the release tag, and publish the GitHub Release.
-- **Main-only request**: If the developer/user only says **"push to main"**, push only `main`. Do **not** create tags, release packages, or GitHub Releases.
+- **Combined branch + release request**: If the developer/user clearly asks to push/upload/sync the branch while also asking for a release in the same active request, then push the branch, push the release tag, and publish the GitHub Release.
+- **Branch-only request**: If the developer/user only asks to push/upload/sync the current branch or `main`, push only that branch. Do **not** create tags, release packages, or GitHub Releases.
 
 ### 4. Push the Authorized Refs
 - **ACTION**: After obtaining explicit permission from the developer, push only the refs authorized by the active request:
@@ -32,7 +32,7 @@ This document defines the strict, standardized protocol for launching new releas
   # Release-only request:
   git push origin vX.Y.Z
 
-  # Combined main + release request:
+  # Combined branch + release request:
   git push origin main
   git push origin vX.Y.Z
   ```
@@ -46,6 +46,6 @@ This document defines the strict, standardized protocol for launching new releas
   # Release-only request: tag + GitHub Release only
   node .agents/scripts/publish-release.js vX.Y.Z
 
-  # Combined main + release request: main + tag + GitHub Release
+  # Combined branch + release request: branch + tag + GitHub Release
   node .agents/scripts/publish-release.js vX.Y.Z --push-main
   ```
