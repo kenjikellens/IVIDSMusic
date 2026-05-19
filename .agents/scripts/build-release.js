@@ -153,8 +153,8 @@ function main() {
     }
 
     // Define source paths
-    const mobileSource = path.join(ROOT_DIR, 'app/build/outputs/apk/mobile/release/app-mobile-release-unsigned.apk');
-    const tvSource = path.join(ROOT_DIR, 'app/build/outputs/apk/tv/release/app-tv-release-unsigned.apk');
+    const mobileSource = path.join(ROOT_DIR, 'app/build/outputs/apk/mobile/release/app-mobile-release.apk');
+    const tvSource = path.join(ROOT_DIR, 'app/build/outputs/apk/tv/release/app-tv-release.apk');
     
     // Find PC build output (e.g. dist/ividsmusic 0.1.6 Portable.exe)
     const distFiles = fs.readdirSync(path.join(ROOT_DIR, 'dist'));
