@@ -27,17 +27,9 @@ You must ensure the codebase respects and handles the four distinct runtimes:
 
 if the user says **"push to main"**, you may directly push ALL changes to main, if the user says **"push [file] to main"**, you only push this file.
 
-## 4. Change Logging
-For every file you **edit**, **add**, or **delete**, you must append a new line to the bottom of the project's `CHANGELOG.md` file (located at the "./documentation/" of the project). Each log entry must follow this format:
-
-[YYYY-MM-DD] [ACTION] <filename>: <brief description of what was changed/added/deleted>
-
-- **ACTION** must be one of: `EDITED`, `ADDED`, or `DELETED`.
-- The description must be concise but specific enough to understand what changed and why.
-- **Chronological Order**: Always append new log entries to the bottom of the file (newest changes at the bottom).
-- **Reset on Release**: The changelog only contains changes since the last release. As soon as a new release is published, tagged, or pushed, the `CHANGELOG.md` file must be cleared (started fresh), and this cleared state must be pushed to `main` immediately to prepare for the next release cycle.
-- **Excluded Files**: Do NOT log modifications to agent-internal files (e.g., `.agents/` folder, workflows, system rules) or documentation files (e.g., `documentation/` folder, `CHANGELOG.md` itself) in `CHANGELOG.md`. The changelog tracks codebase/application changes only.
-- This log entry must be written **every time** a codebase file operation occurs, without exception.
+## 4. Multi-Platform Release Packaging
+- **Release Target Isolation**: Every target release build must package ONLY the three compiled distribution binaries (`IVIDSMusic_Mobile.apk`, `IVIDSMusic_TV.apk`, and `IVIDSMusic_PC.exe`) at its root. The source codebase must remain entirely on the `main` branch.
+- **Orphan Release Execution**: Release updates must be coordinated by executing the `.agents/scripts/build-release.js` utility, which compiles the three targets and isolates them in an orphan tag. Do NOT run manual tag or checkout actions for releases unless instructed.
 
 Always follow these rules for every task you perform.
 

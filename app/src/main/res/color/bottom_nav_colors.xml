@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Active tab color is Neon Green -->
+    <item android:state_checked="true" android:color="#00FF66" />
+    <!-- Default inactive tab color is Muted Gray -->
+    <item android:color="#888888" />
+</selector>

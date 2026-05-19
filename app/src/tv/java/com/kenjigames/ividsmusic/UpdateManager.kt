@@ -27,10 +27,8 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 /**
- * UpdateManager handles the automatic OTA (Over-The-Air) update checking and installation process.
- * It interacts with the GitHub API to find the latest releases, compares version tags,
- * downloads the new APK securely via HTTP, and initiates the Android package installation intent.
- * It acts as a bridge between the WebView (JavaScript) and native Android code.
+ * UpdateManager handles automatic OTA (Over-The-Air) update downloads and installers specifically
+ * for the Android TV app (WebView wrapper) version.
  */
 class UpdateManager(private val mActivity: Activity, private val mWebView: WebView) {
 
@@ -44,10 +42,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         private const val REPO_APK_URL = "https://github.com/kenjikellens/IVIDSMusic/raw/main/IVIDSMusic.apk"
     }
 
-    /**
-     * Checks the GitHub repository releases API to see if a newer version of the app is available.
-     * This method is exposed to JavaScript via the @JavascriptInterface annotation and runs on a background thread.
-     */
     @JavascriptInterface
     fun checkForUpdates() {
         Log.d(TAG, "Checking for updates...")
@@ -141,10 +135,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         }
     }
 
-    /**
-     * Compares the current installed app version against the latest version tag from GitHub.
-     * Handles semantic versioning comparison (e.g., v1.0.1 vs v1.0.2).
-     */
     private fun isNewerVersion(current: String, latest: String): Boolean {
         try {
             notifyWebUpdateStatus("comparing-versions")
@@ -174,10 +164,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         return false
     }
 
-    /**
-     * Retrieves the current app version name from the Android package manager.
-     * This method is exposed to JavaScript via the @JavascriptInterface annotation.
-     */
     @JavascriptInterface
     fun getCurrentVersion(): String {
         return try {
@@ -188,10 +174,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         }
     }
 
-    /**
-     * Initiates a direct forced download of the APK from the repository's raw URL.
-     * This method is exposed to JavaScript via the @JavascriptInterface annotation.
-     */
     @JavascriptInterface
     fun downloadFromRepo() {
         Log.d(TAG, "Requesting direct download from repository...")
@@ -199,10 +181,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         downloadAndInstall()
     }
 
-    /**
-     * Directs the native downloader to download and install a package from a custom URL.
-     * This method is exposed to JavaScript via the @JavascriptInterface annotation.
-     */
     @JavascriptInterface
     fun downloadAndInstallForUrl(url: String) {
         Log.d(TAG, "Requesting custom download URL: $url")
@@ -210,10 +188,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         downloadAndInstall()
     }
 
-    /**
-     * Begins the background download of the latest APK file.
-     * Automatically handles HTTP redirects, writes the stream to the cache, and publishes progress updates.
-     */
     @JavascriptInterface
     fun downloadAndInstall() {
         val downloadUrl = mDownloadUrl
@@ -323,10 +297,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         }
     }
 
-    /**
-     * Triggers the Android system package installer to install the downloaded APK.
-     * Uses FileProvider to securely grant the installer read access to the downloaded file.
-     */
     private fun installApk(apkFile: File) {
         try {
             notifyWebUpdateStatus("installing")
@@ -347,10 +317,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         }
     }
 
-    /**
-     * Checks if the device currently has an active network connection (Wi-Fi or Cellular).
-     * Returns true if a network connection is available, false otherwise.
-     */
     private fun isNetworkAvailable(): Boolean {
         val connectivityManager = mActivity
             .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager?
@@ -359,18 +325,10 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         return activeNetworkInfo != null && activeNetworkInfo.isConnected
     }
 
-    /**
-     * Shuts down the background executor service to prevent memory leaks.
-     * Should be called when the hosting activity is destroyed.
-     */
     fun shutdown() {
         mExecutor.shutdown()
     }
 
-    /**
-     * Sends a JavaScript callback to the WebView notifying that a new update is available.
-     * Evaluates the JavaScript onUpdateFound callback on the UI thread.
-     */
     private fun notifyWebFoundUpdate(version: String) {
         mActivity.runOnUiThread {
             mWebView.evaluateJavascript(
@@ -380,10 +338,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         }
     }
 
-    /**
-     * Sends a JavaScript callback to the WebView notifying that no new updates were found.
-     * Evaluates the JavaScript onNoUpdateFound callback on the UI thread.
-     */
     private fun notifyWebNoUpdateFound() {
         mActivity.runOnUiThread {
             mWebView.evaluateJavascript(
@@ -393,10 +347,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         }
     }
 
-    /**
-     * Sends a JavaScript callback to the WebView to update the UI on the current stage of the update process.
-     * Evaluates the JavaScript onUpdateStatus callback on the UI thread.
-     */
     private fun notifyWebUpdateStatus(statusKey: String) {
         mActivity.runOnUiThread {
             mWebView.evaluateJavascript(
@@ -406,10 +356,6 @@ class UpdateManager(private val mActivity: Activity, private val mWebView: WebVi
         }
     }
 
-    /**
-     * Sends a JavaScript callback to the WebView notifying that an error occurred during the update process.
-     * Evaluates the JavaScript onUpdateCheckError callback on the UI thread.
-     */
     private fun notifyWebUpdateError() {
         mActivity.runOnUiThread {
             mWebView.evaluateJavascript(

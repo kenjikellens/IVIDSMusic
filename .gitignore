@@ -14,3 +14,7 @@
 .cxx
 local.properties
 /tmp/
+node_modules/
+dist/
+ividsmusic_release_temp/
+

@@ -2,8 +2,7 @@
  * IVIDS Music - Release Version Auto-Bumper Script
  * 
  * Description: Automates release version configurations across the Android Gradle configuration,
- *              the JavaScript updater module, and the settings dashboard UI, and appends the 
- *              updates to CHANGELOG.md.
+ *              the JavaScript updater module, and the settings dashboard UI.
  * 
  * Usage:
  *   node .agents/scripts/bump-version.js <versionName> [versionCode]
@@ -20,7 +19,7 @@ const path = require('path');
 const GRADLE_PATH = path.join(__dirname, '../../app/build.gradle.kts');
 const UPDATER_PATH = path.join(__dirname, '../../app/src/main/assets/logic/updater.js');
 const SETTINGS_PATH = path.join(__dirname, '../../app/src/main/assets/gui/pages/settings.html');
-const CHANGELOG_PATH = path.join(__dirname, '../../documentation/CHANGELOG.md');
+
 
 // Validate command line arguments
 const args = process.argv.slice(2);
@@ -120,24 +119,6 @@ fs.writeFileSync(SETTINGS_PATH, settingsContent, 'utf8');
 console.log('\x1b[32m✔ Updated settings.html successfully.\x1b[0m');
 
 
-// === 4. Auto-log to CHANGELOG.md ===
-if (fs.existsSync(CHANGELOG_PATH)) {
-    const today = new Date().toISOString().split('T')[0];
-    let changelogContent = fs.readFileSync(CHANGELOG_PATH, 'utf8');
 
-    const logEntries = [
-        `[${today}] EDITED app/src/main/assets/gui/pages/settings.html: Bumped visual version label to ${targetVersionName} (Beta) inside settings dashboard for UI consistency`,
-        `[${today}] EDITED app/src/main/assets/logic/updater.js: Bumped CURRENT_VERSION constant to ${targetVersionName} to coordinate with v${targetVersionName} release`,
-        `[${today}] EDITED app/build.gradle.kts: Bumped versionName to v${targetVersionName} and incremented versionCode to ${targetVersionCode}.`
-    ];
-
-    const appendedText = '\n' + logEntries.join('\n') + '\n';
-    changelogContent = changelogContent.trim() + appendedText;
-    
-    fs.writeFileSync(CHANGELOG_PATH, changelogContent, 'utf8');
-    console.log('\x1b[32m✔ Appended granular version log entries to CHANGELOG.md successfully.\x1b[0m');
-} else {
-    console.log('\x1b[33m[Warning] CHANGELOG.md not found, skipping logs.\x1b[0m');
-}
 
 console.log('\n\x1b[35m[Success] Version configuration fully synchronized to v' + targetVersionName + '!\x1b[0m\n');
