@@ -1,6 +1,6 @@
 import { Config } from './config.js';
 
-const CURRENT_VERSION = '0.2.1';
+const CURRENT_VERSION = '0.2.3';
 const REPO = 'kenjikellens/IVIDSMusic';
 const API_URL = `https://api.github.com/repos/${REPO}/releases/latest`;
 const RAW_MAIN_URL = `https://github.com/${REPO}/raw/main`;
