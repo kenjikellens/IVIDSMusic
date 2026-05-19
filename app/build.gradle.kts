@@ -27,6 +27,24 @@ android {
             )
         }
     }
+
+    flavorDimensions.add("device")
+    productFlavors {
+        create("mobile") {
+            dimension = "device"
+        }
+        create("tv") {
+            dimension = "device"
+        }
+    }
+
+    sourceSets {
+        getByName("mobile") {
+            assets.exclude("gui/**")
+            assets.exclude("logic/**")
+        }
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -34,6 +52,7 @@ android {
     kotlinOptions {
         jvmTarget = "11"
     }
+
 }
 
 dependencies {

@@ -327,15 +327,8 @@ export const YouTubePlayer = {
                 statusEl.textContent = downloadingText;
             }
 
-            // Pass artist and title to handle the new naming format
-            const params = new URLSearchParams({
-                videoId: videoId,
-                artist: track.artist,
-                title: track.title
-            });
+            const data = await MusicAPI.playTrack(videoId, track.artist, track.title);
 
-            const response = await MusicAPI._fetch(`${Config.SERVER_URL}/play?${params.toString()}`);
-            const data = await response.json();
 
             if (data.status === 'ready') {
                 if (statusContainer) statusContainer.style.display = 'none';
@@ -429,14 +422,8 @@ export const YouTubePlayer = {
             saveBtn.disabled = true;
             saveBtn.style.opacity = '0.5';
 
-            const params = new URLSearchParams({
-                videoId: videoId,
-                artist: this.currentTrack.artist,
-                title: this.currentTrack.title
-            });
+            const data = await MusicAPI.saveTrack(videoId, this.currentTrack.artist, this.currentTrack.title, this.audio.src);
 
-            const response = await MusicAPI._fetch(`${Config.SERVER_URL}/save?${params.toString()}`);
-            const data = await response.json();
 
             if (data.status === 'saved') {
                 console.log('[Save]', data.message);

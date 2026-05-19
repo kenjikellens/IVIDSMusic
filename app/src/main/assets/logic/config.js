@@ -6,6 +6,8 @@
  * In Web/Live Server Mode, it falls back to the local Node.js backend on port 3000.
  */
 const isNative = typeof window !== 'undefined' && window.location.hostname.includes("appassets.androidplatform.net");
+const isElectron = typeof window !== 'undefined' && window.navigator && window.navigator.userAgent.toLowerCase().includes("electron");
+const isWeb = !isNative && !isElectron;
 
 let serverUrl = "http://127.0.0.1:3000";
 if (typeof window !== 'undefined' && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
@@ -14,11 +16,13 @@ if (typeof window !== 'undefined' && (window.location.protocol === 'http:' || wi
 
 export const Config = {
     isNative: isNative,
+    isElectron: isElectron,
+    isWeb: isWeb,
     SERVER_URL: isNative ? "/api" : serverUrl,
-
 };
 
 // Global access for easier debugging
 if (typeof window !== 'undefined') {
     window.Config = Config;
 }
+

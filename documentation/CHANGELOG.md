@@ -46,3 +46,17 @@ All notable changes to the **IVIDS Music** project will be documented in this fi
 [2026-05-19] [EDITED] app/src/main/assets/gui/pages/search.html: Redesigned the search landing page structure by grouping the title, tagline, onboarding promo card, and browse categories grid inside the browse-hero container for unified toggling.
 [2026-05-19] [EDITED] app/src/main/assets/logic/tv-nav.js: Added auto-detection for TV mode to disable spatial navigation and locked readOnly inputs on PC/Mobile.
 [2026-05-19] [EDITED] app/src/main/assets/gui/index.css: Scoped portrait media query search page header styles to only apply when not hidden, preventing empty state results display on mobile.
+[2026-05-19] [ADDED] package.json: Created package.json in root for Electron runtime configuration and devDependencies.
+[2026-05-19] [ADDED] preload.js: Created preload.js in root to securely expose IPC methods to the renderer process.
+[2026-05-19] [ADDED] main.js: Created main.js in root to initialize Electron and handle IPC events for yt-dlp.
+[2026-05-19] [EDITED] app/src/main/assets/logic/config.js: Added isElectron and isWeb flags to detect runtime environments.
+[2026-05-19] [ADDED] app/src/main/assets/logic/indexeddb-storage.js: Created IndexedDB manager to enable binary audio caching on static Web builds (GitHub Pages).
+[2026-05-19] [EDITED] app/src/main/assets/logic/api.js: Refactored getSavedTracks and added playTrack, saveTrack, and deleteTrack functions to support Android, Electron, and static Web dynamically.
+[2026-05-19] [EDITED] app/src/main/assets/logic/player.js: Refactored play and save handlers to use the new dynamic wrappers from MusicAPI.
+[2026-05-19] [EDITED] app/build.gradle.kts: Configured mobile and tv product flavors and excluded web UI/logic assets from the mobile variant.
+
+
+
+
+
+

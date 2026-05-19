@@ -1,0 +1,28 @@
+{
+  "name": "ividsmusic",
+  "version": "0.1.6",
+  "description": "IVIDS Music Standalone Desktop App",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "author": "Kenji Games",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^30.0.0",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.kenjigames.ividsmusic",
+    "win": {
+      "target": "portable",
+      "icon": "app/src/main/ic_launcher-playstore.png"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "app/src/main/assets/**/*"
+    ]
+  }
+}

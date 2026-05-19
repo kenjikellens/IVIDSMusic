@@ -1,4 +1,5 @@
 import { Config } from './config.js';
+import { IndexedDBStorage } from './indexeddb-storage.js';
 
 /**
  * MusicAPI - Powered by Deezer (via Proxy) and iTunes
@@ -434,10 +435,12 @@ export const MusicAPI = {
 
     /**
      * Gets a list of user's saved tracks.
+     *
+     * @param {AbortSignal} [signal=null] - An optional signal to abort the fetch request.
      * @returns {Promise<Array>} List of track objects {filename, artist, title, url}
      */
     async getSavedTracks(signal = null) {
-        if (window.AndroidAPI) {
+        if (Config.isNative) {
             try {
                 // Native Android Mode
                 const jsonStr = window.AndroidAPI.getSavedTracks();
@@ -446,18 +449,134 @@ export const MusicAPI = {
                 console.error('[API] Native getSavedTracks error:', error);
                 return [];
             }
+        } else if (Config.isElectron) {
+            try {
+                return await window.ElectronAPI.getSavedTracks();
+            } catch (error) {
+                console.error('[API] Electron getSavedTracks error:', error);
+                return [];
+            }
         } else {
             // Web / Node.js Mode
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                try {
+                    const response = await fetch(`${Config.SERVER_URL}/api/saved`, { signal });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    return await response.json();
+                } catch (error) {
+                    console.warn('[API] Local Node getSavedTracks failed, falling back to IndexedDB:', error);
+                }
+            }
             try {
-                const response = await fetch(`${Config.SERVER_URL}/api/saved`, { signal });
-                if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                return await response.json();
+                return await IndexedDBStorage.getSavedTracks();
             } catch (error) {
-                console.error('[API] Web getSavedTracks error:', error);
+                console.error('[API] IndexedDB getSavedTracks error:', error);
                 return [];
             }
         }
     },
+
+    /**
+     * Resolves the YouTube video playback streaming URL.
+     *
+     * @param {string} videoId - The YouTube Video ID.
+     * @param {string} artist - Artist name.
+     * @param {string} title - Song title.
+     * @returns {Promise<Object>} Object containing status and resolved stream URL.
+     */
+    async playTrack(videoId, artist, title) {
+        if (Config.isElectron) {
+            return await window.ElectronAPI.playTrack(videoId);
+        }
+        if (Config.isNative) {
+            const params = new URLSearchParams({ videoId, artist, title });
+            const response = await this._fetch(`${Config.SERVER_URL}/play?${params.toString()}`);
+            return await response.json();
+        }
+        // Local Node server fallback
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            try {
+                const params = new URLSearchParams({ videoId, artist, title });
+                const response = await fetch(`${Config.SERVER_URL}/play?${params.toString()}`);
+                if (response.ok) return await response.json();
+            } catch (e) {
+                console.warn('[API] Local Node play server unavailable, falling back to client-side stream resolution.');
+            }
+        }
+
+        // Static Web / GitHub Pages mode: Query Invidious API directly from the browser
+        for (const instance of this.invidiousInstances) {
+            try {
+                const url = `${instance}/api/v1/videos/${videoId}`;
+                const finalUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+                const response = await fetch(finalUrl);
+                if (!response.ok) continue;
+                const json = await response.json();
+                const streams = json.adaptiveFormats;
+                if (streams) {
+                    const audioStream = streams.find(s => s.type && s.type.includes('audio/'));
+                    if (audioStream && audioStream.url) {
+                        return { status: 'ready', url: audioStream.url };
+                    }
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+        return { status: 'error', message: 'No working stream found on Invidious' };
+    },
+
+    /**
+     * Downloads and saves a track locally.
+     *
+     * @param {string} videoId - The YouTube Video ID.
+     * @param {string} artist - Artist name.
+     * @param {string} title - Song title.
+     * @param {string} audioUrl - Currently playing resolved audio URL (required for IndexedDB).
+     * @returns {Promise<Object>} Status of the save operation.
+     */
+    async saveTrack(videoId, artist, title, audioUrl) {
+        if (Config.isElectron) {
+            return await window.ElectronAPI.saveTrack(videoId, artist, title);
+        }
+        if (Config.isNative) {
+            const params = new URLSearchParams({ videoId, artist, title });
+            const response = await this._fetch(`${Config.SERVER_URL}/save?${params.toString()}`);
+            return await response.json();
+        }
+        // Local Node server fallback
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            try {
+                const params = new URLSearchParams({ videoId, artist, title });
+                const response = await fetch(`${Config.SERVER_URL}/save?${params.toString()}`);
+                if (response.ok) return await response.json();
+            } catch (e) {
+                console.warn('[API] Local Node save server unavailable, falling back to IndexedDB.');
+            }
+        }
+
+        // Static Web / GitHub Pages mode: Download stream and save to IndexedDB
+        return await IndexedDBStorage.saveTrack(videoId, artist, title, audioUrl);
+    },
+
+    /**
+     * Deletes a saved track from storage.
+     *
+     * @param {string} filename - The name of the file to delete.
+     * @returns {Promise<Object>} Status of the deletion.
+     */
+    async deleteTrack(filename) {
+        if (Config.isElectron) {
+            return await window.ElectronAPI.deleteTrack(filename);
+        }
+        if (Config.isNative) {
+            console.warn('[API] Delete track is not implemented on Android Native WebView yet.');
+            return { status: 'error', message: 'Not supported on Android' };
+        }
+        // Static Web / GitHub Pages mode
+        return await IndexedDBStorage.deleteTrack(filename);
+    },
+
 
     /**
      * Gets rich metadata for a single track by Deezer ID.
