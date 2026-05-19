@@ -38,8 +38,9 @@ export const MusicAPI = {
             }
         } else {
             // In web mode, route external requests (like Deezer APIs) through public corsproxy.
+            // In Electron, direct calls are allowed because we disabled webSecurity.
             // Ignore requests that are already destined for our local Node backend (:3000).
-            if (isExternal && !url.includes(':3000')) {
+            if (isExternal && !url.includes(':3000') && !Config.isElectron) {
                 finalUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
             }
         }
@@ -486,7 +487,15 @@ export const MusicAPI = {
      */
     async playTrack(videoId, artist, title) {
         if (Config.isElectron) {
-            return await window.ElectronAPI.playTrack(videoId);
+            try {
+                const data = await window.ElectronAPI.playTrack(videoId);
+                if (data && data.status === 'ready' && data.url) {
+                    return data;
+                }
+                console.warn('[API] Electron yt-dlp resolution failed, falling back to client-side Invidious stream...', data);
+            } catch (err) {
+                console.warn('[API] Electron yt-dlp resolver error, falling back to client-side Invidious stream...', err);
+            }
         }
         if (Config.isNative) {
             const params = new URLSearchParams({ videoId, artist, title });
@@ -494,7 +503,7 @@ export const MusicAPI = {
             return await response.json();
         }
         // Local Node server fallback
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        if (!Config.isElectron && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
             try {
                 const params = new URLSearchParams({ videoId, artist, title });
                 const response = await fetch(`${Config.SERVER_URL}/play?${params.toString()}`);
@@ -504,11 +513,11 @@ export const MusicAPI = {
             }
         }
 
-        // Static Web / GitHub Pages mode: Query Invidious API directly from the browser
+        // Static Web / GitHub Pages / Electron fallback mode: Query Invidious API directly
         for (const instance of this.invidiousInstances) {
             try {
                 const url = `${instance}/api/v1/videos/${videoId}`;
-                const finalUrl = `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
+                const finalUrl = Config.isElectron ? url : `https://corsproxy.io/?url=${encodeURIComponent(url)}`;
                 const response = await fetch(finalUrl);
                 if (!response.ok) continue;
                 const json = await response.json();

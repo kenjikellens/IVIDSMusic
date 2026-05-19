@@ -36,7 +36,7 @@ def main():
     if not os.path.exists(node_modules_dir):
         print("\nnode_modules not found. Installing Electron dependencies via npm...")
         try:
-            subprocess.run(['npm', 'install'], check=True, shell=True)
+            subprocess.run(['cmd', '/c', 'npm install'], check=True)
             print("\x1b[32m✔ Dependencies successfully installed.\x1b[0m")
         except subprocess.CalledProcessError as e:
             print(f"\n[Error] npm install failed: {e}")
@@ -46,7 +46,7 @@ def main():
     # Run the Electron desktop shell
     print("\nLaunching IVIDS Music Desktop Application...")
     try:
-        subprocess.run(['npm', 'start'], check=True, shell=True)
+        subprocess.run(['cmd', '/c', 'npm start'], check=True)
         print("\nDesktop application closed.")
     except subprocess.CalledProcessError as e:
         print(f"\n[Error] Failed to start Electron: {e}")
