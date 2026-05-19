@@ -1,137 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 
+    Mobile activity layout: fullscreen WebView wrapper.
+    Mirrors the TV flavor's activity_main.xml structure. The responsive CSS stylesheet
+    automatically renders a bottom navigation bar with all 6 tabs when the device is in
+    portrait orientation, achieving perfect UI parity with the PC/TV web client.
+-->
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0A0A0A"
+    android:background="@color/dark_background"
     tools:context=".MainActivity">
 
-    <!-- Fragment container for screen swapping -->
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/fragment_container"
-        android:name="androidx.navigation.fragment.NavHostFragment"
+    <!-- Main WebView that loads the shared HTML/CSS/JS frontend from assets -->
+    <WebView
+        android:id="@+id/webView"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/bottom_player_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Sticky Bottom Player Bar -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottom_player_bar"
-        android:layout_width="0dp"
-        android:layout_height="64dp"
-        android:background="#121212"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible">
-
-        <!-- Progress Mini-Bar at top of bottom player -->
-        <ProgressBar
-            android:id="@+id/player_progress"
-            style="@android:style/Widget.ProgressBar.Horizontal"
-            android:layout_width="0dp"
-            android:layout_height="2dp"
-            android:progressDrawable="@android:drawable/progress_horizontal"
-            android:progressTint="#00FF66"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <!-- Thumbnail Cover -->
-        <ImageView
-            android:id="@+id/player_cover"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="8dp"
-            android:contentDescription="@string/app_name"
-            android:scaleType="centerCrop"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/player_progress"
-            tools:src="@android:drawable/ic_menu_report_image" />
-
-        <!-- Track details -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
-            android:layout_marginEnd="12dp"
-            android:orientation="vertical"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_play_pause"
-            app:layout_constraintStart_toEndOf="@id/player_cover"
-            app:layout_constraintTop_toBottomOf="@id/player_progress">
-
-            <TextView
-                android:id="@+id/player_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="#FFFFFF"
-                android:textSize="14sp"
-                android:textStyle="bold"
-                tools:text="Song Title" />
-
-            <TextView
-                android:id="@+id/player_artist"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:textColor="#AAAAAA"
-                android:textSize="12sp"
-                tools:text="Artist Name" />
-        </LinearLayout>
-
-        <!-- Play/Pause Toggle button -->
-        <ImageButton
-            android:id="@+id/btn_play_pause"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/app_name"
-            android:src="@android:drawable/ic_media_play"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/btn_next"
-            app:layout_constraintTop_toBottomOf="@id/player_progress"
-            app:tint="#FFFFFF" />
-
-        <!-- Next button -->
-        <ImageButton
-            android:id="@+id/btn_next"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginEnd="8dp"
-            android:background="?android:attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/app_name"
-            android:src="@android:drawable/ic_media_next"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/player_progress"
-            app:tint="#FFFFFF" />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Bottom Navigation Bar -->
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_navigation"
-        android:layout_width="0dp"
-        android:layout_height="56dp"
-        android:background="#0A0A0A"
-        app:itemIconTint="@color/bottom_nav_colors"
-        app:itemTextColor="@color/bottom_nav_colors"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/bottom_nav_menu"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
 
 </androidx.constraintlayout.widget.ConstraintLayout>
