@@ -49,11 +49,21 @@ def main():
         input("\nPress Enter to exit...")
         sys.exit(1)
 
-    print("\nBuilding and installing mobile build variant (:app:installMobileDebug)...")
+    # Determine gradle task based on device presence
+    if devices_status:
+        task = 'installMobileDebug'
+        action_name = "Building and installing mobile build variant (:app:installMobileDebug)..."
+        success_msg = "\n\x1b[32m✔ Native Phone App successfully installed on your device!\x1b[0m"
+    else:
+        task = 'assembleMobileDebug'
+        action_name = "Building Native Phone APK (:app:assembleMobileDebug)..."
+        success_msg = "\n\x1b[32m✔ Native Phone APK successfully compiled!\nOutput location: app/build/outputs/apk/mobile/debug/app-mobile-debug.apk\x1b[0m"
+
+    print(f"\n{action_name}")
     try:
-        # Run gradle install task
-        subprocess.run([gradlew_path, 'installMobileDebug'], check=True)
-        print("\n\x1b[32m✔ Native Phone App successfully installed on your device!\x1b[0m")
+        # Run gradle task
+        subprocess.run([gradlew_path, task], check=True)
+        print(success_msg)
         input("\nPress Enter to close...")
     except subprocess.CalledProcessError as e:
         print(f"\n[Error] Gradle build failed: {e}")

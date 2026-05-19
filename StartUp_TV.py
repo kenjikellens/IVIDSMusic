@@ -49,11 +49,21 @@ def main():
         input("\nPress Enter to exit...")
         sys.exit(1)
 
-    print("\nBuilding and installing Android TV build variant (:app:installTvDebug)...")
+    # Determine gradle task based on device presence
+    if devices_status:
+        task = 'installTvDebug'
+        action_name = "Building and installing Android TV build variant (:app:installTvDebug)..."
+        success_msg = "\n\x1b[32m✔ Android TV App successfully installed on your device!\x1b[0m"
+    else:
+        task = 'assembleTvDebug'
+        action_name = "Building Android TV APK (:app:assembleTvDebug)..."
+        success_msg = "\n\x1b[32m✔ Android TV APK successfully compiled!\nOutput location: app/build/outputs/apk/tv/debug/app-tv-debug.apk\x1b[0m"
+
+    print(f"\n{action_name}")
     try:
-        # Run gradle install task
-        subprocess.run([gradlew_path, 'installTvDebug'], check=True)
-        print("\n\x1b[32m✔ Android TV App successfully installed on your device!\x1b[0m")
+        # Run gradle task
+        subprocess.run([gradlew_path, task], check=True)
+        print(success_msg)
         input("\nPress Enter to close...")
     except subprocess.CalledProcessError as e:
         print(f"\n[Error] Gradle build failed: {e}")
