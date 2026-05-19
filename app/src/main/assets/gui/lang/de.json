@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "Startseite",
   "search": "Suchen",
   "library": "Deine Bibliothek",
@@ -100,5 +100,10 @@
   "results_for": "Ergebnisse für",
   "searching_youtube": "YouTube wird durchsucht...",
   "downloading_mp3": "MP3 wird heruntergeladen...",
-  "error": "Fehler"
+  "error": "Fehler",
+  "now_playing": "Aktuelle Wiedergabe",
+  "queue": "Warteschlange",
+  "clear_queue": "Warteschlange leeren",
+  "next_up": "Als Nächstes",
+  "queue_empty": "Warteschlange ist leer"
 }

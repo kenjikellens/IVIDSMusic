@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "Główna",
   "search": "Szukaj",
   "library": "Biblioteka",
@@ -107,5 +107,10 @@
   "results_for": "Wyniki dla",
   "searching_youtube": "Wyszukiwanie w YouTube...",
   "downloading_mp3": "Pobieranie MP3...",
-  "error": "Błąd"
+  "error": "Błąd",
+  "now_playing": "Teraz odtwarzane",
+  "queue": "Kolejka",
+  "clear_queue": "Wyczyść kolejkę",
+  "next_up": "Następny",
+  "queue_empty": "Kolejka jest pusta"
 }

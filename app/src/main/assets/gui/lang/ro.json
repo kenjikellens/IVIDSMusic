@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "Acasă",
   "search": "Căutare",
   "library": "Biblioteca ta",
@@ -100,5 +100,10 @@
   "results_for": "Rezultate pentru",
   "searching_youtube": "Se caută pe YouTube...",
   "downloading_mp3": "Se descarcă MP3...",
-  "error": "Eroare"
+  "error": "Eroare",
+  "now_playing": "Redate acum",
+  "queue": "Coadă",
+  "clear_queue": "Golește coada",
+  "next_up": "Urmează",
+  "queue_empty": "Coada este goală"
 }

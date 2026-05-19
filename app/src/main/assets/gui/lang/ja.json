@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "ホーム",
   "search": "検索",
   "library": "ライブラリ",
@@ -100,5 +100,10 @@
   "results_for": "の検索結果",
   "searching_youtube": "YouTubeで検索中...",
   "downloading_mp3": "MP3をダウンロード中...",
-  "error": "エラー"
+  "error": "エラー",
+  "now_playing": "現在再生中",
+  "queue": "キュー",
+  "clear_queue": "キューをクリア",
+  "next_up": "次に再生",
+  "queue_empty": "キューは空です"
 }

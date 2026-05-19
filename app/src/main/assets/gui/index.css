@@ -1132,31 +1132,53 @@ header {
     font-variant-numeric: tabular-nums;
 }
 
-/* Custom Slider Styling */
+/* Styles the custom range input slider track with a dynamic highlighted fill */
 .ivids-slider {
     -webkit-appearance: none;
     appearance: none;
     width: 100%;
     height: calc(4px * var(--ui-scale));
-    background: rgba(255, 255, 255, 0.1);
+    background: linear-gradient(to right, var(--primary-color) var(--slider-val, 0%), rgba(255, 255, 255, 0.15) var(--slider-val, 0%));
     border-radius: 2px;
     outline: none;
     cursor: pointer;
 }
 
+/* Styles the custom slider thumb for Webkit browsers */
 .ivids-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: calc(12px * var(--ui-scale));
     height: calc(12px * var(--ui-scale));
-    background: var(--primary-color);
+    background: #ffffff;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 10px rgba(var(--primary-rgb), 0.4);
-    transition: transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--primary-color);
+    transition: border-width 0.2s ease, box-shadow 0.2s ease;
 }
 
+/* Styles the custom range slider thumb for Mozilla Firefox */
+.ivids-slider::-moz-range-thumb {
+    width: calc(12px * var(--ui-scale));
+    height: calc(12px * var(--ui-scale));
+    background: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--primary-color);
+    transition: border-width 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Styles the slider thumb hover state for Webkit to enhance interactive visual feedback */
 .ivids-slider:hover::-webkit-slider-thumb {
-    box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.6);
+    border-width: 3px;
+    box-shadow: 0 0 calc(8px * var(--ui-scale)) rgba(var(--primary-rgb), 0.8);
+}
+
+/* Styles the slider thumb hover state for Firefox to enhance interactive visual feedback */
+.ivids-slider:hover::-moz-range-thumb {
+    border-width: 3px;
+    box-shadow: 0 0 calc(8px * var(--ui-scale)) rgba(var(--primary-rgb), 0.8);
 }
 
 #player-bar::before {
@@ -5502,4 +5524,586 @@ svg.btn-icon {
     font-size: calc(0.88rem * var(--ui-scale));
     font-weight: 700;
 }
+
+/* Styles the right-side control container inside the player bar containing queue and volume toggles */
+.player-right-controls {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: calc(12px * var(--ui-scale));
+}
+
+/* Styles the ambient backdrop container to display dynamically colored organic light gradients */
+#ambient-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -2;
+    overflow: hidden;
+    pointer-events: none;
+    background-color: #050505;
+}
+
+/* Styles a flowing, high-blur glowing color blob in the ambient backdrop */
+.ambient-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(160px);
+    opacity: 0.18;
+    mix-blend-mode: screen;
+    animation: ambient-flow 25s infinite alternate ease-in-out;
+}
+
+/* Styles the first ambient blob positioned in the upper-left area */
+.blob-1 {
+    top: -10%;
+    left: -10%;
+    width: 60vw;
+    height: 60vw;
+    background: radial-gradient(circle, var(--ambient-color-1, var(--primary-color)) 0%, transparent 80%);
+}
+
+/* Styles the second ambient blob positioned in the bottom-right area */
+.blob-2 {
+    bottom: -15%;
+    right: -10%;
+    width: 65vw;
+    height: 65vw;
+    background: radial-gradient(circle, var(--ambient-color-2, var(--accent-color)) 0%, transparent 80%);
+}
+
+/* Styles the third ambient blob positioned dynamically in the center area */
+.blob-3 {
+    top: 30%;
+    left: 30%;
+    width: 50vw;
+    height: 50vw;
+    background: radial-gradient(circle, rgba(var(--primary-rgb), 0.35) 0%, transparent 80%);
+    animation-duration: 35s;
+}
+
+/* Styles the sliding queue drawer panel which presents playing and upcoming tracks */
+.queue-drawer {
+    position: absolute;
+    top: var(--header-height);
+    right: -360px; /* Hidden by default offscreen */
+    width: 350px;
+    height: calc(100% - var(--header-height) - var(--player-height));
+    background: rgba(18, 18, 18, 0.85);
+    backdrop-filter: blur(30px) saturate(1.7);
+    -webkit-backdrop-filter: blur(30px) saturate(1.7);
+    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+/* Styles the sliding queue drawer when it is toggled to the open state */
+.queue-drawer.is-active {
+    right: 0;
+}
+
+/* Styles the header section inside the queue drawer containing the title and controls */
+.queue-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(16px * var(--ui-scale)) calc(20px * var(--ui-scale));
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Styles the title text of the queue drawer header */
+.queue-header h3 {
+    font-size: calc(1.1rem * var(--ui-scale));
+    font-weight: 700;
+    color: var(--text-main);
+}
+
+/* Styles the clear queue button in the drawer header */
+.clear-queue-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    font-size: calc(0.75rem * var(--ui-scale));
+    padding: calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale));
+    border-radius: calc(4px * var(--ui-scale));
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Styles the clear queue button hover state */
+.clear-queue-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: var(--text-main);
+}
+
+/* Styles the clear queue button when disabled */
+.clear-queue-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Styles the close button to dismiss the queue drawer */
+.close-queue-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: calc(1.5rem * var(--ui-scale));
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.2s ease;
+}
+
+/* Styles the close queue button hover state */
+.close-queue-btn:hover {
+    color: var(--text-main);
+}
+
+/* Styles the scrollable content container holding the lists of tracks */
+.queue-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: calc(20px * var(--ui-scale));
+}
+
+/* Styles a section inside the queue content dividing playing and upcoming categories */
+.queue-section {
+    margin-bottom: calc(24px * var(--ui-scale));
+}
+
+/* Styles the category heading label inside each queue section */
+.queue-section h4 {
+    font-size: calc(0.8rem * var(--ui-scale));
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: calc(12px * var(--ui-scale));
+}
+
+/* Styles the list block wrapper for track row items */
+.queue-track-list {
+    display: flex;
+    flex-direction: column;
+    gap: calc(8px * var(--ui-scale));
+}
+
+/* Styles a single track row card inside the queue lists */
+.queue-track-card {
+    display: flex;
+    align-items: center;
+    padding: calc(8px * var(--ui-scale));
+    border-radius: calc(6px * var(--ui-scale));
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+/* Styles the hover state of a track row card inside the queue */
+.queue-track-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+}
+
+/* Styles the active currently-playing track row card inside the queue list */
+.queue-track-card.active {
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: rgba(var(--primary-rgb), 0.25);
+}
+
+/* Styles the small album artwork cover thumbnail in a queue track card */
+.queue-track-cover {
+    width: calc(40px * var(--ui-scale));
+    height: calc(40px * var(--ui-scale));
+    border-radius: calc(4px * var(--ui-scale));
+    margin-right: calc(12px * var(--ui-scale));
+    object-fit: cover;
+}
+
+/* Styles the metadata details container in a queue track card */
+.queue-track-info {
+    flex: 1;
+    min-width: 0;
+}
+
+/* Styles the song title text in a queue track card */
+.queue-track-title {
+    font-size: calc(0.85rem * var(--ui-scale));
+    font-weight: 500;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Styles the artist name text in a queue track card */
+.queue-track-artist {
+    font-size: calc(0.75rem * var(--ui-scale));
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: calc(2px * var(--ui-scale));
+}
+
+/* Styles the delete track action button on hover inside a queue track card */
+.queue-track-remove {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: calc(1.1rem * var(--ui-scale));
+    cursor: pointer;
+    padding: calc(6px * var(--ui-scale));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s ease, background 0.2s ease;
+    margin-left: calc(8px * var(--ui-scale));
+}
+
+/* Styles the hover state of the delete track button inside a queue track card */
+.queue-track-remove:hover {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+}
+
+@keyframes ambient-flow {
+    0% {
+        opacity: 0.15;
+    }
+    100% {
+        opacity: 0.25;
+    }
+}
+
+/* Styles the page title in the header area, hidden by default on desktop layouts */
+.header-page-title {
+    display: none;
+}
+
+@media (orientation: portrait) {
+    /* Styles the queue drawer in mobile portrait mode to fill the viewport width */
+    .queue-drawer {
+        width: 100%;
+        right: -100%;
+        top: 0;
+        height: calc(100% - var(--bottom-nav-height) - var(--player-height));
+    }
+    
+    /* Styles the active queue drawer in portrait mode to slide into full view */
+    .queue-drawer.is-active {
+        right: 0;
+    }
+
+    /* Styles the header page title for mobile portrait viewports */
+    .header-page-title {
+        display: block;
+        font-size: calc(1.3rem * var(--ui-scale));
+        font-weight: 800;
+        color: var(--text-main);
+        letter-spacing: -0.02em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        flex: 1;
+        text-align: left;
+    }
+
+    /* Styles the header search container on mobile, hiding it on non-search pages */
+    body:not([data-current-page="search"]) .search-container {
+        display: none !important;
+    }
+
+    /* Styles the header page title on mobile, hiding it when on the search page */
+    body[data-current-page="search"] .header-page-title {
+        display: none !important;
+    }
+    
+    /* Styles bottom navigation anchor elements to display labels under icons */
+    .nav-links a {
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: calc(4px * var(--ui-scale)) !important;
+        padding: 6px 4px !important;
+        margin: 0 !important;
+        font-size: 9px !important;
+        font-weight: 500 !important;
+        color: var(--text-secondary) !important;
+        border-radius: 8px !important;
+        text-align: center !important;
+        width: 100% !important;
+        transition: background 0.2s ease, color 0.2s ease !important;
+        position: relative !important;
+    }
+
+    /* Styles the span labels inside bottom navigation links to remain visible */
+    .nav-links a span {
+        display: block !important;
+        font-size: 9px !important;
+        opacity: 0.8 !important;
+    }
+
+    /* Styles active state for bottom navigation links */
+    .nav-links a.active {
+        color: var(--primary-color) !important;
+        background: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    /* Styles labels inside active bottom navigation links */
+    .nav-links a.active span {
+        opacity: 1 !important;
+        color: var(--primary-color) !important;
+    }
+
+    /* Styles the active dot indicator for the selected bottom navigation link */
+    .nav-links a.active::after {
+        content: '' !important;
+        position: absolute !important;
+        bottom: 2px !important;
+        left: 0 !important;
+        right: 0 !important;
+        margin: 0 auto !important;
+        width: 4px !important;
+        height: 4px !important;
+        border-radius: 50% !important;
+        background-color: var(--primary-color) !important;
+        box-shadow: 0 0 6px var(--primary-color) !important;
+    }
+
+    /* Styles the player bar as a single-row flex container on mobile portrait */
+    #player-bar {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: calc(12px * var(--ui-scale)) !important;
+        padding: 0 calc(12px * var(--ui-scale)) !important;
+        margin: 0 calc(8px * var(--ui-scale)) calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 8px) calc(8px * var(--ui-scale)) !important;
+        border-radius: calc(12px * var(--ui-scale)) !important;
+        height: calc(64px * var(--ui-scale)) !important;
+        min-height: calc(64px * var(--ui-scale)) !important;
+        background: rgba(15, 15, 15, 0.85) !important;
+        backdrop-filter: blur(30px) saturate(1.8) !important;
+        -webkit-backdrop-filter: blur(30px) saturate(1.8) !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        z-index: 250 !important;
+        overflow: visible !important;
+    }
+
+    /* Styles inactive player bar behavior in mobile portrait layout */
+    #player-bar.is-inactive {
+        display: none !important;
+    }
+
+    /* Styles player track metadata container in mobile portrait layout */
+    .player-info {
+        display: flex !important;
+        align-items: center !important;
+        gap: calc(8px * var(--ui-scale)) !important;
+        flex: 1 !important;
+        min-width: 0 !important;
+    }
+
+    /* Styles the small album artwork cover thumbnail in mobile portrait layout */
+    .player-cover {
+        width: calc(44px * var(--ui-scale)) !important;
+        height: calc(44px * var(--ui-scale)) !important;
+        border-radius: calc(8px * var(--ui-scale)) !important;
+    }
+
+    /* Styles player track details text wrapper in mobile portrait layout */
+    .player-track-details {
+        flex: 1 !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+    }
+
+    /* Styles the dynamic status indicators inside player track details */
+    #player-status-container {
+        display: none !important;
+    }
+
+    /* Styles download, like, dislike, and info buttons in mobile player bar */
+    #save-track-btn, #like-track-btn, #dislike-track-btn, #more-info-btn {
+        display: none !important;
+    }
+
+    /* Styles player controls to lay out elements in a single line next to info */
+    .player-controls {
+        width: auto !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: calc(12px * var(--ui-scale)) !important;
+        margin: 0 !important;
+    }
+
+    /* Styles play controls buttons row in mobile portrait layout */
+    .player-main-controls {
+        display: flex !important;
+        align-items: center !important;
+        gap: calc(12px * var(--ui-scale)) !important;
+    }
+
+    /* Styles play-pause main control button in mobile portrait layout */
+    .player-control-btn.main {
+        width: calc(36px * var(--ui-scale)) !important;
+        height: calc(36px * var(--ui-scale)) !important;
+        background: var(--primary-color) !important;
+        color: #000 !important;
+        border: none !important;
+    }
+
+    /* Styles play-pause main control icon inside the button */
+    .player-control-btn.main svg {
+        width: calc(16px * var(--ui-scale)) !important;
+        height: calc(16px * var(--ui-scale)) !important;
+    }
+
+    /* Styles secondary buttons (Next, Queue) in mobile portrait layout */
+    .player-control-btn.secondary {
+        width: calc(32px * var(--ui-scale)) !important;
+        height: calc(32px * var(--ui-scale)) !important;
+        background: transparent !important;
+        border: none !important;
+    }
+
+    /* Styles secondary button icons inside the button */
+    .player-control-btn.secondary svg,
+    .player-control-btn.secondary img {
+        width: calc(18px * var(--ui-scale)) !important;
+        height: calc(18px * var(--ui-scale)) !important;
+    }
+
+    /* Styles search and previous buttons to be hidden inside mobile player controls */
+    .player-main-controls button:first-child {
+        display: none !important;
+    }
+
+    /* Styles right volume and queue controls container in mobile portrait layout */
+    .player-right-controls {
+        display: flex !important;
+        align-items: center !important;
+        gap: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Styles seek progress slider wrapper positioned at the top of the player bar */
+    .player-progress {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        height: 3px !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Styles the time stamp labels to be hidden on mobile player progress line */
+    .player-progress .time-label {
+        display: none !important;
+    }
+
+    /* Styles seek slider range track to display as a thin edge-aligned bar */
+    #progress-slider {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: 3px !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background: rgba(255, 255, 255, 0.15) !important;
+        border: none !important;
+        pointer-events: auto !important;
+    }
+
+    /* Hides the slider thumb handle on WebKit engines */
+    #progress-slider::-webkit-slider-thumb {
+        display: none !important;
+        -webkit-appearance: none !important;
+        appearance: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* Hides the slider thumb handle on Firefox engines */
+    #progress-slider::-moz-range-thumb {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* Styles the hero wrapper content in song details page to align elements centrally */
+    .song-hero-content {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: calc(24px * var(--ui-scale)) !important;
+    }
+
+    /* Styles the cover art wrapper on the song details page on mobile */
+    .song-cover-wrapper {
+        width: calc(220px * var(--ui-scale)) !important;
+        height: calc(220px * var(--ui-scale)) !important;
+        margin: 0 auto !important;
+    }
+
+    /* Styles song details description container to align center */
+    .song-info {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+
+    /* Styles the main song title to wrap properly and prevent clipping */
+    .song-title {
+        font-size: calc(1.8rem * var(--ui-scale)) !important;
+        white-space: normal !important;
+        word-break: break-word !important;
+        text-align: center !important;
+        margin: calc(12px * var(--ui-scale)) 0 !important;
+    }
+
+    /* Styles sub-info badges such as artist, album name and release year */
+    .song-sub-info {
+        display: flex !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        gap: calc(6px * var(--ui-scale)) !important;
+        font-size: calc(0.9rem * var(--ui-scale)) !important;
+    }
+
+    /* Styles the song action button layout for clean presentation on mobile */
+    .song-actions {
+        display: flex !important;
+        justify-content: center !important;
+        flex-wrap: wrap !important;
+        width: 100% !important;
+        gap: calc(8px * var(--ui-scale)) !important;
+        margin-top: calc(20px * var(--ui-scale)) !important;
+    }
+
+    /* Styles standard action buttons inside full screen song view */
+    .song-actions .btn {
+        flex: 1 1 calc(45% - 8px) !important;
+        min-width: 120px !important;
+        justify-content: center !important;
+    }
+
+    /* Styles the hero container background section in the song details view */
+    .song-hero {
+        padding: calc(24px * var(--ui-scale)) !important;
+    }
+}
+
 

@@ -742,6 +742,8 @@ export const PageSystem = {
                 const countEl = document.getElementById('album-tracks-count');
 
                 if (titleEl) titleEl.textContent = album.title;
+                const headerTitleEl = document.getElementById('header-page-title');
+                if (headerTitleEl) headerTitleEl.textContent = album.title;
                 if (artistEl) {
                     artistEl.textContent = album.artist;
                     artistEl.onclick = () => window.Router.loadPage('artist', { name: album.artist });
@@ -1180,6 +1182,8 @@ export const PageSystem = {
         const heroBgEl = document.getElementById('playlist-hero-bg');
 
         if (nameEl) nameEl.textContent = playlist.name;
+        const headerTitleEl = document.getElementById('header-page-title');
+        if (headerTitleEl) headerTitleEl.textContent = playlist.name;
         if (descEl) descEl.textContent = playlist.description || '';
         if (countEl) countEl.textContent = `${playlist.tracks.length} ${playlist.tracks.length === 1 ? 'song' : 'songs'}`;
         if (coverEl) {

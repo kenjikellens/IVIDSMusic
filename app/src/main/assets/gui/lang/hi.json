@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "होम",
   "search": "खोजें",
   "library": "आपकी लाइब्रेरी",
@@ -100,5 +100,10 @@
   "results_for": "के लिए परिणाम",
   "searching_youtube": "YouTube पर खोजा जा रहा है...",
   "downloading_mp3": "MP3 डाउनलोड हो रहा है...",
-  "error": "त्रुटि"
+  "error": "त्रुटि",
+  "now_playing": "अभी चल रहा है",
+  "queue": "प्लेबैक कतार",
+  "clear_queue": "कतार साफ़ करें",
+  "next_up": "आगे",
+  "queue_empty": "कतार खाली है"
 }

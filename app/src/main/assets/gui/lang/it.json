@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "Home",
   "search": "Cerca",
   "library": "La Tua Libreria",
@@ -100,5 +100,10 @@
   "results_for": "Risultati per",
   "searching_youtube": "Ricerca su YouTube...",
   "downloading_mp3": "Download MP3...",
-  "error": "Errore"
+  "error": "Errore",
+  "now_playing": "In riproduzione",
+  "queue": "Coda",
+  "clear_queue": "Svuota coda",
+  "next_up": "Prossimo",
+  "queue_empty": "La coda è vuota"
 }

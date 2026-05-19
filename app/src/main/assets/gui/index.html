@@ -14,6 +14,13 @@
 </head>
 
 <body>
+    <!-- Ambient glowing light backdrop -->
+    <div id="ambient-backdrop">
+        <div class="ambient-blob blob-1"></div>
+        <div class="ambient-blob blob-2"></div>
+        <div class="ambient-blob blob-3"></div>
+    </div>
+
     <div id="app">
         <!-- Sidebar Navigation -->
         <aside id="sidebar-container">
@@ -74,6 +81,7 @@
         <!-- Content Area with Header -->
         <div class="content-wrapper">
             <header>
+                <div id="header-page-title" class="header-page-title"></div>
                 <div class="search-container">
                     <img class="search-icon" src="svg/search.svg" alt="">
                     <input type="text" placeholder="Artists, songs, albums..." id="header-search-input"
@@ -150,13 +158,41 @@
                         <span id="total-duration" class="time-label">0:00</span>
                     </div>
                 </div>
-                <!-- Right: Volume -->
-                <div class="player-volume">
-                    <img class="player-volume-icon" src="svg/volume.svg" alt="Volume" data-i18n="volume">
-                    <input type="range" id="volume-slider" class="ivids-slider player-volume-slider" value="100" min="0"
-                        max="100">
+                <!-- Right: Volume & Queue -->
+                <div class="player-right-controls">
+                    <button id="queue-toggle-btn" class="player-control-btn secondary" title="Queue" data-i18n-title="queue">
+                        <img src="svg/playlists.svg" alt="Queue" style="width: calc(20px * var(--ui-scale)); height: calc(20px * var(--ui-scale));">
+                    </button>
+                    <div class="player-volume">
+                        <img class="player-volume-icon" src="svg/volume.svg" alt="Volume" data-i18n="volume">
+                        <input type="range" id="volume-slider" class="ivids-slider player-volume-slider" value="100" min="0"
+                            max="100">
+                    </div>
                 </div>
             </footer>
+
+            <!-- Sliding Playback Queue Drawer -->
+            <div id="queue-drawer" class="queue-drawer">
+                <div class="queue-header">
+                    <h3 data-i18n="queue">Queue</h3>
+                    <button id="clear-queue-btn" class="clear-queue-btn btn-secondary" onclick="YouTubePlayer.clearQueue()" data-i18n="clear_queue" disabled>Clear Queue</button>
+                    <button id="close-queue-btn" class="close-queue-btn">&times;</button>
+                </div>
+                <div class="queue-content">
+                    <div class="queue-section">
+                        <h4 data-i18n="now_playing">Now Playing</h4>
+                        <div id="queue-now-playing" class="queue-track-list">
+                            <!-- Currently playing track will be rendered here -->
+                        </div>
+                    </div>
+                    <div class="queue-section">
+                        <h4 data-i18n="next_up">Next Up</h4>
+                        <div id="queue-upcoming" class="queue-track-list">
+                            <!-- Upcoming tracks in queue will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 

@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "Home",
   "search": "Search",
   "library": "Your Library",
@@ -107,5 +107,10 @@
   "results_for": "Results for",
   "searching_youtube": "Searching YouTube...",
   "downloading_mp3": "Downloading MP3...",
-  "error": "Error"
+  "error": "Error",
+  "now_playing": "Now Playing",
+  "queue": "Queue",
+  "clear_queue": "Clear Queue",
+  "next_up": "Next Up",
+  "queue_empty": "Queue is empty"
 }

@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "Ana Sayfa",
   "search": "Ara",
   "library": "Kitaplığınız",
@@ -107,5 +107,10 @@
   "results_for": "İçin sonuçlar",
   "searching_youtube": "YouTube'da aranıyor...",
   "downloading_mp3": "MP3 indiriliyor...",
-  "error": "Hata"
+  "error": "Hata",
+  "now_playing": "Şimdi Çalıyor",
+  "queue": "Kuyruk",
+  "clear_queue": "Kuyruğu Temizle",
+  "next_up": "Sıradaki",
+  "queue_empty": "Kuyruk boş"
 }

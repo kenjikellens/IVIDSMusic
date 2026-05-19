@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "Главная",
   "search": "Поиск",
   "library": "Медиатека",
@@ -100,5 +100,10 @@
   "results_for": "Результаты по запросу",
   "searching_youtube": "Поиск на YouTube...",
   "downloading_mp3": "Загрузка MP3...",
-  "error": "Ошибка"
+  "error": "Ошибка",
+  "now_playing": "Сейчас играет",
+  "queue": "Очередь",
+  "clear_queue": "Очистить очередь",
+  "next_up": "Далее",
+  "queue_empty": "Очередь пуста"
 }

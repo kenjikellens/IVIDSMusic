@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "Startpagina",
   "search": "Zoeken",
   "library": "Je bibliotheek",
@@ -107,5 +107,10 @@
   "results_for": "Resultaten voor",
   "searching_youtube": "Zoeken op YouTube...",
   "downloading_mp3": "MP3 downloaden...",
-  "error": "Fout"
+  "error": "Fout",
+  "now_playing": "Nu aan het afspelen",
+  "queue": "Wachtrij",
+  "clear_queue": "Wachtrij Wissen",
+  "next_up": "Hierna",
+  "queue_empty": "Wachtrij is leeg"
 }

@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "الرئيسية",
   "search": "بحث",
   "library": "مكتبتك",
@@ -100,5 +100,10 @@
   "results_for": "نتائج لـ",
   "searching_youtube": "جاري البحث في YouTube...",
   "downloading_mp3": "جاري تحميل MP3...",
-  "error": "خطأ"
+  "error": "خطأ",
+  "now_playing": "يجري تشغيله الآن",
+  "queue": "قائمة الانتظار",
+  "clear_queue": "مسح قائمة الانتظار",
+  "next_up": "التالي",
+  "queue_empty": "قائمة الانتظار فارغة"
 }

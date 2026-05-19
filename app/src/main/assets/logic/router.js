@@ -3,6 +3,12 @@ export const Router = {
     currentParams: null,
     abortController: null,
 
+    /**
+     * Dynamically loads a specified page into the main view, handles query/history attributes,
+     * updates active sidebar/navigation elements, and dynamically manages localized header titles.
+     * @param {string} pageName The name of the page layout file to retrieve.
+     * @param {Object} [params=null] Optional routing parameters containing page-specific state.
+     */
     async loadPage(pageName, params = null) {
         // Allow re-loading the same page if parameters changed
         if (this.currentPage === pageName && JSON.stringify(this.currentParams) === JSON.stringify(params)) {
@@ -52,6 +58,28 @@ export const Router = {
             // Apply translations to the new content
             if (window.LanguageManager) {
                 window.LanguageManager.translateUI(mainView);
+            }
+
+            // Update header title dynamically
+            const headerTitleEl = document.getElementById('header-page-title');
+            if (headerTitleEl) {
+                const pageTitleKeys = {
+                    'home': 'home',
+                    'recommended': 'nav_foryou',
+                    'search': 'search',
+                    'library': 'library',
+                    'profile': 'you',
+                    'settings': 'settings',
+                    'song': 'song'
+                };
+                const key = pageTitleKeys[pageName];
+                if (key && window.LanguageManager && window.LanguageManager.translations[key]) {
+                    headerTitleEl.textContent = window.LanguageManager.translations[key];
+                } else if (params && (params.name || params.title)) {
+                    headerTitleEl.textContent = params.name || params.title;
+                } else {
+                    headerTitleEl.textContent = pageName.charAt(0).toUpperCase() + pageName.slice(1);
+                }
             }
 
             // Clean up old dynamic scripts

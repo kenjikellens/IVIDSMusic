@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "首页",
   "search": "搜索",
   "library": "媒体库",
@@ -100,5 +100,10 @@
   "results_for": "搜索结果",
   "searching_youtube": "正在搜索 YouTube...",
   "downloading_mp3": "正在下载 MP3...",
-  "error": "错误"
+  "error": "错误",
+  "now_playing": "正在播放",
+  "queue": "播放队列",
+  "clear_queue": "清空队列",
+  "next_up": "即将播放",
+  "queue_empty": "播放队列为空"
 }

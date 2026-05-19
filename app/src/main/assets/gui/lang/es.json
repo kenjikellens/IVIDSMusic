@@ -1,4 +1,4 @@
-﻿{
+{
   "home": "Inicio",
   "search": "Buscar",
   "library": "Tu Biblioteca",
@@ -94,5 +94,10 @@
   "results_for": "Resultados para",
   "searching_youtube": "Buscando en YouTube...",
   "downloading_mp3": "Descargando MP3...",
-  "error": "Error"
+  "error": "Error",
+  "now_playing": "Reproduciendo ahora",
+  "queue": "Cola de reproducción",
+  "clear_queue": "Limpiar cola",
+  "next_up": "A continuación",
+  "queue_empty": "La cola está vacía"
 }
