@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  Interactive Card & List Row Background Selector
+  Provides the active, visual feedback for press and focus states.
+  Features:
+  - Default: Sleek, semi-transparent card background with 12dp rounded corners and a subtle white border.
+  - Pressed: Transition to a primary neon green border and a lighter, elevated background.
+  - Focused: Glow effect using a primary neon green border when navigated via keyboard/DPad.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Visual state when a card or list row is pressed/clicked -->
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <!-- Lighter surface accent color representing button elevation -->
+            <solid android:color="@color/surface_accent" />
+            <!-- Match the uniform 12dp rounded corners of the PC/TV web app design -->
+            <corners android:radius="12dp" />
+            <!-- Highlight with a neon green border -->
+            <stroke
+                android:width="1.5dp"
+                android:color="@color/primary_green" />
+        </shape>
+    </item>
+    
+    <!-- Visual state when a card or list row is focused (e.g. keyboard, remote or D-pad control) -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <!-- Lighter surface accent color to draw emphasis -->
+            <solid android:color="@color/surface_accent" />
+            <corners android:radius="12dp" />
+            <!-- Thicker neon green stroke representing active selection -->
+            <stroke
+                android:width="1.5dp"
+                android:color="@color/primary_green" />
+        </shape>
+    </item>
+    
+    <!-- Default inactive/idle state -->
+    <item>
+        <shape android:shape="rectangle">
+            <!-- Dark surface color matching the general design system -->
+            <solid android:color="@color/surface_color" />
+            <corners android:radius="12dp" />
+            <!-- Subtle semi-transparent border to demarcate cards on a pitch-black background -->
+            <stroke
+                android:width="1dp"
+                android:color="@color/divider_color" />
+        </shape>
+    </item>
+</selector>

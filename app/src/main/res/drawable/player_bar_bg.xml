@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  Sticky Player Bar Background Shape
+  Provides a premium glassmorphic/blur effect style for the persistent bottom player bar.
+  Features:
+  - Solid: Uses a semi-transparent pitch-dark background (#F20A0A0A) allowing screen content to subtly show behind.
+  - Border: Subtle top-border separator to visually distinguish the player from the scrolling background.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Semi-transparent deep dark background for visual overlay glass effect -->
+    <solid android:color="#F20A0A0A" />
+    <!-- Fine white border line acting as a layout divider -->
+    <stroke
+        android:width="1dp"
+        android:color="@color/divider_color" />
+</shape>

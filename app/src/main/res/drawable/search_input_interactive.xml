@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+  Interactive Search Input Pill Background Selector
+  Styles the search bar wrapper as a modern, rounded pill input.
+  Features:
+  - Default: Dark pill shape with a fine border.
+  - Focused: Glow effect with a neon green border and elevated surface color.
+-->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Visual state when the input text box has focus -->
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <!-- Dark surface accent to suggest active input focus -->
+            <solid android:color="#1F1F1F" />
+            <!-- Pill shape corner radius matching modern web search bars -->
+            <corners android:radius="24dp" />
+            <!-- Glow stroke in primary brand neon green -->
+            <stroke
+                android:width="1.5dp"
+                android:color="@color/primary_green" />
+        </shape>
+    </item>
+    
+    <!-- Default idle state when search is not focused -->
+    <item>
+        <shape android:shape="rectangle">
+            <!-- Dark surface color matching card backings -->
+            <solid android:color="#121212" />
+            <corners android:radius="24dp" />
+            <!-- Subtle semi-transparent border matching our theme boundary dividers -->
+            <stroke
+                android:width="1dp"
+                android:color="@color/divider_color" />
+        </shape>
+    </item>
+</selector>
