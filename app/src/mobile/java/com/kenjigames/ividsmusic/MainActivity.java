@@ -86,8 +86,11 @@ public class MainActivity extends AppCompatActivity {
                 .addPathHandler("/saved/", new WebViewAssetLoader.InternalStoragePathHandler(this, savedDir))
                 .build();
 
-        // Configure WebView with JavaScript, DOM storage, and file access enabled
         webView = findViewById(R.id.webView);
+
+        // Force hardware GPU acceleration for smoother rendering performance
+        webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null);
+
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -95,6 +98,9 @@ public class MainActivity extends AppCompatActivity {
         settings.setAllowContentAccess(true);
         settings.setAllowFileAccessFromFileURLs(true);
         settings.setAllowUniversalAccessFromFileURLs(true);
+
+        // Configure WebView to load cached assets preferentially to optimize start-up time
+        settings.setCacheMode(WebSettings.LOAD_CACHE_ELSE_NETWORK);
 
         // Register JavaScript interfaces for native track library and update features
         webView.addJavascriptInterface(new AndroidAPI(), "AndroidAPI");

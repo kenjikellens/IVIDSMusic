@@ -2,6 +2,7 @@ export const Router = {
     currentPage: null,
     currentParams: null,
     abortController: null,
+    templateCache: {}, // In-memory cache for page HTML templates to avoid redundant disk I/O.
 
     /**
      * Dynamically loads a specified page into the main view, handles query/history attributes,
@@ -28,10 +29,15 @@ export const Router = {
 
         try {
             console.log(`[Router] Loading: ${pageName}`, params);
-            const response = await fetch(`pages/${pageName}.html?v=${Date.now()}`, { signal: this.abortController.signal });
-            if (!response.ok) throw new Error(`Could not load page: ${pageName}`);
-
-            const html = await response.text();
+            let html;
+            if (this.templateCache[pageName]) {
+                html = this.templateCache[pageName];
+            } else {
+                const response = await fetch(`pages/${pageName}.html`, { signal: this.abortController.signal });
+                if (!response.ok) throw new Error(`Could not load page: ${pageName}`);
+                html = await response.text();
+                this.templateCache[pageName] = html;
+            }
 
             this.currentParams = params;
             this.currentPage = pageName;

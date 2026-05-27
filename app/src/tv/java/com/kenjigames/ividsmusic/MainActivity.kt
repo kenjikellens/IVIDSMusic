@@ -59,6 +59,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         webView = findViewById(R.id.webView)
+
+        // Force hardware GPU acceleration for smoother rendering performance on TV
+        webView.setLayerType(android.view.View.LAYER_TYPE_HARDWARE, null)
         
         val settings: WebSettings = webView.settings
         settings.javaScriptEnabled = true
@@ -68,6 +71,9 @@ class MainActivity : AppCompatActivity() {
         
         settings.allowFileAccessFromFileURLs = true
         settings.allowUniversalAccessFromFileURLs = true
+
+        // Configure WebView to load cached assets preferentially to optimize start-up time on TV
+        settings.cacheMode = WebSettings.LOAD_CACHE_ELSE_NETWORK
 
         webView.addJavascriptInterface(AndroidAPI(), "AndroidAPI")
 
