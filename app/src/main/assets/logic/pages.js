@@ -1293,6 +1293,17 @@ export const PageSystem = {
 
         if (window.Loader) window.Loader.init();
         if (window.LanguageManager) window.LanguageManager.translateUI(document.getElementById('main-view'));
+    },
+
+    /**
+     * Initializes the Downloader page interface and controls.
+     * Imports the downloader page script bundle dynamically and runs its setup routine.
+     * 
+     * @param {Object} params - The routing parameters containing any query target URL.
+     */
+    async initDownloader(params) {
+        const { DownloaderPage } = await import('./downloader.js');
+        await DownloaderPage.init(params);
     }
 };
 

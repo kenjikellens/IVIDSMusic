@@ -8,32 +8,79 @@ export const TVNav = {
     focusedElement: null,
 
     // Focusable selector
-    selector: 'a, button, input, [tabindex="0"]',
+    selector: 'a, button, input, select, [tabindex="0"]',
 
     /**
      * Method: init
-     * Description: Auto-detects the TV environment and, if present, registers the global keydown event listener
-     *              for spatial D-pad navigation and applies the TV-mode body styling classes.
+     * Description: Registers the developer toggle shortcut and auto-detects TV environment to initialize TV Mode.
      */
     init() {
+        // Register developer toggle shortcut (Alt+T) to test spatial navigation on PC
+        window.addEventListener('keydown', (e) => {
+            if (e.altKey && e.key.toLowerCase() === 't') {
+                e.preventDefault();
+                this.toggleMode();
+            }
+        });
+
         // Auto-detect TV environment via UserAgent or explicit developer URL overrides
         const isTV = /tv|smarttv|googletv|appletv|hbbtv|nintendo|playstation/i.test(navigator.userAgent) || 
                      window.location.search.includes('tvMode=true');
         
         if (!isTV) {
-            console.log('[TVNav] Non-TV environment detected. Spatial navigation disabled.');
+            console.log('[TVNav] Non-TV environment detected. Spatial navigation disabled (Use Alt+T to toggle).');
             this.isEnabled = false;
             return;
         }
 
-        console.log('[TVNav] Initializing Spatial Navigation');
+        this.enable();
+    },
+
+    /**
+     * Method: enable
+     * Description: Enables spatial navigation mode, registers key listeners, and applies TV styles.
+     */
+    enable() {
+        if (this.isEnabled) return;
+        console.log('[TVNav] Enabling Spatial Navigation');
         this.isEnabled = true;
         document.body.classList.add('tv-mode');
 
-        window.addEventListener('keydown', this.handleKeyDown.bind(this));
+        window.removeEventListener('keydown', this.handleKeyDownBound);
+        this.handleKeyDownBound = this.handleKeyDown.bind(this);
+        window.addEventListener('keydown', this.handleKeyDownBound);
 
-        // Setup initial focus
-        setTimeout(() => this.reinitFocus(), 500);
+        setTimeout(() => this.reinitFocus(), 300);
+    },
+
+    /**
+     * Method: disable
+     * Description: Disables spatial navigation mode, removes key listeners, and removes TV styles.
+     */
+    disable() {
+        if (!this.isEnabled) return;
+        console.log('[TVNav] Disabling Spatial Navigation');
+        this.isEnabled = false;
+        document.body.classList.remove('tv-mode');
+        window.removeEventListener('keydown', this.handleKeyDownBound);
+
+        document.querySelectorAll('input').forEach(input => {
+            if (input.dataset.tvBound) {
+                input.readOnly = false;
+            }
+        });
+    },
+
+    /**
+     * Method: toggleMode
+     * Description: Toggles the spatial navigation engine on or off dynamically.
+     */
+    toggleMode() {
+        if (this.isEnabled) {
+            this.disable();
+        } else {
+            this.enable();
+        }
     },
 
     /**
@@ -111,7 +158,17 @@ export const TVNav = {
         };
     },
 
+    /**
+     * Method: navigate
+     * Description: Synchronizes focus with the active element and moves it to the geometrically closest element in the specified direction.
+     * Affects the global focusedElement state and scrolls the new target into view.
+     * @param {string} direction - The direction to navigate ('up', 'down', 'left', or 'right').
+     */
     navigate(direction) {
+        if (document.activeElement && document.activeElement !== document.body && document.contains(document.activeElement)) {
+            this.focusedElement = document.activeElement;
+        }
+
         if (!this.focusedElement || !document.contains(this.focusedElement)) {
             this.reinitFocus();
             return;
@@ -192,12 +249,28 @@ export const TVNav = {
 
     /**
      * Method: handleKeyDown
-     * Description: Global keyboard event listener that intercepts spatial navigation direction keys,
-     *              handles input activation on Enter clicks, and maps hardware Back actions.
+     * Description: Global keyboard event listener that intercepts spatial navigation direction keys.
+     *              Allows native caret movement in active inputs and handles toggling write-mode.
      * @param {KeyboardEvent} e - The keydown event captured from the window.
      */
     handleKeyDown(e) {
         if (!this.isEnabled) return;
+
+        // Exception: If an input is currently active in write-mode (not readOnly),
+        // let the native browser handle arrow keys for text cursor movement.
+        if (document.activeElement && 
+            document.activeElement.tagName.toLowerCase() === 'input' && 
+            !document.activeElement.readOnly) {
+            
+            // Pressing Enter again locks the text input back to read-only mode
+            if (e.key === 'Enter') {
+                const input = document.activeElement;
+                input.readOnly = true;
+                console.log('[TVNav] Input write-mode locked on Enter key.');
+                e.preventDefault();
+            }
+            return;
+        }
 
         switch (e.key) {
             case 'ArrowUp':

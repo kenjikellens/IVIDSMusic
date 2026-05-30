@@ -73,5 +73,96 @@ contextBridge.exposeInMainWorld('ElectronAPI', {
         const listener = (event, progress) => callback(progress);
         ipcRenderer.on('pc-update-progress', listener);
         return () => ipcRenderer.removeListener('pc-update-progress', listener);
+    },
+
+    /**
+     * Opens the native OS directory picker dialog window.
+     * This allows the user to select an output folder for their files.
+     *
+     * @returns {Promise<string|null>} The chosen directory path, or null if cancelled.
+     */
+    selectDirectory: () => ipcRenderer.invoke('select-directory'),
+
+    /**
+     * Retrieves the default OS downloads directory path.
+     * This provides a sensible default fallback target for local file downloads.
+     *
+     * @returns {Promise<string>} The path to the Downloads directory.
+     */
+    getDefaultDir: () => ipcRenderer.invoke('get-default-dir'),
+
+    /**
+     * Submits download parameters to initiate a queue run in the Electron main process.
+     * This initiates downloading and metadata processing using the selected options.
+     *
+     * @param {Object} options - Parameter options.
+     */
+    startDownload: (options) => ipcRenderer.send('start-download', options),
+
+    /**
+     * Aborts the active downloader subprocess.
+     * This terminates any ongoing download and transcoding operations immediately.
+     */
+    cancelDownload: () => ipcRenderer.send('cancel-download'),
+
+    /**
+     * Queries playlist/video metadata via Electron IPC.
+     * This returns lists of tracks found at the target YouTube URL.
+     *
+     * @param {string} url - YouTube URL.
+     * @returns {Promise<Object>} List of video metadata details or error messages.
+     */
+    fetchMetadata: (url) => ipcRenderer.invoke('fetch-metadata', url),
+
+    /**
+     * Registers a callback listener to print backend log strings.
+     * This updates the download console in the UI with status log messages.
+     *
+     * @param {Function} callback - Receives standard console log outputs.
+     * @returns {Function} Unsubscribe function.
+     */
+    onDownloaderLog: (callback) => {
+        const listener = (event, msg) => callback(msg);
+        ipcRenderer.on('downloader-log', listener);
+        return () => ipcRenderer.removeListener('downloader-log', listener);
+    },
+
+    /**
+     * Registers a callback listener for progress percentage changes.
+     * This updates the visual progress bar on the downloader page.
+     *
+     * @param {Function} callback - Receives progress values from 0 to 100.
+     * @returns {Function} Unsubscribe function.
+     */
+    onDownloaderProgress: (callback) => {
+        const listener = (event, percent) => callback(percent);
+        ipcRenderer.on('downloader-progress', listener);
+        return () => ipcRenderer.removeListener('downloader-progress', listener);
+    },
+
+    /**
+     * Registers a callback listener for download track title shifts.
+     * This updates the active track status text on the UI screen.
+     *
+     * @param {Function} callback - Receives dict with status and track details.
+     * @returns {Function} Unsubscribe function.
+     */
+    onDownloaderStatus: (callback) => {
+        const listener = (event, data) => callback(data);
+        ipcRenderer.on('downloader-status', listener);
+        return () => ipcRenderer.removeListener('downloader-status', listener);
+    },
+
+    /**
+     * Registers a callback listener for download task terminations.
+     * This updates the UI to reflect a completed or failed download process.
+     *
+     * @param {Function} callback - Receives dict with success flag and error details.
+     * @returns {Function} Unsubscribe function.
+     */
+    onDownloaderComplete: (callback) => {
+        const listener = (event, data) => callback(data);
+        ipcRenderer.on('downloader-complete', listener);
+        return () => ipcRenderer.removeListener('downloader-complete', listener);
     }
 });

@@ -1,10 +1,11 @@
-const { app, BrowserWindow, ipcMain, protocol, net } = require('electron');
+const { app, BrowserWindow, ipcMain, protocol, net, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { exec, spawn } = require('child_process');
 const { pathToFileURL } = require('url');
 const http = require('http');
 const https = require('https');
+const DownloadManager = require('./src/downloadManager');
 
 const GITHUB_RELEASE_API_URL = 'https://api.github.com/repos/kenjikellens/IVIDSMusic/releases/latest';
 
@@ -293,3 +294,97 @@ ipcMain.handle('install-pc-update', async (event, filePath) => {
         return { status: 'error', message: error.message };
     }
 });
+
+// ============================================================
+// IVIDS YT MP3 Downloader IPC Handlers
+// ============================================================
+
+/** @type {DownloadManager|null} Holds reference to the active download queue task */
+let activeManager = null;
+
+/**
+ * Handles the 'select-directory' IPC invocation by opening a folder picker dialog.
+ * This allows the user to browse their filesystem and select a target folder for downloads.
+ *
+ * @returns {Promise<string|null>} The chosen directory path, or null if cancelled.
+ */
+ipcMain.handle('select-directory', async () => {
+    const result = await dialog.showOpenDialog(mainWindow, {
+        properties: ['openDirectory'],
+        title: 'Select Download Folder'
+    });
+    if (result.canceled || result.filePaths.length === 0) return null;
+    return result.filePaths[0];
+});
+
+/**
+ * Handles the 'get-default-dir' IPC invocation to retrieve the default OS downloads folder.
+ * This is used to initialize the target download directory on the frontend.
+ *
+ * @returns {string} The path to the user's default Downloads directory.
+ */
+ipcMain.handle('get-default-dir', () => {
+    return app.getPath('downloads');
+});
+
+/**
+ * Handles the 'fetch-metadata' IPC invocation to query video or playlist details using yt-dlp.
+ * This returns the list of tracks and durations found in the provided YouTube URL.
+ *
+ * @param {Object} event - The Electron IPC event object.
+ * @param {string} url - The YouTube link URL.
+ * @returns {Promise<Object>} Object containing track list or error details.
+ */
+ipcMain.handle('fetch-metadata', async (event, url) => {
+    try {
+        const manager = new DownloadManager({ url, outputDir: '' }, {
+            onStatusChange: () => {},
+            onLog: () => {}
+        });
+        const ytDlpPath = await manager.resolveYtDlp();
+        const tracks = await manager.fetchTrackList(ytDlpPath);
+        return { tracks };
+    } catch (err) {
+        return { error: err.message };
+    }
+});
+
+/**
+ * Handles the 'start-download' IPC event to initiate a download task using DownloadManager.
+ * This monitors download updates and forwards logs, progress, and status events to the frontend.
+ *
+ * @param {Object} event - The Electron IPC event object.
+ * @param {Object} options - Download parameters such as url, outputDir, format, quality, etc.
+ */
+ipcMain.on('start-download', (event, options) => {
+    if (activeManager) return;
+
+    activeManager = new DownloadManager(options, {
+        onLog: (msg) => {
+            mainWindow?.webContents.send('downloader-log', msg);
+        },
+        onProgress: (percent) => {
+            mainWindow?.webContents.send('downloader-progress', percent);
+        },
+        onStatusChange: (status, track) => {
+            mainWindow?.webContents.send('downloader-status', { status, track });
+        },
+        onComplete: (success, errorMsg) => {
+            activeManager = null;
+            mainWindow?.webContents.send('downloader-complete', { success, errorMsg });
+        }
+    });
+
+    activeManager.run();
+});
+
+/**
+ * Handles the 'cancel-download' IPC event to abort the active download queue execution.
+ * This triggers cancellation on the current DownloadManager instance.
+ */
+ipcMain.on('cancel-download', () => {
+    if (activeManager) {
+        activeManager.cancel();
+    }
+});
+

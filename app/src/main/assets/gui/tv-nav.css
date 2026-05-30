@@ -1,87 +1,88 @@
 /* TV Navigation & Leanback Adjustments */
 
+/* Hides scrollbars when TV mode is active to let D-pad scrolling take full layout control. */
 body.tv-mode ::-webkit-scrollbar {
     display: none;
-    /* Hide scrollbars, D-pad scrolling takes over */
 }
 
+/* Hides manual page scroll navigation buttons since TV D-pad handles scrolling. */
 body.tv-mode .scroll-arrow {
     display: none !important;
-    /* Hide on-screen arrows */
 }
 
 /* ============================
    TV Focus Rings 
    ============================ */
 
-/* Styles the generic TV focus state with a crisp, flush, thick white border outline */
-body.tv-mode a:focus-visible,
-body.tv-mode button:focus-visible,
-body.tv-mode input:focus-visible,
-body.tv-mode [tabindex="0"]:focus-visible {
+/* Styles focusable interactive elements (links, buttons, inputs) in TV mode with a thick white outline. */
+body.tv-mode a:focus,
+body.tv-mode button:focus,
+body.tv-mode input:focus,
+body.tv-mode select:focus,
+body.tv-mode [tabindex="0"]:focus {
     outline: 3px solid #ffffff !important;
     outline-offset: 0px !important;
     z-index: 100;
 }
 
-/* Hide outline on artist cards since their circular image box gets it instead */
-body.tv-mode .music-card.type-artist:focus-visible {
+/* Suppresses the default outer card focus outline for artist-type music cards. */
+body.tv-mode .music-card.type-artist:focus {
     outline: none !important;
 }
 
-/* Styles the music card image focus state with a flush white outline for clean alignment on artist cards */
-body.tv-mode .music-card.type-artist:focus-visible .card-image-box {
+/* Highlights the inner image box of artist cards when focused in TV mode. */
+body.tv-mode .music-card.type-artist:focus .card-image-box {
     outline: 3px solid #ffffff !important;
     outline-offset: 0px !important;
 }
 
-/* Circular elements */
-body.tv-mode .user-profile:focus-visible,
-body.tv-mode .music-card.type-artist:focus-visible .card-image-box,
-body.tv-mode .player-control-btn:focus-visible,
-body.tv-mode .profile-avatar-edit:focus-visible,
-body.tv-mode .promo-close-btn:focus-visible,
-body.tv-mode .blob:focus-visible {
+/* Ensures a circular focus outline for naturally rounded elements like profiles and control buttons in TV mode. */
+body.tv-mode .user-profile:focus,
+body.tv-mode .music-card.type-artist:focus .card-image-box,
+body.tv-mode .player-control-btn:focus,
+body.tv-mode .profile-avatar-edit:focus,
+body.tv-mode .promo-close-btn:focus,
+body.tv-mode .blob:focus {
     border-radius: 50% !important;
 }
 
-/* Player Bar Sliders Focus */
-body.tv-mode .ivids-slider:focus-visible {
+/* Removes default outline styling from progress/volume sliders when focused. */
+body.tv-mode .ivids-slider:focus {
     outline: none !important;
 }
 
-/* Styles the player slider thumb focus indicator with a thick, flush white outline */
-body.tv-mode .ivids-slider:focus-visible::-webkit-slider-thumb {
+/* Highlights the slider handle thumb with a thick white outline when the slider is focused. */
+body.tv-mode .ivids-slider:focus::-webkit-slider-thumb {
     outline: 3px solid #ffffff !important;
     outline-offset: 0px !important;
 }
 
-/* Language Modal Focus */
-body.tv-mode .lang-edit-btn:focus-visible,
-body.tv-mode .lang-modal-close:focus-visible {
+/* Retains circular focus ring borders for language editing and closing controls in TV mode. */
+body.tv-mode .lang-edit-btn:focus,
+body.tv-mode .lang-modal-close:focus {
     border-radius: 50% !important;
 }
 
-/* Styles the language select modal items on D-pad focus with a thick white outline and dark highlight */
-body.tv-mode .lang-option:focus-visible {
+/* Highlights individual language options with outline and background feedback on D-pad focus. */
+body.tv-mode .lang-option:focus {
     outline: 3px solid #ffffff !important;
     outline-offset: 0px !important;
     background: rgba(255, 255, 255, 0.08);
 }
 
-/* Reveal the unified search bar when in TV Mode */
+/* Displays the search bar at full width when in TV mode. */
 body.tv-mode .unified-search-bar {
     display: block !important;
     padding: calc(24px * var(--ui-scale)) calc(40px * var(--ui-scale)) 0 calc(40px * var(--ui-scale));
 }
 
-/* Force full width on TV Mode browse search wrapper */
+/* Adjusts the search layout wrapper to consume full available horizontal spacing on TV. */
 body.tv-mode .unified-search-bar .browse-search-wrapper {
     max-width: 100% !important;
 }
 
-/* Styles the search input on TV D-pad focus with a flush thick white border highlight */
-body.tv-mode .browse-search-input:focus-visible {
+/* Styles the search input field with a thick white outline and background feedback on focus. */
+body.tv-mode .browse-search-input:focus {
     outline: 3px solid #ffffff !important;
     outline-offset: 0px !important;
     background: rgba(255, 255, 255, 0.08) !important;

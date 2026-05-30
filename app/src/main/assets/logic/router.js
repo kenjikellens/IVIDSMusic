@@ -76,7 +76,8 @@ export const Router = {
                     'library': 'library',
                     'profile': 'you',
                     'settings': 'settings',
-                    'song': 'song'
+                    'song': 'song',
+                    'downloader': 'nav_downloader'
                 };
                 const key = pageTitleKeys[pageName];
                 if (key && window.LanguageManager && window.LanguageManager.translations[key]) {
