@@ -78,6 +78,13 @@ function ensureOrphanAssetsOnly(tagName) {
     }
 }
 
+/**
+ * Extracts the compiled release distribution binaries from the git tag refs into a temporary directory.
+ * Returns the absolute path of the generated temporary directory.
+ * 
+ * @param {string} tagName - The git tag to extract assets from.
+ * @returns {string} The path of the temp folder.
+ */
 function extractAssets(tagName) {
     const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), `ividsmusic-${tagName}-`));
 
@@ -86,6 +93,7 @@ function extractAssets(tagName) {
             cwd: ROOT_DIR,
             encoding: 'buffer',
             stdio: ['ignore', 'pipe', 'pipe'],
+            maxBuffer: 100 * 1024 * 1024,
         });
         fs.writeFileSync(path.join(tempDir, assetName), assetBuffer);
     }

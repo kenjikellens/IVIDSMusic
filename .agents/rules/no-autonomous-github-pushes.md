@@ -15,7 +15,8 @@ Every AI agent working on IVIDS Music MUST strictly adhere to this constraint:
    - You MUST ensure the commit message and release details exactly follow the target version's release description.
    - You must never perform Git push actions automatically as part of a background execution loop without explicit developer oversight.
 4. **CODE PUSH VS. RELEASE SEPARATION**: A contextual branch-push request authorizes ONLY pushing the active commit history of the requested branch (for example, `git push origin main`). It does NOT authorize creating a Git tag, drafting a GitHub release, or triggering release packaging/distribution pipelines unless the user explicitly and separately requests release work.
-5. **COMBINED REQUEST AUTHORIZATION**:
-   - If the user clearly asks to push/upload/sync the branch while also explicitly asking to create/publish a release in the same active request, that single request authorizes both the branch push and the release publication workflow for the named version.
-   - If the user only asks to make/create/publish a release `vX.Y.Z`, this authorizes release publication for that version only. Push the release tag and create the GitHub Release, but do **not** push `main`.
-   - If the user only asks to push/upload/sync the branch, this authorizes only the branch push; it does **not** authorize release packaging, tag pushes, or GitHub Release creation.
+5. **RELEASE AUTHORIZATION BY REQUEST**:
+   - **AUTO-AUTHORIZATION FOR RELEASES**: If the user explicitly asks to make, create, build, or publish a release (e.g., via `/version-and-release-update` or a direct request), the agent is **fully authorized** to automatically push the release tag and publish the GitHub Release within the same turn/workflow execution. The agent must proceed to push the tag and publish the release without asking for a separate confirmation or additional approval.
+   - **Combined branch + release request**: Authorizes pushing both the branch (e.g., `main`) and the release tag, and creating the GitHub Release.
+   - **Release-only request**: Authorizes pushing the release tag and creating the GitHub Release only (do **not** push the main/root branch).
+   - **Branch-only request**: Authorizes pushing the branch only (do **not** push tags or create GitHub Releases).
