@@ -20,12 +20,15 @@ This document defines the strict, standardized protocol for launching new releas
   - **Large release**: Increment the major/first digit `X` by +1 and reset `Y` and `Z` to 0 (e.g., `v0.2.2` -> `v1.0.0`).
 - **Title and Description Generation**: Upon receiving or calculating the version name and release type, the Agent must formulate a high-quality, professional release title (e.g., `Release v1.1.0 (Beta)` or `Release v1.1.0`) and a detailed, feature-rich release description highlighting all visual, audio, performance, and core logic improvements.
 
-### 2. Run the Release Packager Script
-- **ACTION**: Execute the release utility script to automate version sync, compile all targets (Mobile, TV, and PC), and create the Git orphan tag:
-  ```powershell
-  node .agents/scripts/build-release.js <versionName>
-  ```
-  *(e.g., `node .agents/scripts/build-release.js 1.2.0`)*
+### 2. Clean Temporary Build Folders and Run the Release Packager Script
+- **ACTION**: Clean up existing temp build/output directories to ensure a clean build and avoid bloated release caches, then execute the release script:
+  1. Clean the Android build caches: Run `./gradlew clean` (or `gradlew clean` on Windows) to fully delete `build` and `app/build` directories.
+  2. Wipe desktop dist directories: Delete the `dist/` folder at the root of the workspace if present.
+  3. Execute:
+     ```powershell
+     node .agents/scripts/build-release.js <versionName>
+     ```
+     *(e.g., `node .agents/scripts/build-release.js 1.2.0`)*
 
 ### 3. Publish Scope Selection
 - **Release-only request**: If the developer/user only asks to make, create, publish, or draft a new release for `vX.Y.Z`, publish only the release tag and GitHub Release. Do **not** push `main`.
