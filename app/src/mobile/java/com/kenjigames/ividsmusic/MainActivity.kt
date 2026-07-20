@@ -33,7 +33,11 @@ class MainActivity : ComponentActivity() {
 
         // Start background Media3 audio playback service
         val serviceIntent = Intent(this, PlaybackService::class.java)
-        startService(serviceIntent)
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            startForegroundService(serviceIntent)
+        } else {
+            startService(serviceIntent)
+        }
 
         setContent {
             IVIDSMusicTheme {
