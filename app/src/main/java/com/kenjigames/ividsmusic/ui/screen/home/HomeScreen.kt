@@ -56,7 +56,7 @@ fun HomeScreen(
                 // "Recommended for You" Row
                 if (uiState.recommendedSongs.isNotEmpty()) {
                     HorizontalTileRow(
-                        title = "✨ Recommended for You",
+                        title = "Recommended for You",
                         items = uiState.recommendedSongs,
                         onSeeAllClick = { onSeeAllClick("Recommended") },
                         onItemClick = { item -> if (item is Song) onSongClick(item) }

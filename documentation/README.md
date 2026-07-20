@@ -1,18 +1,18 @@
-# 🎵 IVIDS Music — Native Android Music Architecture & Blueprint
+# 🎵 IVIDS Music — Architecture & Documentation
 
-**IVIDS Music** is a high-performance, ad-free native music streaming and discovery application built exclusively for **Android (Mobile & Android TV)** using **Jetpack Compose**, **Jetpack Media3 (ExoPlayer)**, and **Room Database**.
-
-This documentation repository serves as the complete architectural blueprint and specifications guide for migrating from the legacy web/hybrid shell to a 100% pure native Kotlin Android application.
+**IVIDS Music** is a high-performance, ad-free music streaming application featuring a **dual-target architecture**:
+1. **Native Android App (Mobile & Android TV)**: Built with **Kotlin**, **Jetpack Compose**, **Jetpack Media3 (ExoPlayer)**, and **Room Database**.
+2. **PC Desktop & Web App (Electron & Browser)**: Built with standalone HTML5/CSS3/JS, housed in the [`pc/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/pc/) directory and launched via `run_pc.py` or Electron (`main.js`).
 
 ---
 
 ## 📚 Documentation Index
 
-### 🚀 Migration Guide
-- 📖 [**Migration Roadmap**](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/documentation/migration_plan.md) — Phased plan for removing legacy web assets (HTML/CSS/JS/Electron) and transitioning to native Kotlin components.
+### 🚀 Migration & Architecture Guide
+- 📖 [**Migration Roadmap**](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/documentation/migration_plan.md) — Phased architecture status and PC web asset separation guide.
 
 ### 🎨 UI & Screens Specifications
-- 📱 [**Native UI & Screen Specifications**](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/documentation/ui/screens.md) — Detailed layout, state management, and Jetpack Compose component specs for all 11 application screens:
+- 📱 [**Native UI & Screen Specifications**](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/documentation/ui/screens.md) — Detailed layout, state management, and Jetpack Compose component specs for all application screens:
   1. **Home Screen** — Curated genre rows, shimmer skeletons, hero cards, recommendations.
   2. **Search Screen** — Hero search, category tabs (Songs, Artists, Albums), release year range filtering, pagination.
   3. **Artist Detail Screen** — Header banner, top songs, full album discography.
@@ -33,20 +33,16 @@ This documentation repository serves as the complete architectural blueprint and
 
 ---
 
-## 🛠️ Target Tech Stack
+## 🛠️ Project Structure & Target Tech Stack
 
-| Component | Technology | Purpose |
+| Layer / Target | Technology | Location & Purpose |
 |---|---|---|
-| **Language** | Kotlin 2.x | Primary language for all app logic & UI |
-| **UI Framework** | Jetpack Compose | Declarative UI for Mobile & Android TV |
-| **Navigation** | Navigation Compose | Type-safe single-activity screen navigation |
-| **Audio Playback** | Jetpack Media3 (ExoPlayer) | Foreground/background service, audio streaming, caching |
-| **Database** | Room (SQLite) | Local persistence for playlists, history, liked tracks & scoring |
-| **Preferences** | Jetpack DataStore | Async settings persistence (UI scale, language, theme) |
-| **Networking** | Retrofit + OkHttp + Kotlinx Serialization | Deezer metadata & Invidious stream extraction |
-| **Image Loading** | Coil Compose | Async image loading & canvas palette extraction |
-| **Dependency Injection** | Hilt / Koin | Modular architecture & viewmodel injection |
-| **TV Spatial Navigation** | Compose TV / FocusRestorer | D-pad remote navigation for Android TV |
+| **Native Mobile App** | Kotlin 2.x + Jetpack Compose | [`app/src/mobile/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/mobile/) — Full Compose Single-Activity UI |
+| **Shared Android Logic** | Room + Media3 ExoPlayer + Retrofit | [`app/src/main/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/main/) — Domain models, DAOs, repositories, player service |
+| **PC Desktop / Dev Server** | Electron + Python (`run_pc.py`) | [`pc/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/pc/) — Web UI assets (`pc/gui/`, `pc/logic/`) for PC executable |
+| **UI Components** | OOP BaseTile Hierarchy | [`ui/component/tile/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/main/java/com/kenjigames/ividsmusic/ui/component/tile/) — `BaseTile` -> `SongTile`, `ArtistTile`, `AlbumTile` |
+| **Audio Engine** | Jetpack Media3 Session + SimpleCache | [`player/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/main/java/com/kenjigames/ividsmusic/player/) — Background playback, 500MB LRU disk cache |
+| **Persistence** | Room DB + DataStore | [`data/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/main/java/com/kenjigames/ividsmusic/data/) — Liked tracks, history (20 cap), playlists, scores, preferences |
 
 ---
 

@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.screen.library
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.kenjigames.ividsmusic.data.AppDatabase
@@ -22,15 +23,22 @@ data class LibraryUiState(
 /** ViewModel powering Library screen */
 class LibraryViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = LibraryRepository(AppDatabase.getInstance(application).trackDao())
-
     private val _uiState = MutableStateFlow(LibraryUiState())
     val uiState: StateFlow<LibraryUiState> = _uiState.asStateFlow()
 
+    private var repository: LibraryRepository? = null
+
     init {
         viewModelScope.launch {
-            repository.savedTracks.collect { songs ->
-                _uiState.update { it.copy(likedSongs = songs) }
+            try {
+                val db = AppDatabase.getInstance(getApplication())
+                val repo = LibraryRepository(db.trackDao())
+                repository = repo
+                repo.savedTracks.collect { songs ->
+                    _uiState.update { it.copy(likedSongs = songs) }
+                }
+            } catch (e: Exception) {
+                Log.e("LibraryViewModel", "Init error: ${e.message}")
             }
         }
     }
@@ -41,7 +49,11 @@ class LibraryViewModel(application: Application) : AndroidViewModel(application)
 
     fun deleteTrack(song: Song) {
         viewModelScope.launch {
-            repository.deleteTrack(song)
+            try {
+                repository?.deleteTrack(song)
+            } catch (e: Exception) {
+                Log.e("LibraryViewModel", "Delete error: ${e.message}")
+            }
         }
     }
 }

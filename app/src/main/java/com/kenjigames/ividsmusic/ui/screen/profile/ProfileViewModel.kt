@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.screen.profile
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.kenjigames.ividsmusic.data.AppDatabase
@@ -25,22 +26,33 @@ data class ProfileUiState(
 /** ViewModel powering Profile screen */
 class ProfileViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val historyRepository = HistoryRepository(AppDatabase.getInstance(application).historyDao())
-
     private val _uiState = MutableStateFlow(ProfileUiState())
     val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
+    private var historyRepository: HistoryRepository? = null
+
     init {
         viewModelScope.launch {
-            historyRepository.recentHistory.collect { history ->
-                _uiState.update { it.copy(recentHistory = history) }
+            try {
+                val db = AppDatabase.getInstance(getApplication())
+                val repo = HistoryRepository(db.historyDao())
+                historyRepository = repo
+                repo.recentHistory.collect { history ->
+                    _uiState.update { it.copy(recentHistory = history) }
+                }
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Init error: ${e.message}")
             }
         }
     }
 
     fun clearHistory() {
         viewModelScope.launch {
-            historyRepository.clearHistory()
+            try {
+                historyRepository?.clearHistory()
+            } catch (e: Exception) {
+                Log.e("ProfileViewModel", "Clear history error: ${e.message}")
+            }
         }
     }
 }
