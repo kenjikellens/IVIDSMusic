@@ -1,7 +1,9 @@
 package com.kenjigames.ividsmusic.player
 
 import androidx.media3.common.C
+import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaSessionService
 
@@ -17,14 +19,26 @@ class PlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        // Create ExoPlayer instance with local wake mode to prevent CPU sleep during play
-        val exoPlayer = ExoPlayer.Builder(this).build().apply {
-            setWakeMode(C.WAKE_MODE_LOCAL)
-        }
+        // Create HTTP data source factory allowing cross-protocol redirects & browser User-Agent
+        val httpDataSourceFactory = DefaultHttpDataSource.Factory()
+            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .setAllowCrossProtocolRedirects(true)
+            .setConnectTimeoutMs(15000)
+            .setReadTimeoutMs(15000)
+
+        val mediaSourceFactory = DefaultMediaSourceFactory(this)
+            .setDataSourceFactory(httpDataSourceFactory)
+
+        // Create ExoPlayer instance with HTTP data source factory and local wake mode
+        val exoPlayer = ExoPlayer.Builder(this)
+            .setMediaSourceFactory(mediaSourceFactory)
+            .build().apply {
+                setWakeMode(C.WAKE_MODE_LOCAL)
+            }
         player = exoPlayer
 
         // Bind ExoPlayer instance to PlaybackManager singleton
-        PlaybackManager.instance.initialize(exoPlayer)
+        PlaybackManager.instance.initialize(exoPlayer, applicationContext)
 
         // Build MediaSession
         mediaSession = MediaSession.Builder(this, exoPlayer).build()

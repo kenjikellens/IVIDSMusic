@@ -57,7 +57,7 @@ class PlaybackManager private constructor() {
     }
 
     /** Binds ExoPlayer instance and registers listeners */
-    fun initialize(player: ExoPlayer) {
+    fun initialize(player: ExoPlayer, context: Context? = null) {
         this.exoPlayer = player
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -80,6 +80,11 @@ class PlaybackManager private constructor() {
                     }
                     Player.STATE_IDLE -> _playerState.update { it.copy(playbackStatus = "Idle") }
                 }
+            }
+
+            override fun onPlayerError(error: PlaybackException) {
+                Log.e(tag, "ExoPlayer error: ${error.message}", error)
+                _playerState.update { it.copy(isBuffering = false, playbackStatus = "Error: ${error.errorCodeName}") }
             }
         })
     }
