@@ -36,7 +36,18 @@ class StreamResolverTest {
     }
 
     @Test
-    fun testUnresolvableStreamReturnsNull() = runBlocking {
+    fun testUnresolvableStreamFallsBackToPreviewUrl() = runBlocking {
+        val song = Song("1", "Song A", "Artist X", coverUrl = "", previewUrl = "https://preview.url/preview.mp3")
+        val resolver = MockStreamResolver(null, null)
+
+        val useCase = ResolveStreamUseCase(primaryResolver = resolver, fallbackResolver = resolver)
+        val resolvedUrl = useCase(song)
+
+        assertEquals("https://preview.url/preview.mp3", resolvedUrl)
+    }
+
+    @Test
+    fun testUnresolvableStreamWithoutPreviewReturnsNull() = runBlocking {
         val song = Song("1", "Song A", "Artist X", coverUrl = "")
         val resolver = MockStreamResolver(null, null)
 
