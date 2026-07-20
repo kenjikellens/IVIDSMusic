@@ -399,14 +399,6 @@ export const YouTubePlayer = {
 
         } catch (error) {
             console.error('[Player Error]', error);
-            if (track.previewUrl) {
-                console.log('[Player Fallback] Stream failed, playing Deezer preview URL:', track.previewUrl);
-                if (statusEl) statusEl.textContent = 'Playing Preview Stream';
-                if (loaderEl) loaderEl.style.display = 'none';
-                this.audio.src = track.previewUrl;
-                this.audio.play();
-                return;
-            }
             if (statusEl) {
                 const errorText = (window.LanguageManager && window.LanguageManager.translations['error']) || 'Error';
                 statusEl.textContent = errorText + ': ' + error.message;

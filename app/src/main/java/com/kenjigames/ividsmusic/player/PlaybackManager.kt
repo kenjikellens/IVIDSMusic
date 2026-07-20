@@ -31,15 +31,14 @@ class PlaybackManager private constructor() {
 
     private val tag = "PlaybackManager"
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private var exoPlayer: ExoPlayer? = null
-    
-    private val queue = PlaybackQueue()
-    private val streamResolver: StreamResolver = NetworkModule.invidiousStreamResolver
-    private val fallbackResolver: StreamResolver = NetworkModule.youtubeHtmlScraper
-
     private val _playerState = MutableStateFlow(PlayerState())
-    /** Reactive Flow emitting player state updates */
     val playerState: StateFlow<PlayerState> = _playerState.asStateFlow()
+
+    private val queue = PlaybackQueue()
+    private var exoPlayer: ExoPlayer? = null
+    private val primaryResolver: StreamResolver = NetworkModule.pipedStreamResolver
+    private val secondaryResolver: StreamResolver = NetworkModule.invidiousStreamResolver
+    private val fallbackResolver: StreamResolver = NetworkModule.youtubeHtmlScraper
 
     private val progressHandler = Handler(Looper.getMainLooper())
     private val progressRunnable = object : Runnable {
@@ -74,7 +73,7 @@ class PlaybackManager private constructor() {
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 when (playbackState) {
-                    Player.STATE_BUFFERING -> _playerState.update { it.copy(isBuffering = true, playbackStatus = "Buffering") }
+                    Player.STATE_BUFFERING -> _playerState.update { it.copy(isBuffering = true, playbackStatus = "Buffering full stream...") }
                     Player.STATE_READY -> _playerState.update { it.copy(isBuffering = false, playbackStatus = if (it.isPlaying) "Playing" else "Paused") }
                     Player.STATE_ENDED -> {
                         _playerState.update { it.copy(playbackStatus = "Ended") }
@@ -85,8 +84,8 @@ class PlaybackManager private constructor() {
             }
 
             override fun onPlayerError(error: PlaybackException) {
-                Log.e(tag, "ExoPlayer error: ${error.message}", error)
-                _playerState.update { it.copy(isBuffering = false, playbackStatus = "Error: ${error.errorCodeName}") }
+                Log.e(tag, "ExoPlayer playback error: ${error.message}", error)
+                _playerState.update { it.copy(isBuffering = false, playbackStatus = "Playback error: ${error.errorCodeName}") }
             }
         })
     }
@@ -103,7 +102,7 @@ class PlaybackManager private constructor() {
         setQueue(listOf(song), 0)
     }
 
-    /** Loads and resolves audio stream for a song */
+    /** Loads and resolves full-length YouTube audio stream for a song */
     private fun loadSong(song: Song) {
         _playerState.update {
             it.copy(
@@ -112,7 +111,7 @@ class PlaybackManager private constructor() {
                 positionMs = 0L,
                 durationMs = (song.durationSeconds * 1000).toLong().coerceAtLeast(0L),
                 isBuffering = true,
-                playbackStatus = "Resolving audio stream..."
+                playbackStatus = "Resolving full YouTube audio..."
             )
         }
 
@@ -121,37 +120,36 @@ class PlaybackManager private constructor() {
                 var streamUrl: String? = null
                 var sourceDescription = ""
 
-                withContext(Dispatchers.IO) {
-                    // 1. Check offline file
-                    if (song.isDownloaded && song.localFilePath != null) {
-                        val file = File(song.localFilePath)
-                        if (file.exists()) {
-                            streamUrl = file.absolutePath
-                            sourceDescription = "Offline Download"
-                        }
+                // 1. Check offline downloaded file
+                if (song.isDownloaded && song.localFilePath != null) {
+                    val file = File(song.localFilePath)
+                    if (file.exists()) {
+                        streamUrl = file.absolutePath
+                        sourceDescription = "Offline Download"
                     }
+                }
 
-                    // 2. Resolve via network if not offline
-                    if (streamUrl == null) {
+                // 2. Resolve full YouTube audio stream
+                if (streamUrl == null) {
+                    withContext(Dispatchers.IO) {
                         try {
                             var videoId = song.videoId
                             if (videoId.isEmpty()) {
                                 val query = "${song.artistName} - ${song.title}"
-                                videoId = streamResolver.resolveVideoId(query) ?: fallbackResolver.resolveVideoId(query) ?: ""
+                                videoId = primaryResolver.resolveVideoId(query) 
+                                    ?: secondaryResolver.resolveVideoId(query) 
+                                    ?: fallbackResolver.resolveVideoId(query) 
+                                    ?: ""
                             }
                             if (videoId.isNotEmpty()) {
-                                streamUrl = streamResolver.resolveAudioUrl(videoId)
-                                if (streamUrl != null) sourceDescription = "High-Quality Stream"
+                                streamUrl = primaryResolver.resolveAudioUrl(videoId) 
+                                    ?: secondaryResolver.resolveAudioUrl(videoId) 
+                                    ?: fallbackResolver.resolveAudioUrl(videoId)
+                                if (streamUrl != null) sourceDescription = "Full High-Quality YouTube Stream"
                             }
                         } catch (e: Throwable) {
                             Log.w(tag, "Stream resolver error: ${e.message}")
                         }
-                    }
-
-                    // 3. Fallback to Deezer Preview URL if stream resolution is unresolvable
-                    if (streamUrl == null && song.previewUrl.isNotEmpty()) {
-                        streamUrl = song.previewUrl
-                        sourceDescription = "Preview Stream"
                     }
                 }
 
@@ -164,6 +162,7 @@ class PlaybackManager private constructor() {
 
                 if (streamUrl != null) {
                     try {
+                        Log.d(tag, "Setting ExoPlayer mediaItem full audio URI: $streamUrl ($sourceDescription)")
                         val mediaItem = MediaItem.fromUri(streamUrl!!)
                         player.setMediaItem(mediaItem)
                         player.prepare()
@@ -174,7 +173,7 @@ class PlaybackManager private constructor() {
                         _playerState.update { it.copy(isBuffering = false, playbackStatus = "Playback error") }
                     }
                 } else {
-                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "Stream unavailable") }
+                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "Full stream unavailable") }
                 }
             } catch (t: Throwable) {
                 Log.e(tag, "Fatal loadSong error: ${t.message}", t)

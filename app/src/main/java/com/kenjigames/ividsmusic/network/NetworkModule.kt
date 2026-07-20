@@ -2,6 +2,7 @@ package com.kenjigames.ividsmusic.network
 
 import com.kenjigames.ividsmusic.network.api.DeezerApiService
 import com.kenjigames.ividsmusic.network.resolver.InvidiousStreamResolver
+import com.kenjigames.ividsmusic.network.resolver.PipedStreamResolver
 import com.kenjigames.ividsmusic.network.resolver.StreamResolver
 import com.kenjigames.ividsmusic.network.resolver.YouTubeHtmlScraper
 import okhttp3.OkHttpClient
@@ -33,7 +34,12 @@ object NetworkModule {
             .create(DeezerApiService::class.java)
     }
 
-    /** Primary stream resolver using Invidious pool */
+    /** Primary stream resolver using Piped API for full-length high quality audio */
+    val pipedStreamResolver: StreamResolver by lazy {
+        PipedStreamResolver(okHttpClient)
+    }
+
+    /** Secondary stream resolver using Invidious pool */
     val invidiousStreamResolver: StreamResolver by lazy {
         InvidiousStreamResolver(okHttpClient)
     }
