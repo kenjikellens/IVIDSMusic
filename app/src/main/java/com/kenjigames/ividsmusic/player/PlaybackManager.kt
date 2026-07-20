@@ -164,47 +164,65 @@ class PlaybackManager private constructor() {
     /** Toggles play/pause */
     fun togglePlayPause() {
         val player = exoPlayer ?: return
+        Log.d(tag, "togglePlayPause() called. Currently isPlaying: ${player.isPlaying}")
         if (player.isPlaying) {
             player.pause()
+            Log.d(tag, "Playback paused successfully")
         } else {
             if (player.playbackState == Player.STATE_IDLE) {
-                _playerState.value.currentSong?.let { loadSong(it) }
+                _playerState.value.currentSong?.let { 
+                    Log.d(tag, "ExoPlayer was idle. Reloading current song: ${it.title}")
+                    loadSong(it) 
+                }
             } else {
                 player.play()
+                Log.d(tag, "Playback resumed successfully")
             }
         }
     }
 
     /** Skips to next song in queue */
     fun next() {
-        queue.next()?.let { loadSong(it) }
+        Log.d(tag, "next() called. Navigating forward in queue.")
+        queue.next()?.let { 
+            Log.d(tag, "Next track found: ${it.title} by ${it.artistName}")
+            loadSong(it) 
+        } ?: Log.w(tag, "No next track found in queue")
     }
 
     /** Skips to previous song in queue */
     fun previous() {
+        Log.d(tag, "previous() called. Checking if we should restart current track or go back.")
         exoPlayer?.let { player ->
             if (player.currentPosition > 3000) {
+                Log.d(tag, "Current track position is > 3s. Restarting current track.")
                 player.seekTo(0)
                 return
             }
         }
-        queue.previous()?.let { loadSong(it) }
+        queue.previous()?.let { 
+            Log.d(tag, "Previous track found: ${it.title} by ${it.artistName}")
+            loadSong(it) 
+        } ?: Log.w(tag, "No previous track found in queue")
     }
 
     /** Seeks to target timestamp in milliseconds */
     fun seekTo(positionMs: Long) {
+        Log.d(tag, "seekTo() called. Seeking to: ${positionMs}ms")
         exoPlayer?.seekTo(positionMs)
     }
 
     /** Toggles queue shuffle mode */
     fun toggleShuffle() {
         val enabled = queue.toggleShuffle()
+        Log.d(tag, "toggleShuffle() called. Shuffle enabled status changed to: $enabled")
         _playerState.update { it.copy(isShuffleEnabled = enabled) }
     }
 
     /** Toggles single track repeat mode */
     fun toggleRepeatOne() {
         val enabled = queue.toggleRepeatOne()
+        Log.d(tag, "toggleRepeatOne() called. Repeat status changed to: $enabled")
         _playerState.update { it.copy(isRepeatOne = enabled) }
     }
 
