@@ -31,12 +31,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Start background Media3 audio playback service
-        val serviceIntent = Intent(this, PlaybackService::class.java)
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            startForegroundService(serviceIntent)
-        } else {
+        // Start background Media3 audio playback service safely
+        try {
+            val serviceIntent = Intent(this, PlaybackService::class.java)
             startService(serviceIntent)
+        } catch (e: Exception) {
+            android.util.Log.e("MainActivity", "Failed to start PlaybackService: ${e.message}")
         }
 
         setContent {

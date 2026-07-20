@@ -105,7 +105,6 @@ class PlaybackManager private constructor() {
 
     /** Loads and resolves audio stream for a song */
     private fun loadSong(song: Song) {
-        val player = exoPlayer ?: return
         _playerState.update {
             it.copy(
                 currentSong = song,
@@ -118,52 +117,68 @@ class PlaybackManager private constructor() {
         }
 
         scope.launch {
-            var streamUrl: String? = null
-            var sourceDescription = ""
+            try {
+                var streamUrl: String? = null
+                var sourceDescription = ""
 
-            withContext(Dispatchers.IO) {
-                // 1. Check offline file
-                if (song.isDownloaded && song.localFilePath != null) {
-                    val file = File(song.localFilePath)
-                    if (file.exists()) {
-                        streamUrl = file.absolutePath
-                        sourceDescription = "Offline Download"
+                withContext(Dispatchers.IO) {
+                    // 1. Check offline file
+                    if (song.isDownloaded && song.localFilePath != null) {
+                        val file = File(song.localFilePath)
+                        if (file.exists()) {
+                            streamUrl = file.absolutePath
+                            sourceDescription = "Offline Download"
+                        }
+                    }
+
+                    // 2. Resolve via network if not offline
+                    if (streamUrl == null) {
+                        try {
+                            var videoId = song.videoId
+                            if (videoId.isEmpty()) {
+                                val query = "${song.artistName} - ${song.title}"
+                                videoId = streamResolver.resolveVideoId(query) ?: fallbackResolver.resolveVideoId(query) ?: ""
+                            }
+                            if (videoId.isNotEmpty()) {
+                                streamUrl = streamResolver.resolveAudioUrl(videoId)
+                                if (streamUrl != null) sourceDescription = "High-Quality Stream"
+                            }
+                        } catch (e: Throwable) {
+                            Log.w(tag, "Stream resolver error: ${e.message}")
+                        }
+                    }
+
+                    // 3. Fallback to Deezer Preview URL if stream resolution is unresolvable
+                    if (streamUrl == null && song.previewUrl.isNotEmpty()) {
+                        streamUrl = song.previewUrl
+                        sourceDescription = "Preview Stream"
                     }
                 }
 
-                // 2. Resolve via network if not offline
-                if (streamUrl == null) {
-                    var videoId = song.videoId
-                    if (videoId.isEmpty()) {
-                        val query = "${song.artistName} - ${song.title}"
-                        videoId = streamResolver.resolveVideoId(query) ?: fallbackResolver.resolveVideoId(query) ?: ""
-                    }
-                    if (videoId.isNotEmpty()) {
-                        streamUrl = streamResolver.resolveAudioUrl(videoId)
-                        if (streamUrl != null) sourceDescription = "High-Quality Stream"
-                    }
+                val player = exoPlayer
+                if (player == null) {
+                    Log.e(tag, "ExoPlayer instance is null. Cannot play stream.")
+                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "Audio engine offline") }
+                    return@launch
                 }
 
-                // 3. Fallback to Deezer Preview URL if stream resolution is unresolvable
-                if (streamUrl == null && song.previewUrl.isNotEmpty()) {
-                    streamUrl = song.previewUrl
-                    sourceDescription = "Preview Stream"
+                if (streamUrl != null) {
+                    try {
+                        val mediaItem = MediaItem.fromUri(streamUrl!!)
+                        player.setMediaItem(mediaItem)
+                        player.prepare()
+                        player.play()
+                        _playerState.update { it.copy(playbackStatus = "Playing ($sourceDescription)") }
+                    } catch (e: Throwable) {
+                        Log.e(tag, "ExoPlayer play failed: ${e.message}")
+                        _playerState.update { it.copy(isBuffering = false, playbackStatus = "Playback error") }
+                    }
+                } else {
+                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "Stream unavailable") }
                 }
-            }
-
-            if (streamUrl != null) {
-                try {
-                    val mediaItem = MediaItem.fromUri(streamUrl!!)
-                    player.setMediaItem(mediaItem)
-                    player.prepare()
-                    player.play()
-                    _playerState.update { it.copy(playbackStatus = "Playing ($sourceDescription)") }
-                } catch (e: Exception) {
-                    Log.e(tag, "ExoPlayer play failed: ${e.message}")
-                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "Playback error") }
-                }
-            } else {
-                _playerState.update { it.copy(isBuffering = false, playbackStatus = "Stream unavailable") }
+            } catch (t: Throwable) {
+                Log.e(tag, "Fatal loadSong error: ${t.message}", t)
+                _playerState.update { it.copy(isBuffering = false, playbackStatus = "Error: ${t.message}") }
             }
         }
     }
