@@ -136,7 +136,7 @@ function createWindow() {
     mainWindow.setMenuBarVisibility(false);
 
     // Load local index.html
-    const indexPath = path.join(__dirname, 'app/src/main/assets/gui/index.html');
+    const indexPath = path.join(__dirname, 'pc/gui/index.html');
     mainWindow.loadFile(indexPath);
 
     mainWindow.on('closed', () => {

@@ -23,7 +23,7 @@
       "main.js",
       "preload.js",
       "src/downloadManager.js",
-      "app/src/main/assets/**/*"
+      "pc/**/*"
     ]
   }
 }

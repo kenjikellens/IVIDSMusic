@@ -40,7 +40,7 @@ def main():
 
     # Resolve the absolute path of the assets directory
     current_dir = os.path.dirname(os.path.abspath(__file__))
-    assets_dir = os.path.join(current_dir, "app", "src", "main", "assets")
+    assets_dir = os.path.join(current_dir, "pc")
 
     if not os.path.exists(assets_dir):
         print(f"Error: Assets folder not found at '{assets_dir}'")
