@@ -14,6 +14,7 @@ data class DeezerSearchResponseDto(
         @SerializedName("id") val id: String = "",
         @SerializedName("title") val title: String = "",
         @SerializedName("duration") val duration: Int = 0,
+        @SerializedName("preview") val preview: String = "",
         @SerializedName("artist") val artist: ArtistDataDto? = null,
         @SerializedName("album") val album: AlbumDataDto? = null
     ) {
@@ -38,7 +39,8 @@ data class DeezerSearchResponseDto(
             artistName = artist?.name ?: "Unknown Artist",
             albumTitle = album?.title ?: "",
             coverUrl = album?.coverMedium ?: artist?.pictureMedium ?: "",
-            durationSeconds = duration
+            durationSeconds = duration,
+            previewUrl = preview
         )
     }
 }

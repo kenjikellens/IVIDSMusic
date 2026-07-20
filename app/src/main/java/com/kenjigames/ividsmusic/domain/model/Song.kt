@@ -23,6 +23,7 @@ data class Song(
     override val coverUrl: String,
     val durationSeconds: Int = 0,
     val videoId: String = "",
+    val previewUrl: String = "",
     val isLiked: Boolean = false,
     val isDownloaded: Boolean = false,
     val localFilePath: String? = null

@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
@@ -103,45 +104,59 @@ class PlaybackManager private constructor() {
                 currentSong = song,
                 isPlaying = false,
                 positionMs = 0L,
-                durationMs = (song.durationSeconds * 1000).toLong(),
+                durationMs = (song.durationSeconds * 1000).toLong().coerceAtLeast(0L),
                 isBuffering = true,
-                playbackStatus = "Loading..."
+                playbackStatus = "Resolving audio stream..."
             )
         }
 
         scope.launch {
             var streamUrl: String? = null
+            var sourceDescription = ""
 
-            // Check offline file
-            if (song.isDownloaded && song.localFilePath != null) {
-                val file = File(song.localFilePath)
-                if (file.exists()) streamUrl = file.absolutePath
-            }
-
-            // Resolve via network if not offline
-            if (streamUrl == null) {
-                var videoId = song.videoId
-                if (videoId.isEmpty()) {
-                    val query = "${song.artistName} - ${song.title}"
-                    videoId = streamResolver.resolveVideoId(query) ?: fallbackResolver.resolveVideoId(query) ?: ""
+            withContext(Dispatchers.IO) {
+                // 1. Check offline file
+                if (song.isDownloaded && song.localFilePath != null) {
+                    val file = File(song.localFilePath)
+                    if (file.exists()) {
+                        streamUrl = file.absolutePath
+                        sourceDescription = "Offline Download"
+                    }
                 }
-                if (videoId.isNotEmpty()) {
-                    streamUrl = streamResolver.resolveAudioUrl(videoId)
+
+                // 2. Resolve via network if not offline
+                if (streamUrl == null) {
+                    var videoId = song.videoId
+                    if (videoId.isEmpty()) {
+                        val query = "${song.artistName} - ${song.title}"
+                        videoId = streamResolver.resolveVideoId(query) ?: fallbackResolver.resolveVideoId(query) ?: ""
+                    }
+                    if (videoId.isNotEmpty()) {
+                        streamUrl = streamResolver.resolveAudioUrl(videoId)
+                        if (streamUrl != null) sourceDescription = "High-Quality Stream"
+                    }
+                }
+
+                // 3. Fallback to Deezer Preview URL if stream resolution is unresolvable
+                if (streamUrl == null && song.previewUrl.isNotEmpty()) {
+                    streamUrl = song.previewUrl
+                    sourceDescription = "Preview Stream"
                 }
             }
 
             if (streamUrl != null) {
                 try {
-                    val mediaItem = MediaItem.fromUri(streamUrl)
+                    val mediaItem = MediaItem.fromUri(streamUrl!!)
                     player.setMediaItem(mediaItem)
                     player.prepare()
                     player.play()
+                    _playerState.update { it.copy(playbackStatus = "Playing ($sourceDescription)") }
                 } catch (e: Exception) {
                     Log.e(tag, "ExoPlayer play failed: ${e.message}")
-                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "Error loading audio") }
+                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "Playback error") }
                 }
             } else {
-                _playerState.update { it.copy(isBuffering = false, playbackStatus = "Stream resolution failed") }
+                _playerState.update { it.copy(isBuffering = false, playbackStatus = "Stream unavailable") }
             }
         }
     }

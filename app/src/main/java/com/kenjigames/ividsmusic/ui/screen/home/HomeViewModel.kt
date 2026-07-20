@@ -41,9 +41,9 @@ class HomeViewModel(
                             isLoading = false,
                             recommendedSongs = songs,
                             genreTracks = mapOf(
-                                "🔥 Pop" to songs.take(6),
-                                "🎸 Rock" to songs.drop(4).take(6),
-                                "🎤 Hip-Hop" to songs.drop(8).take(6)
+                                "Pop" to songs.take(6),
+                                "Rock" to songs.drop(4).take(6),
+                                "Hip-Hop" to songs.drop(8).take(6)
                             )
                         )
                     }

@@ -59,5 +59,11 @@ fun NavGraph(
         composable(Screen.Settings.route) {
             SettingsScreen()
         }
+
+        composable(Screen.SongDetail.route) {
+            com.kenjigames.ividsmusic.ui.screen.song.SongDetailScreen(
+                onBackClick = { navController.popBackStack() }
+            )
+        }
     }
 }

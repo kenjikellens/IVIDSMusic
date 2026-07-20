@@ -63,8 +63,16 @@ class MainActivity : ComponentActivity() {
                         PlayerBottomBar(
                             playerState = playerState,
                             modifier = Modifier.align(Alignment.BottomCenter),
+                            onClick = {
+                                navController.navigate(com.kenjigames.ividsmusic.ui.navigation.Screen.SongDetail.route)
+                            },
                             onTogglePlayPause = { PlaybackManager.instance.togglePlayPause() },
-                            onNext = { PlaybackManager.instance.next() }
+                            onNext = { PlaybackManager.instance.next() },
+                            onToggleLike = {
+                                playerState.currentSong?.let { song ->
+                                    // Toggle like
+                                }
+                            }
                         )
                     }
                 }
