@@ -7,6 +7,7 @@ package com.kenjigames.ividsmusic.domain.model
  * @property id Unique album identifier
  * @property title Name of the album
  * @property artistName Name of the performing artist
+ * @property artist Typed reference to performing [Artist] entity
  * @property coverUrl High-resolution album cover artwork URL
  * @property trackCount Total number of songs in the album
  * @property releaseDate Release year or date string
@@ -16,6 +17,7 @@ data class Album(
     override val id: String,
     val title: String,
     val artistName: String,
+    val artist: Artist? = null,
     override val coverUrl: String,
     val trackCount: Int = 0,
     val releaseDate: String = "",

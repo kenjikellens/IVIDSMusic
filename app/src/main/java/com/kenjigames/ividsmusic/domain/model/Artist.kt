@@ -9,13 +9,17 @@ package com.kenjigames.ividsmusic.domain.model
  * @property imageUrl High-resolution artist picture URL
  * @property fanCount Number of followers/listeners on Deezer
  * @property genres Associated music genre tags
+ * @property albums Associated albums released by this artist
+ * @property topTracks Popular tracks by this artist
  */
 data class Artist(
     override val id: String,
     val name: String,
     val imageUrl: String,
     val fanCount: Int = 0,
-    val genres: List<String> = emptyList()
+    val genres: List<String> = emptyList(),
+    val albums: List<Album> = emptyList(),
+    val topTracks: List<Song> = emptyList()
 ) : MusicItem() {
     override val displayTitle: String get() = name
     override val coverUrl: String get() = imageUrl

@@ -7,6 +7,7 @@ import com.kenjigames.ividsmusic.domain.model.Artist
 import com.kenjigames.ividsmusic.domain.model.Song
 import com.kenjigames.ividsmusic.repository.MusicRepository
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -26,7 +27,7 @@ data class SearchUiState(
     val isEmpty: Boolean get() = songs.isEmpty() && albums.isEmpty() && artists.isEmpty()
 }
 
-/** ViewModel powering Search screen */
+/** ViewModel powering Search screen using dedicated OOP API endpoints */
 class SearchViewModel(
     private val musicRepository: MusicRepository = MusicRepository()
 ) : ViewModel() {
@@ -53,49 +54,28 @@ class SearchViewModel(
         searchJob = viewModelScope.launch {
             delay(350) // Debounce search
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
-            musicRepository.searchTracks(newQuery, limit = 30).fold(
-                onSuccess = { trackList ->
-                    // Extract unique songs
-                    val songs = trackList
 
-                    // Extract unique albums from track list
-                    val albums = trackList
-                        .filter { it.albumTitle.isNotEmpty() }
-                        .distinctBy { it.albumTitle }
-                        .map { song ->
-                            Album(
-                                id = "album_${song.id}",
-                                title = song.albumTitle,
-                                artistName = song.artistName,
-                                coverUrl = song.coverUrl
-                            )
-                        }
+            // Execute parallel OOP queries to dedicated Deezer endpoints
+            val songsDeferred = async { musicRepository.searchTracks(newQuery, limit = 20) }
+            val albumsDeferred = async { musicRepository.searchAlbums(newQuery, limit = 15) }
+            val artistsDeferred = async { musicRepository.searchArtists(newQuery, limit = 15) }
 
-                    // Extract unique artists from track list with official artist picture
-                    val artists = trackList
-                        .filter { it.artistName.isNotEmpty() && it.artistName != "Unknown Artist" }
-                        .distinctBy { it.artistName }
-                        .map { song ->
-                            Artist(
-                                id = "artist_${song.id}",
-                                name = song.artistName,
-                                imageUrl = if (song.artistPictureUrl.isNotEmpty()) song.artistPictureUrl else song.coverUrl
-                            )
-                        }
+            val songsResult = songsDeferred.await()
+            val albumsResult = albumsDeferred.await()
+            val artistsResult = artistsDeferred.await()
 
-                    _uiState.update {
-                        it.copy(
-                            isLoading = false,
-                            songs = songs,
-                            albums = albums,
-                            artists = artists
-                        )
-                    }
-                },
-                onFailure = { error ->
-                    _uiState.update { it.copy(isLoading = false, errorMessage = error.message) }
-                }
-            )
+            val songs = songsResult.getOrDefault(emptyList())
+            val albums = albumsResult.getOrDefault(emptyList())
+            val artists = artistsResult.getOrDefault(emptyList())
+
+            _uiState.update {
+                it.copy(
+                    isLoading = false,
+                    songs = songs,
+                    albums = albums,
+                    artists = artists
+                )
+            }
         }
     }
 }

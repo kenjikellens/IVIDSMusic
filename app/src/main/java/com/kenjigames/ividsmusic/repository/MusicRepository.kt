@@ -1,6 +1,8 @@
 package com.kenjigames.ividsmusic.repository
 
 import android.content.Context
+import com.kenjigames.ividsmusic.domain.model.Album
+import com.kenjigames.ividsmusic.domain.model.Artist
 import com.kenjigames.ividsmusic.domain.model.Song
 import com.kenjigames.ividsmusic.network.NetworkModule
 import com.kenjigames.ividsmusic.network.NetworkMonitor
@@ -22,6 +24,28 @@ class MusicRepository(
             val response = deezerApiService.searchTracks(query, limit)
             val songs = response.data.map { it.toDomainModel(isSlow) }
             Result.success(songs)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Searches for albums matching a keyword query */
+    suspend fun searchAlbums(query: String, limit: Int = 15): Result<List<Album>> = withContext(Dispatchers.IO) {
+        try {
+            val response = deezerApiService.searchAlbums(query, limit)
+            val albums = response.data.map { it.toDomainModel() }
+            Result.success(albums)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /** Searches for artists matching a keyword query */
+    suspend fun searchArtists(query: String, limit: Int = 15): Result<List<Artist>> = withContext(Dispatchers.IO) {
+        try {
+            val response = deezerApiService.searchArtists(query, limit)
+            val artists = response.data.map { it.toDomainModel() }
+            Result.success(artists)
         } catch (e: Exception) {
             Result.failure(e)
         }

@@ -1,5 +1,7 @@
 package com.kenjigames.ividsmusic.network.api
 
+import com.kenjigames.ividsmusic.network.dto.DeezerAlbumResponseDto
+import com.kenjigames.ividsmusic.network.dto.DeezerArtistResponseDto
 import com.kenjigames.ividsmusic.network.dto.DeezerSearchResponseDto
 import retrofit2.http.GET
 import retrofit2.http.Path
@@ -17,6 +19,20 @@ interface DeezerApiService {
         @Query("limit") limit: Int = 25,
         @Query("index") index: Int = 0
     ): DeezerSearchResponseDto
+
+    /** Performs an album search query */
+    @GET("search/album")
+    suspend fun searchAlbums(
+        @Query("q") query: String,
+        @Query("limit") limit: Int = 20
+    ): DeezerAlbumResponseDto
+
+    /** Performs an artist search query */
+    @GET("search/artist")
+    suspend fun searchArtists(
+        @Query("q") query: String,
+        @Query("limit") limit: Int = 20
+    ): DeezerArtistResponseDto
 
     /** Fetches genre charts */
     @GET("chart/{genreId}/tracks")

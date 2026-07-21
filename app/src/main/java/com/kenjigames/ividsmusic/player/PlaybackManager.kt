@@ -37,7 +37,7 @@ class PlaybackManager private constructor() {
     private val queue = PlaybackQueue()
     private var exoPlayer: ExoPlayer? = null
 
-    /** Stream resolvers replicating yt-dlp native Android Innertube player API protocol */
+    /** Stream resolvers using YouTube Innertube multi-client payloads, Piped, and Invidious pools */
     private val primaryResolver: StreamResolver = NetworkModule.youtubeInnertubeResolver
     private val secondaryResolver: StreamResolver = NetworkModule.pipedStreamResolver
     private val fallbackResolver: StreamResolver = NetworkModule.invidiousStreamResolver
@@ -76,7 +76,7 @@ class PlaybackManager private constructor() {
 
             override fun onPlaybackStateChanged(playbackState: Int) {
                 when (playbackState) {
-                    Player.STATE_BUFFERING -> _playerState.update { it.copy(isBuffering = true, playbackStatus = "Buffering full stream...") }
+                    Player.STATE_BUFFERING -> _playerState.update { it.copy(isBuffering = true, playbackStatus = "Buffering stream...") }
                     Player.STATE_READY -> _playerState.update { it.copy(isBuffering = false, playbackStatus = if (it.isPlaying) "Playing" else "Paused") }
                     Player.STATE_ENDED -> {
                         _playerState.update { it.copy(playbackStatus = "Ended") }
@@ -114,7 +114,7 @@ class PlaybackManager private constructor() {
                 positionMs = 0L,
                 durationMs = (song.durationSeconds * 1000).toLong().coerceAtLeast(0L),
                 isBuffering = true,
-                playbackStatus = "Resolving YouTube audio..."
+                playbackStatus = "Resolving audio stream..."
             )
         }
 
@@ -132,7 +132,7 @@ class PlaybackManager private constructor() {
                     }
                 }
 
-                // 2. Resolve full YouTube audio stream using native yt-dlp Innertube protocol -> Piped -> Invidious
+                // 2. Resolve full YouTube audio stream using YouTube Innertube -> Piped -> Invidious
                 if (streamUrl == null) {
                     withContext(Dispatchers.IO) {
                         try {
@@ -148,12 +148,18 @@ class PlaybackManager private constructor() {
                                 streamUrl = primaryResolver.resolveAudioUrl(videoId) 
                                     ?: secondaryResolver.resolveAudioUrl(videoId) 
                                     ?: fallbackResolver.resolveAudioUrl(videoId)
-                                if (streamUrl != null) sourceDescription = "Full High-Quality YouTube Stream"
+                                if (streamUrl != null) sourceDescription = "Full YouTube Stream"
                             }
                         } catch (e: Throwable) {
                             Log.w(tag, "Stream resolver error: ${e.message}")
                         }
                     }
+                }
+
+                // 3. Fallback to previewUrl if YouTube is blocked on network
+                if (streamUrl == null && song.previewUrl.isNotEmpty()) {
+                    streamUrl = song.previewUrl
+                    sourceDescription = "Preview Stream"
                 }
 
                 val player = exoPlayer
@@ -165,7 +171,7 @@ class PlaybackManager private constructor() {
 
                 if (streamUrl != null) {
                     try {
-                        Log.d(tag, "Setting ExoPlayer mediaItem full audio URI: $streamUrl ($sourceDescription)")
+                        Log.d(tag, "Setting ExoPlayer mediaItem audio URI: $streamUrl ($sourceDescription)")
                         val mediaItem = MediaItem.fromUri(streamUrl!!)
                         player.setMediaItem(mediaItem)
                         player.prepare()
@@ -176,7 +182,7 @@ class PlaybackManager private constructor() {
                         _playerState.update { it.copy(isBuffering = false, playbackStatus = "Playback error") }
                     }
                 } else {
-                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "YouTube stream unavailable") }
+                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "Stream unavailable") }
                 }
             } catch (t: Throwable) {
                 Log.e(tag, "Fatal loadSong error: ${t.message}", t)
