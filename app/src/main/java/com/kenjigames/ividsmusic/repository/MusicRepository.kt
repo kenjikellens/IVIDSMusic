@@ -24,9 +24,9 @@ class MusicRepository(
     }
 
     /** Fetches default genre chart recommendations */
-    suspend fun getGenreChart(limit: Int = 20): Result<List<Song>> = withContext(Dispatchers.IO) {
+    suspend fun getGenreChart(genreId: Int = 0, limit: Int = 20): Result<List<Song>> = withContext(Dispatchers.IO) {
         try {
-            val response = deezerApiService.getGenreChart(limit)
+            val response = deezerApiService.getGenreChart(genreId, limit)
             val songs = response.data.map { it.toDomainModel() }
             Result.success(songs)
         } catch (e: Exception) {

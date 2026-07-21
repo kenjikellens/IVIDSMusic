@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -35,46 +35,50 @@ fun HomeScreen(
     val uiState by viewModel.uiState.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if (uiState.isLoading) {
-            Column(modifier = Modifier.padding(top = 16.dp)) {
-                SkeletonRow()
-                Spacer(modifier = Modifier.height(16.dp))
-                SkeletonRow()
-            }
-        } else if (uiState.errorMessage != null) {
+        if (uiState.errorMessage != null && uiState.allGenreNames.isEmpty()) {
             ErrorState(
                 message = uiState.errorMessage ?: "Failed to load home content",
                 onRetry = { viewModel.loadHomeContent() }
             )
         } else {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
                     .padding(bottom = 80.dp)
             ) {
                 // "Recommended for You" Row
-                if (uiState.recommendedSongs.isNotEmpty()) {
-                    HorizontalTileRow(
-                        title = "Recommended for You",
-                        items = uiState.recommendedSongs,
-                        onSeeAllClick = { onSeeAllClick("Recommended") },
-                        onItemClick = { item -> if (item is Song) onSongClick(item) }
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
+                item(key = "RecommendedForYou", contentType = "HeaderRow") {
+                    if (uiState.recommendedSongs.isNotEmpty()) {
+                        HorizontalTileRow(
+                            title = "Recommended for You",
+                            items = uiState.recommendedSongs,
+                            onSeeAllClick = { onSeeAllClick("Recommended") },
+                            onItemClick = { item -> if (item is Song) onSongClick(item) }
+                        )
+                    } else {
+                        SkeletonRow(title = "Recommended for You")
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 // Genre Rows
-                uiState.genreTracks.forEach { (genreTitle, tracks) ->
-                    if (tracks.isNotEmpty()) {
+                items(
+                    items = uiState.allGenreNames,
+                    key = { genreTitle -> genreTitle },
+                    contentType = { "GenreRow" }
+                ) { genreTitle ->
+                    val tracks = uiState.genreTracks[genreTitle]
+                    if (tracks != null && tracks.isNotEmpty()) {
                         HorizontalTileRow(
                             title = genreTitle,
                             items = tracks,
                             onSeeAllClick = { onSeeAllClick(genreTitle) },
                             onItemClick = { item -> if (item is Song) onSongClick(item) }
                         )
-                        Spacer(modifier = Modifier.height(16.dp))
+                    } else {
+                        SkeletonRow(title = genreTitle)
                     }
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
         }

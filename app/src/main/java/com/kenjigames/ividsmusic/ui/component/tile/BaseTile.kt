@@ -68,7 +68,7 @@ fun BaseTile(
         colors = CardDefaults.cardColors(containerColor = DarkSurface),
         border = BorderStroke(1.5.dp, GlassBorder)
     ) {
-        Column(modifier = Modifier.padding(10.dp)) {
+        Column(modifier = Modifier.padding(8.dp)) {
             // Image section with custom shape & overlay
             androidx.compose.foundation.layout.Box(
                 modifier = Modifier
@@ -85,7 +85,7 @@ fun BaseTile(
                 imageOverlay?.invoke()
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(6.dp))
 
             // Title
             Text(

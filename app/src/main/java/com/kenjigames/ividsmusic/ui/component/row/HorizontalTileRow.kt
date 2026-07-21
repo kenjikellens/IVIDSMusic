@@ -48,7 +48,7 @@ fun HorizontalTileRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -70,8 +70,8 @@ fun HorizontalTileRow(
 
         // LazyRow Container
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            contentPadding = PaddingValues(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(items, key = { it.id }) { item ->
                 when (item) {

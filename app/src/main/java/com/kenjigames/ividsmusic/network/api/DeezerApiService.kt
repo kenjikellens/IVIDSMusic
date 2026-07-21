@@ -19,8 +19,9 @@ interface DeezerApiService {
     ): DeezerSearchResponseDto
 
     /** Fetches genre charts */
-    @GET("chart/0/tracks")
+    @GET("chart/{genreId}/tracks")
     suspend fun getGenreChart(
+        @Path("genreId") genreId: Int = 0,
         @Query("limit") limit: Int = 20
     ): DeezerSearchResponseDto
 
