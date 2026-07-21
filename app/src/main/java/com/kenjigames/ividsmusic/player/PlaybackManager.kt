@@ -36,9 +36,11 @@ class PlaybackManager private constructor() {
 
     private val queue = PlaybackQueue()
     private var exoPlayer: ExoPlayer? = null
-    private val primaryResolver: StreamResolver = NetworkModule.pipedStreamResolver
-    private val secondaryResolver: StreamResolver = NetworkModule.invidiousStreamResolver
-    private val fallbackResolver: StreamResolver = NetworkModule.youtubeHtmlScraper
+
+    /** Resolvers replicating yt-dlp native Android Innertube player API protocol */
+    private val primaryResolver: StreamResolver = NetworkModule.youtubeInnertubeResolver
+    private val secondaryResolver: StreamResolver = NetworkModule.pipedStreamResolver
+    private val fallbackResolver: StreamResolver = NetworkModule.invidiousStreamResolver
 
     private val progressHandler = Handler(Looper.getMainLooper())
     private val progressRunnable = object : Runnable {
@@ -111,7 +113,7 @@ class PlaybackManager private constructor() {
                 positionMs = 0L,
                 durationMs = (song.durationSeconds * 1000).toLong().coerceAtLeast(0L),
                 isBuffering = true,
-                playbackStatus = "Resolving full YouTube audio..."
+                playbackStatus = "Resolving YouTube audio..."
             )
         }
 
@@ -129,7 +131,7 @@ class PlaybackManager private constructor() {
                     }
                 }
 
-                // 2. Resolve full YouTube audio stream
+                // 2. Resolve full YouTube audio stream (Innertube / yt-dlp protocol -> Piped -> Invidious)
                 if (streamUrl == null) {
                     withContext(Dispatchers.IO) {
                         try {
@@ -173,7 +175,7 @@ class PlaybackManager private constructor() {
                         _playerState.update { it.copy(isBuffering = false, playbackStatus = "Playback error") }
                     }
                 } else {
-                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "Full stream unavailable") }
+                    _playerState.update { it.copy(isBuffering = false, playbackStatus = "YouTube stream unavailable") }
                 }
             } catch (t: Throwable) {
                 Log.e(tag, "Fatal loadSong error: ${t.message}", t)
@@ -202,49 +204,20 @@ class PlaybackManager private constructor() {
         }
     }
 
-    /** Skips to next song in queue */
+    /** Plays next song in queue */
     fun next() {
-        Log.d(tag, "next() called. Navigating forward in queue.")
-        queue.next()?.let { 
-            Log.d(tag, "Next track found: ${it.title} by ${it.artistName}")
-            loadSong(it) 
-        } ?: Log.w(tag, "No next track found in queue")
+        queue.next()?.let { loadSong(it) }
     }
 
-    /** Skips to previous song in queue */
+    /** Plays previous song in queue */
     fun previous() {
-        Log.d(tag, "previous() called. Checking if we should restart current track or go back.")
-        exoPlayer?.let { player ->
-            if (player.currentPosition > 3000) {
-                Log.d(tag, "Current track position is > 3s. Restarting current track.")
-                player.seekTo(0)
-                return
-            }
-        }
-        queue.previous()?.let { 
-            Log.d(tag, "Previous track found: ${it.title} by ${it.artistName}")
-            loadSong(it) 
-        } ?: Log.w(tag, "No previous track found in queue")
+        queue.previous()?.let { loadSong(it) }
     }
 
-    /** Seeks to target timestamp in milliseconds */
+    /** Seeks to position in milliseconds */
     fun seekTo(positionMs: Long) {
-        Log.d(tag, "seekTo() called. Seeking to: ${positionMs}ms")
         exoPlayer?.seekTo(positionMs)
-    }
-
-    /** Toggles queue shuffle mode */
-    fun toggleShuffle() {
-        val enabled = queue.toggleShuffle()
-        Log.d(tag, "toggleShuffle() called. Shuffle enabled status changed to: $enabled")
-        _playerState.update { it.copy(isShuffleEnabled = enabled) }
-    }
-
-    /** Toggles single track repeat mode */
-    fun toggleRepeatOne() {
-        val enabled = queue.toggleRepeatOne()
-        Log.d(tag, "toggleRepeatOne() called. Repeat status changed to: $enabled")
-        _playerState.update { it.copy(isRepeatOne = enabled) }
+        _playerState.update { it.copy(positionMs = positionMs) }
     }
 
     private fun startProgressUpdate() {

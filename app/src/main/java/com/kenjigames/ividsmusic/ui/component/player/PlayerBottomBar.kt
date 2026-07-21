@@ -4,7 +4,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
@@ -38,7 +41,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.kenjigames.ividsmusic.domain.model.PlayerState
-import com.kenjigames.ividsmusic.ui.theme.DarkSurfaceVariant
 import com.kenjigames.ividsmusic.ui.theme.GlassBorder
 import com.kenjigames.ividsmusic.ui.theme.PrimaryAccent
 import com.kenjigames.ividsmusic.ui.theme.TextMuted
@@ -57,7 +59,8 @@ fun formatTimeMs(millis: Long): String {
 }
 
 /**
- * Persistent bottom player bar composable matching the full feature set of the original Web UI player bar.
+ * Persistent glassmorphism bottom player bar composable with progress top line,
+ * album thumbnail glow, and playback action controls.
  *
  * @param playerState Current player state
  * @param modifier Compose modifier
@@ -88,27 +91,40 @@ fun PlayerBottomBar(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .padding(horizontal = 12.dp, vertical = 4.dp)
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xCC1E1E2A)),
+            colors = CardDefaults.cardColors(containerColor = Color(0xF01A1A26)),
             border = BorderStroke(1.dp, GlassBorder)
         ) {
             Column {
+                // Top Thin Progress Line
+                if (playerState.durationMs > 0) {
+                    val progressFraction = (playerState.positionMs.toFloat() / playerState.durationMs.toFloat()).coerceIn(0f, 1f)
+                    LinearProgressIndicator(
+                        progress = { progressFraction },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(2.dp),
+                        color = PrimaryAccent,
+                        trackColor = Color(0x22FFFFFF)
+                    )
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Album Cover Image
+                    // Album Cover Image with rounded glass border
                     AsyncImage(
                         model = song.coverUrl,
                         contentDescription = song.title,
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .size(46.dp)
-                            .clip(RoundedCornerShape(8.dp))
+                            .clip(RoundedCornerShape(10.dp))
                     )
 
                     Spacer(modifier = Modifier.width(12.dp))
@@ -140,18 +156,8 @@ fun PlayerBottomBar(
                         }
                     }
 
-                    // Download Action Button
-                    IconButton(onClick = onDownload, modifier = Modifier.size(36.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.Download,
-                            contentDescription = "Download",
-                            tint = if (song.isDownloaded) PrimaryAccent else TextMuted,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
                     // Like Action Button
-                    IconButton(onClick = onToggleLike, modifier = Modifier.size(36.dp)) {
+                    IconButton(onClick = onToggleLike, modifier = Modifier.size(34.dp)) {
                         Icon(
                             imageVector = if (song.isLiked) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                             contentDescription = "Like",
@@ -160,48 +166,34 @@ fun PlayerBottomBar(
                         )
                     }
 
-                    // More Info Button (Navigates to Song Detail)
-                    IconButton(onClick = onClick, modifier = Modifier.size(36.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = "More Info",
-                            tint = TextMuted,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-
-                    // Play/Pause Button
-                    IconButton(onClick = onTogglePlayPause, modifier = Modifier.size(36.dp)) {
+                    // Play/Pause Action Button with accent circle
+                    Box(
+                        modifier = Modifier
+                            .size(38.dp)
+                            .clip(CircleShape)
+                            .background(PrimaryAccent)
+                            .clickable(onClick = onTogglePlayPause),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Icon(
                             imageVector = if (playerState.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                             contentDescription = if (playerState.isPlaying) "Pause" else "Play",
                             tint = Color.White,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(22.dp)
                         )
                     }
 
+                    Spacer(modifier = Modifier.width(6.dp))
+
                     // Next Button
-                    IconButton(onClick = onNext, modifier = Modifier.size(36.dp)) {
+                    IconButton(onClick = onNext, modifier = Modifier.size(34.dp)) {
                         Icon(
                             imageVector = Icons.Default.SkipNext,
                             contentDescription = "Next",
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
+                            tint = TextPrimary,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
-                }
-
-                // Progress Indicator Bar
-                if (playerState.durationMs > 0) {
-                    val progressFraction = (playerState.positionMs.toFloat() / playerState.durationMs.toFloat()).coerceIn(0f, 1f)
-                    LinearProgressIndicator(
-                        progress = { progressFraction },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
-                        color = PrimaryAccent,
-                        trackColor = Color.Transparent
-                    )
                 }
             }
         }

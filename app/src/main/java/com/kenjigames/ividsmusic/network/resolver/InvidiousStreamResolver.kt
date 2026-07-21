@@ -17,18 +17,17 @@ class InvidiousStreamResolver(client: OkHttpClient) : StreamResolver {
 
     private val tag = "InvidiousResolver"
 
-    /** Fast 3-second timeout client to avoid hanging or slow network bottlenecks */
     private val fastClient: OkHttpClient = client.newBuilder()
-        .connectTimeout(3, TimeUnit.SECONDS)
-        .readTimeout(3, TimeUnit.SECONDS)
+        .connectTimeout(4, TimeUnit.SECONDS)
+        .readTimeout(4, TimeUnit.SECONDS)
         .build()
 
     private val instances = arrayOf(
-        "https://invidious.flokinet.to",
-        "https://iv.melmac.space",
-        "https://invidious.drgns.space",
-        "https://invidious.perennialte.chs.org",
-        "https://yt.artemislena.eu"
+        "https://yewtu.be",
+        "https://invidious.nerdvpn.de",
+        "https://invidious.projectsegfau.lt",
+        "https://invidious.privacydev.net",
+        "https://invidious.drgns.space"
     )
 
     override suspend fun resolveVideoId(query: String): String? = withContext(Dispatchers.IO) {

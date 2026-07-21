@@ -13,7 +13,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.kenjigames.ividsmusic.domain.model.Album
 import com.kenjigames.ividsmusic.domain.model.Artist
 import com.kenjigames.ividsmusic.domain.model.MusicItem
@@ -27,7 +30,7 @@ import com.kenjigames.ividsmusic.ui.theme.Typography
 
 /**
  * Reusable horizontal scrollable row container for rendering polymorphic lists of [MusicItem].
- * Dynamically dispatches items to SongTile, ArtistTile, or AlbumTile based on type.
+ * Uses bold modern typography for genre titles matching Spotify/Apple Music styling.
  *
  * @param title Section header title
  * @param items List of polymorphic MusicItem domain models
@@ -48,21 +51,30 @@ fun HorizontalTileRow(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = title,
-                style = Typography.titleLarge,
-                color = TextPrimary
+                style = TextStyle(
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = (-0.4).sp,
+                    color = TextPrimary
+                )
             )
             if (onSeeAllClick != null) {
-                TextButton(onClick = onSeeAllClick) {
+                TextButton(
+                    onClick = onSeeAllClick,
+                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp)
+                ) {
                     Text(
-                        text = "See All",
-                        style = Typography.bodyMedium,
-                        color = PrimaryAccent
+                        text = "See all",
+                        style = Typography.labelLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = PrimaryAccent
+                        )
                     )
                 }
             }
@@ -70,8 +82,8 @@ fun HorizontalTileRow(
 
         // LazyRow Container
         LazyRow(
-            contentPadding = PaddingValues(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(items, key = { it.id }) { item ->
                 when (item) {

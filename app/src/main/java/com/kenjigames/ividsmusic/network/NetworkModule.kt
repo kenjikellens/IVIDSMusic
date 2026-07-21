@@ -4,7 +4,7 @@ import com.kenjigames.ividsmusic.network.api.DeezerApiService
 import com.kenjigames.ividsmusic.network.resolver.InvidiousStreamResolver
 import com.kenjigames.ividsmusic.network.resolver.PipedStreamResolver
 import com.kenjigames.ividsmusic.network.resolver.StreamResolver
-import com.kenjigames.ividsmusic.network.resolver.YouTubeHtmlScraper
+import com.kenjigames.ividsmusic.network.resolver.YouTubeInnertubeResolver
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -34,18 +34,18 @@ object NetworkModule {
             .create(DeezerApiService::class.java)
     }
 
-    /** Primary stream resolver using Piped API for full-length high quality audio */
+    /** Primary stream resolver replicating yt-dlp native Android Innertube player API calls */
+    val youtubeInnertubeResolver: StreamResolver by lazy {
+        YouTubeInnertubeResolver(okHttpClient)
+    }
+
+    /** Secondary stream resolver using Piped API pool */
     val pipedStreamResolver: StreamResolver by lazy {
         PipedStreamResolver(okHttpClient)
     }
 
-    /** Secondary stream resolver using Invidious pool */
+    /** Fallback stream resolver using Invidious pool */
     val invidiousStreamResolver: StreamResolver by lazy {
         InvidiousStreamResolver(okHttpClient)
-    }
-
-    /** Fallback stream resolver using YouTube HTML scraping */
-    val youtubeHtmlScraper: StreamResolver by lazy {
-        YouTubeHtmlScraper(okHttpClient)
     }
 }

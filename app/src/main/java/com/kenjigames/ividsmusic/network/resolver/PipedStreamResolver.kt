@@ -17,14 +17,15 @@ class PipedStreamResolver(client: OkHttpClient) : StreamResolver {
     private val tag = "PipedStreamResolver"
 
     private val fastClient: OkHttpClient = client.newBuilder()
-        .connectTimeout(5, TimeUnit.SECONDS)
-        .readTimeout(5, TimeUnit.SECONDS)
+        .connectTimeout(4, TimeUnit.SECONDS)
+        .readTimeout(4, TimeUnit.SECONDS)
         .build()
 
     private val pipedInstances = arrayOf(
-        "https://pipedapi.kavin.rocks",
-        "https://api.piped.video",
-        "https://pipedapi.drgns.space"
+        "https://pipedapi.adminforge.de",
+        "https://pipedapi.astral.autismservices.education",
+        "https://pipedapi.drgns.space",
+        "https://pipedapi.kavin.rocks"
     )
 
     override suspend fun resolveVideoId(query: String): String? = withContext(Dispatchers.IO) {
@@ -75,7 +76,6 @@ class PipedStreamResolver(client: OkHttpClient) : StreamResolver {
                         val json = JSONObject(jsonStr)
                         val audioStreams = json.optJSONArray("audioStreams")
                         if (audioStreams != null && audioStreams.length() > 0) {
-                            // Pick highest bitrate audio stream
                             var bestUrl: String? = null
                             var maxBitrate = -1
 
