@@ -129,14 +129,14 @@ function createWindow() {
             nodeIntegration: false,
             webSecurity: false
         },
-        icon: path.join(__dirname, 'app/src/main/ic_launcher-playstore.png')
+        icon: path.join(__dirname, '../app/src/main/ic_launcher-playstore.png')
     });
 
     // Hide default menu bar for standard app look
     mainWindow.setMenuBarVisibility(false);
 
     // Load local index.html
-    const indexPath = path.join(__dirname, 'pc/gui/index.html');
+    const indexPath = path.join(__dirname, 'gui/index.html');
     mainWindow.loadFile(indexPath);
 
     mainWindow.on('closed', () => {
@@ -387,4 +387,3 @@ ipcMain.on('cancel-download', () => {
         activeManager.cancel();
     }
 });
-

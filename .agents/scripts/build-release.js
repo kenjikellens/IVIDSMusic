@@ -18,7 +18,7 @@ const ROOT_DIR = path.join(__dirname, '../..');
 const GRADLE_PATH = path.join(ROOT_DIR, 'app/build.gradle.kts');
 const UPDATER_PATH = path.join(ROOT_DIR, 'app/src/main/assets/logic/updater.js');
 const SETTINGS_PATH = path.join(ROOT_DIR, 'app/src/main/assets/gui/pages/settings.html');
-const PACKAGE_PATH = path.join(ROOT_DIR, 'package.json');
+const PACKAGE_PATH = path.join(ROOT_DIR, 'pc/package.json');
 
 // Helper to run shell commands synchronously and print outputs
 function runCommand(command, errorMessage) {
@@ -115,7 +115,7 @@ function main() {
     // Commit changes on main
     console.log('\nCommitting version synchronization updates on main branch...');
     runCommand(
-        'git add app/build.gradle.kts package.json app/src/main/assets/logic/updater.js app/src/main/assets/gui/pages/settings.html',
+        'git add app/build.gradle.kts pc/package.json app/src/main/assets/logic/updater.js app/src/main/assets/gui/pages/settings.html',
         'Failed to stage version configuration updates'
     );
     if (hasStagedChanges()) {
@@ -139,7 +139,7 @@ function main() {
     }
 
     console.log('\nCompiling PC Desktop Portable EXE...');
-    if (!runCommand('npm run dist', 'Failed to package PC Desktop executable')) {
+    if (!runCommand('npm --prefix pc run dist', 'Failed to package PC Desktop executable')) {
         process.exit(1);
     }
 
@@ -156,10 +156,11 @@ function main() {
     const mobileSource = path.join(ROOT_DIR, 'app/build/outputs/apk/mobile/release/app-mobile-release.apk');
     const tvSource = path.join(ROOT_DIR, 'app/build/outputs/apk/tv/release/app-tv-release.apk');
     
-    // Find PC build output (e.g. dist/ividsmusic 0.1.6 Portable.exe)
-    const distFiles = fs.readdirSync(path.join(ROOT_DIR, 'dist'));
+    // Find PC build output (e.g. pc/dist/ividsmusic 0.1.6 Portable.exe or dist/)
+    const distDir = fs.existsSync(path.join(ROOT_DIR, 'pc/dist')) ? path.join(ROOT_DIR, 'pc/dist') : path.join(ROOT_DIR, 'dist');
+    const distFiles = fs.existsSync(distDir) ? fs.readdirSync(distDir) : [];
     const pcSourceFile = distFiles.find(file => file.endsWith('.exe'));
-    const pcSource = pcSourceFile ? path.join(ROOT_DIR, 'dist', pcSourceFile) : null;
+    const pcSource = pcSourceFile ? path.join(distDir, pcSourceFile) : null;
 
     // Verify presence of all three built files
     if (!fs.existsSync(mobileSource) || !fs.existsSync(tvSource) || !pcSource || !fs.existsSync(pcSource)) {

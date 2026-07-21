@@ -39,8 +39,7 @@ def main():
         port = s.getsockname()[1]
 
     # Resolve the absolute path of the assets directory
-    current_dir = os.path.dirname(os.path.abspath(__file__))
-    assets_dir = os.path.join(current_dir, "pc")
+    assets_dir = os.path.dirname(os.path.abspath(__file__))
 
     if not os.path.exists(assets_dir):
         print(f"Error: Assets folder not found at '{assets_dir}'")

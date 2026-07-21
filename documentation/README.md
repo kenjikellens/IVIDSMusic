@@ -2,7 +2,7 @@
 
 **IVIDS Music** is a high-performance, ad-free music streaming application featuring a **dual-target architecture**:
 1. **Native Android App (Mobile & Android TV)**: Built with **Kotlin**, **Jetpack Compose**, **Jetpack Media3 (ExoPlayer)**, and **Room Database**.
-2. **PC Desktop & Web App (Electron & Browser)**: Built with standalone HTML5/CSS3/JS, housed in the [`pc/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/pc/) directory and launched via `run_pc.py` or Electron (`main.js`).
+2. **PC Desktop & Web App (Electron & Browser)**: Built with standalone HTML5/CSS3/JS, housed in the [`pc/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/pc/) directory and launched via `pc/run_pc.py` or Electron (`pc/main.js`).
 
 ---
 
@@ -39,7 +39,7 @@
 |---|---|---|
 | **Native Mobile App** | Kotlin 2.x + Jetpack Compose | [`app/src/mobile/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/mobile/) — Full Compose Single-Activity UI |
 | **Shared Android Logic** | Room + Media3 ExoPlayer + Retrofit | [`app/src/main/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/main/) — Domain models, DAOs, repositories, player service |
-| **PC Desktop / Dev Server** | Electron + Python (`run_pc.py`) | [`pc/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/pc/) — Web UI assets (`pc/gui/`, `pc/logic/`) for PC executable |
+| **PC Desktop / Dev Server** | Electron + Python (`pc/run_pc.py`) | [`pc/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/pc/) — Web UI assets (`pc/gui/`, `pc/logic/`) for PC executable |
 | **UI Components** | OOP BaseTile Hierarchy | [`ui/component/tile/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/main/java/com/kenjigames/ividsmusic/ui/component/tile/) — `BaseTile` -> `SongTile`, `ArtistTile`, `AlbumTile` |
 | **Audio Engine** | Jetpack Media3 Session + SimpleCache | [`player/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/main/java/com/kenjigames/ividsmusic/player/) — Background playback, 500MB LRU disk cache |
 | **Persistence** | Room DB + DataStore | [`data/`](file:///c:/Users/kenji/AndroidStudioProjects/IVIDSMusic/app/src/main/java/com/kenjigames/ividsmusic/data/) — Liked tracks, history (20 cap), playlists, scores, preferences |

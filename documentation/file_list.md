@@ -111,8 +111,8 @@
 ../app/src/tv/res/layout/activity_main.xml
 ../build.gradle.kts
 ../gradle.properties
-../main.js
-../package.json
+../pc/main.js
+../pc/package.json
 ../pc/gui/index.css
 ../pc/gui/index.html
 ../pc/gui/lang/ar.json
@@ -188,10 +188,10 @@
 ../pc/logic/toast.js
 ../pc/logic/tv-nav.js
 ../pc/logic/updater.js
-../preload.js
-../run_pc.py
+../pc/preload.js
+../pc/run_pc.py
+../pc/src/downloadManager.js
 ../settings.gradle.kts
-../src/downloadManager.js
 ./algorithm.md
 ./architecture/api_integration.md
 ./architecture/audio_playback.md

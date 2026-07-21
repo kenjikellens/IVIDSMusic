@@ -17,13 +17,14 @@
     "appId": "com.kenjigames.ividsmusic",
     "win": {
       "target": "portable",
-      "icon": "app/src/main/ic_launcher-playstore.png"
+      "icon": "../app/src/main/ic_launcher-playstore.png"
     },
     "files": [
       "main.js",
       "preload.js",
       "src/downloadManager.js",
-      "pc/**/*"
+      "gui/**/*",
+      "logic/**/*"
     ]
   }
 }
