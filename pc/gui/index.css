@@ -703,7 +703,7 @@ header {
 .music-card:focus-visible {
     background: var(--card-color, rgba(255, 255, 255, 0.06));
     box-shadow: inset 0 -2px 0 0 color-mix(in srgb, var(--card-color, var(--primary-color)), white 30%),
-                0 0 0 2px rgba(255, 255, 255, 0.35);
+        0 0 0 2px rgba(255, 255, 255, 0.35);
     z-index: 10;
     outline: none;
 }
@@ -1512,62 +1512,87 @@ header {
 
 /* 5K/8K Monitors & Large TVs */
 @media (min-width: 3800px) {
+
     /* Styles the document root scale for 5K/8K ultra-large displays and TVs to keep content legible */
-    :root { --ui-base-scale: 1.35; }
+    :root {
+        --ui-base-scale: 1.35;
+    }
 }
 
 /* 4K Monitors / Large Displays */
 @media (min-width: 2500px) {
+
     /* Styles the document root scale for 4K high-resolution monitors to balance density and sizing */
-    :root { --ui-base-scale: 1.2; }
+    :root {
+        --ui-base-scale: 1.2;
+    }
 }
 
 /* QHD / High-Res Desktop (1440p) */
 @media (min-width: 1900px) {
+
     /* Styles the document root scale for QHD displays to keep elements comfortable for close-up viewing */
-    :root { --ui-base-scale: 1.1; }
+    :root {
+        --ui-base-scale: 1.1;
+    }
 }
 
 /* Standard Widescreen (1080p) */
 @media (min-width: 1600px) {
+
     /* Styles the document root scale for standard 1080p monitors at a comfortable, default scale */
-    :root { --ui-base-scale: 1.0; }
+    :root {
+        --ui-base-scale: 1.0;
+    }
 }
 
 /* ── Standard & Mobile (Scale Down) ── */
 
 /* Small Laptops / Tablets Landscape */
 @media (max-width: 1400px) {
-    :root { --ui-base-scale: 0.95; }
+    :root {
+        --ui-base-scale: 0.95;
+    }
 }
 
 /* Tablet Large (Rule: 1200px) */
 @media (max-width: 1200px) {
-    :root { --ui-base-scale: 0.85; }
+    :root {
+        --ui-base-scale: 0.85;
+    }
 }
 
 /* Tablet Small (Rule: 1024px) */
 @media (max-width: 1024px) {
-    :root { --ui-base-scale: 0.8; }
+    :root {
+        --ui-base-scale: 0.8;
+    }
 }
 
 /* Mobile Large (Landscape) (Rule: 768px) */
 @media (max-width: 768px) {
-    :root { --ui-base-scale: 0.7; }
+    :root {
+        --ui-base-scale: 0.7;
+    }
 }
 
 /* Mobile Medium (Rule: 700px) */
 @media (max-width: 700px) {
-    :root { --ui-base-scale: 0.65; }
+    :root {
+        --ui-base-scale: 0.65;
+    }
 }
 
 /* Mobile Small (Rule: 600px) */
 @media (max-width: 600px) {
-    :root { --ui-base-scale: 0.55; }
+    :root {
+        --ui-base-scale: 0.55;
+    }
 }
 
 
 @media (orientation: portrait) {
+
     /*
      * Block: :root portrait variables
      * Purpose: Shifts player heights and resets sidebar widths to accommodate a horizontal bottom tab bar.
@@ -1713,7 +1738,8 @@ header {
 
     /* ── Main content: spacious padding with 100% player/navbar scroll clearance ── */
     #main-view {
-        padding: 16px 12px 320px 12px !important; /* Spacious but thin, symmetric 12px side padding */
+        padding: 16px 12px 320px 12px !important;
+        /* Spacious but thin, symmetric 12px side padding */
     }
 
     /* ── Hero: scale-independent physical dimensions ── */
@@ -1791,7 +1817,8 @@ header {
         margin-right: -12px !important;
         padding-left: 12px !important;
         padding-right: 12px !important;
-        gap: 12px !important; /* Elegant physical gap between cards */
+        gap: 12px !important;
+        /* Elegant physical gap between cards */
         margin-bottom: 20px !important;
     }
 
@@ -1808,7 +1835,8 @@ header {
     .row-title {
         font-size: 18px !important;
         margin-bottom: 12px !important;
-        padding-left: 0 !important; /* Aligns perfectly with the 12px main-view boundary */
+        padding-left: 0 !important;
+        /* Aligns perfectly with the 12px main-view boundary */
     }
 
     .row-header {
@@ -2127,7 +2155,7 @@ header {
      * Selector: .settings-container > .row-title (portrait)
      * Purpose: The main "Settings" page heading. Physically sized for mobile readability.
      */
-    .settings-container > .row-title {
+    .settings-container>.row-title {
         font-size: 30px !important;
         margin-bottom: 24px !important;
         letter-spacing: -0.5px !important;
@@ -2435,25 +2463,31 @@ header {
         height: 140px !important;
         margin: 0 auto !important;
     }
+
     .profile-avatar {
         width: 100% !important;
         height: 100% !important;
         border-width: 3px !important;
-        padding: 0 !important; /* Remove padding so injected images fill the circle */
-        font-size: 60px !important; /* In case it's an injected text element */
+        padding: 0 !important;
+        /* Remove padding so injected images fill the circle */
+        font-size: 60px !important;
+        /* In case it's an injected text element */
         display: flex;
         align-items: center;
         justify-content: center;
     }
+
     .profile-header {
         flex-direction: column !important;
         text-align: center !important;
         gap: 20px !important;
         padding: 30px 20px !important;
     }
+
     .profile-name {
         font-size: 28px !important;
     }
+
     .profile-actions {
         justify-content: center !important;
     }
@@ -2462,153 +2496,182 @@ header {
        Touch devices don't need hover scales, and they can cause jitter on tap.
        We meticulously override :hover, :active, and :focus-visible.
        Crucially, we also disable `transition` to prevent animation lag. */
-    .music-card:hover, .music-card:active, .music-card:focus-visible,
-    .music-card.type-artist:hover, .music-card.type-artist:active, .music-card.type-artist:focus-visible,
-    .playlist-card:hover, .playlist-card:active, .playlist-card:focus-visible,
-    .btn:hover, .btn:active, .btn:focus-visible,
-    .nav-links a:hover, .nav-links a:active, .nav-links a:focus-visible,
-    .library-item:hover, .library-item:active, .library-item:focus-visible,
-    .artist-card:hover, .artist-card:active, .artist-card:focus-visible,
-    .lang-modal-close:hover, .lang-modal-close:active, .lang-modal-close:focus-visible,
-    .close-btn:hover, .close-btn:active, .close-btn:focus-visible,
-    .settings-item:hover, .settings-item:active, .settings-item:focus-visible,
-    .player-control-btn.main:hover, .player-control-btn.main:active,
-    .player-control-btn.secondary:hover, .player-control-btn.secondary:active {
+    .music-card:hover,
+    .music-card:active,
+    .music-card:focus-visible,
+    .music-card.type-artist:hover,
+    .music-card.type-artist:active,
+    .music-card.type-artist:focus-visible,
+    .playlist-card:hover,
+    .playlist-card:active,
+    .playlist-card:focus-visible,
+    .btn:hover,
+    .btn:active,
+    .btn:focus-visible,
+    .nav-links a:hover,
+    .nav-links a:active,
+    .nav-links a:focus-visible,
+    .library-item:hover,
+    .library-item:active,
+    .library-item:focus-visible,
+    .artist-card:hover,
+    .artist-card:active,
+    .artist-card:focus-visible,
+    .lang-modal-close:hover,
+    .lang-modal-close:active,
+    .lang-modal-close:focus-visible,
+    .close-btn:hover,
+    .close-btn:active,
+    .close-btn:focus-visible,
+    .settings-item:hover,
+    .settings-item:active,
+    .settings-item:focus-visible,
+    .player-control-btn.main:hover,
+    .player-control-btn.main:active,
+    .player-control-btn.secondary:hover,
+    .player-control-btn.secondary:active {
         transform: scale(1) !important;
         transition: none !important;
     }
-    
+
     /* Cancel the stacked disk hover effect specifically */
     .music-card.type-album:hover .card-image-box::before,
     .music-card.type-album:active .card-image-box::before,
     .music-card.type-album:focus-visible .card-image-box::before {
         transform: translate(6px, 6px) scale(0.98) !important;
     }
+
     .music-card.type-album:hover .card-image-box::after,
     .music-card.type-album:active .card-image-box::after,
     .music-card.type-album:focus-visible .card-image-box::after {
         transform: translate(12px, 12px) scale(0.96) !important;
     }
 
-/* ── Player Bar: compact stacked layout ── */
-#player-bar {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    gap: calc(8px * var(--ui-scale));
-    padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(16px * var(--ui-scale));
-    margin: 0 calc(16px * var(--ui-scale)) calc(calc(88px * var(--ui-scale)) + env(safe-area-inset-bottom, 0px)) calc(16px * var(--ui-scale));
-    border-radius: calc(16px * var(--ui-scale));
-    min-height: unset;
-    height: auto;
-}
+    /* ── Player Bar: compact stacked layout ── */
+    #player-bar {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        gap: calc(8px * var(--ui-scale));
+        padding: calc(12px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(16px * var(--ui-scale));
+        margin: 0 calc(16px * var(--ui-scale)) calc(calc(88px * var(--ui-scale)) + env(safe-area-inset-bottom, 0px)) calc(16px * var(--ui-scale));
+        border-radius: calc(16px * var(--ui-scale));
+        min-height: unset;
+        height: auto;
+    }
 
-#player-bar.is-inactive {
-    margin: 0 calc(24px * var(--ui-scale)) 0 calc(24px * var(--ui-scale));
-}
+    #player-bar.is-inactive {
+        margin: 0 calc(24px * var(--ui-scale)) 0 calc(24px * var(--ui-scale));
+    }
 
-/* Row 1: info + play/pause */
-.player-info {
-    display: flex;
-    align-items: center;
-    gap: calc(10px * var(--ui-scale));
-    width: 100%;
-}
+    /* Row 1: info + play/pause */
+    .player-info {
+        display: flex;
+        align-items: center;
+        gap: calc(10px * var(--ui-scale));
+        width: 100%;
+    }
 
-.player-cover {
-    width: calc(52px * var(--ui-scale));
-    height: calc(52px * var(--ui-scale));
-    border-radius: calc(10px * var(--ui-scale));
-}
+    .player-cover {
+        width: calc(52px * var(--ui-scale));
+        height: calc(52px * var(--ui-scale));
+        border-radius: calc(10px * var(--ui-scale));
+    }
 
-.player-track-details {
-    flex: 1;
-    min-width: 0;
-    margin-left: 0;
-}
+    .player-track-details {
+        flex: 1;
+        min-width: 0;
+        margin-left: 0;
+    }
 
-.player-title {
-    font-size: 0.88rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+    .player-title {
+        font-size: 0.88rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-.player-artist {
-    font-size: 0.72rem;
-    letter-spacing: 0.01em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
+    .player-artist {
+        font-size: 0.72rem;
+        letter-spacing: 0.01em;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
-/* Row 2: controls + progress merged into one row */
-.player-controls {
-    width: 100%;
-    gap: calc(4px * var(--ui-scale));
-}
+    /* Row 2: controls + progress merged into one row */
+    .player-controls {
+        width: 100%;
+        gap: calc(4px * var(--ui-scale));
+    }
 
-.player-main-controls {
-    gap: calc(20px * var(--ui-scale));
-}
+    .player-main-controls {
+        gap: calc(20px * var(--ui-scale));
+    }
 
-.player-control-btn.main {
-    width: calc(38px * var(--ui-scale));
-    height: calc(38px * var(--ui-scale));
-}
+    .player-control-btn.main {
+        width: calc(38px * var(--ui-scale));
+        height: calc(38px * var(--ui-scale));
+    }
 
-.player-control-btn.main svg {
-    width: calc(18px * var(--ui-scale));
-    height: calc(18px * var(--ui-scale));
-}
+    .player-control-btn.main svg {
+        width: calc(18px * var(--ui-scale));
+        height: calc(18px * var(--ui-scale));
+    }
 
-.player-control-btn.secondary {
-    width: calc(28px * var(--ui-scale));
-    height: calc(28px * var(--ui-scale));
-}
+    .player-control-btn.secondary {
+        width: calc(28px * var(--ui-scale));
+        height: calc(28px * var(--ui-scale));
+    }
 
-.player-control-btn.secondary svg {
-    width: calc(16px * var(--ui-scale));
-    height: calc(16px * var(--ui-scale));
-}
+    .player-control-btn.secondary svg {
+        width: calc(16px * var(--ui-scale));
+        height: calc(16px * var(--ui-scale));
+    }
 
-.player-progress {
-    max-width: 100%;
-    padding: 0 calc(4px * var(--ui-scale));
-}
+    .player-progress {
+        max-width: 100%;
+        padding: 0 calc(4px * var(--ui-scale));
+    }
 
-.time-label {
-    font-size: 0.65rem;
-    min-width: calc(30px * var(--ui-scale));
-}
+    .time-label {
+        font-size: 0.65rem;
+        min-width: calc(30px * var(--ui-scale));
+    }
 
-/* Hide volume in portrait â€” phones use hardware volume */
-.player-volume {
-    display: none;
-}
+    /* Hide volume in portrait â€” phones use hardware volume */
+    .player-volume {
+        display: none;
+    }
 
 
-/* â”€â”€ Back button â”€â”€ */
-.back-button {
-    padding: 7px 14px;
-    font-size: 0.82rem;
-}
+    /* â”€â”€ Back button â”€â”€ */
+    .back-button {
+        padding: 7px 14px;
+        font-size: 0.82rem;
+    }
 
-/* â”€â”€ Touch Targets & Typography Optical Adjustments â”€â”€ */
-.more-link {
-    padding: calc(12px * var(--ui-scale));
-    margin: calc(-12px * var(--ui-scale));
-}
+    /* â”€â”€ Touch Targets & Typography Optical Adjustments â”€â”€ */
+    .more-link {
+        padding: calc(12px * var(--ui-scale));
+        margin: calc(-12px * var(--ui-scale));
+    }
 
-h1, h2, .browse-hero-title, .hero-title, .search-page-title, .library-title, .profile-name {
-    line-height: 1.1;
-}
+    h1,
+    h2,
+    .browse-hero-title,
+    .hero-title,
+    .search-page-title,
+    .library-title,
+    .profile-name {
+        line-height: 1.1;
+    }
 
-/* â”€â”€ Load more â”€â”€ */
-.load-more-container {
-    padding: 20px 0;
-}
+    /* â”€â”€ Load more â”€â”€ */
+    .load-more-container {
+        padding: 20px 0;
+    }
 }
 
 @keyframes fadeIn {
@@ -2921,7 +2984,8 @@ body[data-current-page="search"] .unified-search-bar {
 }
 
 /* Styles the hover and focus state for the search clear button */
-.search-clear-btn:hover, .search-clear-btn:focus-visible {
+.search-clear-btn:hover,
+.search-clear-btn:focus-visible {
     color: var(--text-main);
     background: rgba(255, 255, 255, 0.1);
 }
@@ -3146,6 +3210,7 @@ body[data-current-page="search"] .unified-search-bar {
     gap: calc(10px * var(--ui-scale));
     opacity: 0.9;
 }
+
 .settings-section-title:first-of-type {
     margin-top: calc(16px * var(--ui-scale));
 }
@@ -4150,6 +4215,7 @@ svg.btn-icon {
 
 /* Media Query for mobile scaling of the Artist Hero */
 @media (max-width: 768px) {
+
     /* Hide cramped global header search bar in mobile layouts */
     .search-container {
         display: none !important;
@@ -4834,7 +4900,8 @@ svg.btn-icon {
     opacity: 0;
     transition: opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     z-index: 10;
-    padding: 0 0 calc(2px * var(--ui-scale)) 0; /* Align dots perfectly vertically */
+    padding: 0 0 calc(2px * var(--ui-scale)) 0;
+    /* Align dots perfectly vertically */
 }
 
 /*
@@ -5324,6 +5391,7 @@ svg.btn-icon {
     width: auto;
     flex-shrink: 0;
 }
+
 .search-filter-bar::-webkit-scrollbar {
     display: none;
 }
@@ -5420,11 +5488,13 @@ svg.btn-icon {
     outline: none;
     text-align: center;
 }
+
 .year-filter-input::-webkit-outer-spin-button,
 .year-filter-input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
+
 .year-filter-input::placeholder {
     color: var(--text-muted);
 }
@@ -5588,7 +5658,8 @@ svg.btn-icon {
 .queue-drawer {
     position: absolute;
     top: var(--header-height);
-    right: -360px; /* Hidden by default offscreen */
+    right: -360px;
+    /* Hidden by default offscreen */
     width: 350px;
     height: calc(100% - var(--header-height) - var(--player-height));
     background: rgba(18, 18, 18, 0.85);
@@ -5778,6 +5849,7 @@ svg.btn-icon {
     0% {
         opacity: 0.15;
     }
+
     100% {
         opacity: 0.25;
     }
@@ -5789,6 +5861,7 @@ svg.btn-icon {
 }
 
 @media (orientation: portrait) {
+
     /* Styles the queue drawer in mobile portrait mode to fill the viewport width */
     .queue-drawer {
         width: 100%;
@@ -5796,7 +5869,7 @@ svg.btn-icon {
         top: 0;
         height: calc(100% - var(--bottom-nav-height) - var(--player-height));
     }
-    
+
     /* Styles the active queue drawer in portrait mode to slide into full view */
     .queue-drawer.is-active {
         right: 0;
@@ -5825,7 +5898,7 @@ svg.btn-icon {
     body[data-current-page="search"] .header-page-title {
         display: none !important;
     }
-    
+
     /* Styles bottom navigation anchor elements to display labels under icons */
     .nav-links a {
         flex-direction: column !important;
@@ -5932,7 +6005,10 @@ svg.btn-icon {
     }
 
     /* Styles download, like, dislike, and info buttons in mobile player bar */
-    #save-track-btn, #like-track-btn, #dislike-track-btn, #more-info-btn {
+    #save-track-btn,
+    #like-track-btn,
+    #dislike-track-btn,
+    #more-info-btn {
         display: none !important;
     }
 
@@ -6749,15 +6825,14 @@ svg.btn-icon {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto auto;
     }
+
     .downloader-layout .preview-panel {
         grid-column: 1;
         grid-row: 2;
     }
+
     .downloader-layout .output-panel {
         grid-column: 1;
         grid-row: 3;
     }
 }
-
-
-

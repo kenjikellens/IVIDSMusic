@@ -91,7 +91,7 @@ fun PlayerBottomBar(
                 .padding(horizontal = 12.dp, vertical = 6.dp)
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = DarkSurfaceVariant),
+            colors = CardDefaults.cardColors(containerColor = Color(0xCC1E1E2A)),
             border = BorderStroke(1.dp, GlassBorder)
         ) {
             Column {

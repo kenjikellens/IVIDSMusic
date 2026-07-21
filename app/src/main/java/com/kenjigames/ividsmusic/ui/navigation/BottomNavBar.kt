@@ -40,8 +40,8 @@ fun BottomNavBar(
     val currentRoute = navBackStackEntry.value?.destination?.route
 
     NavigationBar(
-        modifier = modifier.background(DarkSurface),
-        containerColor = DarkSurface,
+        modifier = modifier.background(Color(0xDD0F0F14)),
+        containerColor = Color(0xDD0F0F14),
         contentColor = TextPrimary
     ) {
         items.forEach { screen ->
