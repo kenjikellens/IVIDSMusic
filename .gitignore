@@ -15,6 +15,8 @@
 local.properties
 /tmp/
 node_modules/
+pc/node_modules/
 dist/
+pc/dist/
 ividsmusic_release_temp/
 
