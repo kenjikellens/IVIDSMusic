@@ -9,6 +9,7 @@ package com.kenjigames.ividsmusic.domain.model
  * @property artistName Name of the performing artist
  * @property albumTitle Title of the album containing this track
  * @property coverUrl High-resolution cover artwork URL
+ * @property artistPictureUrl High-resolution artist profile picture URL
  * @property durationSeconds Track duration in seconds
  * @property videoId Resolved YouTube Video ID for audio streaming
  * @property isLiked Indicates if the track is in the user's liked library
@@ -21,6 +22,7 @@ data class Song(
     val artistName: String,
     val albumTitle: String = "",
     override val coverUrl: String,
+    val artistPictureUrl: String = "",
     val durationSeconds: Int = 0,
     val videoId: String = "",
     val previewUrl: String = "",

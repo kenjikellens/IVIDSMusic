@@ -12,7 +12,6 @@ import com.kenjigames.ividsmusic.domain.model.PlayerState
 import com.kenjigames.ividsmusic.domain.model.Song
 import com.kenjigames.ividsmusic.network.NetworkModule
 import com.kenjigames.ividsmusic.network.resolver.StreamResolver
-import com.kenjigames.ividsmusic.network.resolver.YtDlpAndroidResolver
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -37,9 +36,8 @@ class PlaybackManager private constructor() {
 
     private val queue = PlaybackQueue()
     private var exoPlayer: ExoPlayer? = null
-    private var ytDlpAndroidResolver: StreamResolver? = null
 
-    /** Resolvers implementing yt-dlp engine and protocol resolvers */
+    /** Stream resolvers replicating yt-dlp native Android Innertube player API protocol */
     private val primaryResolver: StreamResolver = NetworkModule.youtubeInnertubeResolver
     private val secondaryResolver: StreamResolver = NetworkModule.pipedStreamResolver
     private val fallbackResolver: StreamResolver = NetworkModule.invidiousStreamResolver
@@ -64,9 +62,6 @@ class PlaybackManager private constructor() {
     /** Binds ExoPlayer instance and registers listeners */
     fun initialize(player: ExoPlayer, context: Context? = null) {
         this.exoPlayer = player
-        if (context != null && ytDlpAndroidResolver == null) {
-            this.ytDlpAndroidResolver = YtDlpAndroidResolver(context.applicationContext)
-        }
 
         player.addListener(object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -119,7 +114,7 @@ class PlaybackManager private constructor() {
                 positionMs = 0L,
                 durationMs = (song.durationSeconds * 1000).toLong().coerceAtLeast(0L),
                 isBuffering = true,
-                playbackStatus = "Resolving yt-dlp audio..."
+                playbackStatus = "Resolving YouTube audio..."
             )
         }
 
@@ -137,26 +132,23 @@ class PlaybackManager private constructor() {
                     }
                 }
 
-                // 2. Resolve full YouTube audio stream using native yt-dlp engine -> Innertube -> Piped -> Invidious
+                // 2. Resolve full YouTube audio stream using native yt-dlp Innertube protocol -> Piped -> Invidious
                 if (streamUrl == null) {
                     withContext(Dispatchers.IO) {
                         try {
-                            val ytDlp = ytDlpAndroidResolver
                             var videoId = song.videoId
                             if (videoId.isEmpty()) {
                                 val query = "${song.artistName} - ${song.title}"
-                                videoId = ytDlp?.resolveVideoId(query)
-                                    ?: primaryResolver.resolveVideoId(query) 
+                                videoId = primaryResolver.resolveVideoId(query) 
                                     ?: secondaryResolver.resolveVideoId(query) 
                                     ?: fallbackResolver.resolveVideoId(query) 
                                     ?: ""
                             }
                             if (videoId.isNotEmpty()) {
-                                streamUrl = ytDlp?.resolveAudioUrl(videoId)
-                                    ?: primaryResolver.resolveAudioUrl(videoId) 
+                                streamUrl = primaryResolver.resolveAudioUrl(videoId) 
                                     ?: secondaryResolver.resolveAudioUrl(videoId) 
                                     ?: fallbackResolver.resolveAudioUrl(videoId)
-                                if (streamUrl != null) sourceDescription = "Full yt-dlp YouTube Stream"
+                                if (streamUrl != null) sourceDescription = "Full High-Quality YouTube Stream"
                             }
                         } catch (e: Throwable) {
                             Log.w(tag, "Stream resolver error: ${e.message}")

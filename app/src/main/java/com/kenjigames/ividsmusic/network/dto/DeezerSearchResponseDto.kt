@@ -52,12 +52,17 @@ data class DeezerSearchResponseDto(
                     ?: artist?.pictureMedium ?: ""
             }
 
+            val artistPic = artist?.pictureBig.takeIf { !it.isNullOrEmpty() }
+                ?: artist?.pictureMedium.takeIf { !it.isNullOrEmpty() }
+                ?: artist?.pictureSmall ?: ""
+
             return Song(
                 id = id,
                 title = title,
                 artistName = artist?.name ?: "Unknown Artist",
                 albumTitle = album?.title ?: "",
                 coverUrl = if (isSlowNetwork) com.kenjigames.ividsmusic.network.NetworkMonitor.optimizeCoverUrlDirect(rawCover) else rawCover,
+                artistPictureUrl = artistPic,
                 durationSeconds = duration,
                 previewUrl = preview
             )

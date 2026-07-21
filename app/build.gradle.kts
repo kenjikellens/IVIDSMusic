@@ -99,10 +99,6 @@ dependencies {
     implementation("androidx.media3:media3-exoplayer:$media3Version")
     implementation("androidx.media3:media3-session:$media3Version")
 
-    // Native yt-dlp engine for Android
-    implementation("com.github.yausername.youtubedl-android:library:0.17.0")
-    implementation("com.github.yausername.youtubedl-android:ffmpeg:0.17.0")
-
     // Image loading legacy
     implementation("com.squareup.picasso:picasso:2.8")
 

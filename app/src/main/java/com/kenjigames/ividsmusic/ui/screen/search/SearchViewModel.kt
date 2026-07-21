@@ -71,7 +71,7 @@ class SearchViewModel(
                             )
                         }
 
-                    // Extract unique artists from track list
+                    // Extract unique artists from track list with official artist picture
                     val artists = trackList
                         .filter { it.artistName.isNotEmpty() && it.artistName != "Unknown Artist" }
                         .distinctBy { it.artistName }
@@ -79,7 +79,7 @@ class SearchViewModel(
                             Artist(
                                 id = "artist_${song.id}",
                                 name = song.artistName,
-                                imageUrl = song.coverUrl
+                                imageUrl = if (song.artistPictureUrl.isNotEmpty()) song.artistPictureUrl else song.coverUrl
                             )
                         }
 
