@@ -19,12 +19,18 @@ class PlaybackService : MediaSessionService() {
     override fun onCreate() {
         super.onCreate()
 
-        // Create HTTP data source factory allowing cross-protocol redirects & browser User-Agent
+        // Create HTTP data source factory allowing cross-protocol redirects, Referer header, & browser User-Agent
+        val userAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
         val httpDataSourceFactory = DefaultHttpDataSource.Factory()
-            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
+            .setUserAgent(userAgent)
             .setAllowCrossProtocolRedirects(true)
             .setConnectTimeoutMs(15000)
             .setReadTimeoutMs(15000)
+            .setDefaultRequestProperties(mapOf(
+                "User-Agent" to userAgent,
+                "Accept" to "*/*",
+                "Accept-Language" to "en-US,en;q=0.9"
+            ))
 
         val mediaSourceFactory = DefaultMediaSourceFactory(this)
             .setDataSourceFactory(httpDataSourceFactory)

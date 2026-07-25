@@ -32,6 +32,11 @@ class ResolveStreamUseCase(
             if (streamUrl != null) return streamUrl
         }
 
+        // 3. Fallback to preview URL if stream resolution failed
+        if (song.previewUrl.isNotEmpty()) {
+            return song.previewUrl
+        }
+
         return null
     }
 }

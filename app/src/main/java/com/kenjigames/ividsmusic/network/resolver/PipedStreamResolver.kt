@@ -22,10 +22,11 @@ class PipedStreamResolver(client: OkHttpClient) : StreamResolver {
         .build()
 
     private val pipedInstances = arrayOf(
-        "https://pipedapi.adminforge.de",
-        "https://pipedapi.astral.autismservices.education",
-        "https://pipedapi.drgns.space",
-        "https://pipedapi.kavin.rocks"
+        "https://pipedapi.kavin.rocks",
+        "https://pipedapi.tokhmi.xyz",
+        "https://pipedapi.moomoo.me",
+        "https://pipedapi.sysopoly.org",
+        "https://api.piped.privacydev.net"
     )
 
     override suspend fun resolveVideoId(query: String): String? = withContext(Dispatchers.IO) {

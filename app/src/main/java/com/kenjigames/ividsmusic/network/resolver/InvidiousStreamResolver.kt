@@ -24,10 +24,10 @@ class InvidiousStreamResolver(client: OkHttpClient) : StreamResolver {
 
     private val instances = arrayOf(
         "https://yewtu.be",
-        "https://invidious.nerdvpn.de",
-        "https://invidious.projectsegfau.lt",
-        "https://invidious.privacydev.net",
-        "https://invidious.drgns.space"
+        "https://invidious.flokinet.to",
+        "https://invidious.eclipso.at",
+        "https://inv.tux.pizza",
+        "https://invidious.io.lol"
     )
 
     override suspend fun resolveVideoId(query: String): String? = withContext(Dispatchers.IO) {

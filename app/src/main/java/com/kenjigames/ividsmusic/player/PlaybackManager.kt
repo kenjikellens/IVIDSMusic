@@ -59,6 +59,8 @@ class PlaybackManager private constructor() {
         }
     }
 
+    private var currentFallbackAttempt = 0
+
     /** Binds ExoPlayer instance and registers listeners */
     fun initialize(player: ExoPlayer, context: Context? = null) {
         this.exoPlayer = player
@@ -88,6 +90,13 @@ class PlaybackManager private constructor() {
 
             override fun onPlayerError(error: PlaybackException) {
                 Log.e(tag, "ExoPlayer playback error: ${error.message}", error)
+                val currentSong = _playerState.value.currentSong
+                if (currentSong != null && currentFallbackAttempt < 3) {
+                    currentFallbackAttempt++
+                    Log.w(tag, "ExoPlayer source playback error (${error.errorCodeName}). Retrying with fallback level $currentFallbackAttempt for track: ${currentSong.title}")
+                    loadSongWithFallbackLevel(currentSong, currentFallbackAttempt)
+                    return
+                }
                 _playerState.update { it.copy(isBuffering = false, playbackStatus = "Playback error: ${error.errorCodeName}") }
             }
         })
@@ -105,8 +114,14 @@ class PlaybackManager private constructor() {
         setQueue(listOf(song), 0)
     }
 
-    /** Loads and resolves full-length YouTube audio stream for a song */
+    /** Loads and resolves audio stream starting at primary level 0 */
     private fun loadSong(song: Song) {
+        loadSongWithFallbackLevel(song, 0)
+    }
+
+    /** Loads and resolves audio stream with a specific fallback tier level */
+    private fun loadSongWithFallbackLevel(song: Song, fallbackLevel: Int) {
+        currentFallbackAttempt = fallbackLevel
         _playerState.update {
             it.copy(
                 currentSong = song,
@@ -114,7 +129,7 @@ class PlaybackManager private constructor() {
                 positionMs = 0L,
                 durationMs = (song.durationSeconds * 1000).toLong().coerceAtLeast(0L),
                 isBuffering = true,
-                playbackStatus = "Resolving audio stream..."
+                playbackStatus = if (fallbackLevel == 0) "Resolving audio stream..." else "Retrying fallback stream (level $fallbackLevel)..."
             )
         }
 
@@ -123,40 +138,74 @@ class PlaybackManager private constructor() {
                 var streamUrl: String? = null
                 var sourceDescription = ""
 
-                // 1. Check offline downloaded file
-                if (song.isDownloaded && song.localFilePath != null) {
-                    val file = File(song.localFilePath)
-                    if (file.exists()) {
-                        streamUrl = file.absolutePath
-                        sourceDescription = "Offline Download"
+                if (fallbackLevel == 0) {
+                    // 1. Check offline downloaded file
+                    if (song.isDownloaded && song.localFilePath != null) {
+                        val file = File(song.localFilePath)
+                        if (file.exists()) {
+                            streamUrl = file.absolutePath
+                            sourceDescription = "Offline Download"
+                        }
+                    }
+
+                    // 2. Try Primary YouTube Innertube resolver
+                    if (streamUrl == null) {
+                        withContext(Dispatchers.IO) {
+                            try {
+                                var videoId = song.videoId
+                                if (videoId.isEmpty()) {
+                                    val query = "${song.artistName} - ${song.title}"
+                                    videoId = primaryResolver.resolveVideoId(query) ?: ""
+                                }
+                                if (videoId.isNotEmpty()) {
+                                    streamUrl = primaryResolver.resolveAudioUrl(videoId)
+                                    if (streamUrl != null) sourceDescription = "YouTube Innertube"
+                                }
+                            } catch (e: Throwable) {
+                                Log.w(tag, "Primary resolver error: ${e.message}")
+                            }
+                        }
                     }
                 }
 
-                // 2. Resolve full YouTube audio stream using YouTube Innertube -> Piped -> Invidious
-                if (streamUrl == null) {
+                if (streamUrl == null && fallbackLevel <= 1) {
+                    // Try Secondary (Piped) resolver
                     withContext(Dispatchers.IO) {
                         try {
                             var videoId = song.videoId
                             if (videoId.isEmpty()) {
                                 val query = "${song.artistName} - ${song.title}"
-                                videoId = primaryResolver.resolveVideoId(query) 
-                                    ?: secondaryResolver.resolveVideoId(query) 
-                                    ?: fallbackResolver.resolveVideoId(query) 
-                                    ?: ""
+                                videoId = secondaryResolver.resolveVideoId(query) ?: ""
                             }
                             if (videoId.isNotEmpty()) {
-                                streamUrl = primaryResolver.resolveAudioUrl(videoId) 
-                                    ?: secondaryResolver.resolveAudioUrl(videoId) 
-                                    ?: fallbackResolver.resolveAudioUrl(videoId)
-                                if (streamUrl != null) sourceDescription = "Full YouTube Stream"
+                                streamUrl = secondaryResolver.resolveAudioUrl(videoId)
+                                if (streamUrl != null) sourceDescription = "Piped Stream"
                             }
                         } catch (e: Throwable) {
-                            Log.w(tag, "Stream resolver error: ${e.message}")
+                            Log.w(tag, "Secondary resolver error: ${e.message}")
                         }
                     }
                 }
 
-                // 3. Fallback to previewUrl if YouTube is blocked on network
+                if (streamUrl == null && fallbackLevel <= 2) {
+                    // Try Fallback (Invidious) resolver
+                    withContext(Dispatchers.IO) {
+                        try {
+                            var videoId = song.videoId
+                            if (videoId.isEmpty()) {
+                                val query = "${song.artistName} - ${song.title}"
+                                videoId = fallbackResolver.resolveVideoId(query) ?: ""
+                            }
+                            if (videoId.isNotEmpty()) {
+                                streamUrl = fallbackResolver.resolveAudioUrl(videoId)
+                                if (streamUrl != null) sourceDescription = "Invidious Stream"
+                            }
+                        } catch (e: Throwable) {
+                            Log.w(tag, "Fallback resolver error: ${e.message}")
+                        }
+                    }
+                }
+
                 if (streamUrl == null && song.previewUrl.isNotEmpty()) {
                     streamUrl = song.previewUrl
                     sourceDescription = "Preview Stream"
@@ -171,7 +220,7 @@ class PlaybackManager private constructor() {
 
                 if (streamUrl != null) {
                     try {
-                        Log.d(tag, "Setting ExoPlayer mediaItem audio URI: $streamUrl ($sourceDescription)")
+                        Log.d(tag, "Setting ExoPlayer mediaItem audio URI (fallbackLevel $fallbackLevel): $streamUrl ($sourceDescription)")
                         val mediaItem = MediaItem.fromUri(streamUrl!!)
                         player.setMediaItem(mediaItem)
                         player.prepare()

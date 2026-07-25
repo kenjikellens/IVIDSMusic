@@ -49,7 +49,11 @@ This document defines the strict, standardized protocol for launching new releas
 
 ### 5. Create and Publish the GitHub Release (Make Available on GitHub)
 - **ACTION**: You MUST push the tag and create/publish the formal release on GitHub targeting the tag `vX.Y.Z` to make it fully available for users to download. Use the professional release title and description formulated in Step 1.
-- **Isolate Source Code (GitHub Assets)**: Ensure that only the three binaries generated at the tag root are advertised as the main binaries. (Note: GitHub automatically archives the orphan repository state for this tag, which due to our orphan release flow, will naturally contain ONLY the three compiled binaries and no source code).
+- **Isolate Source Code (GitHub Assets)**: Ensure that only the three compiled binaries generated at the tag root are advertised as the main release assets:
+  1. `IVIDSMusic_Mobile.apk` (Native Kotlin/Java Android Mobile app)
+  2. `IVIDSMusic_TV.apk` (Android TV WebView app)
+  3. `IVIDSMusic_PC.exe` (PC Desktop Electron WebView app)
+  (Note: GitHub automatically archives the orphan repository state for this tag, which due to our orphan release flow, will naturally contain ONLY these three compiled binaries and no source code).
 - **Automation Helper**: Prefer the scoped publish helper after the local orphan tag exists:
   ```powershell
   # Release-only request: tag + GitHub Release only

@@ -13,9 +13,9 @@ You must maintain, respect, and design for the granular layout hierarchy. This s
 
 ## 2. Platform-Specific Implementations & Compatibility
 You must ensure the codebase respects and handles the four distinct runtimes:
-- **PC Desktop (Electron)**: Run natively inside Electron. Uses `main.js` and `preload.js` IPC handlers to call `yt-dlp` for streaming and saving, and loads saved media via the custom `saved-media://` protocol.
-- **Android TV (WebView)**: Compiled under the `tv` Gradle flavor. Loads the embedded `gui` and `logic` assets into an Android WebView, utilizing Kotlin `shouldInterceptRequest` hooks for playing/saving.
-- **Android Phone (Native Java)**: Fully native Java application under the `mobile` Gradle flavor. Uses Android XML layouts, Room DB for library persistence, Jetpack Media3 ExoPlayer in a background service, and Retrofit/OkHttp for networking.
+- **Android Phone (Native Kotlin/Java)**: `IVIDSMusic_Mobile.apk` compiled under the `mobile` Gradle flavor (`app` module). Fully native Kotlin/Java application using Jetpack Compose UI, Room DB for library persistence, Jetpack Media3 ExoPlayer in a background service, and Retrofit/OkHttp for networking.
+- **Android TV (Android WebView)**: `IVIDSMusic_TV.apk` compiled under the `tv` Gradle flavor (`app` module). WebView-based Android TV application loading embedded `gui` and `logic` web assets into an Android WebView, utilizing Kotlin `shouldInterceptRequest` hooks for playing/saving.
+- **PC Desktop (Electron WebView)**: `IVIDSMusic_PC.exe` compiled from `pc/`. WebView-based desktop application running embedded `gui` and `logic` web assets inside Electron. Uses `main.js` and `preload.js` IPC handlers to call `yt-dlp` for streaming and saving, loading saved media via custom `saved-media://` protocol.
 - **Static Web / GitHub Pages**: Served as static assets. Resolves playback URLs via public Invidious API instances, and caches downloaded audio streams as binary Blobs in browser IndexedDB.
 - **Unified Logic Integration**: Frontend files (e.g., `api.js`, `player.js`) must query `Config.isElectron`, `Config.isNative` (Android WebView), and `Config.isWeb` to dynamically call the correct platform API wrapper.
 
@@ -28,7 +28,11 @@ You must ensure the codebase respects and handles the four distinct runtimes:
 If the user clearly asks to push/upload/sync the current branch, you may push the current branch and its local commits. If the user limits the push to a specific file, commit, branch, tag, or ref, push only that requested scope.
 
 ## 4. Multi-Platform Release Packaging
-- **Release Target Isolation**: Every target release build must package ONLY the three compiled distribution binaries (`IVIDSMusic_Mobile.apk`, `IVIDSMusic_TV.apk`, and `IVIDSMusic_PC.exe`) at its root. The source codebase must remain entirely on the `main` branch.
+- **Release Target Isolation**: Every target release build must package ONLY the three compiled distribution binaries at its root:
+  - `IVIDSMusic_Mobile.apk` (Native Kotlin/Java Android Mobile app)
+  - `IVIDSMusic_TV.apk` (Android TV WebView app)
+  - `IVIDSMusic_PC.exe` (PC Desktop Electron WebView app)
+  The source codebase must remain entirely on the `main` branch.
 - **Orphan Release Execution**: Release updates must be coordinated by executing the `.agents/scripts/build-release.js` utility, which compiles the three targets and isolates them in an orphan tag. Do NOT run manual tag or checkout actions for releases unless instructed.
 
 Always follow these rules for every task you perform.

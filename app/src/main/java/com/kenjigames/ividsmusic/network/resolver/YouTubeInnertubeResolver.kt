@@ -32,6 +32,7 @@ class YouTubeInnertubeResolver(client: OkHttpClient) : StreamResolver {
                 .url(url)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36")
                 .header("Accept-Language", "en-US,en;q=0.9")
+                .header("Cookie", "SOCS=CAI; CONSENT=YES+")
                 .build()
 
             fastClient.newCall(request).execute().use { response ->
@@ -173,6 +174,6 @@ class YouTubeInnertubeResolver(client: OkHttpClient) : StreamResolver {
         } catch (e: Exception) {
             Log.w(tag, "queryPlayerEndpoint ($clientName) exception: ${e.message}")
         }
-        null
+        return null
     }
 }
