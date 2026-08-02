@@ -13,7 +13,7 @@ You must maintain, respect, and design for the granular layout hierarchy. This s
 
 ## 2. Platform-Specific Implementations & Compatibility
 You must ensure the codebase respects and handles the four distinct runtimes:
-- **Android Phone (Native Kotlin/Java)**: `IVIDSMusic_Mobile.apk` compiled under the `mobile` Gradle flavor (`app` module). Fully native Kotlin/Java application using Jetpack Compose UI, Room DB for library persistence, Jetpack Media3 ExoPlayer in a background service, and Retrofit/OkHttp for networking.
+- **Android Phone (Android WebView)**: `IVIDSMusic_Mobile.apk` compiled under the `mobile` Gradle flavor (`app` module). WebView-based Android Mobile application loading embedded `gui` and `logic` web assets from `app/src/main/assets` into an Android WebView, utilizing Kotlin `shouldInterceptRequest` hooks for playing/saving.
 - **Android TV (Android WebView)**: `IVIDSMusic_TV.apk` compiled under the `tv` Gradle flavor (`app` module). WebView-based Android TV application loading embedded `gui` and `logic` web assets into an Android WebView, utilizing Kotlin `shouldInterceptRequest` hooks for playing/saving.
 - **PC Desktop (Electron WebView)**: `IVIDSMusic_PC.exe` compiled from `pc/`. WebView-based desktop application running embedded `gui` and `logic` web assets inside Electron. Uses `main.js` and `preload.js` IPC handlers to call `yt-dlp` for streaming and saving, loading saved media via custom `saved-media://` protocol.
 - **Static Web / GitHub Pages**: Served as static assets. Resolves playback URLs via public Invidious API instances, and caches downloaded audio streams as binary Blobs in browser IndexedDB.
