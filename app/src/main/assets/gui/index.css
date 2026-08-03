@@ -55,7 +55,76 @@
     /* Transitions */
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
+/* 5 Responsive Width Breakpoints */
+@media (max-width: 1200px) { :root { --ui-base-scale: 0.95; } }
+@media (max-width: 1024px) { :root { --ui-base-scale: 0.9; } }
+@media (max-width: 768px) { :root { --ui-base-scale: 0.85; } }
+@media (max-width: 700px) { :root { --ui-base-scale: 0.8; } }
+@media (max-width: 600px) { :root { --ui-base-scale: 0.75; } }
+
+/* Bottom Navigation Bar Base Component - Hidden on Desktop Landscape */
+.bottom-nav, #bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: var(--bottom-nav-height);
+    background: rgba(10, 10, 12, 0.96);
+    backdrop-filter: blur(24px) saturate(1.5);
+    -webkit-backdrop-filter: blur(24px) saturate(1.5);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    z-index: 1000;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0 calc(8px * var(--ui-scale));
+}
+
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: calc(3px * var(--ui-scale));
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: calc(0.7rem * var(--ui-scale));
+    font-weight: 500;
+    border: 2px solid transparent;
+    border-radius: calc(8px * var(--ui-scale));
+    padding: calc(4px * var(--ui-scale)) calc(8px * var(--ui-scale));
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    box-sizing: border-box;
+}
+
+.bottom-nav-item:hover,
+.bottom-nav-item.active {
+    color: var(--primary-color);
+    background: rgba(var(--primary-rgb), 0.1);
+    border-color: rgba(var(--primary-rgb), 0.3);
+}
+
+.bottom-nav-item img.nav-icon {
+    width: calc(20px * var(--ui-scale));
+    height: calc(20px * var(--ui-scale));
+}
+
+/* Mobile Portrait Mode Orientation Shift (Overrides default desktop sidebar/nav) */
+@media (orientation: portrait), (max-width: 768px) {
+    :root {
+        --sidebar-width: 0px;
+        --bottom-nav-height: calc(60px * var(--ui-scale));
+    }
+
+    #sidebar-container {
+        display: none !important;
+    }
+
+    .bottom-nav, #bottom-nav {
+        display: flex !important;
+    }
 }
 
 /* ============================
@@ -301,26 +370,23 @@ img.player-volume-icon {
     font-weight: 600;
 }
 
-/* Styles the animated vertical accent bar on the left of each navigation link to emphasize the active state */
 .nav-links a::before {
     content: '';
     position: absolute;
     left: 0;
     top: 25%;
-    /* (100% - 50%) / 2 */
     width: 3px;
     height: 50%;
     background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
     border-radius: 0 3px 3px 0;
-    transform: scaleY(0);
-    transform-origin: center;
-    transition: transform 0.3s var(--ease-spring);
+    opacity: 0;
+    transition: opacity 0.2s ease;
 }
 
 .nav-links a:hover::before,
 .nav-links a:focus-visible::before,
 .nav-links a.active::before {
-    transform: scaleY(1);
+    opacity: 1;
 }
 
 .nav-divider {
@@ -598,13 +664,11 @@ header {
     font-family: inherit;
     cursor: pointer;
     border: none;
-    transition: transform 0.2s var(--ease-spring),
-        box-shadow 0.25s ease,
-        background 0.25s ease;
+    transition: box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .btn:active {
-    transform: scale(0.96);
+    background-color: rgba(var(--primary-rgb), 0.2);
 }
 
 .btn-primary {

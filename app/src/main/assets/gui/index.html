@@ -84,6 +84,30 @@
             </nav>
         </aside>
 
+        <!-- Mobile Bottom Navigation Bar (Shown only in portrait / mobile mode) -->
+        <nav id="bottom-nav" class="bottom-nav">
+            <a href="#" class="bottom-nav-item active" onclick="Router.loadPage('home')" id="mobile-nav-home">
+                <img class="nav-icon" src="svg/home.svg" alt="">
+                <span data-i18n="home">Home</span>
+            </a>
+            <a href="#" class="bottom-nav-item" onclick="Router.loadPage('recommended')" id="mobile-nav-recommended">
+                <img class="nav-icon" src="svg/brand.svg" alt="">
+                <span data-i18n="nav_foryou">For You</span>
+            </a>
+            <a href="#" class="bottom-nav-item" onclick="Router.loadPage('search')" id="mobile-nav-search">
+                <img class="nav-icon" src="svg/search.svg" alt="">
+                <span data-i18n="search">Search</span>
+            </a>
+            <a href="#" class="bottom-nav-item" onclick="Router.loadPage('library')" id="mobile-nav-library">
+                <img class="nav-icon" src="svg/library.svg" alt="">
+                <span data-i18n="library">Your Library</span>
+            </a>
+            <a href="#" class="bottom-nav-item" onclick="Router.loadPage('profile')" id="mobile-nav-profile">
+                <img class="nav-icon" src="svg/user.svg" alt="">
+                <span data-i18n="you">You</span>
+            </a>
+        </nav>
+
         <!-- Content Area with Header -->
         <div class="content-wrapper">
             <header>
