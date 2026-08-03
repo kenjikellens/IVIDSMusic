@@ -5,7 +5,7 @@
         <input id="browse-search-input" class="browse-search-input" type="text" placeholder="Artists, songs, albums..."
             autocomplete="off" data-i18n="search_placeholder"
             onkeydown="if(event.key==='Enter' && this.value.trim()) { this.blur(); window.performSearch(this.value.trim()); }">
-        <button id="search-clear-btn" class="search-clear-btn" style="display: none;">✕</button>
+        <button id="search-clear-btn" class="btn btn-ghost search-clear-btn" style="display: none;">✕</button>
     </div>
 </div>
 
@@ -32,42 +32,42 @@
     <!-- Browse Categories Grid -->
     <div class="search-categories-grid">
         <!-- Pop -->
-        <div class="search-category-card pop" onclick="window.performSearch('Pop')">
+        <div class="card card-category pop" onclick="window.performSearch('Pop')">
             <span class="category-title">Pop</span>
             <div class="category-bg-art">✨</div>
         </div>
         <!-- Hip-Hop -->
-        <div class="search-category-card hiphop" onclick="window.performSearch('Hip Hop')">
+        <div class="card card-category hiphop" onclick="window.performSearch('Hip Hop')">
             <span class="category-title">Hip-Hop</span>
             <div class="category-bg-art">🎤</div>
         </div>
         <!-- Rock -->
-        <div class="search-category-card rock" onclick="window.performSearch('Rock')">
+        <div class="card card-category rock" onclick="window.performSearch('Rock')">
             <span class="category-title">Rock</span>
             <div class="category-bg-art">🎸</div>
         </div>
         <!-- Dance & Electronic -->
-        <div class="search-category-card electronic" onclick="window.performSearch('Dance')">
+        <div class="card card-category electronic" onclick="window.performSearch('Dance')">
             <span class="category-title">Dance</span>
             <div class="category-bg-art">🎧</div>
         </div>
         <!-- Jazz -->
-        <div class="search-category-card jazz" onclick="window.performSearch('Jazz')">
+        <div class="card card-category jazz" onclick="window.performSearch('Jazz')">
             <span class="category-title">Jazz</span>
             <div class="category-bg-art">🎷</div>
         </div>
         <!-- Classical -->
-        <div class="search-category-card classical" onclick="window.performSearch('Classical')">
+        <div class="card card-category classical" onclick="window.performSearch('Classical')">
             <span class="category-title">Classical</span>
             <div class="category-bg-art">🎻</div>
         </div>
         <!-- Chill & Acoustic -->
-        <div class="search-category-card chill" onclick="window.performSearch('Chill')">
+        <div class="card card-category chill" onclick="window.performSearch('Chill')">
             <span class="category-title">Chill</span>
             <div class="category-bg-art">☕</div>
         </div>
         <!-- Workout -->
-        <div class="search-category-card workout" onclick="window.performSearch('Workout')">
+        <div class="card card-category workout" onclick="window.performSearch('Workout')">
             <span class="category-title">Workout</span>
             <div class="category-bg-art">⚡</div>
         </div>
@@ -95,10 +95,10 @@
       Purpose: Houses the horizontal categories filter chips and year capsule, supporting overflow-x scrolling.
     -->
     <div id="search-filters" class="search-filter-bar">
-        <button class="filter-chip active" id="filter-chip-all" onclick="window.setSearchFilter(null)" data-i18n="filter_all">All</button>
-        <button class="filter-chip" id="filter-chip-track" onclick="window.setSearchFilter('all')" data-i18n="songs">Songs</button>
-        <button class="filter-chip" id="filter-chip-artist" onclick="window.setSearchFilter('artist')" data-i18n="artists">Artists</button>
-        <button class="filter-chip" id="filter-chip-album" onclick="window.setSearchFilter('album')" data-i18n="albums">Albums</button>
+        <button class="btn btn-ghost filter-chip active" id="filter-chip-all" onclick="window.setSearchFilter(null)" data-i18n="filter_all">All</button>
+        <button class="btn btn-ghost filter-chip" id="filter-chip-track" onclick="window.setSearchFilter('all')" data-i18n="songs">Songs</button>
+        <button class="btn btn-ghost filter-chip" id="filter-chip-artist" onclick="window.setSearchFilter('artist')" data-i18n="artists">Artists</button>
+        <button class="btn btn-ghost filter-chip" id="filter-chip-album" onclick="window.setSearchFilter('album')" data-i18n="albums">Albums</button>
         <!-- 
           Class: year-filter-wrapper
           Purpose: Premium pill wrapper that houses the year calendar icon and input to filter results by year.
@@ -118,7 +118,7 @@
             <h2 class="row-title" data-i18n="artists">Artists</h2>
             <a class="more-link" onclick="setSearchFilter('artist')"><span data-i18n="see_all">See all</span></a>
         </div>
-        <div class="results-row" id="artists-results"></div>
+        <div class="scroll-row" id="artists-results"></div>
     </div>
 
     <div id="songs-row-container" class="row-scroll-wrapper is-hidden">
@@ -126,7 +126,7 @@
             <h2 class="row-title" data-i18n="songs">Songs</h2>
             <a class="more-link" onclick="setSearchFilter('all')"><span data-i18n="see_all">See all</span></a>
         </div>
-        <div class="results-row" id="songs-results"></div>
+        <div class="scroll-row" id="songs-results"></div>
     </div>
 
     <div id="albums-row-container" class="row-scroll-wrapper is-hidden">
@@ -134,14 +134,14 @@
             <h2 class="row-title" data-i18n="albums">Albums</h2>
             <a class="more-link" onclick="setSearchFilter('album')"><span data-i18n="see_all">See all</span></a>
         </div>
-        <div class="results-row" id="albums-results"></div>
+        <div class="scroll-row" id="albums-results"></div>
     </div>
 </div>
 
 <!-- State 4: Grid View -->
 <div id="single-category-grid" class="is-hidden">
     <div class="grid-header">
-        <button class="back-button" onclick="setSearchFilter(null)" data-i18n="back">Back</button>
+        <button class="btn btn-secondary back-button" onclick="setSearchFilter(null)" data-i18n="back">Back</button>
         <h2 class="row-title" id="grid-title" data-i18n="results_title">Results</h2>
     </div>
     <div class="grid-results" id="grid-results"></div>

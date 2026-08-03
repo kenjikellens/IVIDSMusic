@@ -23,11 +23,11 @@
             </div>
             <h1 id="song-title" class="song-title">—</h1>
             <div class="song-sub-info">
-               <button id="song-artist-link" class="song-artist-btn">
+               <button id="song-artist-link" class="btn btn-ghost song-artist-btn">
                   <span id="song-artist" class="song-artist">—</span>
                </button>
                <span class="song-dot">·</span>
-               <button id="song-album-link" class="song-album-btn">
+               <button id="song-album-link" class="btn btn-ghost song-album-btn">
                   <span id="song-album" class="song-album">—</span>
                </button>
                <span class="song-dot">·</span>
@@ -81,11 +81,11 @@
       <div class="row-header">
          <h2 class="row-title" data-i18n="from_the_artist">From the Artist</h2>
       </div>
-      <button class="scroll-arrow left" onclick="scrollRow('song-artist-tracks', -1)">
+      <button class="btn btn-ghost scroll-arrow left" onclick="scrollRow('song-artist-tracks', -1)">
          <div class="scroll-arrow-icon">❮</div>
       </button>
-      <div class="results-row" id="song-artist-tracks"></div>
-      <button class="scroll-arrow right" onclick="scrollRow('song-artist-tracks', 1)">
+      <div class="scroll-row" id="song-artist-tracks"></div>
+      <button class="btn btn-ghost scroll-arrow right" onclick="scrollRow('song-artist-tracks', 1)">
          <div class="scroll-arrow-icon">❯</div>
       </button>
    </div>
@@ -95,11 +95,11 @@
       <div class="row-header">
          <h2 class="row-title" data-i18n="similar_tracks">Similar Tracks</h2>
       </div>
-      <button class="scroll-arrow left" onclick="scrollRow('song-related-tracks', -1)">
+      <button class="btn btn-ghost scroll-arrow left" onclick="scrollRow('song-related-tracks', -1)">
          <div class="scroll-arrow-icon">❮</div>
       </button>
-      <div class="results-row" id="song-related-tracks"></div>
-      <button class="scroll-arrow right" onclick="scrollRow('song-related-tracks', 1)">
+      <div class="scroll-row" id="song-related-tracks"></div>
+      <button class="btn btn-ghost scroll-arrow right" onclick="scrollRow('song-related-tracks', 1)">
          <div class="scroll-arrow-icon">❯</div>
       </button>
    </div>

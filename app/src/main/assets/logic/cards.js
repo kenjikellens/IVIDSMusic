@@ -37,7 +37,7 @@ export const CardSystem = {
      * @returns {HTMLElement} The populated, interactive card element.
      */
     hydrateCard(card, track) {
-        card.className = `music-card type-${track.type || 'song'}`;
+        card.className = `card card-${track.type || 'song'}`;
         card.tabIndex = 0;
         card.dataset.trackJson = JSON.stringify(track);
 
@@ -52,15 +52,15 @@ export const CardSystem = {
                 ` : ''}
             </div>
             ${track.type === 'song' ? `
-                <button class="card-more-btn" title="Options" tabindex="-1">
+                <button class="btn btn-ghost card-more-btn" title="Options" tabindex="-1">
                     ⋮
                 </button>
             ` : ''}
             <div class="card-info-box">
-                <div class="card-title">${track.title || track.name}</div>
+                <div class="card-title"><span class="marquee-text">${track.title || track.name}</span></div>
                 ${track.type === 'artist' ? '' : `
                     <div class="card-artist">
-                        <a href="#" class="artist-link" data-name="${track.artist}">
+                        <a href="#" class="artist-link marquee-text" data-name="${track.artist}">
                             ${track.artist}
                         </a>
                     </div>
@@ -125,9 +125,9 @@ export const CardSystem = {
                     window.Router.loadPage('song', { track: track });
                 } else {
                     // PC/Desktop behavior: build sibling queue and play immediately
-                    const parent = card.closest('.results-row, .row-posters, .profile-recent-list, .grid-results, #recommended-content');
+                    const parent = card.closest('.scroll-row, .results-row, .row-posters, .profile-recent-list, .grid-results, #recommended-content');
                     if (parent) {
-                        const siblingCards = Array.from(parent.querySelectorAll('.music-card.type-song'));
+                        const siblingCards = Array.from(parent.querySelectorAll('.card.card-song, .music-card.type-song'));
                         const siblingTracks = siblingCards.map(c => {
                             try {
                                 return JSON.parse(c.dataset.trackJson || '{}');
@@ -173,16 +173,16 @@ export const CardSystem = {
             <div class="row-header">
                 <h2 class="row-title" data-i18n="${id}_header">${title}</h2>
             </div>
-            <button class="scroll-arrow left" onclick="scrollRow('${id}', -1)">
+            <button class="btn btn-ghost scroll-arrow left" onclick="scrollRow('${id}', -1)">
                 <div class="scroll-arrow-icon">❮</div>
             </button>
-            <div class="results-row" id="${id}"></div>
-            <button class="scroll-arrow right" onclick="scrollRow('${id}', 1)">
+            <div class="scroll-row" id="${id}"></div>
+            <button class="btn btn-ghost scroll-arrow right" onclick="scrollRow('${id}', 1)">
                 <div class="scroll-arrow-icon">❯</div>
             </button>
         `;
 
-        const row = rowWrapper.querySelector('.results-row');
+        const row = rowWrapper.querySelector('.scroll-row');
         tracks.forEach(track => row.appendChild(this.createCard(track)));
         return rowWrapper;
     },
@@ -225,19 +225,19 @@ export const CardSystem = {
             popover.innerHTML = `
                 <div class="popup-title">${track.title}</div>
                 <div class="popup-list">
-                    <button class="popup-item" id="opt-play-now">
+                    <button class="btn btn-ghost popup-item" id="opt-play-now">
                         <span class="popup-icon">▶</span>
                         <span class="popup-text">Play Now</span>
                     </button>
-                    <button class="popup-item" id="opt-play-next">
+                    <button class="btn btn-ghost popup-item" id="opt-play-next">
                         <span class="popup-icon">⏭</span>
                         <span class="popup-text">Play Next</span>
                     </button>
-                    <button class="popup-item" id="opt-add-to-queue">
+                    <button class="btn btn-ghost popup-item" id="opt-add-to-queue">
                         <span class="popup-icon">➕</span>
                         <span class="popup-text">Add to Queue</span>
                     </button>
-                    <button class="popup-item" id="opt-add-to-playlist">
+                    <button class="btn btn-ghost popup-item" id="opt-add-to-playlist">
                         <span class="popup-icon">📂</span>
                         <span class="popup-text">Add to Playlist...</span>
                     </button>

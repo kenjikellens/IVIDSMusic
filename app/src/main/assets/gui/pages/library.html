@@ -22,13 +22,13 @@
     <!-- Action Bar -->
     <div class="library-action-bar">
         <div class="action-left">
-            <button id="library-play-all" class="btn btn-primary play-all-btn" onclick="YouTubePlayer.playAllSaved()">
+            <button id="library-play-all" class="btn btn-primary" onclick="YouTubePlayer.playAllSaved()">
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path d="M8 5v14l11-7z" />
                 </svg>
                 <span data-i18n="play_all">Play All</span>
             </button>
-            <button id="library-shuffle" class="btn btn-secondary shuffle-btn" onclick="YouTubePlayer.shuffleSaved()">
+            <button id="library-shuffle" class="btn btn-secondary" onclick="YouTubePlayer.shuffleSaved()">
                 <img src="svg/shuffle.svg" alt="Shuffle" class="btn-icon">
                 <span data-i18n="shuffle">Shuffle</span>
             </button>
@@ -46,9 +46,9 @@
     <div id="recent-row-container" class="row-scroll-wrapper is-hidden">
         <div class="row-header">
             <h2 class="row-title" data-i18n="recently_listened">Recently Listened</h2>
-            <button class="btn-text-only" onclick="PageSystem.clearHistory()" data-i18n="clear_all">Clear All</button>
+            <button class="btn btn-ghost btn-text-only" onclick="PageSystem.clearHistory()" data-i18n="clear_all">Clear All</button>
         </div>
-        <div id="library-recent-list" class="results-row">
+        <div id="library-recent-list" class="scroll-row">
             <!-- Rendered by pages.js -->
         </div>
     </div>
@@ -70,7 +70,7 @@
             </div>
         </div>
 
-        <div id="library-playlists-list" class="results-row is-hidden">
+        <div id="library-playlists-list" class="scroll-row is-hidden">
             <!-- Rendered by pages.js -->
         </div>
     </div>
@@ -80,7 +80,7 @@
         <div class="modal-content glassmorphism">
             <div class="modal-header">
                 <h3 data-i18n="create_playlist">Create Playlist</h3>
-                <button class="modal-close-btn" onclick="PageSystem.closeCreatePlaylistModal(event, true)">&times;</button>
+                <button class="btn btn-ghost modal-close-btn" onclick="PageSystem.closeCreatePlaylistModal(event, true)">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="input-group">

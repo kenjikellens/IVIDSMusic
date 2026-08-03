@@ -457,14 +457,14 @@ export const PageSystem = {
                 artistsList.innerHTML = '';
                 topArtists.forEach(artist => {
                     const card = document.createElement('div');
-                    card.className = 'music-card type-artist';
+                    card.className = 'card card-artist';
                     card.tabIndex = 0;
                     card.innerHTML = `
                         <div class="card-image-box">
                             <img src="svg/user.svg" class="poster" alt="${artist.name}" style="filter: invert(0.3); padding: 25%;">
                         </div>
                         <div class="card-info-box">
-                            <div class="card-title">${artist.name}</div>
+                            <div class="card-title"><span class="marquee-text">${artist.name}</span></div>
                         </div>
                     `;
                     card.onclick = () => window.Router.loadPage('artist', { name: artist.name });
@@ -582,7 +582,7 @@ export const PageSystem = {
                     <div class="track-title">${track.title}</div>
                     <div class="track-artist">${track.artist}</div>
                 </div>
-                <button class="play-local-btn player-control-btn main small" tabindex="-1">
+                <button class="btn btn-primary play-local-btn" tabindex="-1">
                     <img src="svg/play.svg" alt="Play">
                 </button>
             `;
@@ -654,8 +654,8 @@ export const PageSystem = {
                     <img src="${track.cover}" class="poster" alt="${track.title}">
                 </div>
                 <div class="card-info-box">
-                    <div class="card-title">${track.title}</div>
-                    <div class="card-artist">${track.artist}</div>
+                    <div class="card-title"><span class="marquee-text">${track.title}</span></div>
+                    <div class="card-artist"><span class="marquee-text">${track.artist}</span></div>
                 </div>
             `;
 
@@ -1071,8 +1071,8 @@ export const PageSystem = {
                     <span style="font-size: 2.8rem;">📂</span>
                 </div>
                 <div class="card-info-box">
-                    <div class="card-title">${pl.name}</div>
-                    <div class="card-artist">${pl.tracks.length} ${pl.tracks.length === 1 ? 'song' : 'songs'}</div>
+                    <div class="card-title"><span class="marquee-text">${pl.name}</span></div>
+                    <div class="card-artist"><span class="marquee-text">${pl.tracks.length} ${pl.tracks.length === 1 ? 'song' : 'songs'}</span></div>
                 </div>
                 <button class="delete-playlist-btn" onclick="event.stopPropagation(); PageSystem.deletePlaylist('${pl.id}')" title="Delete Playlist" tabindex="-1" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.5); border: none; border-radius: 50%; color: #fff; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer; opacity: 0; transition: opacity 0.2s;">
                     &times;

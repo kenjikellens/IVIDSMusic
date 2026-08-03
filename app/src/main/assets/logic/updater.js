@@ -242,7 +242,7 @@ export const Updater = {
 
         const overlay = document.createElement('div');
         overlay.id = 'update-overlay';
-        overlay.className = 'update-modal-overlay';
+        overlay.className = 'modal-overlay update-modal-overlay';
         
         const downloadUrl = this.getDownloadUrl(release);
 
@@ -279,8 +279,8 @@ export const Updater = {
                     <span class="update-progress-text" id="update-progress-text"></span>
                 </div>
                 <div class="update-footer-actions" id="update-actions">
-                    <button class="btn secondary" id="update-dismiss-btn">${translatedLater}</button>
-                    <button class="btn primary" id="update-download-btn">${translatedNow}</button>
+                    <button class="btn btn-secondary" id="update-dismiss-btn">${translatedLater}</button>
+                    <button class="btn btn-primary" id="update-download-btn">${translatedNow}</button>
                 </div>
             </div>
         `;

@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="IVIDS Music — stream your favourite music ad-free.">
     <title>IVIDS Music</title>
-    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="index.css?v=0.2.3.7">
     <link rel="stylesheet" href="tv-nav.css">
     <link rel="stylesheet" href="loader.css">
     <link rel="icon" type="image/png" href="gemini-logo.png">
@@ -144,23 +144,23 @@
                         </div>
                     </div>
                     <!-- Save Button -->
-                    <button id="save-track-btn" class="player-control-btn secondary"
+                    <button id="save-track-btn" class="btn btn-secondary player-control-btn"
                         style="margin-left:auto; margin-right: 8px;" onclick="YouTubePlayer.saveTrack()"
                         title="Download Track" data-i18n="download_track" disabled>
                         <img src="svg/download.svg" alt="Download">
                     </button>
                     <!-- Like Button -->
-                    <button id="like-track-btn" class="player-control-btn secondary" style="margin-right: 8px;"
+                    <button id="like-track-btn" class="btn btn-secondary player-control-btn" style="margin-right: 8px;"
                         onclick="YouTubePlayer.toggleLike()" title="Like" data-i18n="like" disabled>
                         <img src="svg/like.svg" alt="Like">
                     </button>
                     <!-- Dislike Button -->
-                    <button id="dislike-track-btn" class="player-control-btn secondary" style="margin-right: 15px;"
+                    <button id="dislike-track-btn" class="btn btn-secondary player-control-btn" style="margin-right: 15px;"
                         onclick="YouTubePlayer.toggleDislike()" title="Dislike" data-i18n="dislike" disabled>
                         <img src="svg/dislike.svg" alt="Dislike">
                     </button>
                     <!-- More Info Button -->
-                    <button id="more-info-btn" class="player-control-btn secondary" style="margin-right: 15px;"
+                    <button id="more-info-btn" class="btn btn-secondary player-control-btn" style="margin-right: 15px;"
                         onclick="Router.loadPage('song')" title="More Info" data-i18n="more_info" disabled>
                         <img src="svg/info.svg" alt="More Info">
                     </button>
@@ -168,15 +168,15 @@
                 <!-- Center: Controls & Progress -->
                 <div class="player-controls">
                     <div class="player-main-controls">
-                        <button class="player-control-btn secondary" onclick="YouTubePlayer.previous()" title="Previous"
+                        <button class="btn btn-secondary player-control-btn" onclick="YouTubePlayer.previous()" title="Previous"
                             data-i18n="previous">
                             <img src="svg/previous.svg" alt="Previous">
                         </button>
-                        <button id="play-pause-btn" class="player-control-btn main" title="Play / Pause"
+                        <button id="play-pause-btn" class="btn btn-primary player-control-btn main" title="Play / Pause"
                             data-i18n="play">
                             <img id="play-icon" src="svg/play.svg" alt="Play">
                         </button>
-                        <button class="player-control-btn secondary" onclick="YouTubePlayer.next()" title="Next"
+                        <button class="btn btn-secondary player-control-btn" onclick="YouTubePlayer.next()" title="Next"
                             data-i18n="next">
                             <img src="svg/next.svg" alt="Next">
                         </button>
@@ -190,7 +190,7 @@
                 </div>
                 <!-- Right: Volume & Queue -->
                 <div class="player-right-controls">
-                    <button id="queue-toggle-btn" class="player-control-btn secondary" title="Queue" data-i18n-title="queue">
+                    <button id="queue-toggle-btn" class="btn btn-secondary player-control-btn" title="Queue" data-i18n-title="queue">
                         <img src="svg/playlists.svg" alt="Queue" style="width: calc(20px * var(--ui-scale)); height: calc(20px * var(--ui-scale));">
                     </button>
                     <div class="player-volume">
@@ -205,8 +205,8 @@
             <div id="queue-drawer" class="queue-drawer">
                 <div class="queue-header">
                     <h3 data-i18n="queue">Queue</h3>
-                    <button id="clear-queue-btn" class="clear-queue-btn btn-secondary" onclick="YouTubePlayer.clearQueue()" data-i18n="clear_queue" disabled>Clear Queue</button>
-                    <button id="close-queue-btn" class="close-queue-btn">&times;</button>
+                    <button id="clear-queue-btn" class="btn btn-secondary clear-queue-btn" onclick="YouTubePlayer.clearQueue()" data-i18n="clear_queue" disabled>Clear Queue</button>
+                    <button id="close-queue-btn" class="btn btn-ghost close-queue-btn">&times;</button>
                 </div>
                 <div class="queue-content">
                     <div class="queue-section">

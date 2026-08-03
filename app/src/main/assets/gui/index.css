@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* Disable default mobile browser blue tap-highlight boxes on all touchable elements */
 * {
     -webkit-tap-highlight-color: transparent !important;
 }
@@ -12,59 +11,48 @@
 }
 
 :root {
-    /* Responsive Scale: composed of a breakpoint-driven base and a user multiplier.
-       - --ui-base-scale is set by breakpoints (media queries).
-       - --ui-user-scale is set by settings (JS should update this at runtime).
-       The effective --ui-scale used throughout the CSS is the product of both. */
+    
     --ui-base-scale: 1;
     --ui-user-scale: 1;
     --ui-scale: calc(var(--ui-base-scale) * var(--ui-user-scale));
 
-    /* Core Theme Colors (Refined Teal) */
     --primary-color: #4dd0e1;
     --primary-rgb: 77, 208, 225;
     --accent-color: #0288d1;
     --accent-rgb: 2, 136, 209;
 
-    /* Backgrounds */
     --background-color: #0a0a0a;
     --surface-color: #151515;
     --surface-light: #222222;
     --card-bg: #1a1a1a;
 
-    /* Text */
     --text-main: #f0f4f8;
     --text-secondary: #94a3b8;
     --text-muted: #556677;
 
-    /* Buttons */
     --btn-primary-bg: var(--primary-color);
     --btn-primary-text: #0a0f14;
     --btn-secondary-bg: rgba(255, 255, 255, 0.06);
     --btn-secondary-border: rgba(255, 255, 255, 0.1);
 
-    /* Sizing (scaled) */
     --sidebar-width: calc(260px * var(--ui-scale));
     --header-height: calc(64px * var(--ui-scale));
     --player-height: calc(80px * var(--ui-scale));
-    /* total vertical padding applied inside #main-view (top + bottom) */
+    
     --main-vertical-padding: calc(64px * var(--ui-scale));
-    /* default bottom nav height (0 when not in portrait); scaled with ui-scale */
+    
     --bottom-nav-height: 0px;
 
-    /* Transitions */
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-/* 5 Responsive Width Breakpoints */
 @media (max-width: 1200px) { :root { --ui-base-scale: 0.95; } }
 @media (max-width: 1024px) { :root { --ui-base-scale: 0.9; } }
 @media (max-width: 768px) { :root { --ui-base-scale: 0.85; } }
 @media (max-width: 700px) { :root { --ui-base-scale: 0.8; } }
 @media (max-width: 600px) { :root { --ui-base-scale: 0.75; } }
 
-/* Bottom Navigation Bar Base Component - Hidden on Desktop Landscape */
 .bottom-nav, #bottom-nav {
     display: none;
     position: fixed;
@@ -111,7 +99,6 @@
     height: calc(20px * var(--ui-scale));
 }
 
-/* Mobile Portrait Mode Orientation Shift (Overrides default desktop sidebar/nav) */
 @media (orientation: portrait), (max-width: 768px) {
     :root {
         --sidebar-width: 0px;
@@ -154,13 +141,40 @@ body {
     display: none !important;
 }
 
-/* Global focus-visible catch-all for keyboard accessibility */
 a:focus-visible,
 button:focus-visible,
 input:focus-visible,
 [tabindex]:focus-visible {
     outline: 2px solid rgba(var(--primary-rgb), 0.6);
     outline-offset: 2px;
+}
+
+/* ==========================================================================
+   Utility Classes (.flex-center, .text-ellipsis, .no-scrollbar)
+   ========================================================================== */
+
+/* Flexbox Centering Helper */
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Single-Line Text Truncation */
+.text-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Container Scrollbar Hiding */
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none !important;
 }
 
 .page-loading-overlay {
@@ -178,7 +192,6 @@ input:focus-visible,
     z-index: 1000;
 }
 
-/* Custom scrollbar */
 ::-webkit-scrollbar {
     width: 6px;
 }
@@ -261,7 +274,7 @@ input:focus-visible,
     letter-spacing: 8px;
     text-transform: uppercase;
     margin-left: 8px;
-    /* Offset to center optically with the generous letter-spacing */
+    
 }
 
 /* ============================
@@ -270,23 +283,18 @@ input:focus-visible,
    we use CSS filters to colorize them.
    ============================ */
 
-
-/* Nav icons â€” muted grey by default */
 img.nav-icon {
     filter: brightness(0) invert(0.65);
 }
 
-/* Nav icons â€” white on hover */
 .nav-links a:hover img.nav-icon {
     filter: brightness(0) invert(1);
 }
 
-/* Nav icons â€” primary aqua when active */
 .nav-links a.active img.nav-icon {
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
 
-/* Header search icon â€” muted, aqua on focus */
 img.search-icon {
     filter: brightness(0) invert(0.4);
 }
@@ -295,21 +303,18 @@ img.search-icon {
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
 
-/* User profile icon */
 .user-profile img {
     width: calc(18px * var(--ui-scale));
     height: calc(18px * var(--ui-scale));
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
 
-/* Player control button icons â€” white */
 .player-control-btn img {
     display: block;
     filter: brightness(0) invert(1);
     transition: filter 0.2s ease;
 }
 
-/* Player volume icon */
 img.player-volume-icon {
     filter: brightness(0) invert(0.6);
 }
@@ -324,7 +329,6 @@ img.player-volume-icon {
     margin-bottom: 2px;
 }
 
-/* Styles each navigation link in the sidebar, providing a premium flex layout and transition anchor */
 .nav-links a {
     display: flex;
     align-items: center;
@@ -335,8 +339,9 @@ img.player-volume-icon {
     font-weight: 500;
     border-radius: calc(8px * var(--ui-scale));
     position: relative;
-    border: 1px solid transparent;
-    transition: all 0.25s var(--ease-out-expo);
+    border: 2px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    box-sizing: border-box;
 }
 
 .nav-icon {
@@ -353,7 +358,6 @@ img.player-volume-icon {
     opacity: 1;
 }
 
-/* Styles the navigation link hover state with a premium glassmorphic glow and a subtle accent color border */
 .nav-links a:hover {
     color: var(--text-main);
     background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
@@ -361,7 +365,6 @@ img.player-volume-icon {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
-/* Styles the active navigation link state, applying a premium themed background highlight and a distinct themed border */
 .nav-links a.active {
     color: var(--primary-color);
     background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.12) 0%, rgba(var(--primary-rgb), 0.03) 100%);
@@ -489,7 +492,6 @@ header {
     background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.25), rgba(var(--accent-rgb), 0.15));
 }
 
-/* Content wrapper (replaces inline flex style) */
 .content-wrapper {
     flex: 1;
     display: flex;
@@ -510,7 +512,6 @@ header {
     background: transparent;
 }
 
-/* Safety net: never show script content in the view */
 #main-view script {
     display: none !important;
 }
@@ -653,45 +654,70 @@ header {
     gap: calc(12px * var(--ui-scale));
 }
 
-/* ============================
-   Buttons
-   ============================ */
+/* ==========================================================================
+   Button Component (.btn, .btn-primary, .btn-secondary, .btn-ghost, .btn-icon)
+   ========================================================================== */
 .btn {
-    padding: calc(10px * var(--ui-scale)) calc(28px * var(--ui-scale));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(8px * var(--ui-scale));
+    padding: calc(10px * var(--ui-scale)) calc(24px * var(--ui-scale));
     border-radius: calc(24px * var(--ui-scale));
     font-size: calc(0.85rem * var(--ui-scale));
     font-weight: 600;
     font-family: inherit;
+    line-height: 1.2;
     cursor: pointer;
-    border: none;
-    transition: box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+    border: 2px solid transparent;
+    background-color: var(--surface-light);
+    color: var(--text-main);
+    background-clip: padding-box;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    text-decoration: none;
+    user-select: none;
+    box-sizing: border-box;
 }
 
-.btn:active {
-    background-color: rgba(var(--primary-rgb), 0.2);
+.btn:hover {
+    border-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.16);
+    box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
 }
 
+/* Primary Button Modifier */
 .btn-primary {
-    background: transparent;
-    color: var(--primary-color);
-    border: 1.5px solid var(--primary-color);
+    background-color: var(--primary-color);
+    color: #05131a;
+    border-color: var(--primary-color);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 0 15px rgba(var(--primary-rgb), 0.2);
-    color: var(--text-main);
-    border-color: var(--text-main);
+    background-color: #67e8f9;
+    border-color: #ffffff;
+    box-shadow: 0 0 16px rgba(var(--primary-rgb), 0.5);
 }
 
+/* Secondary Button Modifier */
 .btn-secondary {
-    background: transparent;
-    color: var(--text-secondary);
-    border: 1.5px solid var(--btn-secondary-border);
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-main);
 }
 
-.btn-secondary:hover {
+/* Ghost / Text-Only Button Modifier */
+.btn-ghost,
+.btn-text-only {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--text-secondary);
+}
+
+.btn-ghost:hover,
+.btn-text-only:hover {
+    background-color: rgba(255, 255, 255, 0.08);
     color: var(--text-main);
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ============================
@@ -716,27 +742,30 @@ header {
     letter-spacing: -0.2px;
 }
 
+/* ==========================================================================
+   Horizontal Scroll Container Component (.scroll-row, .row-posters)
+   ========================================================================== */
+.scroll-row,
 .row-posters {
     display: flex;
     gap: calc(18px * var(--ui-scale));
     flex-wrap: nowrap;
     overflow-x: auto;
-
-    /* Extra padding allows cards to scale up inside the container box without touching edges */
     padding: calc(20px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(40px * var(--ui-scale)) calc(12px * var(--ui-scale));
-
     scrollbar-width: none;
-    /* Firefox */
+    -ms-overflow-style: none;
 }
 
+.scroll-row::-webkit-scrollbar,
 .row-posters::-webkit-scrollbar {
     display: none;
 }
 
-/* ============================
-   Music Card — Split Layout (Image + Info)
-   ============================ */
-/* Styles the music card container (for songs, albums, and artists) as a rounded glassmorphic block */
+/* ==========================================================================
+   Card Component (.card, .music-card)
+   Base card container for songs, albums, playlists, and artists.
+   ========================================================================== */
+.card,
 .music-card {
     position: relative;
     width: calc(140px * var(--ui-scale));
@@ -746,77 +775,86 @@ header {
     flex-direction: column;
     gap: calc(10px * var(--ui-scale));
     cursor: pointer;
-    transition: transform 0.35s var(--ease-out-expo),
-        box-shadow 0.35s var(--ease-out-expo),
-        z-index 0s;
     border-radius: calc(12px * var(--ui-scale));
-    padding: calc(16px * var(--ui-scale));
-    /* Add some padding for the 'box' feel */
+    padding: calc(12px * var(--ui-scale));
     background: var(--card-color, rgba(255, 255, 255, 0.05));
-    border: none;
-
-    /* Set overflow to visible so custom outer focus rings and stacked album drop shadows are not clipped */
-    overflow: visible;
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    background-clip: padding-box;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    overflow: hidden;
     z-index: 1;
-    will-change: opacity, transform;
+    box-sizing: border-box;
 }
 
-
-/* Styles the music card on hover and focus to display a distinct translucent background and thick outer border glow */
+.card:hover,
+.card:focus-visible,
 .music-card:hover,
 .music-card:focus-visible {
-    background: var(--card-color, rgba(255, 255, 255, 0.06));
-    box-shadow: inset 0 -2px 0 0 color-mix(in srgb, var(--card-color, var(--primary-color)), white 30%),
-        0 0 0 2px rgba(255, 255, 255, 0.35);
-    z-index: 10;
+    border-color: #ffffff;
+    background-color: var(--surface-light);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4), 0 0 12px rgba(255, 255, 255, 0.15);
     outline: none;
 }
 
-/*
- * Selector: .music-card:hover .poster
- * Purpose: Brightens the cover art image when card is hovered for interactive micro-feedback.
- */
-.music-card:hover .poster {
-    filter: brightness(1.15);
-}
-
-/*
- * Selector: .card-image-box
- * Purpose: Container wrapper for music card cover art posters.
- */
-.card-image-box {
+.card-image-box, .card__thumb-wrapper {
     position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
-    border-radius: calc(12px * var(--ui-scale));
+    border-radius: calc(10px * var(--ui-scale));
     overflow: hidden;
     background: var(--card-bg);
-    transition: transform 0.3s ease, box-shadow 0.3s ease, border-radius 0.3s ease;
 }
 
-/* Artist: Minimalist Circular Look */
-/*
- * Selector: .music-card.type-artist
- * Purpose: Formats artist profile cards, disabling background and container padding to maintain standard card sizes without layout shift.
- */
-.music-card.type-artist {
+.poster, .card__thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: filter 0.2s ease;
+}
+
+.music-card:hover .poster, .card:hover .card__thumb {
+    filter: brightness(1.1);
+}
+
+.card-info-box, .card__content {
+    display: flex;
+    flex-direction: column;
+    gap: calc(2px * var(--ui-scale));
+    overflow: hidden;
+}
+
+.card-title, .card__title {
+    font-weight: 600;
+    font-size: calc(0.85rem * var(--ui-scale));
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.card-artist, .card-subtitle, .card__subtitle {
+    font-size: calc(0.75rem * var(--ui-scale));
+    font-weight: 400;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.music-card.type-artist, .card--artist {
     background: transparent !important;
-    box-shadow: none !important;
-    /* Removed padding: 0 and border-radius: 50% from the container itself */
+    border-color: transparent !important;
 }
 
-/*
- * Selector: .music-card.type-artist .card-image-box
- * Purpose: Formats the cover image box as a perfect circle for a high-end, clean profile avatar look.
- */
-.music-card.type-artist .card-image-box {
+.music-card.type-artist .card-image-box, .card--artist .card__thumb-wrapper {
     border-radius: 50%;
 }
 
-/*
- * Selector: .music-card.type-artist:hover, .music-card.type-artist:focus-visible
- * Purpose: Suppresses browser focus-visible outline and maintains background transparency during focus/hover.
- */
+.music-card.type-artist:hover .card-image-box, .card--artist:hover .card__thumb-wrapper {
+    box-shadow: 0 0 0 2px #ffffff;
+}
+
 .music-card.type-artist:hover,
 .music-card.type-artist:focus-visible {
     background: transparent !important;
@@ -824,18 +862,10 @@ header {
     outline: none !important;
 }
 
-/*
- * Selector: .music-card.type-artist::after
- * Purpose: Prevents showing the standard play overlay overlay button on artist cards.
- */
 .music-card.type-artist::after {
     display: none !important;
 }
 
-/*
- * Selector: .music-card.type-artist:hover .card-image-box, .music-card.type-artist:focus-visible .card-image-box
- * Purpose: Adds a gorgeous high-end white circular glow ring strictly around the circular profile photo on focus or hover.
- */
 .music-card.type-artist:hover .card-image-box,
 .music-card.type-artist:focus-visible .card-image-box {
     box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35);
@@ -853,10 +883,9 @@ header {
     text-shadow: none;
 }
 
-/* Album: Stacked effect */
 .music-card.type-album .card-image-box {
     overflow: visible;
-    /* Allow stack to show */
+    
     z-index: 1;
 }
 
@@ -893,7 +922,6 @@ header {
     transform: translate(16px, 16px) scale(0.98);
 }
 
-/* Base poster style without hover zoom */
 .poster {
     width: 100%;
     height: 100%;
@@ -902,41 +930,51 @@ header {
     transition: filter 0.3s ease;
 }
 
-/* Styles the bottom info text panel of a music card, aligning its corners with the parent radius */
-.music-card .card-info-box {
-    padding: calc(12px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
-    background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0.4) 60%, transparent 100%);
-    margin: 0 calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale)) calc(-16px * var(--ui-scale));
-    /* Pull precisely by the padding amount to fill the box */
+.music-card .card-info-box,
+.card .card-info-box {
+    padding: calc(14px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(8px * var(--ui-scale)) calc(8px * var(--ui-scale));
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.9) 0%, rgba(0, 0, 0, 0.5) 65%, transparent 100%);
+    margin: 0 calc(-14px * var(--ui-scale)) calc(-14px * var(--ui-scale)) calc(-14px * var(--ui-scale));
     z-index: 2;
-    border-bottom-left-radius: calc(12px * var(--ui-scale));
-    border-bottom-right-radius: calc(12px * var(--ui-scale));
+    border-bottom-left-radius: calc(14px * var(--ui-scale));
+    border-bottom-right-radius: calc(14px * var(--ui-scale));
+    display: flex;
+    flex-direction: column;
+    gap: calc(2px * var(--ui-scale));
+    overflow: hidden;
+    width: calc(100% + calc(28px * var(--ui-scale)));
+    box-sizing: border-box;
 }
 
 .card-title {
     font-weight: 700;
-    font-size: calc(0.9rem * var(--ui-scale));
+    font-size: calc(0.85rem * var(--ui-scale));
     color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: calc(2px * var(--ui-scale));
-    padding-bottom: calc(8px * var(--ui-scale));
+    margin-bottom: 0;
+    padding: 0;
     text-align: left;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
-}
-
-.card-artist {
-    font-size: calc(0.8rem * var(--ui-scale));
-    font-weight: 400;
-    color: #b3b3b3;
-    padding: 0 calc(6px * var(--ui-scale));
-    text-align: center;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     width: 100%;
+    box-sizing: border-box;
+    display: block;
+}
+
+.card-artist {
+    font-size: calc(0.78rem * var(--ui-scale));
+    font-weight: 400;
+    color: #b3b3b3;
+    padding: 0;
+    text-align: left;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.9);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+    box-sizing: border-box;
+    display: block;
 }
 
 .card-artist a {
@@ -945,17 +983,54 @@ header {
     transition: color 0.2s ease;
     display: inline-block;
     max-width: 100%;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
     vertical-align: bottom;
-    text-align: left;
-    /* Internal text aligns left when element is 100% wide */
 }
 
 .card-artist a:hover {
     color: var(--primary-color);
     text-decoration: underline;
+}
+
+/* Single-Line Continuous GPU Marquee (Title & Artist) */
+.card-title,
+.card-artist {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: clip !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    position: relative !important;
+}
+
+.card-title > *,
+.card-artist > *,
+.card-title .marquee-text,
+.card-artist .marquee-text,
+.card-artist a {
+    display: inline-block !important;
+    white-space: nowrap !important;
+    min-width: 100% !important;
+    width: max-content !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    vertical-align: bottom !important;
+    position: relative !important;
+    animation: marquee-continuous-swipe 7s ease-in-out infinite alternate !important;
+    will-change: left, transform !important;
+}
+
+@keyframes marquee-continuous-swipe {
+    0%, 25% {
+        left: 0%;
+        transform: translateX(0%);
+    }
+    75%, 100% {
+        left: 100%;
+        transform: translateX(-100%);
+    }
 }
 
 .poster-overlay {
@@ -978,7 +1053,6 @@ header {
     bottom: 0;
 }
 
-/* Creates the overlay play button centered on music cards, fading in smoothly on hover */
 .music-card::after {
     content: '';
     position: absolute;
@@ -1000,11 +1074,10 @@ header {
     transition: opacity 0.25s ease;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     z-index: 2;
-    /* Adjust position relative to the image box */
+    
     margin-top: -15px;
 }
 
-/* Fades in the card play button overlay on hover */
 .music-card:hover::after {
     opacity: 1;
 }
@@ -1019,7 +1092,7 @@ header {
 .skeleton-row {
     display: flex;
     gap: calc(18px * var(--ui-scale));
-    /* Match .row-posters gap */
+    
     margin-bottom: calc(36px * var(--ui-scale));
 }
 
@@ -1033,7 +1106,7 @@ header {
     flex-direction: column;
     gap: calc(10px * var(--ui-scale));
     border: 2px solid rgba(255, 255, 255, 0.05);
-    /* Match 2px border of real cards */
+    
     overflow: hidden;
 }
 
@@ -1041,7 +1114,7 @@ header {
     width: 100%;
     aspect-ratio: 1/1;
     border-radius: calc(12px * var(--ui-scale));
-    /* Match real card image radius */
+    
     background: rgba(255, 255, 255, 0.05);
     position: relative;
 }
@@ -1049,11 +1122,10 @@ header {
 .skeleton-info-box {
     padding: calc(12px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale));
     margin: 0 -11px -11px -11px;
-    /* Match real card info box overlap */
+    
     background: rgba(255, 255, 255, 0.02);
 }
 
-/* Subtle Pulse for Text Blocks */
 .skeleton-text {
     border-radius: 4px;
     background: rgba(255, 255, 255, 0.08);
@@ -1071,7 +1143,6 @@ header {
     margin: 0 calc(20px * var(--ui-scale));
     width: 60%;
 }
-
 
 @keyframes skeleton-pulse {
     0% {
@@ -1196,7 +1267,6 @@ header {
     font-variant-numeric: tabular-nums;
 }
 
-/* Styles the custom range input slider track with a dynamic highlighted fill */
 .ivids-slider {
     -webkit-appearance: none;
     appearance: none;
@@ -1208,7 +1278,6 @@ header {
     cursor: pointer;
 }
 
-/* Styles the custom slider thumb for Webkit browsers */
 .ivids-slider::-webkit-slider-thumb {
     -webkit-appearance: none;
     width: calc(12px * var(--ui-scale));
@@ -1221,7 +1290,6 @@ header {
     transition: border-width 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Styles the custom range slider thumb for Mozilla Firefox */
 .ivids-slider::-moz-range-thumb {
     width: calc(12px * var(--ui-scale));
     height: calc(12px * var(--ui-scale));
@@ -1233,13 +1301,11 @@ header {
     transition: border-width 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Styles the slider thumb hover state for Webkit to enhance interactive visual feedback */
 .ivids-slider:hover::-webkit-slider-thumb {
     border-width: 3px;
     box-shadow: 0 0 calc(8px * var(--ui-scale)) rgba(var(--primary-rgb), 0.8);
 }
 
-/* Styles the slider thumb hover state for Firefox to enhance interactive visual feedback */
 .ivids-slider:hover::-moz-range-thumb {
     border-width: 3px;
     box-shadow: 0 0 calc(8px * var(--ui-scale)) rgba(var(--primary-rgb), 0.8);
@@ -1249,7 +1315,7 @@ header {
     content: '';
     position: absolute;
     inset: -100px;
-    /* Oversized to prevent blur edges from showing */
+    
     background-image: var(--current-cover);
     background-size: cover;
     background-position: center;
@@ -1268,7 +1334,6 @@ header {
     z-index: 1;
 }
 
-/* Player Bar â€” Element Classes */
 .player-info {
     display: flex;
     align-items: center;
@@ -1307,17 +1372,11 @@ header {
 .player-title {
     font-weight: 600;
     font-size: calc(0.9rem * var(--ui-scale));
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .player-artist {
     font-size: calc(0.75rem * var(--ui-scale));
     color: #b3b3b3;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .player-status {
@@ -1387,10 +1446,6 @@ header {
     transition: opacity 1.2s ease;
 }
 
-
-
-
-
 /* ============================
    Horizontal Scrolling Rows
    ============================ */
@@ -1408,7 +1463,6 @@ header {
     display: none;
 }
 
-/* Scroll Container for Arrows */
 .row-scroll-wrapper {
     position: relative;
     margin-bottom: calc(40px * var(--ui-scale));
@@ -1417,7 +1471,7 @@ header {
 .scroll-arrow {
     position: absolute;
     top: calc(50px * var(--ui-scale));
-    /* Offset for title height */
+    
     bottom: 0px;
     width: calc(60px * var(--ui-scale));
     background: linear-gradient(to right, rgba(10, 10, 10, 0.8), transparent);
@@ -1514,7 +1568,6 @@ header {
     transform: translateX(3px);
 }
 
-/* Search Page & Grid Specifics */
 .grid-header {
     display: flex;
     align-items: center;
@@ -1572,99 +1625,72 @@ header {
    Responsive Breakpoints
    ============================ */
 
-/* ── Widescreen & Ultra-HD (Scale Up) ── */
-
-/* 5K/8K Monitors & Large TVs */
 @media (min-width: 3800px) {
 
-    /* Styles the document root scale for 5K/8K ultra-large displays and TVs to keep content legible */
     :root {
         --ui-base-scale: 1.35;
     }
 }
 
-/* 4K Monitors / Large Displays */
 @media (min-width: 2500px) {
 
-    /* Styles the document root scale for 4K high-resolution monitors to balance density and sizing */
     :root {
         --ui-base-scale: 1.2;
     }
 }
 
-/* QHD / High-Res Desktop (1440p) */
 @media (min-width: 1900px) {
 
-    /* Styles the document root scale for QHD displays to keep elements comfortable for close-up viewing */
     :root {
         --ui-base-scale: 1.1;
     }
 }
 
-/* Standard Widescreen (1080p) */
 @media (min-width: 1600px) {
 
-    /* Styles the document root scale for standard 1080p monitors at a comfortable, default scale */
     :root {
         --ui-base-scale: 1.0;
     }
 }
 
-/* ── Standard & Mobile (Scale Down) ── */
-
-/* Small Laptops / Tablets Landscape */
 @media (max-width: 1400px) {
     :root {
         --ui-base-scale: 0.95;
     }
 }
 
-/* Tablet Large (Rule: 1200px) */
 @media (max-width: 1200px) {
     :root {
         --ui-base-scale: 0.85;
     }
 }
 
-/* Tablet Small (Rule: 1024px) */
 @media (max-width: 1024px) {
     :root {
         --ui-base-scale: 0.8;
     }
 }
 
-/* Mobile Large (Landscape) (Rule: 768px) */
 @media (max-width: 768px) {
     :root {
         --ui-base-scale: 0.7;
     }
 }
 
-/* Mobile Medium (Rule: 700px) */
 @media (max-width: 700px) {
     :root {
         --ui-base-scale: 0.65;
     }
 }
 
-/* Mobile Small (Rule: 600px) */
 @media (max-width: 600px) {
     :root {
         --ui-base-scale: 0.55;
     }
 }
 
-
 @media (orientation: portrait) {
 
-    /*
-     * Block: :root portrait variables
-     * Purpose: Shifts player heights and resets sidebar widths to accommodate a horizontal bottom tab bar.
-     * Note: --ui-base-scale is forced to 0.85 in portrait mode regardless of viewport width. This overrides
-     *       the narrow-screen breakpoints (e.g. 0.55 at <600px) that caused microscopic text and icons on
-     *       mobile phones held in portrait orientation. All calc(... * var(--ui-scale)) values resolve
-     *       at a comfortable, readable physical size on mobile.
-     */
     :root {
         --ui-base-scale: 0.85;
         --player-height: auto;
@@ -1673,12 +1699,10 @@ header {
         --main-vertical-padding: calc(40px * var(--ui-scale));
     }
 
-    /* ── App Shell: vertical stack ── */
     #app {
         flex-direction: column;
     }
 
-    /* ── Sidebar → Bottom Tab Bar ── */
     #sidebar-container {
         position: fixed;
         bottom: 0;
@@ -1700,13 +1724,11 @@ header {
         z-index: 300;
     }
 
-    /* Hide brand logo, dividers, extra nav wrappers */
     #sidebar-container .sidebar-brand,
     #sidebar-container .nav-divider {
         display: none;
     }
 
-    /* Flatten nav elements for horizontal layout */
     #sidebar-container nav {
         width: 100%;
         display: flex;
@@ -1743,7 +1765,6 @@ header {
         background: rgba(255, 255, 255, 0.1);
     }
 
-    /* Hide the left accent bar in portrait */
     .nav-links a::before {
         display: none;
     }
@@ -1753,13 +1774,11 @@ header {
         height: 26px !important;
     }
 
-    /* ── Content Wrapper: full width + clear bottom space ── */
     .content-wrapper {
         width: 100%;
         padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + (10px * var(--ui-scale)));
     }
 
-    /* ── Header: scale-independent physical dimensions ── */
     header {
         padding: 0 12px !important;
         height: 64px !important;
@@ -1800,13 +1819,11 @@ header {
         gap: calc(10px * var(--ui-scale));
     }
 
-    /* ── Main content: spacious padding with 100% player/navbar scroll clearance ── */
     #main-view {
         padding: 16px 12px 320px 12px !important;
-        /* Spacious but thin, symmetric 12px side padding */
+        
     }
 
-    /* ── Hero: scale-independent physical dimensions ── */
     .hero {
         min-height: 180px !important;
         padding: 24px 20px !important;
@@ -1816,7 +1833,6 @@ header {
         box-sizing: border-box !important;
     }
 
-    /* Hide extra blobs in portrait — cleaner + better performance */
     .hero-blob:not(:first-child) {
         display: none;
     }
@@ -1848,7 +1864,6 @@ header {
         justify-content: center !important;
     }
 
-    /* ── Music Cards: perfect mobile scale-independent sizing ── */
     .music-card {
         width: 140px !important;
         min-width: 140px !important;
@@ -1858,15 +1873,22 @@ header {
     .music-card .card-info-box {
         padding: 8px 6px 4px 6px !important;
         margin: 0 -10px -10px -10px !important;
+        overflow: hidden !important;
     }
 
     .card-title {
         font-size: 14px !important;
-        padding-bottom: 4px !important;
+        padding-bottom: 0 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: clip !important;
     }
 
     .card-artist {
         font-size: 12px !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: clip !important;
     }
 
     .row-posters,
@@ -1882,7 +1904,7 @@ header {
         padding-left: 12px !important;
         padding-right: 12px !important;
         gap: 12px !important;
-        /* Elegant physical gap between cards */
+        
         margin-bottom: 20px !important;
     }
 
@@ -1900,7 +1922,7 @@ header {
         font-size: 18px !important;
         margin-bottom: 12px !important;
         padding-left: 0 !important;
-        /* Aligns perfectly with the 12px main-view boundary */
+        
     }
 
     .row-header {
@@ -1911,12 +1933,10 @@ header {
         margin-bottom: calc(20px * var(--ui-scale));
     }
 
-    /* Hide scroll arrows on touch */
     .scroll-arrow {
         display: none !important;
     }
 
-    /* â”€â”€ Skeletons: match card sizing â”€â”€ */
     .skeleton-card {
         width: calc(115px * var(--ui-scale));
         min-width: calc(115px * var(--ui-scale));
@@ -1924,7 +1944,7 @@ header {
 
     .skeleton-info-box {
         margin: 0 -11px -11px -11px;
-        /* Maintain same overlap ratio */
+        
     }
 
     .skeleton-poster {
@@ -1943,48 +1963,24 @@ header {
         display: none;
     }
 
-    /* ── Search/Browse: compact hero ── */
-    /*
-     * Selector: .browse-hero (portrait)
-     * Purpose: Compact padding for the search landing page hero banner on mobile.
-     */
     .browse-hero {
         padding: calc(28px * var(--ui-scale)) calc(16px * var(--ui-scale));
     }
 
-    /*
-     * Selector: .browse-hero-title (portrait)
-     * Purpose: Scale-relative heading for the Search landing page at mobile sizes.
-     */
     .browse-hero-title {
         font-size: calc(2rem * var(--ui-scale));
         letter-spacing: -1px;
     }
 
-    /*
-     * Selector: .browse-search-input (portrait)
-     * Purpose: Keeps the landing-page search bar text and padding comfortable on mobile.
-     */
     .browse-search-input {
         padding: calc(14px * var(--ui-scale)) calc(16px * var(--ui-scale)) calc(14px * var(--ui-scale)) calc(48px * var(--ui-scale));
         font-size: calc(1rem * var(--ui-scale));
     }
 
-    /*
-     * Selector: body[data-current-page="search"]:not([data-search-has-query="true"]) .search-container
-     * Purpose: Hides the redundant header search bar in mobile portrait view when browsing the search landing page with no query.
-     */
     body[data-current-page="search"]:not([data-search-has-query="true"]) .search-container {
         display: none !important;
     }
 
-    /* ── Search Results Header ── */
-
-    /*
-     * Selector: .search-page-title (portrait)
-     * Purpose: Scale-independent physical font size so "Search Results" is always clearly readable on phones.
-     *          Allows text to wrap rather than overflow off-screen.
-     */
     .search-page-title {
         font-size: 22px !important;
         letter-spacing: -0.5px !important;
@@ -1992,10 +1988,6 @@ header {
         line-height: 1.2 !important;
     }
 
-    /*
-     * Selector: .search-page-subtitle (portrait)
-     * Purpose: Legible scale-independent subtitle text below the "Search Results" heading.
-     */
     .search-page-subtitle {
         font-size: 13px !important;
         margin-top: 4px !important;
@@ -2003,12 +1995,6 @@ header {
         line-height: 1.4 !important;
     }
 
-    /*
-     * Selector: .search-page-header (portrait) — covers both scoped and unscoped usage
-     * Purpose: Stacks the title-group and filter-bar vertically; removes desktop side-by-side alignment.
-     *          Top padding is trimmed to prevent wasted vertical space; bottom margin keeps content breathable.
-     *          Only applies when the header is not hidden, preserving search empty state integrity.
-     */
     .search-page-header:not(.is-hidden),
     body[data-current-page="search"] .search-page-header:not(.is-hidden) {
         display: flex !important;
@@ -2020,14 +2006,6 @@ header {
         margin-bottom: 20px !important;
     }
 
-    /* ── Filter Chip Bar ── */
-
-    /*
-     * Selector: .search-filter-bar (portrait)
-     * Purpose: Full-width horizontally-scrollable chip bar, edge-flushed with the main-view 12px boundary.
-     *          No padding-left so chips sit at the very start; padding-right gives the last chip breathing room.
-     *          -webkit-overflow-scrolling enables momentum scrolling on iOS WebView.
-     */
     .search-filter-bar,
     body[data-current-page="search"] .search-filter-bar {
         width: 100% !important;
@@ -2048,12 +2026,6 @@ header {
         display: none !important;
     }
 
-    /*
-     * Selector: .filter-chip (portrait)
-     * Purpose: Scale-independent physical chip dimensions ensuring each chip is a comfortable 36px tall
-     *          tap target with legible 14px text. Border-radius is a perfect capsule (100px).
-     *          flex-shrink: 0 prevents chips from being squeezed when the bar is full.
-     */
     .filter-chip {
         padding: 8px 16px !important;
         font-size: 14px !important;
@@ -2067,12 +2039,6 @@ header {
         justify-content: center !important;
     }
 
-    /*
-     * Selector: .year-filter-wrapper (portrait)
-     * Purpose: Compact calendar + year input capsule that sits inline within the scrollable filter bar.
-     *          Uses flex-shrink: 0 so it never collapses. margin-left: auto pushes it to the far right naturally.
-     *          Physical padding and font ensure it stays readable and comfortable as a tap target.
-     */
     .year-filter-wrapper {
         padding: 7px 12px !important;
         gap: 6px !important;
@@ -2081,32 +2047,16 @@ header {
         margin-left: 4px !important;
     }
 
-    /*
-     * Selector: .year-filter-icon (portrait)
-     * Purpose: Physical 14px icon size, consistent with the chip row height.
-     */
     .year-filter-icon {
         width: 14px !important;
         height: 14px !important;
     }
 
-    /*
-     * Selector: .year-filter-input (portrait)
-     * Purpose: Slightly wider touch-friendly year field with physical font-size for legibility.
-     */
     .year-filter-input {
         font-size: 14px !important;
         width: 52px !important;
     }
 
-    /* ── Search/Grid Results: responsive 2-column grid ── */
-
-    /*
-     * Selector: .grid-results (portrait)
-     * Purpose: Forces the search results grid into a clean 2-column auto-fill layout. minmax(140px, 1fr)
-     *          guarantees at least 2 columns on any phone viewport above 300px wide while allowing
-     *          wider phones to show 3+. Gap is a comfortable physical 16px.
-     */
     .grid-results {
         display: grid !important;
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
@@ -2114,17 +2064,12 @@ header {
         width: 100% !important;
     }
 
-    /*
-     * Selector: body[data-current-page="search"] header .search-container
-     * Purpose: Stretches the top header search input capsule to fill all available horizontal header space on mobile.
-     */
     body[data-current-page="search"] header .search-container {
         max-width: none !important;
         width: 100% !important;
         flex: 1 !important;
     }
 
-    /* ── Profile: stacked ── */
     .profile-header {
         flex-direction: column;
         text-align: center;
@@ -2157,7 +2102,6 @@ header {
         justify-content: center;
     }
 
-    /* ── Library: compact ── */
     .library-hero {
         padding: calc(24px * var(--ui-scale));
         min-height: unset;
@@ -2195,41 +2139,17 @@ header {
         width: 100%;
     }
 
-    /* ══════════════════════════════════════════════════
-       Settings: Premium iOS-Inspired Stacked Card Layout
-       ══════════════════════════════════════════════════
-       In portrait mode the settings page is completely redesigned
-       into a vertically stacked, card-based system inspired by
-       iOS Settings. Each section has a small uppercase header,
-       and each item stacks its label + description above its
-       control widget for effortless one-handed use.
-       ══════════════════════════════════════════════════ */
-
-    /*
-     * Selector: .settings-container (portrait)
-     * Purpose: Full-bleed container with comfortable padding. Removes the max-width
-     *          desktop constraint so settings fill the entire screen width.
-     */
     .settings-container {
         padding: 16px 16px 40px 16px !important;
         max-width: 100% !important;
     }
 
-    /*
-     * Selector: .settings-container > .row-title (portrait)
-     * Purpose: The main "Settings" page heading. Physically sized for mobile readability.
-     */
     .settings-container>.row-title {
         font-size: 30px !important;
         margin-bottom: 24px !important;
         letter-spacing: -0.5px !important;
     }
 
-    /*
-     * Selector: .settings-section-title (portrait)
-     * Purpose: iOS-inspired section label — small, uppercase, muted text above each
-     *          settings group card. Resembles iOS grouped table section headers.
-     */
     .settings-section-title {
         font-size: 14px !important;
         font-weight: 600 !important;
@@ -2242,26 +2162,15 @@ header {
         padding-left: 4px !important;
     }
 
-    /*
-     * Selector: .settings-section-title:first-of-type (portrait)
-     * Purpose: Reduces the top spacing above the very first section (Appearance)
-     *          since it sits directly below the page heading.
-     */
     .settings-section-title:first-of-type {
         margin-top: 4px !important;
     }
 
-    /*
-     * Selector: .settings-section-icon (portrait)
-     * Purpose: Slightly shrinks the section header icons to match the smaller
-     *          uppercase label aesthetic.
-     */
     .settings-section-icon {
         width: 16px !important;
         height: 16px !important;
     }
 
-    /* Styles the mobile portrait settings group card with a premium translucent dark background */
     .settings-section {
         background: rgba(255, 255, 255, 0.065) !important;
         border: 1px solid rgba(255, 255, 255, 0.08) !important;
@@ -2274,13 +2183,6 @@ header {
         overflow: hidden !important;
     }
 
-    /*
-     * Selector: .settings-item (portrait)
-     * Purpose: Transforms each setting row into a stacked vertical tile.
-     *          Label and description sit on top, the control widget sits below,
-     *          full-width. Padding is physical px for consistent tap spacing.
-     *          A subtle bottom border separates items within the same section card.
-     */
     .settings-item {
         flex-direction: column !important;
         align-items: stretch !important;
@@ -2290,52 +2192,26 @@ header {
         border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
     }
 
-    /*
-     * Selector: .settings-item:last-child (portrait)
-     * Purpose: Removes the bottom border on the last item within a section card
-     *          to prevent a double-line against the card's bottom edge.
-     */
     .settings-item:last-child {
         border-bottom: none !important;
     }
 
-    /*
-     * Selector: .settings-info (portrait)
-     * Purpose: Ensures the label + description text block takes full width.
-     */
     .settings-info {
         width: 100% !important;
     }
 
-    /*
-     * Selector: .settings-label (portrait)
-     * Purpose: Physical 17px font for the setting name. Large enough to be clearly
-     *          readable on high-DPI mobile screens.
-     */
     .settings-label {
         font-size: 17px !important;
         font-weight: 600 !important;
         margin-bottom: 2px !important;
     }
 
-    /*
-     * Selector: .settings-desc (portrait)
-     * Purpose: Slightly smaller secondary text below the label.
-     */
     .settings-desc {
         font-size: 15px !important;
         line-height: 1.4 !important;
         opacity: 0.65 !important;
     }
 
-    /* ── Scale Stepper: full-width horizontal control ── */
-
-    /*
-     * Selector: .scale-stepper (portrait)
-     * Purpose: Stretches the – 100% + control to full width. The stepper becomes
-     *          a prominent horizontal bar with generous tap targets. The background
-     *          blends into the card tile with a subtle inset look.
-     */
     .scale-stepper {
         width: 100% !important;
         display: flex !important;
@@ -2349,11 +2225,6 @@ header {
         flex-wrap: nowrap !important;
     }
 
-    /*
-     * Selector: .scale-stepper-btn (portrait)
-     * Purpose: Large 44px square tap targets for – and + buttons. Apple HIG
-     *          recommends 44px minimum for touch targets.
-     */
     .scale-stepper-btn {
         width: 44px !important;
         height: 44px !important;
@@ -2369,10 +2240,6 @@ header {
         color: var(--text-main) !important;
     }
 
-    /*
-     * Selector: .scale-value (portrait)
-     * Purpose: Center-aligned percentage display between the – and + buttons.
-     */
     .scale-value {
         font-size: 18px !important;
         font-weight: 700 !important;
@@ -2381,14 +2248,6 @@ header {
         text-align: center !important;
     }
 
-    /* ── Language Row: tappable block ── */
-
-    /*
-     * Selector: .lang-display (portrait)
-     * Purpose: Stretches the language name + edit button to full width with the
-     *          name on the left and the edit icon on the far right, creating a
-     *          natural iOS-style "tap to change" row.
-     */
     .lang-display {
         width: 100% !important;
         display: flex !important;
@@ -2401,43 +2260,22 @@ header {
         gap: 12px !important;
     }
 
-    /*
-     * Selector: .lang-current-name (portrait)
-     * Purpose: Physical readable font size for the current language label.
-     */
     .lang-current-name {
         font-size: 17px !important;
         font-weight: 600 !important;
     }
 
-    /*
-     * Selector: .lang-edit-btn (portrait)
-     * Purpose: Compact circular edit button with physical dimensions.
-     */
     .lang-edit-btn {
         width: 34px !important;
         height: 34px !important;
         min-width: 34px !important;
     }
 
-    /*
-     * Selector: .lang-edit-icon (portrait)
-     * Purpose: Physical icon size for the edit pencil icon.
-     */
     .lang-edit-icon {
         width: 15px !important;
         height: 15px !important;
     }
 
-    /* ── Check for Updates Button: full-width accent pill ── */
-
-    /*
-     * Selector: .check-updates-btn (portrait)
-     * Purpose: Transforms the inline "Check for Updates" button into a full-width
-     *          prominent pill CTA at the bottom of the About section. Uses the
-     *          primary accent color as a border highlight to draw attention without
-     *          being garish.
-     */
     .check-updates-btn {
         width: 100% !important;
         padding: 12px 20px !important;
@@ -2449,14 +2287,6 @@ header {
         color: var(--primary-color) !important;
     }
 
-    /* ── Language Modal: bottom sheet ── */
-
-    /*
-     * Selector: .lang-modal (portrait)
-     * Purpose: In portrait the language modal becomes a bottom sheet that slides
-     *          up from the bottom edge, covering ~75% of the screen. This is the
-     *          standard iOS/Android pattern for selection modals.
-     */
     .lang-modal {
         width: 100% !important;
         max-width: 100% !important;
@@ -2470,18 +2300,10 @@ header {
         padding: 20px 16px 40px 16px !important;
     }
 
-    /*
-     * Selector: .lang-modal-title (portrait)
-     * Purpose: Physical font size for the modal heading.
-     */
     .lang-modal-title {
         font-size: 20px !important;
     }
 
-    /*
-     * Selector: .lang-modal-close (portrait)
-     * Purpose: Physical 36px tap target for the close X button.
-     */
     .lang-modal-close {
         width: 36px !important;
         height: 36px !important;
@@ -2492,11 +2314,6 @@ header {
         height: 14px !important;
     }
 
-    /*
-     * Selector: .lang-modal-list (portrait)
-     * Purpose: Single-column vertical list for language options in portrait.
-     *          Allows vertical scrolling when the list exceeds the sheet height.
-     */
     .lang-modal-list {
         grid-auto-flow: row !important;
         grid-template-rows: none !important;
@@ -2505,23 +2322,17 @@ header {
         overflow-y: auto !important;
     }
 
-    /*
-     * Selector: .lang-option (portrait)
-     * Purpose: Large, comfortable language selection rows with physical dimensions.
-     */
     .lang-option {
         padding: 14px 16px !important;
         font-size: 17px !important;
         border-radius: 12px !important;
     }
 
-    /* ── Playlist cards: narrower ── */
     .playlist-card {
         width: calc(115px * var(--ui-scale));
         min-width: calc(115px * var(--ui-scale));
     }
 
-    /* ── Profile Page Adjustments ── */
     .profile-avatar-wrapper {
         width: 140px !important;
         height: 140px !important;
@@ -2533,9 +2344,9 @@ header {
         height: 100% !important;
         border-width: 3px !important;
         padding: 0 !important;
-        /* Remove padding so injected images fill the circle */
+        
         font-size: 60px !important;
-        /* In case it's an injected text element */
+        
         display: flex;
         align-items: center;
         justify-content: center;
@@ -2556,10 +2367,6 @@ header {
         justify-content: center !important;
     }
 
-    /* ── Disable Hover Scaling on Touch (Mobile) ── 
-       Touch devices don't need hover scales, and they can cause jitter on tap.
-       We meticulously override :hover, :active, and :focus-visible.
-       Crucially, we also disable `transition` to prevent animation lag. */
     .music-card:hover,
     .music-card:active,
     .music-card:focus-visible,
@@ -2598,7 +2405,6 @@ header {
         transition: none !important;
     }
 
-    /* Cancel the stacked disk hover effect specifically */
     .music-card.type-album:hover .card-image-box::before,
     .music-card.type-album:active .card-image-box::before,
     .music-card.type-album:focus-visible .card-image-box::before {
@@ -2611,7 +2417,6 @@ header {
         transform: translate(12px, 12px) scale(0.96) !important;
     }
 
-    /* ── Player Bar: compact stacked layout ── */
     #player-bar {
         grid-template-columns: 1fr;
         grid-template-rows: auto auto;
@@ -2627,7 +2432,6 @@ header {
         margin: 0 calc(24px * var(--ui-scale)) 0 calc(24px * var(--ui-scale));
     }
 
-    /* Row 1: info + play/pause */
     .player-info {
         display: flex;
         align-items: center;
@@ -2651,20 +2455,13 @@ header {
         font-size: 0.88rem;
         font-weight: 600;
         letter-spacing: -0.01em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
     .player-artist {
         font-size: 0.72rem;
         letter-spacing: 0.01em;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
     }
 
-    /* Row 2: controls + progress merged into one row */
     .player-controls {
         width: 100%;
         gap: calc(4px * var(--ui-scale));
@@ -2704,19 +2501,15 @@ header {
         min-width: calc(30px * var(--ui-scale));
     }
 
-    /* Hide volume in portrait â€” phones use hardware volume */
     .player-volume {
         display: none;
     }
 
-
-    /* â”€â”€ Back button â”€â”€ */
     .back-button {
         padding: 7px 14px;
         font-size: 0.82rem;
     }
 
-    /* â”€â”€ Touch Targets & Typography Optical Adjustments â”€â”€ */
     .more-link {
         padding: calc(12px * var(--ui-scale));
         margin: calc(-12px * var(--ui-scale));
@@ -2732,7 +2525,6 @@ header {
         line-height: 1.1;
     }
 
-    /* â”€â”€ Load more â”€â”€ */
     .load-more-container {
         padding: 20px 0;
     }
@@ -2784,7 +2576,6 @@ header {
    Search Page
    ============================ */
 
-/* Container for search landing page hero, centered horizontally */
 .browse-hero {
     position: relative;
     display: flex;
@@ -2819,7 +2610,6 @@ header {
     background-clip: text;
 }
 
-/* Styles the search page onboarding card with elegant glassmorphism and balanced centering */
 .search-hero-promo {
     position: relative;
     width: 90%;
@@ -2857,7 +2647,6 @@ header {
     transition: all 0.3s var(--ease-out-expo);
 }
 
-/* Styles the hover state for the close button, replacing scale with high-fidelity glass highlight */
 .promo-close-btn:hover {
     background: rgba(255, 255, 255, 0.15);
     border-color: rgba(255, 255, 255, 0.4);
@@ -2884,7 +2673,6 @@ header {
     background-clip: text;
 }
 
-/* Styles the description text of the onboarding search card */
 .search-hero-promo .hero-desc {
     font-size: calc(0.9rem * var(--ui-scale));
     color: var(--text-secondary);
@@ -2893,7 +2681,6 @@ header {
     margin-bottom: 0;
 }
 
-/* Container for browse categories grid on the search landing page */
 .search-categories-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(calc(180px * var(--ui-scale)), 1fr));
@@ -2905,7 +2692,6 @@ header {
     box-sizing: border-box;
 }
 
-/* Individual browse category card with glassmorphism, dynamic gradients, and smooth border highlights */
 .search-category-card {
     position: relative;
     height: calc(120px * var(--ui-scale));
@@ -2922,21 +2708,18 @@ header {
     justify-content: space-between;
 }
 
-/* Hover highlights for category cards using a white thicker border per rule 2 */
 .search-category-card:hover {
     border-color: rgba(255, 255, 255, 0.4);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
     background-color: rgba(255, 255, 255, 0.05);
 }
 
-/* Focused state highlight for TV spatial navigation */
 .search-category-card:focus-visible {
     outline: 3px solid #ffffff !important;
     outline-offset: 0px !important;
     border-color: #ffffff !important;
 }
 
-/* Title text for browse category card */
 .search-category-card .category-title {
     font-size: calc(1.3rem * var(--ui-scale));
     font-weight: 700;
@@ -2945,7 +2728,6 @@ header {
     z-index: 2;
 }
 
-/* Decorative visual background icon/art for the category card */
 .search-category-card .category-bg-art {
     position: absolute;
     bottom: calc(-10px * var(--ui-scale));
@@ -2956,52 +2738,42 @@ header {
     transition: opacity 0.3s ease;
 }
 
-/* Increases visibility of background art on hover */
 .search-category-card:hover .category-bg-art {
     opacity: 0.4;
 }
 
-/* Pop category card gradient styling */
 .search-category-card.pop {
     background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);
 }
 
-/* Hip-hop category card gradient styling */
 .search-category-card.hiphop {
     background: linear-gradient(135deg, #f59e0b 0%, #b45309 100%);
 }
 
-/* Rock category card gradient styling */
 .search-category-card.rock {
     background: linear-gradient(135deg, #8b5cf6 0%, #5b21b6 100%);
 }
 
-/* Electronic category card gradient styling */
 .search-category-card.electronic {
     background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
 }
 
-/* Jazz category card gradient styling */
 .search-category-card.jazz {
     background: linear-gradient(135deg, #10b981 0%, #047857 100%);
 }
 
-/* Classical category card gradient styling */
 .search-category-card.classical {
     background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
 }
 
-/* Chill category card gradient styling */
 .search-category-card.chill {
     background: linear-gradient(135deg, #6366f1 0%, #4338ca 100%);
 }
 
-/* Workout category card gradient styling */
 .search-category-card.workout {
     background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%);
 }
 
-/* Styles the unified search input wrapper to be centered on PC/TV/Mobile layout */
 .browse-search-wrapper {
     position: relative;
     width: 100%;
@@ -3009,24 +2781,20 @@ header {
     margin: 0 auto;
 }
 
-/* Hides the global header search input container on the search page to avoid duplicate inputs */
 body[data-current-page="search"] header .search-container {
     display: none !important;
 }
 
-/* Styles the unified root search bar container used in Mobile/TV layouts */
 .unified-search-bar {
     display: none;
     width: 100%;
 }
 
-/* Prominently displays the unified search bar globally when active on the search page */
 body[data-current-page="search"] .unified-search-bar {
     display: block !important;
     margin-bottom: calc(24px * var(--ui-scale));
 }
 
-/* Styles the absolute-positioned clear button to reset active search inputs */
 .search-clear-btn {
     position: absolute;
     right: calc(16px * var(--ui-scale));
@@ -3047,7 +2815,6 @@ body[data-current-page="search"] .unified-search-bar {
     transition: color 0.2s, background 0.2s;
 }
 
-/* Styles the hover and focus state for the search clear button */
 .search-clear-btn:hover,
 .search-clear-btn:focus-visible {
     color: var(--text-main);
@@ -3095,7 +2862,6 @@ body[data-current-page="search"] .unified-search-bar {
     color: var(--text-muted);
 }
 
-/* Increases visibility and updates icon color of the search icon on input focus */
 .browse-search-wrapper:focus-within .browse-search-icon {
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
     opacity: 1;
@@ -3114,28 +2880,18 @@ body[data-current-page="search"] .unified-search-bar {
     flex: 1;
 }
 
-/*
- * Selector: .search-page-title
- * Purpose: Beautifully renders the main search results title, avoiding text wrapping on desktop viewports.
- */
 .search-page-title {
     font-size: calc(2.5rem * var(--ui-scale));
     font-weight: 800;
     margin: 0;
     letter-spacing: -1px;
-    white-space: nowrap;
 }
 
-/*
- * Selector: .search-page-subtitle
- * Purpose: Displays the dynamic search query subtitle on a single line on desktop viewports.
- */
 .search-page-subtitle {
     color: var(--text-muted);
     margin-top: 8px;
     font-size: calc(1rem * var(--ui-scale));
     opacity: 0.8;
-    white-space: nowrap;
 }
 
 .search-filter-bar {
@@ -3248,7 +3004,6 @@ body[data-current-page="search"] .unified-search-bar {
     margin: 0 auto;
 }
 
-/* Styles the global settings section cards with a premium translucent dark background different from the deep background */
 .settings-section {
     margin-bottom: calc(32px * var(--ui-scale));
     background: rgba(255, 255, 255, 0.055);
@@ -3258,11 +3013,6 @@ body[data-current-page="search"] .unified-search-bar {
     box-shadow: 0 calc(8px * var(--ui-scale)) calc(32px * var(--ui-scale)) rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-/*
- * Selector: .settings-section-title
- * Purpose: Titles of the settings sections, positioned elegantly outside the containers.
- *          Applies a top margin for vertical spacing between groups, except for the first block.
- */
 .settings-section-title {
     font-size: calc(1.15rem * var(--ui-scale));
     font-weight: 700;
@@ -3306,7 +3056,6 @@ body[data-current-page="search"] .unified-search-bar {
     color: var(--text-secondary);
 }
 
-/* Language Display Row */
 .lang-display {
     display: flex;
     align-items: center;
@@ -3348,9 +3097,10 @@ body[data-current-page="search"] .unified-search-bar {
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
 
-/* ────────────────────────────────────
-   Language Modal
-   ──────────────────────────────────── */
+/* ==========================================================================
+   Modal Overlay Component (.modal-overlay)
+   ========================================================================== */
+.modal-overlay,
 .lang-modal-overlay {
     position: fixed;
     inset: 0;
@@ -3384,7 +3134,7 @@ body[data-current-page="search"] .unified-search-bar {
     width: 90%;
     max-width: calc(1000px * var(--ui-scale));
     max-height: 90vh;
-    /* Don't exceed viewport */
+    
     display: flex;
     flex-direction: column;
     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(var(--primary-rgb), 0.08);
@@ -3451,7 +3201,6 @@ body[data-current-page="search"] .unified-search-bar {
     padding-right: 5px;
 }
 
-/* Scrollbar styling for the list */
 .lang-modal-list::-webkit-scrollbar {
     width: 4px;
 }
@@ -3465,7 +3214,6 @@ body[data-current-page="search"] .unified-search-bar {
     border-radius: 2px;
 }
 
-/* Mobile Adjustments */
 @media (max-width: 768px) {
     .lang-modal {
         width: 100%;
@@ -3539,7 +3287,6 @@ body[data-current-page="search"] .unified-search-bar {
     opacity: 1;
 }
 
-/* Segmented Control / Scale Buttons */
 .scale-options,
 .scale-stepper {
     display: flex;
@@ -3751,8 +3498,6 @@ body[data-current-page="search"] .unified-search-bar {
     color: #000;
 }
 
-/* Mobile Adjustments */
-
 .scale-btn:hover {
     color: var(--text-main);
     background: rgba(255, 255, 255, 0.05);
@@ -3805,18 +3550,15 @@ body[data-current-page="search"] .unified-search-bar {
     color: var(--text-secondary);
 }
 
-/* Styles the play button of library track items, fading in on item hover */
 .library-track-item .play-local-btn {
     opacity: 0;
     transition: opacity 0.2s ease;
 }
 
-/* Fades in the track play button on item hover */
 .library-track-item:hover .play-local-btn {
     opacity: 1;
 }
 
-/* Consolidated Library Styles */
 /* ============================
    Expanded Library Page Styles
    ============================ */
@@ -3889,7 +3631,6 @@ body[data-current-page="search"] .unified-search-bar {
     max-width: 500px;
 }
 
-/* Action Bar */
 .library-action-bar {
     display: flex;
     justify-content: space-between;
@@ -3918,12 +3659,12 @@ body[data-current-page="search"] .unified-search-bar {
 
 img.btn-icon {
     filter: brightness(0);
-    /* Make img black for primary, light buttons */
+    
 }
 
 .btn-secondary img.btn-icon {
     filter: brightness(0) invert(1);
-    /* Make img white for secondary, dark buttons */
+    
 }
 
 svg.btn-icon {
@@ -3963,7 +3704,6 @@ svg.btn-icon {
     width: 360px;
 }
 
-/* White glassy feel for library cards */
 #library-recent-list .music-card {
     background: rgba(255, 255, 255, 0.08) !important;
     backdrop-filter: blur(12px) saturate(1.8);
@@ -4000,18 +3740,15 @@ svg.btn-icon {
     color: var(--text-secondary);
 }
 
-/* Styles the play button for library track items in consolidated layout, fading in on item hover */
 .library-track-item .play-local-btn {
     opacity: 0;
     transition: opacity 0.25s ease;
 }
 
-/* Fades in the consolidated track play button on item hover */
 .library-track-item:hover .play-local-btn {
     opacity: 1;
 }
 
-/* Empty State */
 .library-empty-state {
     padding: 80px 40px;
     text-align: center;
@@ -4089,7 +3826,6 @@ svg.btn-icon {
     transform: scale(0.95);
 }
 
-/* Playlist Specific Styles */
 .playlist-empty-state {
     padding: 60px 40px;
     text-align: center;
@@ -4176,10 +3912,6 @@ svg.btn-icon {
     color: var(--text-secondary);
 }
 
-/* ─────────────────────────────────────────────────────────
-   ARTIST PAGE
-   ───────────────────────────────────────────────────────── */
-
 .artist-page {
     display: flex;
     flex-direction: column;
@@ -4202,7 +3934,6 @@ svg.btn-icon {
     border: 1px solid var(--border-light);
 }
 
-/* Inherit blob styles from .hero-bg, just ensure the container is layered correctly */
 .artist-hero .hero-bg {
     z-index: 0;
 }
@@ -4277,22 +4008,18 @@ svg.btn-icon {
     gap: calc(40px * var(--ui-scale));
 }
 
-/* Media Query for mobile scaling of the Artist Hero */
 @media (max-width: 768px) {
 
-    /* Hide cramped global header search bar in mobile layouts */
     .search-container {
         display: none !important;
     }
 
-    /* Styles the unified root search bar container used in Mobile/TV layouts */
     .unified-search-bar {
         display: block !important;
         padding: calc(16px * var(--ui-scale)) calc(16px * var(--ui-scale)) 0 calc(16px * var(--ui-scale));
         box-sizing: border-box;
     }
 
-    /* Override wrapper width limit in mobile search page layout */
     .unified-search-bar .browse-search-wrapper {
         max-width: 100% !important;
     }
@@ -4412,7 +4139,6 @@ svg.btn-icon {
     padding-bottom: calc(120px * var(--ui-scale));
 }
 
-/* Hero */
 .song-hero {
     position: relative;
     border-radius: calc(24px * var(--ui-scale));
@@ -4425,7 +4151,7 @@ svg.btn-icon {
     padding: calc(48px * var(--ui-scale));
     margin-bottom: calc(32px * var(--ui-scale));
     overflow: hidden;
-    /* Use the extracted cover color as a subtle tint */
+    
     --song-color: rgba(var(--primary-rgb), 0.1);
     box-shadow:
         0 4px 40px rgba(0, 0, 0, 0.4),
@@ -4463,7 +4189,6 @@ svg.btn-icon {
     gap: calc(40px * var(--ui-scale));
 }
 
-/* Cover Art */
 .song-cover-wrapper {
     position: relative;
     flex-shrink: 0;
@@ -4483,7 +4208,6 @@ svg.btn-icon {
     display: block;
 }
 
-/* Info */
 .song-info {
     display: flex;
     flex-direction: column;
@@ -4563,7 +4287,6 @@ svg.btn-icon {
     flex-wrap: wrap;
 }
 
-/* Tags Section */
 .song-tags-section {
     margin-bottom: calc(32px * var(--ui-scale));
     padding: 0 calc(4px * var(--ui-scale));
@@ -4618,7 +4341,6 @@ svg.btn-icon {
     flex-shrink: 0;
 }
 
-/* Empty State */
 .song-empty-state {
     padding: 80px 40px;
     text-align: center;
@@ -4639,7 +4361,6 @@ svg.btn-icon {
     margin-bottom: 16px;
 }
 
-/* Portrait / Mobile Adjustments */
 @media (orientation: portrait) {
     .song-hero-content {
         flex-direction: column;
@@ -4722,7 +4443,6 @@ svg.btn-icon {
     font-size: calc(0.8rem * var(--ui-scale));
 }
 
-/* Profile Stats */
 .profile-stats-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -4760,7 +4480,6 @@ svg.btn-icon {
     letter-spacing: 0.5px;
 }
 
-/* Profile sections */
 .profile-section {
     margin-bottom: calc(32px * var(--ui-scale));
 }
@@ -4769,7 +4488,6 @@ svg.btn-icon {
     margin-bottom: calc(12px * var(--ui-scale));
 }
 
-/* Genres grid */
 .genres-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(calc(150px * var(--ui-scale)), 1fr));
@@ -4801,7 +4519,6 @@ svg.btn-icon {
     font-weight: 500;
 }
 
-/* Edit Profile Modal */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -4907,7 +4624,6 @@ svg.btn-icon {
     justify-content: center;
 }
 
-/* Profile: Portrait / Mobile */
 @media (orientation: portrait) {
     .profile-header {
         flex-direction: column;
@@ -4941,11 +4657,6 @@ svg.btn-icon {
    Playlist Management and Context Menu Popover Styling System
    ========================================================================== */
 
-/*
- * .card-more-btn:
- * An absolute-positioned, glassmorphic circular three-dots options button rendered
- * at the top-right of the entire music card container. Appears smoothly on hover/focus.
- */
 .card-more-btn {
     position: absolute;
     top: calc(8px * var(--ui-scale));
@@ -4965,29 +4676,19 @@ svg.btn-icon {
     transition: opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
     z-index: 10;
     padding: 0 0 calc(2px * var(--ui-scale)) 0;
-    /* Align dots perfectly vertically */
+    
 }
 
-/*
- * Show the options button when hovering or keyboard/D-pad focusing the music card.
- */
 .music-card:hover .card-more-btn,
 .music-card:focus-within .card-more-btn {
     opacity: 1;
 }
 
-/*
- * Custom hover border highlight animation (No prohibited transforms!).
- */
 .card-more-btn:hover {
     background: rgba(0, 0, 0, 0.9);
     border-color: #fff;
 }
 
-/*
- * .popup-back-btn:
- * A clean, circular glassmorphic back arrow button used inside the nested playlist popup menu.
- */
 .popup-back-btn {
     width: calc(24px * var(--ui-scale));
     height: calc(24px * var(--ui-scale));
@@ -5005,11 +4706,6 @@ svg.btn-icon {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-/*
- * .add-to-playlist-popup:
- * A floating, glassmorphic popover container displaying a list of target playlists.
- * Positioned dynamically next to the clicked card element.
- */
 .add-to-playlist-popup {
     background: rgba(18, 18, 18, 0.85) !important;
     backdrop-filter: blur(20px) !important;
@@ -5025,10 +4721,6 @@ svg.btn-icon {
     gap: calc(4px * var(--ui-scale));
 }
 
-/*
- * .popup-title:
- * The small, uppercase header text displayed inside the playlist dropdown menu.
- */
 .popup-title {
     font-size: calc(0.75rem * var(--ui-scale));
     text-transform: uppercase;
@@ -5039,10 +4731,6 @@ svg.btn-icon {
     letter-spacing: 0.05em;
 }
 
-/*
- * .popup-empty-state:
- * Informs the user when they have no custom playlists created yet.
- */
 .popup-empty-state {
     padding: calc(12px * var(--ui-scale));
     text-align: center;
@@ -5050,9 +4738,6 @@ svg.btn-icon {
     font-size: calc(0.85rem * var(--ui-scale));
 }
 
-/*
- * Link style inside the empty popover, pointing back to the library.
- */
 .popup-empty-state a {
     color: var(--primary-color, #fff);
     text-decoration: underline;
@@ -5061,10 +4746,6 @@ svg.btn-icon {
     font-weight: 500;
 }
 
-/*
- * .popup-list:
- * Flex wrapper listing the target playlist options inside the floating popover.
- */
 .popup-list {
     display: flex;
     flex-direction: column;
@@ -5073,10 +4754,6 @@ svg.btn-icon {
     overflow-y: auto;
 }
 
-/*
- * .popup-item:
- * Interactive clickable item for each custom playlist, with hover background transitions.
- */
 .popup-item {
     background: transparent;
     border: none;
@@ -5095,27 +4772,16 @@ svg.btn-icon {
     transition: background 0.15s ease, color 0.15s ease;
 }
 
-/*
- * Hover border/background highlights for items (No scale transforms!).
- */
 .popup-item:hover,
 .popup-item:focus {
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
 }
 
-/*
- * .playlist-card:
- * Overrides to support the delete icon overlay when hovering playlist grid items.
- */
 .playlist-card:hover .delete-playlist-btn {
     opacity: 1 !important;
 }
 
-/*
- * .playlist-empty-state:
- * Large centered placeholder icon and message shown in the library when no playlists exist.
- */
 .playlist-empty-state {
     display: flex;
     justify-content: center;
@@ -5127,9 +4793,6 @@ svg.btn-icon {
     margin-bottom: calc(20px * var(--ui-scale));
 }
 
-/*
- * Centered flex alignment inside the empty library block.
- */
 .playlist-empty-content {
     display: flex;
     flex-direction: column;
@@ -5138,16 +4801,10 @@ svg.btn-icon {
     text-align: center;
 }
 
-/*
- * Large emoji folder icon styling.
- */
 .playlist-empty-icon {
     font-size: calc(2.5rem * var(--ui-scale));
 }
 
-/*
- * Subtle text descriptions for the empty library states.
- */
 .playlist-empty-content p {
     color: rgba(255, 255, 255, 0.4);
     font-size: calc(0.95rem * var(--ui-scale));
@@ -5158,11 +4815,6 @@ svg.btn-icon {
    Automated and Manual Release Update Modal Styling System
    ========================================================================== */
 
-/*
- * .update-modal-overlay:
- * A full-screen semi-transparent backdrop overlay that darkens and blurs the main viewport,
- * focusing attention entirely on the release update announcement modal.
- */
 .update-modal-overlay {
     position: fixed;
     top: 0;
@@ -5178,11 +4830,6 @@ svg.btn-icon {
     z-index: 10000;
 }
 
-/*
- * .update-modal:
- * The central premium glassmorphic dialog card displaying update information.
- * Uses saturation boost and strong backdrop blurs to stand out against standard pages.
- */
 .update-modal {
     width: calc(460px * var(--ui-scale));
     max-width: 90%;
@@ -5199,10 +4846,6 @@ svg.btn-icon {
     text-align: center;
 }
 
-/*
- * .update-header:
- * Flex header block organizing the rocket status emoji and primary header title.
- */
 .update-header {
     display: flex;
     flex-direction: column;
@@ -5210,19 +4853,11 @@ svg.btn-icon {
     gap: calc(8px * var(--ui-scale));
 }
 
-/*
- * .update-rocket:
- * Large dynamic rocket emoji styling.
- */
 .update-rocket {
     font-size: calc(3rem * var(--ui-scale));
     line-height: 1;
 }
 
-/*
- * .update-title:
- * The primary bold announcement header inside the update overlay.
- */
 .update-title {
     font-size: calc(1.5rem * var(--ui-scale));
     font-weight: 700;
@@ -5230,10 +4865,6 @@ svg.btn-icon {
     margin: 0;
 }
 
-/*
- * .update-info-block:
- * Layout block organizing the version comparison badges and changelog texts.
- */
 .update-info-block {
     display: flex;
     flex-direction: column;
@@ -5242,20 +4873,12 @@ svg.btn-icon {
     width: 100%;
 }
 
-/*
- * .version-badge-container:
- * Horizontal flex alignment wrapper for the source and target versions.
- */
 .version-badge-container {
     display: flex;
     align-items: center;
     gap: calc(10px * var(--ui-scale));
 }
 
-/*
- * .version-badge:
- * Pill badges indicating active semantic version strings.
- */
 .version-badge {
     padding: calc(4px * var(--ui-scale)) calc(12px * var(--ui-scale));
     border-radius: calc(12px * var(--ui-scale));
@@ -5263,47 +4886,29 @@ svg.btn-icon {
     font-weight: 700;
 }
 
-/*
- * Local version badge styling (Neutral dim white).
- */
 .version-badge.current {
     background: rgba(255, 255, 255, 0.08);
     color: rgba(255, 255, 255, 0.65);
     border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/*
- * Remote release version badge styling (Highlighted theme color).
- */
 .version-badge.remote {
     background: rgba(var(--primary-rgb), 0.15);
     color: var(--primary-color);
     border: 1px solid rgba(var(--primary-rgb), 0.3);
 }
 
-/*
- * .version-arrow:
- * Dim separator arrow between version badges.
- */
 .version-arrow {
     color: rgba(255, 255, 255, 0.4);
     font-size: calc(1rem * var(--ui-scale));
 }
 
-/*
- * .update-release-name:
- * Subtitle indicating the release's descriptive tag name.
- */
 .update-release-name {
     font-size: calc(1.1rem * var(--ui-scale));
     font-weight: 600;
     color: #fff;
 }
 
-/*
- * .update-changelog-title:
- * Section label indicating the release's feature list.
- */
 .update-changelog-title {
     font-size: calc(0.85rem * var(--ui-scale));
     font-weight: 700;
@@ -5314,10 +4919,6 @@ svg.btn-icon {
     letter-spacing: 0.05em;
 }
 
-/*
- * .update-changelog-body:
- * Left-aligned, scrollable log listing features and visual changes.
- */
 .update-changelog-body {
     font-size: calc(0.88rem * var(--ui-scale));
     color: rgba(255, 255, 255, 0.75);
@@ -5333,10 +4934,6 @@ svg.btn-icon {
     box-sizing: border-box;
 }
 
-/*
- * .update-footer-actions:
- * Alignment row for modal dialog dismiss and update confirmation buttons.
- */
 .update-footer-actions {
     display: flex;
     gap: calc(12px * var(--ui-scale));
@@ -5345,9 +4942,6 @@ svg.btn-icon {
     margin-top: calc(4px * var(--ui-scale));
 }
 
-/*
- * Button overrides inside the update modal (Ensuring no prohibited transforms).
- */
 .update-footer-actions .btn {
     padding: calc(10px * var(--ui-scale)) calc(20px * var(--ui-scale));
     font-size: calc(0.9rem * var(--ui-scale));
@@ -5361,10 +4955,6 @@ svg.btn-icon {
     justify-content: center;
 }
 
-/*
- * .btn.secondary:
- * Dismiss/Later button inside the update overlay.
- */
 .update-footer-actions .btn.secondary {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -5372,10 +4962,6 @@ svg.btn-icon {
     transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease !important;
 }
 
-/*
- * Secondary button hover/focus:
- * Subtle glassmorphism brighten and solid border highlight. No prohibited transforms.
- */
 .update-footer-actions .btn.secondary:hover,
 .update-footer-actions .btn.secondary:focus {
     background: rgba(255, 255, 255, 0.12) !important;
@@ -5384,10 +4970,6 @@ svg.btn-icon {
     outline: none;
 }
 
-/*
- * .btn.primary:
- * Confirm/Download update button inside the update overlay.
- */
 .update-footer-actions .btn.primary {
     background: rgba(var(--primary-rgb), 0.8) !important;
     border: 1px solid rgba(var(--primary-rgb), 0.3) !important;
@@ -5395,11 +4977,6 @@ svg.btn-icon {
     transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
 }
 
-/*
- * Primary button hover/focus:
- * Full theme accent primary color background shift, bright border highlight, and
- * a matching soft primary shadow glow. No prohibited transforms.
- */
 .update-footer-actions .btn.primary:hover,
 .update-footer-actions .btn.primary:focus {
     background: var(--primary-color) !important;
@@ -5408,10 +4985,6 @@ svg.btn-icon {
     outline: none;
 }
 
-/*
- * .check-updates-btn:
- * The manual Settings update button. Starts as a premium dark glassmorphic badge.
- */
 .check-updates-btn {
     background: rgba(255, 255, 255, 0.05) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
@@ -5421,11 +4994,6 @@ svg.btn-icon {
     transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease !important;
 }
 
-/*
- * Manual button hover/focus:
- * High-end responsive focus. Adjusts border to solid white highlight, glows with theme
- * primary accent color shadow, and brightens text. Complies with No Prohibited Transforms rules.
- */
 .check-updates-btn:hover,
 .check-updates-btn:focus {
     background: rgba(var(--primary-rgb), 0.15) !important;
@@ -5439,11 +5007,6 @@ svg.btn-icon {
    Premium Search Filter Bar & Chips
    ============================ */
 
-/*
- * Selector: .search-filter-bar
- * Purpose: Formats the category filter chips container, permitting smooth horizontal kinetic scrolling on touch screen viewports.
- *          Has width: auto and does not shrink on desktop to prevent title squishing.
- */
 .search-filter-bar {
     display: flex;
     align-items: center;
@@ -5460,10 +5023,6 @@ svg.btn-icon {
     display: none;
 }
 
-/*
- * Selector: .filter-chip
- * Purpose: Elegant glassmorphic capsule design for music category filter chips. Highlight transitions use background variations.
- */
 .filter-chip {
     padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
     background: rgba(255, 255, 255, 0.05);
@@ -5479,10 +5038,6 @@ svg.btn-icon {
     transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
 
-/*
- * Selector: .filter-chip:hover, .filter-chip:focus-visible
- * Purpose: Applies a modern glassmorphic highlight on hover or keyboard focus, complying with the "No Prohibited Transforms" rule.
- */
 .filter-chip:hover,
 .filter-chip:focus-visible {
     background: rgba(255, 255, 255, 0.1);
@@ -5490,10 +5045,6 @@ svg.btn-icon {
     color: var(--text-main);
 }
 
-/*
- * Selector: .filter-chip.active
- * Purpose: Highlights the currently selected category filter chip with a solid high-contrast theme primary accent color.
- */
 .filter-chip.active {
     background: var(--primary-color) !important;
     border-color: var(--primary-color) !important;
@@ -5501,10 +5052,6 @@ svg.btn-icon {
     font-weight: 600;
 }
 
-/*
- * Selector: .year-filter-wrapper
- * Purpose: Premium capsule wrapper that perfectly aligns the calendar svg icon and year input field.
- */
 .year-filter-wrapper {
     display: flex;
     align-items: center;
@@ -5517,19 +5064,11 @@ svg.btn-icon {
     transition: background 0.25s ease, border-color 0.25s ease;
 }
 
-/*
- * Selector: .year-filter-wrapper:focus-within
- * Purpose: Highlights the year capsule border and background when the internal number field is focused.
- */
 .year-filter-wrapper:focus-within {
     border-color: var(--primary-color);
     background: rgba(255, 255, 255, 0.08);
 }
 
-/*
- * Selector: .year-filter-icon
- * Purpose: Minimalist calendar symbol styling with high opacity.
- */
 .year-filter-icon {
     width: calc(14px * var(--ui-scale));
     height: calc(14px * var(--ui-scale));
@@ -5537,10 +5076,6 @@ svg.btn-icon {
     filter: invert(1);
 }
 
-/*
- * Selector: .year-filter-input
- * Purpose: Styles the clean year number input field, suppressing default browser spinner arrows.
- */
 .year-filter-input {
     background: transparent;
     border: none;
@@ -5567,11 +5102,6 @@ svg.btn-icon {
    Toast Notifications System Style
    ========================================================================== */
 
-/*
- * Selector: .ivids-toast
- * Purpose: Styles the floating glassmorphic toast notification popup container.
- *          Centered horizontally across devices without using prohibited transforms.
- */
 .ivids-toast {
     position: fixed;
     bottom: calc(100px * var(--ui-scale));
@@ -5597,28 +5127,18 @@ svg.btn-icon {
     line-height: 1.4;
 }
 
-/*
- * Selector: .ivids-toast.visible
- * Purpose: Reveals the toast smoothly and shifts its position slightly upward.
- */
 .ivids-toast.visible {
     opacity: 1;
     pointer-events: auto;
     bottom: calc(115px * var(--ui-scale));
 }
 
-/*
- * Selector: .settings-section-icon
- * Purpose: Styles icons next to settings group headers.
- *          Applies a primary themed colored filter.
- */
 .settings-section-icon {
     width: calc(20px * var(--ui-scale));
     height: calc(20px * var(--ui-scale));
     filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
 
-/* Progress container layout that structures the download progress text and visual bar layout. */
 .update-progress-container {
     width: 100%;
     margin-bottom: calc(20px * var(--ui-scale));
@@ -5628,7 +5148,6 @@ svg.btn-icon {
     gap: calc(12px * var(--ui-scale));
 }
 
-/* Background track representing progress bar 0-100% capacity with transparent boundaries. */
 .update-progress-bar-bg {
     width: 100%;
     height: calc(8px * var(--ui-scale));
@@ -5639,7 +5158,6 @@ svg.btn-icon {
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Luminous neon theme color bar highlighting download completion percentage. */
 .update-progress-bar {
     position: absolute;
     top: 0;
@@ -5652,14 +5170,12 @@ svg.btn-icon {
     transition: width 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Informative description detailing stage download status text. */
 .update-progress-text {
     color: #fff;
     font-size: calc(0.88rem * var(--ui-scale));
     font-weight: 700;
 }
 
-/* Styles the right-side control container inside the player bar containing queue and volume toggles */
 .player-right-controls {
     display: flex;
     align-items: center;
@@ -5667,7 +5183,6 @@ svg.btn-icon {
     gap: calc(12px * var(--ui-scale));
 }
 
-/* Styles the ambient backdrop container to display dynamically colored organic light gradients */
 #ambient-backdrop {
     position: fixed;
     top: 0;
@@ -5680,7 +5195,6 @@ svg.btn-icon {
     background-color: #050505;
 }
 
-/* Styles a flowing, high-blur glowing color blob in the ambient backdrop */
 .ambient-blob {
     position: absolute;
     border-radius: 50%;
@@ -5690,7 +5204,6 @@ svg.btn-icon {
     animation: ambient-flow 25s infinite alternate ease-in-out;
 }
 
-/* Styles the first ambient blob positioned in the upper-left area */
 .blob-1 {
     top: -10%;
     left: -10%;
@@ -5699,7 +5212,6 @@ svg.btn-icon {
     background: radial-gradient(circle, var(--ambient-color-1, var(--primary-color)) 0%, transparent 80%);
 }
 
-/* Styles the second ambient blob positioned in the bottom-right area */
 .blob-2 {
     bottom: -15%;
     right: -10%;
@@ -5708,7 +5220,6 @@ svg.btn-icon {
     background: radial-gradient(circle, var(--ambient-color-2, var(--accent-color)) 0%, transparent 80%);
 }
 
-/* Styles the third ambient blob positioned dynamically in the center area */
 .blob-3 {
     top: 30%;
     left: 30%;
@@ -5718,12 +5229,11 @@ svg.btn-icon {
     animation-duration: 35s;
 }
 
-/* Styles the sliding queue drawer panel which presents playing and upcoming tracks */
 .queue-drawer {
     position: absolute;
     top: var(--header-height);
     right: -360px;
-    /* Hidden by default offscreen */
+    
     width: 350px;
     height: calc(100% - var(--header-height) - var(--player-height));
     background: rgba(18, 18, 18, 0.85);
@@ -5737,12 +5247,10 @@ svg.btn-icon {
     box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
 }
 
-/* Styles the sliding queue drawer when it is toggled to the open state */
 .queue-drawer.is-active {
     right: 0;
 }
 
-/* Styles the header section inside the queue drawer containing the title and controls */
 .queue-header {
     display: flex;
     align-items: center;
@@ -5751,14 +5259,12 @@ svg.btn-icon {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Styles the title text of the queue drawer header */
 .queue-header h3 {
     font-size: calc(1.1rem * var(--ui-scale));
     font-weight: 700;
     color: var(--text-main);
 }
 
-/* Styles the clear queue button in the drawer header */
 .clear-queue-btn {
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -5770,20 +5276,17 @@ svg.btn-icon {
     transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
-/* Styles the clear queue button hover state */
 .clear-queue-btn:hover:not(:disabled) {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.3);
     color: var(--text-main);
 }
 
-/* Styles the clear queue button when disabled */
 .clear-queue-btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
 }
 
-/* Styles the close button to dismiss the queue drawer */
 .close-queue-btn {
     background: none;
     border: none;
@@ -5795,24 +5298,20 @@ svg.btn-icon {
     transition: color 0.2s ease;
 }
 
-/* Styles the close queue button hover state */
 .close-queue-btn:hover {
     color: var(--text-main);
 }
 
-/* Styles the scrollable content container holding the lists of tracks */
 .queue-content {
     flex: 1;
     overflow-y: auto;
     padding: calc(20px * var(--ui-scale));
 }
 
-/* Styles a section inside the queue content dividing playing and upcoming categories */
 .queue-section {
     margin-bottom: calc(24px * var(--ui-scale));
 }
 
-/* Styles the category heading label inside each queue section */
 .queue-section h4 {
     font-size: calc(0.8rem * var(--ui-scale));
     text-transform: uppercase;
@@ -5821,14 +5320,12 @@ svg.btn-icon {
     margin-bottom: calc(12px * var(--ui-scale));
 }
 
-/* Styles the list block wrapper for track row items */
 .queue-track-list {
     display: flex;
     flex-direction: column;
     gap: calc(8px * var(--ui-scale));
 }
 
-/* Styles a single track row card inside the queue lists */
 .queue-track-card {
     display: flex;
     align-items: center;
@@ -5840,19 +5337,16 @@ svg.btn-icon {
     transition: background 0.2s ease, border-color 0.2s ease;
 }
 
-/* Styles the hover state of a track row card inside the queue */
 .queue-track-card:hover {
     background: rgba(255, 255, 255, 0.06);
     border-color: rgba(255, 255, 255, 0.08);
 }
 
-/* Styles the active currently-playing track row card inside the queue list */
 .queue-track-card.active {
     background: rgba(var(--primary-rgb), 0.1);
     border-color: rgba(var(--primary-rgb), 0.25);
 }
 
-/* Styles the small album artwork cover thumbnail in a queue track card */
 .queue-track-cover {
     width: calc(40px * var(--ui-scale));
     height: calc(40px * var(--ui-scale));
@@ -5861,13 +5355,11 @@ svg.btn-icon {
     object-fit: cover;
 }
 
-/* Styles the metadata details container in a queue track card */
 .queue-track-info {
     flex: 1;
     min-width: 0;
 }
 
-/* Styles the song title text in a queue track card */
 .queue-track-title {
     font-size: calc(0.85rem * var(--ui-scale));
     font-weight: 500;
@@ -5877,7 +5369,6 @@ svg.btn-icon {
     text-overflow: ellipsis;
 }
 
-/* Styles the artist name text in a queue track card */
 .queue-track-artist {
     font-size: calc(0.75rem * var(--ui-scale));
     color: var(--text-secondary);
@@ -5887,7 +5378,6 @@ svg.btn-icon {
     margin-top: calc(2px * var(--ui-scale));
 }
 
-/* Styles the delete track action button on hover inside a queue track card */
 .queue-track-remove {
     background: none;
     border: none;
@@ -5903,7 +5393,6 @@ svg.btn-icon {
     margin-left: calc(8px * var(--ui-scale));
 }
 
-/* Styles the hover state of the delete track button inside a queue track card */
 .queue-track-remove:hover {
     color: #ef4444;
     background: rgba(239, 68, 68, 0.1);
@@ -5919,14 +5408,12 @@ svg.btn-icon {
     }
 }
 
-/* Styles the page title in the header area, hidden by default on desktop layouts */
 .header-page-title {
     display: none;
 }
 
 @media (orientation: portrait) {
 
-    /* Styles the queue drawer in mobile portrait mode to fill the viewport width */
     .queue-drawer {
         width: 100%;
         right: -100%;
@@ -5934,12 +5421,10 @@ svg.btn-icon {
         height: calc(100% - var(--bottom-nav-height) - var(--player-height));
     }
 
-    /* Styles the active queue drawer in portrait mode to slide into full view */
     .queue-drawer.is-active {
         right: 0;
     }
 
-    /* Styles the header page title for mobile portrait viewports */
     .header-page-title {
         display: block;
         font-size: calc(1.3rem * var(--ui-scale));
@@ -5953,17 +5438,14 @@ svg.btn-icon {
         text-align: left;
     }
 
-    /* Styles the header search container on mobile, hiding it on non-search pages */
     body:not([data-current-page="search"]) .search-container {
         display: none !important;
     }
 
-    /* Styles the header page title on mobile, hiding it when on the search page */
     body[data-current-page="search"] .header-page-title {
         display: none !important;
     }
 
-    /* Styles bottom navigation anchor elements to display labels under icons */
     .nav-links a {
         flex-direction: column !important;
         align-items: center !important;
@@ -5981,26 +5463,22 @@ svg.btn-icon {
         position: relative !important;
     }
 
-    /* Styles the span labels inside bottom navigation links to remain visible */
     .nav-links a span {
         display: block !important;
         font-size: 9px !important;
         opacity: 0.8 !important;
     }
 
-    /* Styles active state for bottom navigation links */
     .nav-links a.active {
         color: var(--primary-color) !important;
         background: rgba(255, 255, 255, 0.05) !important;
     }
 
-    /* Styles labels inside active bottom navigation links */
     .nav-links a.active span {
         opacity: 1 !important;
         color: var(--primary-color) !important;
     }
 
-    /* Styles the active dot indicator for the selected bottom navigation link */
     .nav-links a.active::after {
         content: '' !important;
         position: absolute !important;
@@ -6015,7 +5493,6 @@ svg.btn-icon {
         box-shadow: 0 0 6px var(--primary-color) !important;
     }
 
-    /* Styles the player bar as a single-row flex container on mobile portrait */
     #player-bar {
         display: flex !important;
         flex-direction: row !important;
@@ -6035,12 +5512,10 @@ svg.btn-icon {
         overflow: visible !important;
     }
 
-    /* Styles inactive player bar behavior in mobile portrait layout */
     #player-bar.is-inactive {
         display: none !important;
     }
 
-    /* Styles player track metadata container in mobile portrait layout */
     .player-info {
         display: flex !important;
         align-items: center !important;
@@ -6049,26 +5524,22 @@ svg.btn-icon {
         min-width: 0 !important;
     }
 
-    /* Styles the small album artwork cover thumbnail in mobile portrait layout */
     .player-cover {
         width: calc(44px * var(--ui-scale)) !important;
         height: calc(44px * var(--ui-scale)) !important;
         border-radius: calc(8px * var(--ui-scale)) !important;
     }
 
-    /* Styles player track details text wrapper in mobile portrait layout */
     .player-track-details {
         flex: 1 !important;
         min-width: 0 !important;
         margin-left: 0 !important;
     }
 
-    /* Styles the dynamic status indicators inside player track details */
     #player-status-container {
         display: none !important;
     }
 
-    /* Styles download, like, dislike, and info buttons in mobile player bar */
     #save-track-btn,
     #like-track-btn,
     #dislike-track-btn,
@@ -6076,7 +5547,6 @@ svg.btn-icon {
         display: none !important;
     }
 
-    /* Styles player controls to lay out elements in a single line next to info */
     .player-controls {
         width: auto !important;
         display: flex !important;
@@ -6085,14 +5555,12 @@ svg.btn-icon {
         margin: 0 !important;
     }
 
-    /* Styles play controls buttons row in mobile portrait layout */
     .player-main-controls {
         display: flex !important;
         align-items: center !important;
         gap: calc(12px * var(--ui-scale)) !important;
     }
 
-    /* Styles play-pause main control button in mobile portrait layout */
     .player-control-btn.main {
         width: calc(36px * var(--ui-scale)) !important;
         height: calc(36px * var(--ui-scale)) !important;
@@ -6101,13 +5569,11 @@ svg.btn-icon {
         border: none !important;
     }
 
-    /* Styles play-pause main control icon inside the button */
     .player-control-btn.main svg {
         width: calc(16px * var(--ui-scale)) !important;
         height: calc(16px * var(--ui-scale)) !important;
     }
 
-    /* Styles secondary buttons (Next, Queue) in mobile portrait layout */
     .player-control-btn.secondary {
         width: calc(32px * var(--ui-scale)) !important;
         height: calc(32px * var(--ui-scale)) !important;
@@ -6115,19 +5581,16 @@ svg.btn-icon {
         border: none !important;
     }
 
-    /* Styles secondary button icons inside the button */
     .player-control-btn.secondary svg,
     .player-control-btn.secondary img {
         width: calc(18px * var(--ui-scale)) !important;
         height: calc(18px * var(--ui-scale)) !important;
     }
 
-    /* Styles search and previous buttons to be hidden inside mobile player controls */
     .player-main-controls button:first-child {
         display: none !important;
     }
 
-    /* Styles right volume and queue controls container in mobile portrait layout */
     .player-right-controls {
         display: flex !important;
         align-items: center !important;
@@ -6135,7 +5598,6 @@ svg.btn-icon {
         margin: 0 !important;
     }
 
-    /* Styles seek progress slider wrapper positioned at the top of the player bar */
     .player-progress {
         position: absolute !important;
         top: 0 !important;
@@ -6147,12 +5609,10 @@ svg.btn-icon {
         margin: 0 !important;
     }
 
-    /* Styles the time stamp labels to be hidden on mobile player progress line */
     .player-progress .time-label {
         display: none !important;
     }
 
-    /* Styles seek slider range track to display as a thin edge-aligned bar */
     #progress-slider {
         position: absolute !important;
         top: 0 !important;
@@ -6166,7 +5626,6 @@ svg.btn-icon {
         pointer-events: auto !important;
     }
 
-    /* Hides the slider thumb handle on WebKit engines */
     #progress-slider::-webkit-slider-thumb {
         display: none !important;
         -webkit-appearance: none !important;
@@ -6175,14 +5634,12 @@ svg.btn-icon {
         height: 0 !important;
     }
 
-    /* Hides the slider thumb handle on Firefox engines */
     #progress-slider::-moz-range-thumb {
         display: none !important;
         width: 0 !important;
         height: 0 !important;
     }
 
-    /* Styles the hero wrapper content in song details page to align elements centrally */
     .song-hero-content {
         flex-direction: column !important;
         align-items: center !important;
@@ -6190,14 +5647,12 @@ svg.btn-icon {
         gap: calc(24px * var(--ui-scale)) !important;
     }
 
-    /* Styles the cover art wrapper on the song details page on mobile */
     .song-cover-wrapper {
         width: calc(220px * var(--ui-scale)) !important;
         height: calc(220px * var(--ui-scale)) !important;
         margin: 0 auto !important;
     }
 
-    /* Styles song details description container to align center */
     .song-info {
         display: flex !important;
         flex-direction: column !important;
@@ -6205,7 +5660,6 @@ svg.btn-icon {
         width: 100% !important;
     }
 
-    /* Styles the main song title to wrap properly and prevent clipping */
     .song-title {
         font-size: calc(1.8rem * var(--ui-scale)) !important;
         white-space: normal !important;
@@ -6214,7 +5668,6 @@ svg.btn-icon {
         margin: calc(12px * var(--ui-scale)) 0 !important;
     }
 
-    /* Styles sub-info badges such as artist, album name and release year */
     .song-sub-info {
         display: flex !important;
         justify-content: center !important;
@@ -6223,7 +5676,6 @@ svg.btn-icon {
         font-size: calc(0.9rem * var(--ui-scale)) !important;
     }
 
-    /* Styles the song action button layout for clean presentation on mobile */
     .song-actions {
         display: flex !important;
         justify-content: center !important;
@@ -6233,27 +5685,23 @@ svg.btn-icon {
         margin-top: calc(20px * var(--ui-scale)) !important;
     }
 
-    /* Styles standard action buttons inside full screen song view */
     .song-actions .btn {
         flex: 1 1 calc(45% - 8px) !important;
         min-width: 120px !important;
         justify-content: center !important;
     }
 
-    /* Styles the hero container background section in the song details view */
     .song-hero {
         padding: calc(24px * var(--ui-scale)) !important;
     }
 }
 
-/* Page wrapper container for the IVIDS Downloader module */
 .downloader-container {
     display: flex;
     flex-direction: column;
     gap: calc(16px * var(--ui-scale));
 }
 
-/* Two-column grid layout dividing settings/logs from the preview panel */
 .downloader-layout {
     display: grid;
     grid-template-columns: 1fr 1.2fr;
@@ -6262,7 +5710,6 @@ svg.btn-icon {
     min-height: 0;
 }
 
-/* Panel card wrapper housing configuration forms */
 .downloader-layout .config-panel {
     grid-column: 1;
     grid-row: 1;
@@ -6277,7 +5724,6 @@ svg.btn-icon {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* Panel card wrapper housing playlist/video previews */
 .downloader-layout .preview-panel {
     grid-column: 2;
     grid-row: 1 / 3;
@@ -6294,7 +5740,6 @@ svg.btn-icon {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* Panel card wrapper housing output console log lines */
 .downloader-layout .output-panel {
     grid-column: 1;
     grid-row: 2;
@@ -6310,7 +5755,6 @@ svg.btn-icon {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* Input row layout aligning label descriptors next to field input widgets */
 .downloader-container .form-row {
     display: flex;
     flex-direction: column;
@@ -6319,14 +5763,12 @@ svg.btn-icon {
     margin-bottom: calc(16px * var(--ui-scale));
 }
 
-/* Descriptive labels inside form input rows */
 .downloader-container .form-row label {
     font-size: calc(0.85rem * var(--ui-scale));
     font-weight: 600;
     color: var(--text-secondary);
 }
 
-/* Text input fields capturing YouTube video/playlist link strings */
 .downloader-container .form-row input[type="text"] {
     width: 100%;
     background: rgba(0, 0, 0, 0.2);
@@ -6339,12 +5781,10 @@ svg.btn-icon {
     transition: border-color 0.25s ease;
 }
 
-/* Focus highlighting outline for active URL text inputs */
 .downloader-container .form-row input[type="text"]:focus {
     border-color: var(--primary-color);
 }
 
-/* Sub-row aligning directory paths alongside browse trigger actions */
 .downloader-container .dir-row {
     display: flex;
     align-items: center;
@@ -6352,7 +5792,6 @@ svg.btn-icon {
     width: 100%;
 }
 
-/* Display container showing the currently selected local target folder */
 .downloader-container .dir-path {
     flex: 1;
     font-size: calc(0.8rem * var(--ui-scale));
@@ -6366,7 +5805,6 @@ svg.btn-icon {
     white-space: nowrap;
 }
 
-/* Secondary selection browse button opening directory chooser dialogs */
 .downloader-container .btn-browse {
     background: var(--btn-secondary-bg);
     color: var(--text-main);
@@ -6380,26 +5818,22 @@ svg.btn-icon {
     transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Hover background changes for browse trigger buttons */
 .downloader-container .btn-browse:hover {
     background: rgba(255, 255, 255, 0.1);
     border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Inline description shown in Android/Web fallback modes */
 .downloader-container .storage-desc {
     font-size: calc(0.8rem * var(--ui-scale));
     color: var(--text-muted);
     padding: calc(4px * var(--ui-scale)) 0;
 }
 
-/* Styling wrapper container for custom selects dropdown widgets */
 .downloader-container .media-type-select-wrapper {
     position: relative;
     width: 100%;
 }
 
-/* Media selector select element drop-down list */
 .downloader-container select {
     width: 100%;
     background: rgba(0, 0, 0, 0.2);
@@ -6412,7 +5846,6 @@ svg.btn-icon {
     cursor: pointer;
 }
 
-/* Trigger button toggle for advanced settings sections disclosures */
 .downloader-container .advanced-toggle {
     background: none;
     border: none;
@@ -6427,12 +5860,10 @@ svg.btn-icon {
     gap: calc(6px * var(--ui-scale));
 }
 
-/* Advanced disclosure toggle buttons hover underlines */
 .downloader-container .advanced-toggle:hover {
     text-decoration: underline;
 }
 
-/* Grid-based settings section housing formats and quality selectors */
 .downloader-container .advanced-panel {
     display: none;
     gap: calc(16px * var(--ui-scale));
@@ -6441,26 +5872,22 @@ svg.btn-icon {
     margin-bottom: calc(16px * var(--ui-scale));
 }
 
-/* Visible advanced panel modifier class showing selections grid */
 .downloader-container .advanced-panel.visible {
     display: grid;
 }
 
-/* Stacked input form groups inside advanced grid containers */
 .downloader-container .adv-group {
     display: flex;
     flex-direction: column;
     gap: calc(6px * var(--ui-scale));
 }
 
-/* Text descriptor labels inside advanced selector groups */
 .downloader-container .adv-group label {
     font-size: calc(0.75rem * var(--ui-scale));
     font-weight: 600;
     color: var(--text-secondary);
 }
 
-/* Dropdown selections elements inside advanced panel blocks */
 .downloader-container .adv-group select {
     width: 100%;
     background: rgba(0, 0, 0, 0.2);
@@ -6473,13 +5900,11 @@ svg.btn-icon {
     cursor: pointer;
 }
 
-/* Options dropdown context options background wrapper */
 .downloader-container .adv-group select option {
     background: var(--surface-color);
     color: var(--text-main);
 }
 
-/* Actions toolbar wrapping download execute and cancel actions button */
 .downloader-container .actions {
     display: flex;
     gap: calc(12px * var(--ui-scale));
@@ -6487,7 +5912,6 @@ svg.btn-icon {
     margin-top: auto;
 }
 
-/* Main primary call to action button executing downloads */
 .downloader-container .btn-download {
     background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
     color: #0a0f14;
@@ -6500,19 +5924,16 @@ svg.btn-icon {
     transition: opacity 0.2s ease, box-shadow 0.25s ease;
 }
 
-/* Hover highlights for solid primary download action buttons */
 .downloader-container .btn-download:hover {
     box-shadow: 0 0 16px rgba(var(--primary-rgb), 0.45);
 }
 
-/* Download execute button disabled layout representation */
 .downloader-container .btn-download:disabled {
     opacity: 0.4;
     cursor: not-allowed;
     box-shadow: none;
 }
 
-/* Neutral secondary outline cancel button aborting downloads */
 .downloader-container .btn-cancel {
     background: transparent;
     color: #ef4444;
@@ -6525,19 +5946,16 @@ svg.btn-icon {
     transition: background-color 0.2s ease;
 }
 
-/* Hover highlights for cancel outline action buttons */
 .downloader-container .btn-cancel:hover {
     background: rgba(239, 68, 68, 0.1);
 }
 
-/* Neutral cancel action button disabled layout representation */
 .downloader-container .btn-cancel:disabled {
     opacity: 0.4;
     cursor: not-allowed;
     background: transparent;
 }
 
-/* Preview card title headers formatting loading triggers and actions */
 .downloader-container .preview-header {
     display: flex;
     align-items: center;
@@ -6545,14 +5963,12 @@ svg.btn-icon {
     margin-bottom: calc(16px * var(--ui-scale));
 }
 
-/* Text heading inside previews header columns */
 .downloader-container .preview-title {
     font-size: calc(1rem * var(--ui-scale));
     font-weight: 600;
     color: var(--text-main);
 }
 
-/* Empty preview dashboard overlay mask shown when URL is inactive */
 .downloader-container .preview-empty {
     flex: 1;
     display: flex;
@@ -6565,24 +5981,20 @@ svg.btn-icon {
     padding: calc(40px * var(--ui-scale));
 }
 
-/* Empty previews placeholder vector artwork icons */
 .downloader-container .preview-empty-icon {
     fill: var(--text-muted);
     opacity: 0.3;
 }
 
-/* Empty previews description instructions label text */
 .downloader-container .preview-empty p {
     font-size: calc(0.85rem * var(--ui-scale));
     color: var(--text-muted);
 }
 
-/* Layout block wrapping single video cards info details */
 .downloader-container .preview-state-single {
     width: 100%;
 }
 
-/* Card details card displaying thumbnail and metadata of single loaded video */
 .downloader-container .video-card {
     display: flex;
     gap: calc(16px * var(--ui-scale));
@@ -6593,7 +6005,6 @@ svg.btn-icon {
     width: 100%;
 }
 
-/* Visual thumbnail frame container wrapper for single video preview */
 .downloader-container .video-thumb {
     position: relative;
     flex-shrink: 0;
@@ -6604,7 +6015,6 @@ svg.btn-icon {
     background: #000;
 }
 
-/* Thumbnail poster images inside single video preview */
 .downloader-container .video-thumb img {
     width: 100%;
     height: 100%;
@@ -6612,7 +6022,6 @@ svg.btn-icon {
     display: block;
 }
 
-/* Rounded runtime label overlay badge inside video thumbnails */
 .downloader-container .video-duration {
     position: absolute;
     bottom: calc(6px * var(--ui-scale));
@@ -6625,7 +6034,6 @@ svg.btn-icon {
     border-radius: calc(3px * var(--ui-scale));
 }
 
-/* Columns container housing titles next to single video thumbnails */
 .downloader-container .video-info {
     flex: 1;
     display: flex;
@@ -6634,19 +6042,18 @@ svg.btn-icon {
     min-width: 0;
 }
 
-/* Text headings title labels inside single video previews */
 .downloader-container .video-info-title {
     font-size: calc(0.95rem * var(--ui-scale));
     font-weight: 600;
     color: var(--text-main);
     line-height: 1.3;
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-/* Channel metadata details container row inside single video previews */
 .downloader-container .video-info-channel {
     display: flex;
     align-items: center;
@@ -6655,7 +6062,6 @@ svg.btn-icon {
     color: var(--text-secondary);
 }
 
-/* Circular initials avatar placeholders next to channel titles */
 .downloader-container .channel-avatar {
     width: calc(24px * var(--ui-scale));
     height: calc(24px * var(--ui-scale));
@@ -6669,7 +6075,6 @@ svg.btn-icon {
     color: var(--text-main);
 }
 
-/* Playlist preview wrappers checklist layout blocks */
 .downloader-container .preview-state-playlist {
     display: flex;
     flex-direction: column;
@@ -6677,7 +6082,6 @@ svg.btn-icon {
     min-height: 0;
 }
 
-/* Active select checklist toolbars containing counters and select/deselect action triggers */
 .downloader-container .track-list-header {
     display: flex;
     align-items: center;
@@ -6687,7 +6091,6 @@ svg.btn-icon {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-/* Quantity label counter text showing playlist size counts */
 .downloader-container .track-count {
     font-size: calc(0.8rem * var(--ui-scale));
     font-weight: 600;
@@ -6695,7 +6098,6 @@ svg.btn-icon {
     flex: 1;
 }
 
-/* Outline action buttons triggers selecting/deselecting playlist items checkboxes */
 .downloader-container .btn-select {
     background: transparent;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -6708,14 +6110,12 @@ svg.btn-icon {
     transition: all 0.2s ease;
 }
 
-/* Hover highlights for playlist items select tool triggers */
 .downloader-container .btn-select:hover {
     color: var(--text-main);
     border-color: rgba(255, 255, 255, 0.25);
     background: rgba(255, 255, 255, 0.02);
 }
 
-/* Scrollable container list wrapping checklist playlist track items rows */
 .downloader-container .track-list-items {
     flex: 1;
     overflow-y: auto;
@@ -6725,7 +6125,6 @@ svg.btn-icon {
     padding-right: calc(4px * var(--ui-scale));
 }
 
-/* Individual track row checklist item labels wrapper */
 .downloader-container .track-item {
     display: flex;
     align-items: center;
@@ -6738,12 +6137,10 @@ svg.btn-icon {
     transition: background-color 0.2s ease;
 }
 
-/* Hover background styling for individual track checklist rows */
 .downloader-container .track-item:hover {
     background: rgba(255, 255, 255, 0.03);
 }
 
-/* Checkbox inputs selectors inside playlist checklists */
 .downloader-container .track-cb {
     width: calc(16px * var(--ui-scale));
     height: calc(16px * var(--ui-scale));
@@ -6751,7 +6148,6 @@ svg.btn-icon {
     cursor: pointer;
 }
 
-/* Visual thumbnail frame container inside playlist checklists */
 .downloader-container .track-thumb {
     width: calc(48px * var(--ui-scale));
     aspect-ratio: 16 / 9;
@@ -6761,7 +6157,6 @@ svg.btn-icon {
     flex-shrink: 0;
 }
 
-/* Thumbnail poster images inside playlist checklists */
 .downloader-container .track-thumb img {
     width: 100%;
     height: 100%;
@@ -6769,7 +6164,6 @@ svg.btn-icon {
     display: block;
 }
 
-/* Columns next to checklist thumbnails displaying titles and artists */
 .downloader-container .track-info {
     flex: 1;
     display: flex;
@@ -6777,7 +6171,6 @@ svg.btn-icon {
     min-width: 0;
 }
 
-/* Title text headings for individual playlist track checklists */
 .downloader-container .track-title {
     font-size: calc(0.85rem * var(--ui-scale));
     font-weight: 500;
@@ -6787,7 +6180,6 @@ svg.btn-icon {
     white-space: nowrap;
 }
 
-/* Artist channel subtitle label text inside playlist checklists */
 .downloader-container .track-artist {
     font-size: calc(0.75rem * var(--ui-scale));
     color: var(--text-secondary);
@@ -6796,13 +6188,11 @@ svg.btn-icon {
     white-space: nowrap;
 }
 
-/* Duration labels text inside individual playlist track rows */
 .downloader-container .track-length {
     font-size: calc(0.7rem * var(--ui-scale));
     color: var(--text-muted);
 }
 
-/* Layout alignment rows showing status counters above progress bar */
 .downloader-container .progress-header {
     display: flex;
     align-items: center;
@@ -6810,14 +6200,12 @@ svg.btn-icon {
     margin-bottom: calc(8px * var(--ui-scale));
 }
 
-/* Visual active status text labels showing active download progress state */
 .downloader-container .status-text {
     font-size: calc(0.85rem * var(--ui-scale));
     font-weight: 600;
     color: var(--text-main);
 }
 
-/* Descriptive text label showing active downloading track name details */
 .downloader-container .track-text {
     font-size: calc(0.8rem * var(--ui-scale));
     color: var(--text-secondary);
@@ -6827,7 +6215,6 @@ svg.btn-icon {
     white-space: nowrap;
 }
 
-/* Visual frame container wrapping the active download progress bar */
 .downloader-container .progress-bar-container {
     width: 100%;
     height: calc(8px * var(--ui-scale));
@@ -6837,7 +6224,6 @@ svg.btn-icon {
     margin-bottom: calc(14px * var(--ui-scale));
 }
 
-/* Animated color fill-bar displaying progress percentage values */
 .downloader-container .progress-bar-fill {
     width: 0%;
     height: 100%;
@@ -6846,7 +6232,6 @@ svg.btn-icon {
     transition: width 0.3s ease;
 }
 
-/* Scrolling console container hosting execution CLI log lines */
 .downloader-container .console {
     flex: 1;
     background: rgba(0, 0, 0, 0.4);
@@ -6861,29 +6246,24 @@ svg.btn-icon {
     user-select: text;
 }
 
-/* Individual diagnostic execution CLI log console line */
 .downloader-container .log-line {
     margin-bottom: calc(4px * var(--ui-scale));
     word-break: break-all;
     white-space: pre-wrap;
 }
 
-/* Success status modifier highlights for log lines */
 .downloader-container .log-success {
     color: #4ade80;
 }
 
-/* Warning status modifier highlights for log lines */
 .downloader-container .log-warn {
     color: #fbbf24;
 }
 
-/* Error status modifier highlights for log lines */
 .downloader-container .log-error {
     color: #f87171;
 }
 
-/* Responsive collapse rule adapting downloader grid to single column on mobile */
 @media (max-width: 900px) {
     .downloader-layout {
         grid-template-columns: 1fr;
@@ -6900,3 +6280,163 @@ svg.btn-icon {
         grid-row: 3;
     }
 }
+
+/* ==========================================================================
+   OOP Component Architecture Base System
+   ========================================================================== */
+
+/* 1. Base Button (.btn) */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: calc(8px * var(--ui-scale));
+    padding: calc(10px * var(--ui-scale)) calc(20px * var(--ui-scale));
+    border-radius: calc(24px * var(--ui-scale));
+    font-family: inherit;
+    font-size: calc(0.9rem * var(--ui-scale));
+    font-weight: 600;
+    cursor: pointer;
+    border: 2px solid transparent;
+    outline: none;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+    user-select: none;
+    box-sizing: border-box;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* Button Subclass Modifiers */
+.btn-primary {
+    background: var(--primary-color, #ffffff);
+    color: var(--bg-dark, #0a0a0a);
+    border-color: var(--primary-color, #ffffff);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+    background: var(--primary-hover, #f0f0f0);
+    border-color: #ffffff;
+    box-shadow: 0 0 16px rgba(255, 255, 255, 0.4);
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-main, #ffffff);
+    border-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+    background: rgba(255, 255, 255, 0.18);
+    border-color: #ffffff;
+    box-shadow: 0 0 14px rgba(255, 255, 255, 0.25);
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--text-main, #ffffff);
+    border-color: transparent;
+}
+
+.btn-ghost:hover,
+.btn-ghost:focus-visible {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.btn-icon {
+    padding: calc(8px * var(--ui-scale));
+    border-radius: 50%;
+    aspect-ratio: 1 / 1;
+}
+
+/* 2. Base Card (.card) */
+.card {
+    position: relative;
+    border-radius: calc(14px * var(--ui-scale));
+    padding: calc(14px * var(--ui-scale));
+    background: var(--card-color, rgba(255, 255, 255, 0.04));
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    overflow: hidden;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    box-sizing: border-box;
+}
+
+.card:hover,
+.card:focus-visible {
+    border-color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4), 0 0 14px rgba(255, 255, 255, 0.2);
+    outline: none;
+}
+
+/* Card Subclass Modifiers */
+.card-artist .card-image-box,
+.card-artist .card__thumb-wrapper {
+    border-radius: 50%;
+}
+
+.card-artist:hover,
+.card-artist:focus-visible {
+    background: transparent !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
+
+.card-artist:hover .card-image-box,
+.card-artist:focus-visible .card-image-box {
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.4);
+}
+
+.card-category {
+    padding: calc(20px * var(--ui-scale));
+    border-radius: calc(16px * var(--ui-scale));
+}
+
+.card-stat {
+    padding: calc(16px * var(--ui-scale));
+    border-radius: calc(12px * var(--ui-scale));
+}
+
+/* 3. Base Modal Overlay (.modal-overlay) */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    opacity: 1;
+    transition: opacity 0.25s ease;
+}
+
+/* 4. Base Scroll Row (.scroll-row) */
+.scroll-row {
+    display: flex;
+    gap: calc(18px * var(--ui-scale));
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: calc(16px * var(--ui-scale)) calc(12px * var(--ui-scale));
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.scroll-row::-webkit-scrollbar {
+    display: none;
+}
+
