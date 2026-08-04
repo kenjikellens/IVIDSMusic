@@ -527,7 +527,7 @@ header {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: calc(32px * var(--ui-scale)) calc(36px * var(--ui-scale)) calc(var(--player-height) + 24px + 32px);
+    padding: calc(32px * var(--ui-scale)) 0px calc(var(--player-height) + 24px + 32px) !important;
     background: transparent;
 }
 
@@ -551,7 +551,7 @@ header {
     display: flex;
     align-items: flex-end;
     padding: calc(40px * var(--ui-scale));
-    margin-bottom: calc(40px * var(--ui-scale));
+    margin: 0 calc(20px * var(--ui-scale)) calc(40px * var(--ui-scale));
 }
 
 .hero-bg {
@@ -757,6 +757,7 @@ header {
     font-size: calc(1.3rem * var(--ui-scale));
     font-weight: 700;
     margin-bottom: 4px !important;
+    padding-left: calc(16px * var(--ui-scale));
     color: var(--text-main);
     letter-spacing: -0.2px;
 }
@@ -769,7 +770,7 @@ header {
     gap: 0px !important;
     flex-wrap: nowrap;
     overflow-x: auto;
-    padding: 4px calc(12px * var(--ui-scale)) calc(24px * var(--ui-scale)) calc(12px * var(--ui-scale)) !important;
+    padding: 4px 0px calc(24px * var(--ui-scale)) 0px !important;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -859,6 +860,48 @@ header {
 
 .music-card:hover .poster {
     filter: brightness(1.1);
+}
+
+/* Circular Play Button — bottom-right corner of card image, appears on hover */
+.card-play-btn {
+    position: absolute;
+    bottom: calc(8px * var(--ui-scale));
+    right: calc(8px * var(--ui-scale));
+    width: calc(40px * var(--ui-scale));
+    height: calc(40px * var(--ui-scale));
+    border-radius: 50%;
+    background: var(--primary-color);
+    border: none;
+    color: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.85);
+    transition: opacity 0.2s ease, transform 0.2s ease, filter 0.15s ease;
+    z-index: 5;
+    padding: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Play button SVG icon sizing */
+.card-play-btn svg {
+    width: calc(18px * var(--ui-scale));
+    height: calc(18px * var(--ui-scale));
+    margin-left: 2px;
+}
+
+/* Show play button on card hover */
+.music-card:hover .card-play-btn,
+.music-card:focus-within .card-play-btn {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Play button hover state — slightly brighter */
+.card-play-btn:hover {
+    filter: brightness(1.15);
 }
 
 .card-info-box {
@@ -1075,34 +1118,7 @@ header {
     bottom: 0;
 }
 
-.music-card::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: calc(48px * var(--ui-scale));
-    height: calc(48px * var(--ui-scale));
-    background-color: var(--primary-color);
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='black' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M8 5v14l11-7z'/%3E%3C/svg%3E");
-    background-size: 50%;
-    background-repeat: no-repeat;
-    background-position: center;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.25s ease;
-    box-shadow: none !important;
-    z-index: 2;
 
-    margin-top: -15px;
-}
-
-.music-card:hover::after {
-    opacity: 1;
-}
 
 /* ============================
    Skeleton Loaders
@@ -1842,8 +1858,7 @@ header {
     }
 
     #main-view {
-        padding: 16px 12px 320px 12px !important;
-
+        padding: 16px 0px 320px 0px !important;
     }
 
     .hero {
@@ -2580,7 +2595,7 @@ header {
    Home Page
    ============================ */
 .home-rows-container {
-    padding: 0 20px;
+    padding: 0;
 }
 
 /* ============================
@@ -4679,37 +4694,7 @@ svg.btn-icon {
    Playlist Management and Context Menu Popover Styling System
    ========================================================================== */
 
-.card-more-btn {
-    position: absolute;
-    top: calc(8px * var(--ui-scale));
-    right: calc(8px * var(--ui-scale));
-    width: calc(28px * var(--ui-scale));
-    height: calc(28px * var(--ui-scale));
-    border-radius: 50%;
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
-    font-size: calc(0.95rem * var(--ui-scale));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-    z-index: 10;
-    padding: 0 0 calc(2px * var(--ui-scale)) 0;
 
-}
-
-.music-card:hover .card-more-btn,
-.music-card:focus-within .card-more-btn {
-    opacity: 1;
-}
-
-.card-more-btn:hover {
-    background: rgba(0, 0, 0, 0.9);
-    border-color: #fff;
-}
 
 .popup-back-btn {
     width: calc(24px * var(--ui-scale));

@@ -34,21 +34,17 @@ export class CardComponentFactory {
         const cover = track.cover || 'gui/gemini-logo.png';
         const isExplicit = track.explicit || track.isExplicit;
 
+        /* Card HTML template — play button positioned bottom-right inside image box */
         card.innerHTML = `
             <div class="card-image-box">
                 ${track.type === 'artist' ? '<div class="ivids-loader poster-loader"></div>' : ''}
                 <img src="${cover}" alt="${title}" class="poster" loading="lazy" style="${track.type === 'artist' ? 'opacity: 0' : ''}">
                 ${(track.type === 'song' || track.type === 'album' || !track.type) ? `
-                    <div class="card-play-overlay" title="Play">
+                    <button class="card-play-btn" title="Play" tabindex="-1">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                    </div>
+                    </button>
                 ` : ''}
             </div>
-            ${track.type === 'song' ? `
-                <button class="btn btn-ghost card-more-btn" title="Options" tabindex="-1">
-                    ⋮
-                </button>
-            ` : ''}
             <div class="card-info-box">
                 <div class="card-title"><span class="marquee-text">${title}</span></div>
                 ${track.type === 'artist' ? '' : `
@@ -62,18 +58,20 @@ export class CardComponentFactory {
             </div>
         `;
 
-
+        /* Off-main-thread image decoding */
         const img = card.querySelector('.poster');
         if (img && img.decode) {
             img.decode().catch(() => {});
         }
 
+        /* Extract average color for card accent */
         if (MusicRepository.getAverageColor) {
             MusicRepository.getAverageColor(cover).then(color => {
                 if (color) card.style.setProperty('--card-color', color);
             }).catch(() => {});
         }
 
+        /* Artist image lazy-load with decode animation */
         if (track.type === 'artist' && MusicRepository.getArtistImage) {
             MusicRepository.getArtistImage(artist).then(imgUrl => {
                 const loader = card.querySelector('.poster-loader');
@@ -101,15 +99,17 @@ export class CardComponentFactory {
             });
         }
 
-        const moreBtn = card.querySelector('.card-more-btn');
-        if (moreBtn) {
-            moreBtn.onclick = (e) => {
+        /* Play button click → start playback directly (stopPropagation prevents card navigation) */
+        const playBtn = card.querySelector('.card-play-btn');
+        if (playBtn) {
+            playBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                this.openOptionsPopover(e, track);
+                MediaPlayer.playTrack(track);
             };
         }
 
+        /* Card body click → navigate to page (song page, album page, artist page) */
         card.onclick = (e) => {
             if (e.target.classList.contains('artist-link')) {
                 e.preventDefault();
@@ -123,7 +123,8 @@ export class CardComponentFactory {
             } else if (track.type === 'album') {
                 if (window.Router) window.Router.loadPage('album', { id: track.id });
             } else {
-                MediaPlayer.playTrack(track);
+                /* Song card click → open song detail page */
+                if (window.Router) window.Router.loadPage('song', { id: track.id });
             }
         };
 
@@ -145,69 +146,6 @@ export class CardComponentFactory {
             fragment.appendChild(this.createCard(item));
         });
         container.appendChild(fragment);
-    }
-
-    /**
-     * Opens contextual options popover menu for a track.
-     */
-    static openOptionsPopover(event, track) {
-        const existing = document.getElementById('add-to-playlist-popover');
-        if (existing) existing.remove();
-
-        const popover = document.createElement('div');
-        popover.id = 'add-to-playlist-popover';
-        popover.className = 'glassmorphism add-to-playlist-popup';
-
-        const rect = event.currentTarget.getBoundingClientRect();
-        popover.style.position = 'absolute';
-        popover.style.top = `${rect.bottom + window.scrollY + 5}px`;
-        popover.style.left = `${Math.min(rect.left + window.scrollX, window.innerWidth - 220)}px`;
-        popover.style.zIndex = '9999';
-
-        document.body.appendChild(popover);
-
-        popover.innerHTML = `
-            <div class="popup-title">${track.title || track.name}</div>
-            <div class="popup-list">
-                <button class="btn btn-ghost popup-item" id="opt-play-now">
-                    <span class="popup-icon">▶</span>
-                    <span class="popup-text">Play Now</span>
-                </button>
-                <button class="btn btn-ghost popup-item" id="opt-add-to-queue">
-                    <span class="popup-icon">➕</span>
-                    <span class="popup-text">Add to Queue</span>
-                </button>
-            </div>
-        `;
-
-        const optPlayNow = popover.querySelector('#opt-play-now');
-        if (optPlayNow) {
-            optPlayNow.onclick = (e) => {
-                e.preventDefault(); e.stopPropagation();
-                MediaPlayer.playTrack(track);
-                popover.remove();
-            };
-        }
-
-        const optAddToQueue = popover.querySelector('#opt-add-to-queue');
-        if (optAddToQueue) {
-            optAddToQueue.onclick = (e) => {
-                e.preventDefault(); e.stopPropagation();
-                MediaPlayer.queueManager.addTrack(track);
-                popover.remove();
-            };
-        }
-
-        const closeHandler = (e) => {
-            if (!popover.contains(e.target)) {
-                popover.remove();
-                document.removeEventListener('click', closeHandler);
-            }
-        };
-
-        setTimeout(() => {
-            document.addEventListener('click', closeHandler);
-        }, 50);
     }
 }
 
