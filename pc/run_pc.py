@@ -3,68 +3,119 @@ import socket
 import webbrowser
 import threading
 import time
+import sys
+from functools import partial
 from http.server import SimpleHTTPRequestHandler
 from socketserver import TCPServer
 
-class Handler(SimpleHTTPRequestHandler):
+class QuietHTTPRequestHandler(SimpleHTTPRequestHandler):
     """
-    Custom HTTP request handler that suppresses default console logs
-    to keep the terminal output clean.
+    Custom HTTP request handler that suppresses default console request logs
+    to keep terminal output clean during static asset serving.
     """
     def log_message(self, format, *args):
-        # Suppress logging server requests
         pass
 
-def start_server(port, directory):
+class LocalWebServer:
     """
-    Binds a TCPServer to serve static files from the specified directory.
-
-    :param port: The integer port number to bind the server.
-    :param directory: The directory path containing the assets to serve.
+    Manages the background local HTTP server lifecycle, dynamic port binding,
+    and asset serving without process working directory mutations.
     """
-    # Change the current working directory of the process to the target assets folder
-    # so that SimpleHTTPRequestHandler serves files relative to it.
-    os.chdir(directory)
-    with TCPServer(('localhost', port), Handler) as httpd:
-        httpd.serve_forever()
+    def __init__(self, directory: str, host: str = 'localhost', port: int = 0):
+        self.directory = directory
+        self.host = host
+        self.requested_port = port
+        self.port = port
+        self.server = None
+        self.thread = None
+        self.is_running = False
 
-def main():
+    def find_free_port(self) -> int:
+        """
+        Finds an available dynamic TCP port on the host network interface.
+        :returns: Integer port number.
+        """
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((self.host, 0))
+            return s.getsockname()[1]
+
+    def start(self):
+        """
+        Starts the background HTTP server on a daemon thread using partial handler directory binding.
+        """
+        if self.requested_port == 0:
+            self.port = self.find_free_port()
+
+        handler_factory = partial(QuietHTTPRequestHandler, directory=self.directory)
+        TCPServer.allow_reuse_address = True
+        self.server = TCPServer((self.host, self.port), handler_factory)
+        self.is_running = True
+
+        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread.start()
+
+    def stop(self):
+        """
+        Stops the server gracefully and closes network sockets.
+        """
+        if self.server and self.is_running:
+            self.server.shutdown()
+            self.server.server_close()
+            self.is_running = False
+
+    def get_url(self, relative_path: str = "") -> str:
+        """
+        Constructs the local HTTP URL for the target relative asset path.
+        :param relative_path: Relative URL path string.
+        :returns: Full HTTP URL string.
+        """
+        path = relative_path.lstrip('/')
+        return f"http://{self.host}:{self.port}/{path}"
+
+class IVIDSPCLauncher:
     """
-    Finds a dynamically available free port, starts the background HTTP server
-    serving the assets folder, and opens the index.html page in the default web browser.
+    Main application orchestrator responsible for validating environments,
+    launching background web servers, and opening system web browsers.
     """
-    # Find a free port dynamically
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(('localhost', 0))
-        port = s.getsockname()[1]
+    def __init__(self, assets_dir: str = None):
+        if assets_dir is None:
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            assets_dir = os.path.abspath(os.path.join(base_dir, '..', 'app', 'src', 'main', 'assets'))
+        self.assets_dir = assets_dir
+        self.web_server = None
 
-    # Resolve the absolute path of the assets directory
-    assets_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'app', 'src', 'main', 'assets'))
+    def validate_environment(self) -> bool:
+        """
+        Verifies that required web asset directories exist before launching.
+        :returns: True if environment is valid, False otherwise.
+        """
+        if not os.path.exists(self.assets_dir):
+            print(f"Error: Assets folder not found at '{self.assets_dir}'")
+            return False
+        return True
 
-    if not os.path.exists(assets_dir):
-        print(f"Error: Assets folder not found at '{assets_dir}'")
-        return
+    def run(self):
+        """
+        Executes the PC server startup workflow, opens browser, and monitors process lifecycle.
+        """
+        if not self.validate_environment():
+            sys.exit(1)
 
-    # Start the HTTP server on a daemon background thread
-    server_thread = threading.Thread(
-        target=start_server,
-        args=(port, assets_dir),
-        daemon=True
-    )
-    server_thread.start()
+        self.web_server = LocalWebServer(directory=self.assets_dir)
+        self.web_server.start()
 
-    # Build local URL and open it in the default system web browser
-    url = f"http://localhost:{port}/gui/index.html"
-    print(f"Server started on http://localhost:{port}/")
-    print(f"Opening browser at: {url}")
-    webbrowser.open(url)
+        target_url = self.web_server.get_url("gui/index.html")
+        print(f"Server started on http://localhost:{self.web_server.port}/")
+        print(f"Opening browser at: {target_url}")
+        webbrowser.open(target_url)
 
-    # Keep the main process running to keep the background server thread alive
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("\nShutting down server...")
+        try:
+            while self.web_server.is_running:
+                time.sleep(0.5)
+        except KeyboardInterrupt:
+            print("\nShutting down server...")
+            self.web_server.stop()
 
 if __name__ == '__main__':
-    main()
+    launcher = IVIDSPCLauncher()
+    launcher.run()

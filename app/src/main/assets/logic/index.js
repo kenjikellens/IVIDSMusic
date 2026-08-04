@@ -10,7 +10,7 @@ import { TVNav } from './tv-nav.js';
  */
 export class Application {
     /**
-     * Initializes all core services and boots the SPA application interface.
+     * Initializes all core services, prefetches HTML templates, and boots the SPA application interface.
      */
     static async bootstrap() {
         console.log('[IVIDS Music] Bootstrapping OOP Application...');
@@ -19,6 +19,9 @@ export class Application {
             await MediaPlayer.init();
             await DownloadManager.init();
             await TVNav.init();
+
+            // Background prefetch of all HTML page templates for 0ms instant tab switching
+            Router.prefetchAllPages().catch(() => {});
 
             // Load initial home route
             await Router.loadPage('home');

@@ -12,7 +12,7 @@ import { SettingsPageController } from './pages/SettingsPageController.js';
 import { DownloaderPageController } from './pages/DownloaderPageController.js';
 
 /**
- * RouterService orchestrates SPA page transitions, template caching, and PageController lifecycle.
+ * RouterService orchestrates SPA page transitions, template prefetching, LRU caching, and PageController lifecycle.
  */
 export class RouterService extends BaseService {
     #currentPage = null;
@@ -45,7 +45,27 @@ export class RouterService extends BaseService {
     get currentParams() { return this.#currentParams; }
 
     /**
-     * Dynamically loads a specified page into the main view, updating navigation state and executing PageController lifecycle.
+     * Asynchronously prefetches all static HTML page templates into in-memory LRUCache on app launch.
+     */
+    async prefetchAllPages() {
+        const pages = ['home', 'search', 'recommended', 'artist', 'album', 'song', 'library', 'settings', 'downloader'];
+        await Promise.all(
+            pages.map(async (pageName) => {
+                if (!this.#templateCache.has(pageName)) {
+                    try {
+                        const res = await fetch(`pages/${pageName}.html`);
+                        if (res.ok) {
+                            const html = await res.text();
+                            this.#templateCache.set(pageName, html);
+                        }
+                    } catch (e) { }
+                }
+            })
+        );
+    }
+
+    /**
+     * Dynamically loads a specified page into the main view with zero-latency template rendering.
      * @param {string} pageName
      * @param {Object} [params]
      */
@@ -57,7 +77,10 @@ export class RouterService extends BaseService {
         const mainView = document.getElementById('main-view');
         if (!mainView) return;
 
-        mainView.innerHTML = '<div class="page-loading-overlay"><div class="ivids-loader"></div></div>';
+        let html = this.#templateCache.get(pageName);
+        if (!html) {
+            mainView.innerHTML = '<div class="page-loading-overlay"><div class="ivids-loader"></div></div>';
+        }
 
         if (this.#activeController) {
             this.#activeController.destroy();
@@ -65,7 +88,6 @@ export class RouterService extends BaseService {
         }
 
         try {
-            let html = this.#templateCache.get(pageName);
             if (!html) {
                 const response = await fetch(`pages/${pageName}.html`);
                 if (!response.ok) throw new Error(`Could not load page: ${pageName}`);

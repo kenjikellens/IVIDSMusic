@@ -2,7 +2,7 @@ import { Config } from '../config.js';
 import { ProxyService } from './ProxyService.js';
 
 /**
- * InvidiousResolver resolves YouTube playback stream endpoints via public Invidious instances.
+ * InvidiousResolver resolves YouTube playback stream endpoints via parallel instance probing for ultra-fast audio loading.
  */
 export class InvidiousResolver {
     #invidiousInstances = [
@@ -12,7 +12,7 @@ export class InvidiousResolver {
     ];
 
     /**
-     * Resolves playable audio stream URL for a given YouTube video ID.
+     * Resolves playable audio stream URL for a given YouTube video ID using parallel race probing.
      * @param {string} videoId
      * @returns {Promise<string|null>} Audio stream URL or null.
      */
@@ -24,10 +24,13 @@ export class InvidiousResolver {
             return `saved-media://${videoId}`;
         }
 
-        for (const instance of this.#invidiousInstances) {
+        const resolveInstance = async (instance) => {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3500);
             try {
                 const url = `${instance}/api/v1/videos/${videoId}`;
-                const response = await ProxyService.fetch(url);
+                const response = await ProxyService.fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
                 const data = await response.json();
 
                 if (data.adaptiveFormats) {
@@ -36,10 +39,18 @@ export class InvidiousResolver {
                         return audioFormat.url;
                     }
                 }
+                throw new Error('No audio format found');
             } catch (err) {
-                console.warn(`[InvidiousResolver] Instance ${instance} failed for video ${videoId}:`, err);
+                clearTimeout(timeoutId);
+                throw err;
             }
+        };
+
+        try {
+            return await Promise.any(this.#invidiousInstances.map(inst => resolveInstance(inst)));
+        } catch (err) {
+            console.error(`[InvidiousResolver] Parallel resolution failed for video ${videoId}:`, err);
+            return null;
         }
-        return null;
     }
 }
