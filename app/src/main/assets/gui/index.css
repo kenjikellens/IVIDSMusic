@@ -762,10 +762,9 @@ header {
 }
 
 /* ==========================================================================
-   Horizontal Scroll Container Component (.scroll-row, .row-posters)
+   Horizontal Scroll Container Component (.scroll-row)
    ========================================================================== */
-.scroll-row,
-.row-posters {
+.scroll-row {
     display: flex;
     gap: 0px !important;
     flex-wrap: nowrap;
@@ -775,26 +774,19 @@ header {
     -ms-overflow-style: none;
 }
 
-.scroll-row::-webkit-scrollbar,
-.row-posters::-webkit-scrollbar {
+.scroll-row::-webkit-scrollbar {
     display: none;
 }
 
 /* ==========================================================================
    Single Reusable Spotify Zoom-Hover Overlay System (.container-hover-effect)
    ========================================================================== */
-.container-hover-effect,
-.card,
-.music-card,
-.nav-links a {
+.container-hover-effect {
     position: relative;
     z-index: 1;
 }
 
-.container-hover-effect::before,
-.card::before,
-.music-card::before,
-.nav-links a::before {
+.container-hover-effect::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -809,20 +801,12 @@ header {
 
 .container-hover-effect:hover::before,
 .container-hover-effect:focus-visible::before,
-.container-hover-effect.active::before,
-.card:hover::before,
-.card:focus-visible::before,
-.music-card:hover::before,
-.music-card:focus-visible::before,
-.nav-links a:hover::before,
-.nav-links a:focus-visible::before,
-.nav-links a.active::before {
+.container-hover-effect.active::before {
     opacity: 1;
     transform: scale(1);
 }
 
-/* Base Card Container */
-.card,
+/* Base Card Container (.music-card) */
 .music-card {
     width: calc(180px * var(--ui-scale));
     min-width: calc(180px * var(--ui-scale));
@@ -844,8 +828,6 @@ header {
     box-sizing: border-box;
 }
 
-.card:hover,
-.card:focus-visible,
 .music-card:hover,
 .music-card:focus-visible {
     background: transparent !important;
@@ -855,8 +837,7 @@ header {
     outline: none;
 }
 
-.card-image-box,
-.card__thumb-wrapper {
+.card-image-box {
     position: relative;
     z-index: 1;
     width: 100%;
@@ -867,8 +848,7 @@ header {
     transform: none !important;
 }
 
-.poster,
-.card__thumb {
+.poster {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -877,13 +857,11 @@ header {
     transform: none !important;
 }
 
-.music-card:hover .poster,
-.card:hover .card__thumb {
+.music-card:hover .poster {
     filter: brightness(1.1);
 }
 
-.card-info-box,
-.card__content {
+.card-info-box {
     position: relative;
     z-index: 1;
     display: flex;
@@ -893,8 +871,7 @@ header {
     transform: none !important;
 }
 
-.card-title,
-.card__title {
+.card-title {
     font-weight: 600;
     font-size: calc(0.85rem * var(--ui-scale));
     color: var(--text-main);
@@ -903,9 +880,7 @@ header {
     text-overflow: clip;
 }
 
-.card-artist,
-.card-subtitle,
-.card__subtitle {
+.card-artist {
     font-size: calc(0.75rem * var(--ui-scale));
     font-weight: 400;
     color: var(--text-secondary);
@@ -914,19 +889,16 @@ header {
     text-overflow: clip;
 }
 
-.music-card.type-artist,
-.card--artist {
+.music-card.type-artist {
     background: transparent !important;
     border-color: transparent !important;
 }
 
-.music-card.type-artist .card-image-box,
-.card--artist .card__thumb-wrapper {
+.music-card.type-artist .card-image-box {
     border-radius: 50%;
 }
 
-.music-card.type-artist:hover .card-image-box,
-.card--artist:hover .card__thumb-wrapper {
+.music-card.type-artist:hover .card-image-box {
     box-shadow: none !important;
 }
 

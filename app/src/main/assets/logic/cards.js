@@ -25,7 +25,7 @@ export class CardComponentFactory {
     static hydrateCard(card, track) {
         if (!card || !track) return card;
 
-        card.className = `card card-${track.type || 'song'}`;
+        card.className = `music-card container-hover-effect type-${track.type || 'song'}`;
         card.tabIndex = 0;
         card.dataset.trackJson = JSON.stringify(track);
 
