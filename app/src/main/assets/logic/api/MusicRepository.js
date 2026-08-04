@@ -2,50 +2,28 @@ import { BaseService } from '../core/BaseService.js';
 import { DeezerProvider } from './DeezerProvider.js';
 import { iTunesProvider } from './iTunesProvider.js';
 import { InvidiousResolver } from './InvidiousResolver.js';
-import { LRUCache } from '../utils/LRUCache.js';
 
 /**
- * MusicRepositoryService provides a unified facade for metadata searching, charts, genres, and stream resolution,
- * featuring high-speed in-memory LRU caching to eliminate duplicate network requests.
+ * MusicRepositoryService provides a unified facade for metadata searching, charts, genres, and stream resolution.
+ * All memory caching has been removed to ensure real-time, live data on every query.
  */
 export class MusicRepositoryService extends BaseService {
     #deezer = new DeezerProvider();
     #itunes = new iTunesProvider();
     #invidious = new InvidiousResolver();
-    #searchCache = new LRUCache(100);
-    #categoryCache = new LRUCache(20);
-    #colorCache = new LRUCache(200);
 
     /**
-     * Universal metadata search across music providers with in-memory caching.
+     * Universal metadata search across music providers without in-memory caching.
      */
     async search(query = 'top hits', limit = 20, type = 'all', yearRange = null, offset = 0, unique = false, signal = null) {
-        const cacheKey = `search:${query}:${limit}:${type}:${yearRange}:${offset}:${unique}`;
-        if (this.#searchCache.has(cacheKey)) {
-            return this.#searchCache.get(cacheKey);
-        }
-
-        const results = await this.#deezer.search(query, limit, type, yearRange, offset, unique, signal);
-        if (results && results.length > 0) {
-            this.#searchCache.set(cacheKey, results);
-        }
-        return results;
+        return await this.#deezer.search(query, limit, type, yearRange, offset, unique, signal);
     }
 
     /**
-     * Fetch category rows using genre chart endpoints with caching.
+     * Fetch category rows using genre chart endpoints directly.
      */
     async getCategories(genres, signal = null) {
-        const cacheKey = `categories:${genres ? genres.join(',') : 'default'}`;
-        if (this.#categoryCache.has(cacheKey)) {
-            return this.#categoryCache.get(cacheKey);
-        }
-
-        const results = await this.#deezer.getCategories(genres, signal);
-        if (results && results.length > 0) {
-            this.#categoryCache.set(cacheKey, results);
-        }
-        return results;
+        return await this.#deezer.getCategories(genres, signal);
     }
 
     /**
@@ -56,19 +34,10 @@ export class MusicRepositoryService extends BaseService {
     }
 
     /**
-     * Retrieves top chart tracks with caching.
+     * Retrieves top chart tracks directly.
      */
     async getChart(limit = 20) {
-        const cacheKey = `chart:${limit}`;
-        if (this.#searchCache.has(cacheKey)) {
-            return this.#searchCache.get(cacheKey);
-        }
-
-        const results = await this.#deezer.getChart(limit);
-        if (results && results.length > 0) {
-            this.#searchCache.set(cacheKey, results);
-        }
-        return results;
+        return await this.#deezer.getChart(limit);
     }
 
     /**
@@ -79,13 +48,10 @@ export class MusicRepositoryService extends BaseService {
     }
 
     /**
-     * Calculates dominant cover artwork color with caching.
+     * Calculates dominant cover artwork color without memory caching.
      */
     async getAverageColor(imageUrl) {
         if (!imageUrl) return 'rgba(255,255,255,0.05)';
-        if (this.#colorCache.has(imageUrl)) {
-            return this.#colorCache.get(imageUrl);
-        }
 
         return new Promise((resolve) => {
             const img = new Image();
@@ -105,7 +71,6 @@ export class MusicRepositoryService extends BaseService {
                     }
                     const count = data.length / 4;
                     const color = `rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`;
-                    this.#colorCache.set(imageUrl, color);
                     resolve(color);
                 } catch (e) {
                     resolve("rgba(255,255,255,0.05)");

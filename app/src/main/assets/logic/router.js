@@ -1,5 +1,4 @@
 import { BaseService } from './core/BaseService.js';
-import { LRUCache } from './utils/LRUCache.js';
 import { LanguageManager } from './language-manager.js';
 import { HomePageController } from './pages/HomePageController.js';
 import { SearchPageController } from './pages/SearchPageController.js';
@@ -12,12 +11,12 @@ import { SettingsPageController } from './pages/SettingsPageController.js';
 import { DownloaderPageController } from './pages/DownloaderPageController.js';
 
 /**
- * RouterService orchestrates SPA page transitions, template prefetching, LRU caching, and PageController lifecycle.
+ * RouterService orchestrates SPA page transitions and PageController lifecycle.
+ * In-memory template caching has been removed to ensure fresh page HTML loads.
  */
 export class RouterService extends BaseService {
     #currentPage = null;
     #currentParams = null;
-    #templateCache = new LRUCache(30);
     #activeController = null;
     #controllers = new Map();
 
@@ -45,27 +44,14 @@ export class RouterService extends BaseService {
     get currentParams() { return this.#currentParams; }
 
     /**
-     * Asynchronously prefetches all static HTML page templates into in-memory LRUCache on app launch.
+     * No-op stub for backward compatibility.
      */
     async prefetchAllPages() {
-        const pages = ['home', 'search', 'recommended', 'artist', 'album', 'song', 'library', 'settings', 'downloader'];
-        await Promise.all(
-            pages.map(async (pageName) => {
-                if (!this.#templateCache.has(pageName)) {
-                    try {
-                        const res = await fetch(`pages/${pageName}.html`);
-                        if (res.ok) {
-                            const html = await res.text();
-                            this.#templateCache.set(pageName, html);
-                        }
-                    } catch (e) { }
-                }
-            })
-        );
+        return Promise.resolve();
     }
 
     /**
-     * Dynamically loads a specified page into the main view with zero-latency template rendering.
+     * Dynamically loads a specified page into the main view with direct live HTML fetching.
      * @param {string} pageName
      * @param {Object} [params]
      */
@@ -77,23 +63,15 @@ export class RouterService extends BaseService {
         const mainView = document.getElementById('main-view');
         if (!mainView) return;
 
-        let html = this.#templateCache.get(pageName);
-        if (!html) {
-            mainView.innerHTML = '<div class="page-loading-overlay"><div class="ivids-loader"></div></div>';
-        }
-
         if (this.#activeController) {
             this.#activeController.destroy();
             this.#activeController = null;
         }
 
         try {
-            if (!html) {
-                const response = await fetch(`pages/${pageName}.html`);
-                if (!response.ok) throw new Error(`Could not load page: ${pageName}`);
-                html = await response.text();
-                this.#templateCache.set(pageName, html);
-            }
+            const response = await fetch(`pages/${pageName}.html`);
+            if (!response.ok) throw new Error(`Could not load page: ${pageName}`);
+            const html = await response.text();
 
             this.#currentPage = pageName;
             this.#currentParams = params;
