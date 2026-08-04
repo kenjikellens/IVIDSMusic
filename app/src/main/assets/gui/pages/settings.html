@@ -1,33 +1,22 @@
 <div class="settings-container">
     <h1 class="row-title" data-i18n="settings">Settings</h1>
 
-    <!-- 
-  Class: settings-section-title
-  Purpose: Displays the section headings (e.g. Appearance) outside container cards for a modern dashboard style.
--->
+    <!-- Section: Appearance -->
     <h2 class="settings-section-title">
         <img class="settings-section-icon" src="svg/settings.svg" alt="">
         <span data-i18n="appearance">Appearance</span>
     </h2>
 
-    <!-- 
-  Class: settings-section
-  Purpose: Translucent, glassmorphic card container housing individual settings rows.
--->
-    <div class="music-card settings-section container-hover-effect">
-        <!-- 
-      Class: settings-item
-      Purpose: Elegant horizontal layout row matching the label/description with control widgets.
-    -->
+    <div class="settings-section">
         <div class="settings-item">
             <div class="settings-info">
                 <div class="settings-label" data-i18n="interface_scale">Interface Scale</div>
                 <div class="settings-desc" data-i18n="interface_scale_desc">Adjust the size of the UI elements.</div>
             </div>
             <div class="scale-stepper" id="scale-options-container">
-                <button class="btn btn-ghost scale-stepper-btn" id="scale-decrease">-</button>
+                <button class="btn btn-ghost" id="scale-decrease">-</button>
                 <div class="scale-value" id="current-scale-display">100%</div>
-                <button class="btn btn-ghost scale-stepper-btn" id="scale-increase">+</button>
+                <button class="btn btn-ghost" id="scale-increase">+</button>
             </div>
         </div>
 
@@ -36,35 +25,26 @@
                 <div class="settings-label" data-i18n="language">Language</div>
                 <div class="settings-desc" data-i18n="language_desc">Choose your preferred language.</div>
             </div>
-            <div class="lang-display">
+            <button class="btn btn-secondary" id="lang-edit-btn" tabindex="0" aria-label="Change language">
                 <span class="lang-current-name" id="current-lang-display">English</span>
-                <button class="btn btn-ghost lang-edit-btn" id="lang-edit-btn" tabindex="0"
-                    aria-label="Change language">
-                    <img src="svg/edit.svg" alt="Edit" class="lang-edit-icon">
-                </button>
-            </div>
+                <img src="svg/edit.svg" alt="Edit" class="lang-edit-icon">
+            </button>
         </div>
     </div>
 
-    <!-- 
-  Class: settings-section-title
-  Purpose: Displays the 'About' section heading outside its glass container.
--->
+    <!-- Section: About -->
     <h2 class="settings-section-title">
         <img class="settings-section-icon" src="svg/info.svg" alt="">
         <span data-i18n="about">About</span>
     </h2>
 
-    <div class="music-card settings-section container-hover-effect">
+    <div class="settings-section">
         <div class="settings-item">
             <div class="settings-info">
                 <div class="settings-label" data-i18n="version">Version</div>
                 <div class="settings-desc">0.2.3 (Beta)</div>
             </div>
-            <button class="btn btn-secondary check-updates-btn" id="check-updates-btn"
-                onclick="if (window.Updater) window.Updater.checkManual()" data-i18n="check_updates"
-                style="padding: calc(6px * var(--ui-scale)) calc(12px * var(--ui-scale)); font-size: calc(0.8rem * var(--ui-scale)); border-radius: calc(8px * var(--ui-scale)); cursor: pointer;">Check
-                for Updates</button>
+            <button class="btn btn-secondary" id="check-updates-btn" onclick="if (window.Updater) window.Updater.checkManual()" data-i18n="check_updates">Check for Updates</button>
         </div>
         <div class="settings-item">
             <div class="settings-info">
@@ -80,7 +60,7 @@
     <div class="lang-modal" role="dialog" aria-label="Choose Language">
         <div class="lang-modal-header">
             <h3 class="lang-modal-title" data-i18n="language">Language</h3>
-            <button class="btn btn-ghost lang-modal-close" id="lang-modal-close" tabindex="0" aria-label="Close">
+            <button class="lang-modal-close" id="lang-modal-close" tabindex="0" aria-label="Close">
                 <img src="svg/close.svg" alt="Close">
             </button>
         </div>
