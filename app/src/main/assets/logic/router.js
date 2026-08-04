@@ -105,6 +105,7 @@ export class RouterService extends BaseService {
 
             mainView.innerHTML = temp.innerHTML;
             LanguageManager.translateUI(mainView);
+            if (window.Loader) window.Loader.init();
 
             document.querySelectorAll('.nav-links a').forEach(link => {
                 link.classList.remove('active');

@@ -189,7 +189,7 @@ export const PageSystem = {
         const SKELETON_CARD = `
             <div class="music-card card-placeholder container-hover-effect">
                 <div class="card-image-box">
-                    <div class="ivids-loader"></div>
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
                 </div>
                 <div class="card-info-box">
                     <div class="card-title"></div>
