@@ -32,13 +32,14 @@ export class CardComponentFactory {
         const title = track.title || track.name || 'Unknown';
         const artist = track.artist || 'Unknown Artist';
         const cover = track.cover || 'gui/gemini-logo.png';
+        const isExplicit = track.explicit || track.isExplicit;
 
         card.innerHTML = `
             <div class="card-image-box">
                 ${track.type === 'artist' ? '<div class="ivids-loader poster-loader"></div>' : ''}
                 <img src="${cover}" alt="${title}" class="poster" loading="lazy" style="${track.type === 'artist' ? 'opacity: 0' : ''}">
-                ${track.type === 'song' ? `
-                    <div class="card-play-overlay">
+                ${(track.type === 'song' || track.type === 'album' || !track.type) ? `
+                    <div class="card-play-overlay" title="Play">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     </div>
                 ` : ''}
@@ -52,6 +53,7 @@ export class CardComponentFactory {
                 <div class="card-title"><span class="marquee-text">${title}</span></div>
                 ${track.type === 'artist' ? '' : `
                     <div class="card-artist">
+                        ${isExplicit ? '<span class="explicit-badge" title="Explicit">E</span>' : ''}
                         <a href="#" class="artist-link marquee-text" data-name="${artist}">
                             ${artist}
                         </a>
@@ -59,6 +61,7 @@ export class CardComponentFactory {
                 `}
             </div>
         `;
+
 
         const img = card.querySelector('.poster');
         if (img && img.decode) {
