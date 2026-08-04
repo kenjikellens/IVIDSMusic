@@ -298,10 +298,9 @@ input:focus-visible,
     min-height: 100%;
 }
 
-/* For You Header Component Alignment Modifier */
-.foryou-header .row-title {
-    padding-left: 0 !important;
-    margin-bottom: 0 !important;
+/* For You Hero Banner Modifier */
+.foryou-hero {
+    margin: 0 0 calc(32px * var(--ui-scale)) 0 !important;
 }
 
 /* For You Refresh Taste Button Modifier */
