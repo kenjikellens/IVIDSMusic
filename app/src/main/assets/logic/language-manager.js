@@ -5,7 +5,7 @@ import { BaseService } from './core/BaseService.js';
  */
 export class LanguageManagerService extends BaseService {
     SUPPORTED_LANGUAGES = ['en', 'nl', 'fr', 'de', 'es', 'pt', 'it', 'zh', 'hi', 'ar', 'ru', 'ro', 'ja', 'tr', 'ko', 'pl'];
-    
+
     LANGUAGE_NAMES = {
         en: 'English',
         nl: 'Nederlands',

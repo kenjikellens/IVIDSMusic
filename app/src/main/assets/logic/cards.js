@@ -147,6 +147,81 @@ export class CardComponentFactory {
         });
         container.appendChild(fragment);
     }
+
+    /**
+     * Creates a full music row component with header, title, and populated horizontal scroll container.
+     * @param {string} title - Section header title text
+     * @param {string} containerId - DOM ID for the scroll container
+     * @param {Array<Object>} items - Array of track/card objects
+     * @param {string} [type] - Default card item type
+     * @returns {HTMLElement} The complete music row element
+     */
+    static createRow(title, containerId, items = [], type = 'song') {
+        const row = document.createElement('div');
+        row.className = 'row-container';
+
+        const header = document.createElement('div');
+        header.className = 'row-header';
+
+        const titleEl = document.createElement('h2');
+        titleEl.className = 'row-title';
+        titleEl.textContent = title;
+        header.appendChild(titleEl);
+
+        const postersContainer = document.createElement('div');
+        postersContainer.className = 'scroll-row';
+        if (containerId) postersContainer.id = containerId;
+
+        this.renderCards(postersContainer, items, type);
+
+        row.appendChild(header);
+        row.appendChild(postersContainer);
+        return row;
+    }
+
+    /**
+     * Creates a 1-to-1 skeleton row component matching the exact geometry of a hydrated row.
+     * @param {string} title - Section header title text
+     * @param {string} containerId - DOM ID for the scroll container
+     * @param {number} [count=6] - Number of skeleton cards to generate
+     * @returns {HTMLElement} The skeleton row element
+     */
+    static createSkeletonRow(title, containerId, count = 6) {
+        const row = document.createElement('div');
+        row.className = 'row-container';
+
+        const header = document.createElement('div');
+        header.className = 'row-header';
+
+        const titleEl = document.createElement('h2');
+        titleEl.className = 'row-title';
+        titleEl.textContent = title;
+        header.appendChild(titleEl);
+
+        const postersContainer = document.createElement('div');
+        postersContainer.className = 'scroll-row skeleton-row';
+        if (containerId) postersContainer.id = containerId;
+
+        let skeletonsHTML = '';
+        for (let i = 0; i < count; i++) {
+            skeletonsHTML += `
+                <div class="music-card skeleton-card container-hover-effect">
+                    <div class="skeleton-img">
+                        <img src="svg/loader.svg" alt="Loading" class="ivids-loader-img poster-loader">
+                    </div>
+                    <div class="skeleton-info-box">
+                        <div class="skeleton-text title"></div>
+                        <div class="skeleton-text artist"></div>
+                    </div>
+                </div>
+            `;
+        }
+        postersContainer.innerHTML = skeletonsHTML;
+
+        row.appendChild(header);
+        row.appendChild(postersContainer);
+        return row;
+    }
 }
 
 export const CardsEngine = CardComponentFactory;

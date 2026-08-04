@@ -78,7 +78,9 @@ export class DeezerProvider {
 
             return results;
         } catch (error) {
-            console.error('[DeezerProvider] Search error:', error);
+            if (error.name !== 'AbortError') {
+                console.error('[DeezerProvider] Search error:', error);
+            }
             return [];
         }
     }
@@ -126,7 +128,9 @@ export class DeezerProvider {
                         tracks: uniqueTracks
                     };
                 } catch (e) {
-                    console.error(`[DeezerProvider] Genre ${genre} failed:`, e);
+                    if (e.name !== 'AbortError') {
+                        console.error(`[DeezerProvider] Genre ${genre} failed:`, e);
+                    }
                     return { title: genre, id: genre.toLowerCase().replace(/\s+/g, '-'), tracks: [] };
                 }
             })
@@ -155,7 +159,9 @@ export class DeezerProvider {
                 previewUrl: item.preview
             }));
         } catch (error) {
-            console.error('[DeezerProvider] Chart error:', error);
+            if (error.name !== 'AbortError') {
+                console.error('[DeezerProvider] Chart error:', error);
+            }
             return [];
         }
     }

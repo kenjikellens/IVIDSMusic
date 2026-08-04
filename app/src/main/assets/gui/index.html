@@ -18,7 +18,6 @@
     <link rel="modulepreload" href="../logic/language-manager.js">
     <link rel="stylesheet" href="index.css?v=0.2.3.7">
     <link rel="stylesheet" href="tv-nav.css">
-    <link rel="stylesheet" href="loader.css">
     <link rel="icon" type="image/png" href="gemini-logo.png">
     <script type="module" src="../logic/index.js"></script>
 </head>
@@ -248,10 +247,6 @@
         import { Updater } from '../logic/updater.js';
 
         window.onload = () => {
-            SettingsManager.init();
-            TVNav.init();
-            Router.loadPage('home');
-
             // Silent daily auto update check on app boot (delayed to avoid network bottleneck)
             setTimeout(() => {
                 if (window.Updater) window.Updater.initAutoCheck();

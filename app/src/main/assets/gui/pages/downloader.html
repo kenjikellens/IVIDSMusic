@@ -3,7 +3,7 @@
 
     <div class="downloader-layout">
         <!-- Left: Configuration Panel Card -->
-        <section class="music-card config-panel container-hover-effect" id="settings-card">
+        <section class="config-panel" id="settings-card">
             <div class="form-row">
                 <label for="url-input" data-i18n="home_url_label">YouTube URL</label>
                 <input type="text" id="url-input" data-i18n-placeholder="home_url_placeholder" placeholder="Paste playlist or video link here..." autocomplete="off">
@@ -14,7 +14,7 @@
                 <label data-i18n="home_save_label">Save to</label>
                 <div class="dir-row">
                     <div class="dir-path" id="dir-path">Loading...</div>
-                    <button class="btn btn-secondary btn-browse" id="btn-browse" data-i18n="home_browse">Browse</button>
+                    <button class="btn btn-secondary" id="btn-browse" data-i18n="home_browse">Browse</button>
                 </div>
             </div>
 
@@ -36,7 +36,7 @@
             </div>
 
             <!-- Advanced Settings Toggle button -->
-            <button class="btn btn-ghost advanced-toggle" id="advanced-toggle" data-i18n="home_advanced">
+            <button class="btn btn-ghost" id="advanced-toggle" data-i18n="home_advanced">
                 ⚙ Advanced Settings
             </button>
 
@@ -102,13 +102,13 @@
 
             <!-- Execution actions -->
             <div class="actions">
-                <button class="btn btn-primary btn-download" id="btn-download" data-i18n="home_start">Start Download</button>
-                <button class="btn btn-secondary btn-cancel" id="btn-cancel" data-i18n="home_cancel" disabled>Cancel</button>
+                <button class="btn btn-primary" id="btn-download" data-i18n="home_start">Start Download</button>
+                <button class="btn btn-secondary" id="btn-cancel" data-i18n="home_cancel" disabled>Cancel</button>
             </div>
         </section>
 
         <!-- Right: Preview Panel Card -->
-        <section class="music-card preview-panel container-hover-effect" id="preview-panel">
+        <section class="preview-panel" id="preview-panel">
             <div class="preview-header">
                 <span class="preview-title" data-i18n="preview_title">Preview</span>
                 <button class="btn btn-secondary" id="btn-load-info" data-i18n="preview_load">Load Info</button>
@@ -133,8 +133,8 @@
             <div id="state-playlist" class="preview-state-playlist" style="display: none;">
                 <div class="track-list-header">
                     <span class="track-count" id="track-count-text">0 tracks found</span>
-                    <button class="btn btn-secondary btn-select" id="btn-select-all" data-i18n="preview_select_all">Select All</button>
-                    <button class="btn btn-secondary btn-select" id="btn-deselect-all" data-i18n="preview_deselect_all">Deselect All</button>
+                    <button class="btn btn-secondary" id="btn-select-all" data-i18n="preview_select_all">Select All</button>
+                    <button class="btn btn-secondary" id="btn-deselect-all" data-i18n="preview_deselect_all">Deselect All</button>
                 </div>
                 <div class="track-list-items" id="track-list">
                     <!-- Populated dynamically -->
@@ -143,7 +143,7 @@
         </section>
 
         <!-- Bottom: Progress & CLI Console Output Panel -->
-        <section class="music-card output-panel container-hover-effect" id="progress-section">
+        <section class="output-panel" id="progress-section">
             <div class="progress-header">
                 <span class="status-text" id="status-text" data-i18n="console_status_idle">Status: Idle</span>
                 <span class="track-text" id="track-text"></span>

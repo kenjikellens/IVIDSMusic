@@ -1,18 +1,19 @@
-<div class="row-header" style="margin-top:20px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 15px;">
-   <h1 class="row-title" style="font-size: 2rem; margin: 0;">✨ <span data-i18n="nav_foryou">For You</span></h1>
-   <button id="refresh-recs-btn" class="btn btn-secondary check-updates-btn" onclick="if (window.DiscoveryEngine) window.DiscoveryEngine.initRecommended({ forceRefresh: true })" style="padding: calc(6px * var(--ui-scale)) calc(14px * var(--ui-scale)); font-size: calc(0.85rem * var(--ui-scale)); border-radius: calc(8px * var(--ui-scale)); cursor: pointer; display: flex; align-items: center; gap: 6px;">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="width: 14px; height: 14px;">
-         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.57-.57"/>
-      </svg>
-      <span data-i18n="refresh_taste">Refresh Taste</span>
-   </button>
-</div>
-<p style="color: var(--text-secondary); margin-bottom: 30px;" data-i18n="foryou_desc">Personalized picks based on what
-   you listen to, like, and explore.</p>
+<div class="foryou-container">
+   <div class="row-header foryou-header">
+      <h1 class="row-title" data-i18n="nav_foryou">For You</h1>
+      <button id="refresh-recs-btn" class="btn btn-secondary foryou-refresh-btn" onclick="if (window.DiscoveryEngine) window.DiscoveryEngine.initRecommended({ forceRefresh: true })">
+         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.57-.57"/>
+         </svg>
+         <span data-i18n="refresh_taste">Refresh Taste</span>
+      </button>
+   </div>
+   <p class="foryou-desc" data-i18n="foryou_desc">Personalized picks based on what you listen to, like, and explore.</p>
 
-<div id="recommended-content" style="display: flex; flex-direction: column; gap: 40px;">
-   <div style="text-align:center; padding: 40px; color: var(--text-secondary);">
-      <div class="ivids-loader" style="margin: 0 auto 15px auto;"></div>
-      <div data-i18n="loading_recommendations">Analyzing your taste...</div>
+   <div id="recommended-content" class="foryou-content">
+      <div class="foryou-state-box">
+         <div class="ivids-loader"></div>
+         <div data-i18n="loading_recommendations">Analyzing your taste...</div>
+      </div>
    </div>
 </div>

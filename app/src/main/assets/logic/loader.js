@@ -4,34 +4,25 @@
  */
 export const Loader = {
     /**
-     * Injects the loader SVG into any element with the 'ivids-loader' class
-     * that hasn't been initialized yet.
+     * Injects the animated SVG loader image into elements with the 'ivids-loader' class
      */
     init() {
         const loaders = document.querySelectorAll('.ivids-loader:not(.initialized)');
         loaders.forEach(loader => {
-            loader.innerHTML = `
-                <svg class="spinner" viewBox="0 0 50 50">
-                    <circle cx="25" cy="25" r="20"></circle>
-                </svg>
-            `;
+            loader.innerHTML = `<img src="svg/loader.svg" alt="Loading" class="ivids-loader-img">`;
             loader.classList.add('initialized');
         });
     },
 
     /**
-     * Creates a loader element programmatically
+     * Creates a loader DOM container programmatically with svg/loader.svg
      * @param {string} size - 'small', 'medium', 'large'
-     * @returns {HTMLElement}
+     * @returns {HTMLElement} The created loader element
      */
     create(size = 'medium') {
         const div = document.createElement('div');
         div.className = `ivids-loader ${size}`;
-        div.innerHTML = `
-            <svg class="spinner" viewBox="0 0 50 50">
-                <circle cx="25" cy="25" r="20"></circle>
-            </svg>
-        `;
+        div.innerHTML = `<img src="svg/loader.svg" alt="Loading" class="ivids-loader-img">`;
         div.classList.add('initialized');
         return div;
     }

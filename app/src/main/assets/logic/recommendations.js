@@ -312,24 +312,42 @@ export const DiscoveryEngine = {
          // If no telemetry history exists, show a localized empty state message
          if (interests.artists.length === 0 && interests.tracks.length === 0) {
             container.innerHTML = `
-               <div style="text-align:center; padding: 60px; color: var(--text-secondary);">
-                  <div style="font-size: 3rem; margin-bottom: 20px;">🎧</div>
-                  <h2 data-i18n="foryou_empty_title" style="color: var(--text-main); margin-bottom: 10px;">Start Listening!</h2>
-                  <p data-i18n="foryou_empty_desc">Play some songs or like artists to get personalized recommendations here.</p>
+               <div class="foryou-empty-state">
+                  <div class="foryou-empty-icon">🎧</div>
+                  <h2 class="foryou-empty-title" data-i18n="foryou_empty_title">Start Listening!</h2>
+                  <p class="foryou-empty-desc" data-i18n="foryou_empty_desc">Play some songs or like artists to get personalized recommendations here.</p>
                </div>
             `;
             if (window.LanguageManager) window.LanguageManager.translateUI(container);
             return;
          }
 
-         container.innerHTML = `
-            <div class="skeleton-list" style="padding: 20px;">
-               ${`<div class="skeleton-card track-skeleton container-hover-effect" style="width: 100%; height: 80px; margin-bottom: 15px;"></div>`.repeat(3)}
-            </div>
-         `;
-
          // Dynamic import CardSystem to avoid circular imports
          const { CardSystem } = await import('./cards.js');
+
+         // Pre-render 1-to-1 skeleton rows matching exact row layout
+         container.innerHTML = '';
+
+         const skelRow1 = CardSystem.createSkeletonRow('Discovery Mix For You', 'foryou-discovery-mix', 6);
+         container.appendChild(skelRow1);
+
+         const topGenres = interests.genres.slice(0, 3);
+         if (topGenres.length > 0) {
+            const genreA = topGenres[0].name;
+            const genreB = topGenres[1]?.name || topGenres[0].name;
+            const fusionTitle = genreA === genreB ? `${genreA} Fusion` : `${genreA} & ${genreB} Fusion`;
+            const skelRow2 = CardSystem.createSkeletonRow(fusionTitle, 'foryou-genre-fusion', 6);
+            container.appendChild(skelRow2);
+         }
+
+         const topArtists = interests.artists.slice(0, 3);
+         if (topArtists.length > 0) {
+            const artistA = topArtists[0];
+            const artistB = topArtists[1] || topArtists[0];
+            const matchTitle = artistA.id === artistB.id ? `More from ${artistA.name}` : `Best of ${artistA.name} & ${artistB.name}`;
+            const skelRow3 = CardSystem.createSkeletonRow(matchTitle, 'foryou-taste-match', 6);
+            container.appendChild(skelRow3);
+         }
 
          // 1. Gather a High-Fidelity Candidate Pool
          const candidatePool = [];
@@ -352,7 +370,6 @@ export const DiscoveryEngine = {
          }
 
          // Gather candidates based on top 3 artists
-         const topArtists = interests.artists.slice(0, 3);
          for (const a of topArtists) {
             try {
                const artistTracks = await MusicAPI.getArtistTopTracks(a.id, signal);
@@ -361,7 +378,6 @@ export const DiscoveryEngine = {
          }
 
          // Gather candidates based on top 3 genres
-         const topGenres = interests.genres.slice(0, 3);
          for (const g of topGenres) {
             try {
                const genreTracks = await MusicAPI.getGenreTracks(g.name, signal);
@@ -405,22 +421,21 @@ export const DiscoveryEngine = {
             .filter(item => !savedIds.has(item.track.id))
             .map(item => item.track);
 
-         container.innerHTML = '';
-
-         // --- Row 1: Discovery Mix For You ---
-         if (discoveryMixCandidates.length > 0) {
+         // --- Hydrate Row 1: Discovery Mix For You ---
+         const discoveryContainer = document.getElementById('foryou-discovery-mix');
+         if (discoveryMixCandidates.length > 0 && discoveryContainer) {
             const discoveryList = discoveryMixCandidates.slice(0, 12);
-            // Dynamic Header Translation Match
-            const row = CardSystem.createRow('Discovery Mix For You', 'foryou-discovery-mix', discoveryList);
-            container.appendChild(row);
+            CardSystem.renderCards(discoveryContainer, discoveryList);
+         } else if (discoveryContainer) {
+            discoveryContainer.closest('.row-container')?.remove();
          }
 
-         // --- Row 2: Dynamic Genre Fusion Mix ---
-         if (topGenres.length > 0) {
+         // --- Hydrate Row 2: Dynamic Genre Fusion Mix ---
+         const fusionContainer = document.getElementById('foryou-genre-fusion');
+         if (topGenres.length > 0 && fusionContainer) {
             const genreA = topGenres[0].name;
             const genreB = topGenres[1]?.name || topGenres[0].name;
-            
-            // Filter candidates that align closely with the user's top genres
+
             const fusionCandidates = scoredPool
                .filter(item => {
                   const name = item.track.genre || '';
@@ -431,17 +446,18 @@ export const DiscoveryEngine = {
                .slice(0, 10);
 
             if (fusionCandidates.length > 0) {
-               const fusionTitle = genreA === genreB ? `${genreA} Fusion` : `${genreA} & ${genreB} Fusion`;
-               const row = CardSystem.createRow(fusionTitle, 'foryou-genre-fusion', fusionCandidates);
-               container.appendChild(row);
+               CardSystem.renderCards(fusionContainer, fusionCandidates);
+            } else {
+               fusionContainer.closest('.row-container')?.remove();
             }
          }
 
-         // --- Row 3: Taste Match (Top Artists Blend) ---
-         if (topArtists.length > 0) {
+         // --- Hydrate Row 3: Taste Match (Top Artists Blend) ---
+         const matchContainer = document.getElementById('foryou-taste-match');
+         if (topArtists.length > 0 && matchContainer) {
             const artistA = topArtists[0];
             const artistB = topArtists[1] || topArtists[0];
-            
+
             const artistCandidates = scoredPool
                .filter(item => {
                   const t = item.track;
@@ -453,9 +469,9 @@ export const DiscoveryEngine = {
                .slice(0, 10);
 
             if (artistCandidates.length > 0) {
-               const matchTitle = artistA.id === artistB.id ? `More from ${artistA.name}` : `Best of ${artistA.name} & ${artistB.name}`;
-               const row = CardSystem.createRow(matchTitle, 'foryou-taste-match', artistCandidates);
-               container.appendChild(row);
+               CardSystem.renderCards(matchContainer, artistCandidates);
+            } else {
+               matchContainer.closest('.row-container')?.remove();
             }
          }
 
