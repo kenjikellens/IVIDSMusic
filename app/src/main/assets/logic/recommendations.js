@@ -312,10 +312,10 @@ export const DiscoveryEngine = {
          // If no telemetry history exists, show a localized empty state message
          if (interests.artists.length === 0 && interests.tracks.length === 0) {
             container.innerHTML = `
-               <div class="foryou-empty-state">
-                  <div class="foryou-empty-icon">🎧</div>
-                  <h2 class="foryou-empty-title" data-i18n="foryou_empty_title">Start Listening!</h2>
-                  <p class="foryou-empty-desc" data-i18n="foryou_empty_desc">Play some songs or like artists to get personalized recommendations here.</p>
+               <div class="empty-state-box foryou-empty-state">
+                  <div class="empty-state-icon foryou-empty-icon">🎧</div>
+                  <h2 class="empty-state-title foryou-empty-title" data-i18n="foryou_empty_title">Start Listening!</h2>
+                  <p class="empty-state-desc foryou-empty-desc" data-i18n="foryou_empty_desc">Play some songs or like artists to get personalized recommendations here.</p>
                </div>
             `;
             if (window.LanguageManager) window.LanguageManager.translateUI(container);

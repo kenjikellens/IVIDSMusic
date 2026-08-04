@@ -1,5 +1,5 @@
-<div class="foryou-container">
-   <div class="row-header foryou-header">
+<div class="page-container foryou-container">
+   <div class="page-header foryou-header">
       <h1 class="row-title" data-i18n="nav_foryou">For You</h1>
       <button id="refresh-recs-btn" class="btn btn-secondary foryou-refresh-btn" onclick="if (window.DiscoveryEngine) window.DiscoveryEngine.initRecommended({ forceRefresh: true })">
          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="btn-icon">
@@ -8,10 +8,10 @@
          <span data-i18n="refresh_taste">Refresh Taste</span>
       </button>
    </div>
-   <p class="foryou-desc" data-i18n="foryou_desc">Personalized picks based on what you listen to, like, and explore.</p>
+   <p class="page-desc foryou-desc" data-i18n="foryou_desc">Personalized picks based on what you listen to, like, and explore.</p>
 
    <div id="recommended-content" class="foryou-content">
-      <div class="foryou-state-box">
+      <div class="empty-state-box foryou-state-box">
          <div class="ivids-loader"></div>
          <div data-i18n="loading_recommendations">Analyzing your taste...</div>
       </div>

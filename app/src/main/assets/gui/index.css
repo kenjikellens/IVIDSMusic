@@ -228,6 +228,106 @@ input:focus-visible,
     z-index: 1000;
 }
 
+/* Base Page Layout Wrapper Container */
+.page-container {
+    width: 100%;
+    padding: calc(24px * var(--ui-scale)) calc(32px * var(--ui-scale));
+    box-sizing: border-box;
+}
+
+/* Base Page Header Flex Container */
+.page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: calc(16px * var(--ui-scale));
+    margin-bottom: calc(12px * var(--ui-scale));
+}
+
+/* Base Page Subtitle / Description Text */
+.page-desc {
+    font-size: calc(0.95rem * var(--ui-scale));
+    color: var(--text-secondary);
+    margin-bottom: calc(24px * var(--ui-scale));
+    line-height: 1.5;
+}
+
+/* Base Empty & Status State Container Box */
+.empty-state-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: calc(48px * var(--ui-scale)) calc(24px * var(--ui-scale));
+    text-align: center;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px dashed rgba(255, 255, 255, 0.08);
+    border-radius: calc(16px * var(--ui-scale));
+    margin-top: calc(16px * var(--ui-scale));
+}
+
+/* Empty State Large Icon */
+.empty-state-icon {
+    font-size: calc(3rem * var(--ui-scale));
+    margin-bottom: calc(16px * var(--ui-scale));
+}
+
+/* Empty State Heading Title */
+.empty-state-title {
+    font-size: calc(1.3rem * var(--ui-scale));
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: calc(8px * var(--ui-scale));
+}
+
+/* Empty State Subtitle Description */
+.empty-state-desc {
+    font-size: calc(0.9rem * var(--ui-scale));
+    color: var(--text-secondary);
+    max-width: 420px;
+    line-height: 1.5;
+}
+
+/* ==========================================================================
+   For You Page Modifier Classes (.foryou-container, .foryou-header, etc.)
+   ========================================================================== */
+
+/* For You Main Section Modifier */
+.foryou-container {
+    position: relative;
+    min-height: 100%;
+}
+
+/* For You Header Component Alignment Modifier */
+.foryou-header .row-title {
+    padding-left: 0 !important;
+    margin-bottom: 0 !important;
+}
+
+/* For You Refresh Taste Button Modifier */
+.foryou-refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(8px * var(--ui-scale));
+    padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
+    border-radius: calc(20px * var(--ui-scale));
+    font-size: calc(0.85rem * var(--ui-scale));
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* For You Refresh Button Icon */
+.foryou-refresh-btn .btn-icon {
+    width: calc(16px * var(--ui-scale));
+    height: calc(16px * var(--ui-scale));
+}
+
+/* For You Dynamic Content Wrapper */
+.foryou-content {
+    margin-top: calc(16px * var(--ui-scale));
+}
+
+
 ::-webkit-scrollbar {
     width: 6px;
 }

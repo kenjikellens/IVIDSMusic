@@ -8,3 +8,6 @@ Every AI agent working on IVIDS Music MUST strictly follow these CSS utility and
    Apply that single utility class directly to the target elements in HTML (`class="container-hover-effect ..."`) and in JS template strings (`renderCard()`, `renderNavItem()`).
 3. **Inherited Property Scaling**:
    Utility classes for container overlays must use `border-radius: inherit` and relative positioning so they seamlessly adapt to any container shape without duplicating styles.
+4. **Base Container Composition over Standalone Classes**:
+   When creating or updating pages, sections, or views, ALWAYS compose with pre-existing base container & layout classes (e.g. `class="page-container foryou-container"`, `class="page-header foryou-header"`, `class="empty-state-box foryou-empty-state"`). Never create standalone custom containers (`<div class="foryou-container">`) without attaching base CSS classes. Modifier classes should only supply page-specific tweaks.
+
