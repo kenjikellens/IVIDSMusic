@@ -375,8 +375,10 @@ img.player-volume-icon {
     font-weight: 500;
     border-radius: calc(8px * var(--ui-scale));
     position: relative;
-    border: 2px solid transparent;
-    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transition: color 0.15s ease;
     box-sizing: border-box;
 }
 
@@ -396,36 +398,17 @@ img.player-volume-icon {
 
 .nav-links a:hover {
     color: var(--text-main);
-    background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
-    border-color: rgba(var(--primary-rgb), 0.35);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }
 
 .nav-links a.active {
     color: var(--primary-color);
-    background: linear-gradient(90deg, rgba(var(--primary-rgb), 0.12) 0%, rgba(var(--primary-rgb), 0.03) 100%);
-    border-color: rgba(var(--primary-rgb), 0.45);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(var(--primary-rgb), 0.05);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     font-weight: 600;
-}
-
-.nav-links a::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 25%;
-    width: 3px;
-    height: 50%;
-    background: linear-gradient(180deg, var(--primary-color), var(--accent-color));
-    border-radius: 0 3px 3px 0;
-    opacity: 0;
-    transition: opacity 0.2s ease;
-}
-
-.nav-links a:hover::before,
-.nav-links a:focus-visible::before,
-.nav-links a.active::before {
-    opacity: 1;
 }
 
 .nav-divider {
@@ -773,7 +756,7 @@ header {
 .row-title {
     font-size: calc(1.3rem * var(--ui-scale));
     font-weight: 700;
-    margin-bottom: calc(10px * var(--ui-scale));
+    margin-bottom: 4px !important;
     color: var(--text-main);
     letter-spacing: -0.2px;
 }
@@ -787,7 +770,7 @@ header {
     gap: 0px !important;
     flex-wrap: nowrap;
     overflow-x: auto;
-    padding: calc(20px * var(--ui-scale)) calc(12px * var(--ui-scale)) calc(40px * var(--ui-scale)) calc(12px * var(--ui-scale));
+    padding: 4px calc(12px * var(--ui-scale)) calc(24px * var(--ui-scale)) calc(12px * var(--ui-scale)) !important;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -798,12 +781,49 @@ header {
 }
 
 /* ==========================================================================
-   Card Component (.card, .music-card)
-   Base Spotify-style card container for songs, albums, playlists, and artists.
+   Single Reusable Spotify Zoom-Hover Overlay System (.container-hover-effect)
    ========================================================================== */
+.container-hover-effect,
+.card,
+.music-card,
+.nav-links a {
+    position: relative;
+    z-index: 1;
+}
+
+.container-hover-effect::before,
+.card::before,
+.music-card::before,
+.nav-links a::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: rgba(255, 255, 255, 0.12) !important;
+    opacity: 0;
+    transform: scale(0.9);
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.container-hover-effect:hover::before,
+.container-hover-effect:focus-visible::before,
+.container-hover-effect.active::before,
+.card:hover::before,
+.card:focus-visible::before,
+.music-card:hover::before,
+.music-card:focus-visible::before,
+.nav-links a:hover::before,
+.nav-links a:focus-visible::before,
+.nav-links a.active::before {
+    opacity: 1;
+    transform: scale(1);
+}
+
+/* Base Card Container */
 .card,
 .music-card {
-    position: relative;
     width: calc(180px * var(--ui-scale));
     min-width: calc(180px * var(--ui-scale));
     flex: 0 0 auto;
@@ -821,31 +841,7 @@ header {
     transform: none !important;
     transition: none !important;
     overflow: visible;
-    z-index: 1;
     box-sizing: border-box;
-}
-
-/* Spotify Card Hover Overlay Box */
-.card::before,
-.music-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    border-radius: calc(12px * var(--ui-scale));
-    background: rgba(255, 255, 255, 0.12) !important;
-    opacity: 0;
-    transform: scale(0.9);
-    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-    pointer-events: none;
-}
-
-.card:hover::before,
-.card:focus-visible::before,
-.music-card:hover::before,
-.music-card:focus-visible::before {
-    opacity: 1;
-    transform: scale(1);
 }
 
 .card:hover,
@@ -990,12 +986,6 @@ header {
     border-radius: 0 !important;
     display: flex;
     box-shadow: none !important;
-}
-    flex-direction: column;
-    gap: calc(2px * var(--ui-scale));
-    overflow: hidden;
-    width: calc(100% + calc(28px * var(--ui-scale)));
-    box-sizing: border-box;
 }
 
 .card-title {
@@ -6340,4 +6330,4 @@ svg.btn-icon {
         grid-row: 3;
     }
 }
-
+
