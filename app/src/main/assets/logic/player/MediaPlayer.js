@@ -2,14 +2,16 @@ import { BaseService } from '../core/BaseService.js';
 import { MediaAudioEngine } from './MediaAudioEngine.js';
 import { QueueManager } from './QueueManager.js';
 import { MusicRepository } from '../api/MusicRepository.js';
-import { StorageFactory } from '../storage/StorageFactory.js';
 
 /**
- * MediaPlayerService provides an integrated facade for audio playback, queueing, and UI player bar binding.
+ * MediaPlayerService provides an integrated facade for audio playback, queueing, UI player bar binding,
+ * and 60fps requestAnimationFrame progress updates.
  */
 export class MediaPlayerService extends BaseService {
     #audioEngine = new MediaAudioEngine();
     #queueManager = new QueueManager();
+    #rafId = null;
+    #isDraggingSlider = false;
 
     constructor() {
         super();
@@ -17,13 +19,100 @@ export class MediaPlayerService extends BaseService {
     }
 
     #bindEngineEvents() {
-        this.#audioEngine.on('play', () => this.emit('play'));
-        this.#audioEngine.on('pause', () => this.emit('pause'));
+        this.#audioEngine.on('play', () => {
+            this.emit('play');
+            this.#startProgressLoop();
+            this.#updatePlayButtonState(true);
+        });
+
+        this.#audioEngine.on('pause', () => {
+            this.emit('pause');
+            this.#stopProgressLoop();
+            this.#updatePlayButtonState(false);
+        });
+
         this.#audioEngine.on('ended', () => {
             this.emit('ended');
+            this.#stopProgressLoop();
             this.next();
         });
-        this.#queueManager.on('trackChanged', ({ track }) => this.emit('trackChanged', track));
+
+        this.#queueManager.on('trackChanged', ({ track }) => {
+            this.emit('trackChanged', track);
+            this.#updatePlayerBarInfo(track);
+        });
+    }
+
+    #startProgressLoop() {
+        this.#stopProgressLoop();
+        const update = () => {
+            if (this.#audioEngine.isPlaying && !this.#isDraggingSlider) {
+                this.#updateProgressUI();
+            }
+            if (this.#audioEngine.isPlaying) {
+                this.#rafId = requestAnimationFrame(update);
+            }
+        };
+        this.#rafId = requestAnimationFrame(update);
+    }
+
+    #stopProgressLoop() {
+        if (this.#rafId) {
+            cancelAnimationFrame(this.#rafId);
+            this.#rafId = null;
+        }
+    }
+
+    #updateProgressUI() {
+        const currentTimeEl = document.getElementById('current-time');
+        const durationEl = document.getElementById('total-duration');
+        const slider = document.getElementById('progress-slider');
+
+        const current = this.#audioEngine.currentTime;
+        const duration = this.#audioEngine.duration;
+
+        if (currentTimeEl) currentTimeEl.textContent = this.formatTime(current);
+        if (durationEl && duration) durationEl.textContent = this.formatTime(duration);
+
+        if (slider && duration) {
+            const pct = (current / duration) * 100;
+            slider.value = pct;
+            slider.style.setProperty('--slider-val', `${pct}%`);
+        }
+    }
+
+    #updatePlayButtonState(isPlaying) {
+        const playBtn = document.getElementById('play-pause-btn');
+        const playIcon = document.getElementById('play-icon');
+        const playerBar = document.getElementById('player-bar');
+
+        if (playerBar) playerBar.classList.remove('is-inactive');
+        if (playIcon) {
+            playIcon.src = isPlaying ? 'svg/pause.svg' : 'svg/play.svg';
+        } else if (playBtn) {
+            playBtn.innerHTML = isPlaying
+                ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>'
+                : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        }
+    }
+
+    #updatePlayerBarInfo(track) {
+        if (!track) return;
+        const coverEl = document.getElementById('player-cover');
+        const titleEl = document.getElementById('player-title');
+        const artistEl = document.getElementById('player-artist');
+
+        if (coverEl) coverEl.src = track.cover || 'gui/gemini-logo.png';
+        if (titleEl) titleEl.textContent = track.title || track.name || '—';
+        if (artistEl) artistEl.textContent = track.artist || '—';
+    }
+
+    /** Formats seconds into MM:SS display string */
+    formatTime(seconds) {
+        if (!seconds || isNaN(seconds)) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
     }
 
     /** Returns audio engine */
@@ -53,6 +142,7 @@ export class MediaPlayerService extends BaseService {
      */
     async playTrack(track) {
         if (!track) return;
+        this.#updatePlayerBarInfo(track);
         try {
             let streamUrl = track.url || track.audioUrl;
             if (!streamUrl && track.videoId) {
@@ -109,8 +199,23 @@ export class MediaPlayerService extends BaseService {
                 this.#audioEngine.volume = val;
             };
         }
+        if (progressSlider) {
+            progressSlider.onmousedown = () => { this.#isDraggingSlider = true; };
+            progressSlider.ontouchstart = () => { this.#isDraggingSlider = true; };
+            const onRelease = () => {
+                if (!this.#isDraggingSlider) return;
+                this.#isDraggingSlider = false;
+                if (this.#audioEngine.duration) {
+                    const time = (progressSlider.value / 100) * this.#audioEngine.duration;
+                    this.#audioEngine.currentTime = time;
+                }
+            };
+            progressSlider.onmouseup = onRelease;
+            progressSlider.ontouchend = onRelease;
+        }
     }
 }
 
 /** MediaPlayer singleton instance */
 export const MediaPlayer = new MediaPlayerService();
+export const YouTubePlayer = MediaPlayer;

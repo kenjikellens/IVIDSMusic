@@ -6,16 +6,20 @@ import { ProxyService } from './ProxyService.js';
 export class DeezerProvider {
     #baseUrl = 'https://api.deezer.com';
 
+    genreMap = {
+        'Pop': 132,
+        'Rock': 152,
+        'Hip-Hop': 116,
+        'Electronic': 106,
+        'Hardcore': 464,
+        'R&B': 165,
+        'Jazz': 129,
+        'Dance': 113,
+        'Alternative': 85,
+    };
+
     /**
      * Executes metadata search on Deezer.
-     * @param {string} query
-     * @param {number} limit
-     * @param {string} type - 'all', 'artist', 'album'
-     * @param {string} [yearRange]
-     * @param {number} [offset]
-     * @param {boolean} [unique]
-     * @param {AbortSignal} [signal]
-     * @returns {Promise<Array<Object>>}
      */
     async search(query = 'top hits', limit = 20, type = 'all', yearRange = null, offset = 0, unique = false, signal = null) {
         try {
@@ -52,7 +56,7 @@ export class DeezerProvider {
                     return {
                         type: 'song',
                         id: item.id,
-                        title: item.title,
+                        title: item.title_short || item.title,
                         artist: item.artist?.name || 'Unknown',
                         artistId: item.artist?.id || null,
                         album: item.album?.title || 'Unknown',
@@ -80,9 +84,58 @@ export class DeezerProvider {
     }
 
     /**
+     * Fetch category rows using Deezer genre chart endpoints (proper genre filtering).
+     */
+    async getCategories(genres = ['Pop', 'Rock', 'Hip-Hop', 'Hardcore', 'Electronic', 'Jazz', 'Dance'], signal = null) {
+        const results = await Promise.all(
+            genres.map(async (genre) => {
+                try {
+                    const genreId = this.genreMap[genre];
+                    if (!genreId) return { title: genre, id: genre.toLowerCase().replace(/\s+/g, '-'), tracks: [] };
+
+                    const url = `${this.#baseUrl}/chart/${genreId}/tracks?limit=30`;
+                    const response = await ProxyService.fetch(url, { signal });
+                    const data = await response.json();
+
+                    let tracks = [];
+                    if (data && data.data) {
+                        tracks = data.data.map(item => ({
+                            type: 'song',
+                            id: item.id,
+                            title: item.title_short || item.title,
+                            artist: item.artist?.name || 'Unknown',
+                            artistId: item.artist?.id || null,
+                            album: item.album?.title || 'Unknown',
+                            cover: item.album?.cover_big || item.album?.cover_xl,
+                            previewUrl: item.preview
+                        }));
+                    }
+
+                    // Variety filter: max 1 track per artist
+                    const seen = new Set();
+                    const uniqueTracks = tracks.filter(item => {
+                        const key = (item.artist || '').toLowerCase();
+                        if (seen.has(key)) return false;
+                        seen.add(key);
+                        return true;
+                    }).slice(0, 12);
+
+                    return {
+                        title: genre,
+                        id: genre.toLowerCase().replace(/\s+/g, '-').replace(/'/g, ''),
+                        tracks: uniqueTracks
+                    };
+                } catch (e) {
+                    console.error(`[DeezerProvider] Genre ${genre} failed:`, e);
+                    return { title: genre, id: genre.toLowerCase().replace(/\s+/g, '-'), tracks: [] };
+                }
+            })
+        );
+        return results.filter(row => row.tracks.length > 0);
+    }
+
+    /**
      * Gets top chart tracks from Deezer.
-     * @param {number} limit
-     * @returns {Promise<Array<Object>>}
      */
     async getChart(limit = 20) {
         try {
@@ -94,7 +147,7 @@ export class DeezerProvider {
             return data.data.map(item => ({
                 type: 'song',
                 id: item.id,
-                title: item.title,
+                title: item.title_short || item.title,
                 artist: item.artist?.name || 'Unknown',
                 artistId: item.artist?.id || null,
                 album: item.album?.title || 'Unknown',

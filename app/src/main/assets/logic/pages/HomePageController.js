@@ -10,31 +10,17 @@ let isHeroDismissed = false;
  */
 export class HomePageController extends BasePageController {
     /**
-     * Renders Home page category rows in-place into pre-rendered skeletons.
+     * Renders Home page category rows using Deezer genre chart endpoints.
      * @param {Object} params
      */
     async render(params = {}) {
         this.resetAbortController();
 
         try {
-            const genres = ['Pop', 'Rock', 'Hip-Hop', 'Hardcore', 'Electronic', 'Jazz', 'Dance'];
-            const results = await Promise.all(
-                genres.map(async (genre) => {
-                    try {
-                        const tracks = await MusicRepository.search(genre, 12, 'song');
-                        return {
-                            id: genre.toLowerCase().replace(/\s+/g, '-'),
-                            tracks
-                        };
-                    } catch (e) {
-                        return { id: genre.toLowerCase(), tracks: [] };
-                    }
-                })
-            );
-
+            const rows = await MusicRepository.getRecommendations(this.signal);
             if (this.signal?.aborted) return;
 
-            results.forEach(category => {
+            rows.forEach(category => {
                 const rowContent = document.getElementById(`content-${category.id}`);
                 if (rowContent) {
                     const existingCards = Array.from(rowContent.children);
@@ -55,8 +41,8 @@ export class HomePageController extends BasePageController {
             });
 
             const heroBtn = document.getElementById('play-hero-btn');
-            if (heroBtn && results[0]?.tracks[0]) {
-                heroBtn.onclick = () => MediaPlayer.playTrack(results[0].tracks[0]);
+            if (heroBtn && rows[0]?.tracks[0]) {
+                heroBtn.onclick = () => MediaPlayer.playTrack(rows[0].tracks[0]);
             }
 
             const hero = document.querySelector('.hero');
