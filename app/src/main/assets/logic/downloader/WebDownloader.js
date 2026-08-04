@@ -1,5 +1,5 @@
 import { AbstractDownloader } from './AbstractDownloader.js';
-import { IndexedDBStorage } from '../storage/IndexedDBStorage.js';
+import { IndexedDBStorage } from '../indexeddb-storage.js';
 
 /**
  * WebDownloader caches track audio streams inside browser IndexedDB as Blobs.

@@ -1,5 +1,5 @@
-import { Config } from '../core/Config.js';
-import { IndexedDBStorage } from './IndexedDBStorage.js';
+import { Config } from '../config.js';
+import { IndexedDBStorage } from '../indexeddb-storage.js';
 import { AndroidStorageEngine } from './AndroidStorage.js';
 import { ElectronStorageEngine } from './ElectronStorage.js';
 

@@ -1,5 +1,5 @@
 import { BaseService } from '../core/BaseService.js';
-import { Config } from '../core/Config.js';
+import { Config } from '../config.js';
 import { WebDownloader } from './WebDownloader.js';
 import { AndroidDownloader } from './AndroidDownloader.js';
 import { ElectronDownloader } from './ElectronDownloader.js';

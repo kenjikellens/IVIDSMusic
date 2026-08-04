@@ -1,4 +1,4 @@
-import { Config } from '../core/Config.js';
+import { Config } from '../config.js';
 import { ProxyService } from './ProxyService.js';
 
 /**

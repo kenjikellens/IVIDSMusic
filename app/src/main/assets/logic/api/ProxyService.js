@@ -1,4 +1,4 @@
-import { Config } from '../core/Config.js';
+import { Config } from '../config.js';
 
 /**
  * ProxyService handles CORS proxy resolution across Native, Electron, and Web environments.
