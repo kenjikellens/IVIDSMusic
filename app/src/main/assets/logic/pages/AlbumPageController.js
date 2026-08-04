@@ -1,5 +1,5 @@
 import { BasePageController } from './BasePageController.js';
-import { CardComponentFactory } from '../components/CardComponent.js';
+import { CardComponentFactory } from '../cards.js';
 
 /**
  * AlbumPageController manages album detail views and tracklists.
