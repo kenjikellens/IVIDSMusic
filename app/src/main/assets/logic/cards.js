@@ -180,11 +180,11 @@ export class CardComponentFactory {
     }
 
     /**
-     * Creates a 1-to-1 skeleton row component matching the exact geometry of a hydrated row.
+     * Creates a row component pre-rendered with real card container placeholders.
      * @param {string} title - Section header title text
      * @param {string} containerId - DOM ID for the scroll container
-     * @param {number} [count=6] - Number of skeleton cards to generate
-     * @returns {HTMLElement} The skeleton row element
+     * @param {number} [count=6] - Number of card placeholders to generate
+     * @returns {HTMLElement} The row element
      */
     static createSkeletonRow(title, containerId, count = 6) {
         const row = document.createElement('div');
@@ -199,27 +199,29 @@ export class CardComponentFactory {
         header.appendChild(titleEl);
 
         const postersContainer = document.createElement('div');
-        postersContainer.className = 'scroll-row skeleton-row';
+        postersContainer.className = 'scroll-row';
         if (containerId) postersContainer.id = containerId;
 
-        let skeletonsHTML = '';
+        let placeholdersHTML = '';
         for (let i = 0; i < count; i++) {
-            skeletonsHTML += `
-                <div class="music-card skeleton-card container-hover-effect">
-                    <div class="skeleton-img">
-                        <img src="svg/loader.svg" alt="Loading" class="ivids-loader-img poster-loader">
+            placeholdersHTML += `
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box">
+                        <div class="ivids-loader"></div>
                     </div>
-                    <div class="skeleton-info-box">
-                        <div class="skeleton-text title"></div>
-                        <div class="skeleton-text artist"></div>
+                    <div class="card-info-box">
+                        <div class="card-title"></div>
+                        <div class="card-artist"></div>
                     </div>
                 </div>
             `;
         }
-        postersContainer.innerHTML = skeletonsHTML;
+        postersContainer.innerHTML = placeholdersHTML;
 
         row.appendChild(header);
         row.appendChild(postersContainer);
+
+        if (window.Loader) setTimeout(() => window.Loader.init(), 0);
         return row;
     }
 }

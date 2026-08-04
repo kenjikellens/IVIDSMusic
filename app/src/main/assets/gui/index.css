@@ -997,6 +997,35 @@ header {
     transform: none !important;
 }
 
+/* Card Placeholder Container (Replaces Skeleton UI) */
+.music-card.card-placeholder {
+    pointer-events: none;
+    user-select: none;
+}
+
+/* Card Placeholder Image Box Loader Alignment */
+.music-card.card-placeholder .card-image-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+/* Card Placeholder Spinner Sizing */
+.music-card.card-placeholder .card-image-box .ivids-loader {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(36px * var(--ui-scale));
+    height: calc(36px * var(--ui-scale));
+}
+
+/* Card Placeholder Text Space Visibility */
+.music-card.card-placeholder .card-title,
+.music-card.card-placeholder .card-artist {
+    visibility: hidden;
+}
+
 .poster {
     width: 100%;
     height: 100%;

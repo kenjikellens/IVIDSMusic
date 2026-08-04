@@ -187,13 +187,13 @@ export const PageSystem = {
         };
 
         const SKELETON_CARD = `
-            <div class="skeleton-card container-hover-effect">
-                <div class="skeleton-img">
-                    <div class="ivids-loader poster-loader"></div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"></div>
                 </div>
-                <div class="skeleton-info-box">
-                    <div class="skeleton-text title"></div>
-                    <div class="skeleton-text artist"></div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
                 </div>
             </div>`;
 
