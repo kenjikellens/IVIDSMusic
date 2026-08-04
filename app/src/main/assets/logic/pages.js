@@ -187,7 +187,7 @@ export const PageSystem = {
         };
 
         const SKELETON_CARD = `
-            <div class="skeleton-card">
+            <div class="skeleton-card container-hover-effect">
                 <div class="skeleton-img">
                     <div class="ivids-loader poster-loader"></div>
                 </div>
@@ -457,7 +457,7 @@ export const PageSystem = {
                 artistsList.innerHTML = '';
                 topArtists.forEach(artist => {
                     const card = document.createElement('div');
-                    card.className = 'card card-artist';
+                    card.className = 'card card-artist container-hover-effect';
                     card.tabIndex = 0;
                     card.innerHTML = `
                         <div class="card-image-box">
@@ -529,7 +529,7 @@ export const PageSystem = {
 
         container.innerHTML = `
             <div class="skeleton-list">
-                ${`<div class="skeleton-card track-skeleton" style="width: 100%; height: 60px; margin-bottom: 10px;"></div>`.repeat(5)}
+                ${`<div class="skeleton-card track-skeleton container-hover-effect" style="width: 100%; height: 60px; margin-bottom: 10px;"></div>`.repeat(5)}
             </div>
         `;
 
@@ -646,7 +646,7 @@ export const PageSystem = {
 
         validHistory.forEach(track => {
             const card = document.createElement('div');
-            card.className = 'music-card';
+            card.className = 'music-card container-hover-effect';
             card.tabIndex = 0; // Added for TV Nav
             card.dataset.trackJson = JSON.stringify(track);
             card.innerHTML = `
@@ -1063,7 +1063,7 @@ export const PageSystem = {
 
         playlists.forEach(pl => {
             const card = document.createElement('div');
-            card.className = 'music-card playlist-card';
+            card.className = 'music-card playlist-card container-hover-effect';
             card.tabIndex = 0;
             card.dataset.playlistId = pl.id;
             card.innerHTML = `

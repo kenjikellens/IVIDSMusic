@@ -324,7 +324,7 @@ export const DiscoveryEngine = {
 
          container.innerHTML = `
             <div class="skeleton-list" style="padding: 20px;">
-               ${`<div class="skeleton-card track-skeleton" style="width: 100%; height: 80px; margin-bottom: 15px;"></div>`.repeat(3)}
+               ${`<div class="skeleton-card track-skeleton container-hover-effect" style="width: 100%; height: 80px; margin-bottom: 15px;"></div>`.repeat(3)}
             </div>
          `;
 
