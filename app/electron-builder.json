@@ -1,0 +1,20 @@
+{
+  "appId": "com.kenjigames.ividsmusic",
+  "productName": "IVIDSMusic",
+  "electronVersion": "30.0.0",
+  "win": {
+    "target": "portable"
+  },
+  "directories": {
+    "output": "dist"
+  },
+  "files": [
+    "main.js",
+    "preload.js",
+    "src/downloadManager.js",
+    "src/main/assets/gui/**/*",
+    "src/main/assets/logic/**/*",
+    "!**/node_modules/**",
+    "!**/build/**"
+  ]
+}
