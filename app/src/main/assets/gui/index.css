@@ -258,34 +258,69 @@ input:focus-visible,
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(48px * var(--ui-scale)) calc(24px * var(--ui-scale));
+    padding: calc(56px * var(--ui-scale)) calc(32px * var(--ui-scale));
     text-align: center;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px dashed rgba(255, 255, 255, 0.08);
-    border-radius: calc(16px * var(--ui-scale));
-    margin-top: calc(16px * var(--ui-scale));
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.1);
+    border-radius: calc(20px * var(--ui-scale));
+    margin-top: calc(24px * var(--ui-scale));
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(20px);
 }
 
-/* Empty State Large Icon */
-.empty-state-icon {
-    font-size: calc(3rem * var(--ui-scale));
-    margin-bottom: calc(16px * var(--ui-scale));
+/* Empty State Glow Effect Backdrop */
+.empty-state-glow {
+    position: absolute;
+    width: calc(200px * var(--ui-scale));
+    height: calc(200px * var(--ui-scale));
+    background: radial-gradient(circle, rgba(var(--primary-rgb), 0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Empty State Icon Wrapper Container */
+.empty-state-icon-wrapper {
+    position: relative;
+    z-index: 1;
+    width: calc(64px * var(--ui-scale));
+    height: calc(64px * var(--ui-scale));
+    border-radius: 50%;
+    background: rgba(var(--primary-rgb), 0.12);
+    border: 1px solid rgba(var(--primary-rgb), 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: calc(20px * var(--ui-scale));
+}
+
+/* Empty State Icon SVG */
+.empty-state-icon-wrapper img.empty-icon {
+    width: calc(28px * var(--ui-scale));
+    height: calc(28px * var(--ui-scale));
+    filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
 }
 
 /* Empty State Heading Title */
 .empty-state-title {
-    font-size: calc(1.3rem * var(--ui-scale));
+    position: relative;
+    z-index: 1;
+    font-size: calc(1.35rem * var(--ui-scale));
     font-weight: 700;
     color: var(--text-main);
-    margin-bottom: calc(8px * var(--ui-scale));
+    margin-bottom: calc(10px * var(--ui-scale));
 }
 
 /* Empty State Subtitle Description */
 .empty-state-desc {
-    font-size: calc(0.9rem * var(--ui-scale));
+    position: relative;
+    z-index: 1;
+    font-size: calc(0.92rem * var(--ui-scale));
     color: var(--text-secondary);
-    max-width: 420px;
-    line-height: 1.5;
+    max-width: 440px;
+    line-height: 1.6;
+    margin-bottom: calc(24px * var(--ui-scale));
 }
 
 /* ==========================================================================
