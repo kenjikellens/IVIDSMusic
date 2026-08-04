@@ -1,9 +1,9 @@
-import { Config } from './core/Config.js';
-import { LanguageManager } from './utils/LanguageManager.js';
-import { Router } from './core/Router.js';
+import { Config } from './config.js';
+import { LanguageManager } from './language-manager.js';
+import { Router } from './router.js';
 import { MediaPlayer } from './player/MediaPlayer.js';
 import { DownloadManager } from './downloader/DownloadManager.js';
-import { TVNav } from './components/TVNavEngine.js';
+import { TVNav } from './tv-nav.js';
 
 /**
  * Application Bootstrap class that orchestrates service initialization and app lifecycle.
