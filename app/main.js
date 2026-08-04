@@ -129,14 +129,14 @@ function createWindow() {
             nodeIntegration: false,
             webSecurity: false
         },
-        icon: path.join(__dirname, '../app/src/main/ic_launcher-playstore.png')
+        icon: path.join(__dirname, 'src/main/ic_launcher-playstore.png')
     });
 
     // Hide default menu bar for standard app look
     mainWindow.setMenuBarVisibility(false);
 
-    // Load local index.html
-    const indexPath = path.join(__dirname, '../app/src/main/assets/gui/index.html');
+    // Load local index.html directly from app/src/main/assets/gui/index.html
+    const indexPath = path.join(__dirname, 'src/main/assets/gui/index.html');
     mainWindow.loadFile(indexPath);
 
     mainWindow.on('closed', () => {

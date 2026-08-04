@@ -80,7 +80,7 @@ class IVIDSPCLauncher:
     def __init__(self, assets_dir: str = None):
         if assets_dir is None:
             base_dir = os.path.dirname(os.path.abspath(__file__))
-            assets_dir = os.path.abspath(os.path.join(base_dir, '..', 'app', 'src', 'main', 'assets'))
+            assets_dir = os.path.abspath(os.path.join(base_dir, 'app', 'src', 'main', 'assets'))
         self.assets_dir = assets_dir
         self.web_server = None
 
