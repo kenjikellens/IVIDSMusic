@@ -29,7 +29,12 @@ export class ProxyService {
             }
         }
 
-        const response = await fetch(finalUrl, options);
+        const fetchOptions = {
+            cache: 'no-store',
+            ...options
+        };
+
+        const response = await fetch(finalUrl, fetchOptions);
         if (!response.ok) throw new Error(`HTTP ${response.status} for ${url}`);
         return response;
     }

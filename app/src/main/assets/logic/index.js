@@ -10,21 +10,24 @@ import { TVNav } from './tv-nav.js';
  */
 export class Application {
     /**
-     * Initializes all core services, prefetches HTML templates, and boots the SPA application interface.
+     * Initializes all core services and boots the SPA application interface with zero latency.
      */
     static async bootstrap() {
         console.log('[IVIDS Music] Bootstrapping OOP Application...');
         try {
-            await LanguageManager.init();
-            await MediaPlayer.init();
-            await DownloadManager.init();
-            await TVNav.init();
+            document.body.setAttribute('data-current-page', 'home');
 
-            // Background prefetch of all HTML page templates for 0ms instant tab switching
-            Router.prefetchAllPages().catch(() => {});
+            // Trigger home controller rendering immediately so loaders are instantly active
+            Router.loadPage('home').catch(e => console.error(e));
 
-            // Load initial home route
-            await Router.loadPage('home');
+            // Initialize background services concurrently
+            Promise.all([
+                LanguageManager.init(),
+                MediaPlayer.init(),
+                DownloadManager.init(),
+                TVNav.init()
+            ]).catch(err => console.error('[IVIDS Music] Service init warning:', err));
+
             console.log('[IVIDS Music] Application booted successfully.');
         } catch (err) {
             console.error('[IVIDS Music] Application bootstrap error:', err);

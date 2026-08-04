@@ -136,7 +136,707 @@
             </header>
 
             <!-- Main View for Dynamic Content -->
-            <main id="main-view"></main>
+            <main id="main-view">
+<!-- Hero Section -->
+<section class="hero">
+    <div class="hero-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+        <div class="blob blob-4"></div>
+    </div>
+    <button id="close-hero-btn" class="promo-close-btn" title="Dismiss" data-i18n-title="dismiss">
+        <img src="svg/close.svg" alt="Close">
+    </button>
+    <div class="hero-content">
+        <h1 class="hero-title" data-i18n="welcome_title">Welcome to IVIDS Music</h1>
+        <p class="hero-desc" data-i18n="welcome_desc">Your ultimate destination for high-fidelity sound, curated
+            discovery, and an endless world
+            of musical exploration.</p>
+        <div class="hero-buttons">
+            <button id="play-hero-btn" class="btn btn-primary focused"><span data-i18n="start_listening">Start
+                    Listening</span></button>
+            <button class="btn btn-secondary" onclick="Router.loadPage('search', { query: 'Top Hits' })"><span
+                    data-i18n="explore_trends">Explore
+                    Trends</span></button>
+        </div>
+    </div>
+</section>
+
+
+<!-- Dynamic Content Area (Pre-rendered Skeletons) -->
+<div id="home-rows-container" class="home-rows-container">
+
+    <div class="row-container" id="row-pop">
+        <div class="row-header">
+            <h2 class="row-title">Pop</h2>
+        </div>
+        <div class="scroll-row " id="content-pop">
+            <!-- 12 Skeletons pre-rendered for instant layout -->
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row-container" id="row-rock">
+        <div class="row-header">
+            <h2 class="row-title">Rock</h2>
+        </div>
+        <div class="scroll-row " id="content-rock">
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row-container" id="row-hip-hop">
+        <div class="row-header">
+            <h2 class="row-title">Hip-Hop</h2>
+        </div>
+        <div class="scroll-row " id="content-hip-hop">
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row-container" id="row-hardcore">
+        <div class="row-header">
+            <h2 class="row-title">Hardcore</h2>
+        </div>
+        <div class="scroll-row " id="content-hardcore">
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row-container" id="row-jazz">
+        <div class="row-header">
+            <h2 class="row-title">Jazz</h2>
+        </div>
+        <div class="scroll-row " id="content-jazz">
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row-container" id="row-dance">
+        <div class="row-header">
+            <h2 class="row-title">Dance</h2>
+        </div>
+        <div class="scroll-row " id="content-dance">
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row-container" id="row-electronic">
+        <div class="row-header">
+            <h2 class="row-title">Electronic</h2>
+        </div>
+        <div class="scroll-row " id="content-electronic">
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+            <div class="music-card card-placeholder container-hover-effect">
+                <div class="card-image-box">
+                    <div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div>
+                </div>
+                <div class="card-info-box">
+                    <div class="card-title"></div>
+                    <div class="card-artist"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</main>
 
             <!-- Persistent Player Bar -->
             <footer id="player-bar" class="is-inactive">

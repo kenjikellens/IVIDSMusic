@@ -69,7 +69,7 @@ export class RouterService extends BaseService {
         }
 
         try {
-            const response = await fetch(`pages/${pageName}.html`);
+            const response = await fetch(`pages/${pageName}.html`, { cache: 'no-store' });
             if (!response.ok) throw new Error(`Could not load page: ${pageName}`);
             const html = await response.text();
 
@@ -94,7 +94,7 @@ export class RouterService extends BaseService {
             if (controller) {
                 this.#activeController = controller;
                 controller.container = mainView;
-                await controller.render(params || {});
+                controller.render(params || {}).catch(err => console.error('[RouterService] Render error:', err));
             }
 
             mainView.scrollTop = 0;
