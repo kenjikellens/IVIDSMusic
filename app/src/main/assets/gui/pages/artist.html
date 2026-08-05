@@ -38,30 +38,81 @@
         </div>
     </div>
 
-    <!-- Content Sections -->
+    <!-- Content Sections (Exact match of song.html category structure and order) -->
     <div class="artist-content" id="artist-content">
-        <!-- Top Tracks -->
-        <div id="artist-top-tracks-container" class="row-scroll-wrapper is-hidden">
+        <!-- 1. Albums from Artist Row -->
+        <div id="artist-albums-container" class="row-scroll-wrapper">
             <div class="row-header">
-                <h2 class="row-title" data-i18n="top_tracks_header">Top Tracks</h2>
+                <h2 id="artist-albums-title" class="row-title" data-i18n="albums_from_artist">Albums</h2>
             </div>
-            <div class="scroll-row" id="artist-top-tracks"></div>
+            <div class="scroll-row" id="artist-albums">
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+            </div>
         </div>
 
-        <!-- Albums -->
-        <div id="artist-albums-container" class="row-scroll-wrapper is-hidden">
+        <!-- 2. Most Popular Songs Row -->
+        <div id="artist-popular-container" class="row-scroll-wrapper">
             <div class="row-header">
-                <h2 class="row-title" data-i18n="albums">Albums</h2>
+                <h2 id="artist-popular-title" class="row-title" data-i18n="popular_songs_from_artist">Most Popular Songs</h2>
             </div>
-            <div class="scroll-row" id="artist-albums"></div>
+            <div class="scroll-row" id="artist-popular-tracks">
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+            </div>
         </div>
 
-        <!-- Related Artists -->
-        <div id="artist-related-container" class="row-scroll-wrapper is-hidden">
+        <!-- 3. Most Trending Songs Row -->
+        <div id="artist-trending-container" class="row-scroll-wrapper">
             <div class="row-header">
-                <h2 class="row-title" data-i18n="top_artists_header">Similar Artists</h2>
+                <h2 id="artist-trending-title" class="row-title" data-i18n="trending_songs_from_artist">Most Trending Songs</h2>
             </div>
-            <div class="scroll-row" id="artist-related"></div>
+            <div class="scroll-row" id="artist-trending-tracks">
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+                <div class="music-card card-placeholder container-hover-effect">
+                    <div class="card-image-box"><div class="ivids-loader"><img src="svg/loader.svg" alt="Loading" class="ivids-loader-img"></div></div>
+                    <div class="card-info-box"><div class="card-title"></div><div class="card-artist"></div></div>
+                </div>
+            </div>
         </div>
     </div>
 </div>

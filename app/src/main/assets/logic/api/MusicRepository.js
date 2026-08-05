@@ -47,37 +47,46 @@ export class MusicRepositoryService extends BaseService {
         return await this.#invidious.getAudioStreamUrl(videoId);
     }
 
+    #colorCache = new Map();
+
     /**
-     * Calculates dominant cover artwork color without memory caching.
+     * Calculates dominant cover artwork color with fast in-memory Map caching.
      */
     async getAverageColor(imageUrl) {
         if (!imageUrl) return 'rgba(255,255,255,0.05)';
+        if (this.#colorCache.has(imageUrl)) return this.#colorCache.get(imageUrl);
 
-        return new Promise((resolve) => {
+        const color = await new Promise((resolve) => {
             const img = new Image();
             img.crossOrigin = "Anonymous";
             img.src = imageUrl;
             img.onload = () => {
                 try {
                     const canvas = document.createElement("canvas");
-                    canvas.width = 16;
-                    canvas.height = 16;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0, 16, 16);
-                    const data = ctx.getImageData(0, 0, 16, 16).data;
+                    canvas.width = 8;
+                    canvas.height = 8;
+                    const ctx = canvas.getContext("2d", { willReadFrequently: true });
+                    ctx.drawImage(img, 0, 0, 8, 8);
+                    const data = ctx.getImageData(0, 0, 8, 8).data;
                     let r = 0, g = 0, b = 0;
                     for (let i = 0; i < data.length; i += 4) {
                         r += data[i]; g += data[i + 1]; b += data[i + 2];
                     }
                     const count = data.length / 4;
-                    const color = `rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`;
-                    resolve(color);
+                    resolve(`rgb(${Math.round(r / count)}, ${Math.round(g / count)}, ${Math.round(b / count)})`);
                 } catch (e) {
                     resolve("rgba(255,255,255,0.05)");
                 }
             };
             img.onerror = () => resolve("rgba(255,255,255,0.05)");
         });
+
+        if (this.#colorCache.size > 300) {
+            const firstKey = this.#colorCache.keys().next().value;
+            this.#colorCache.delete(firstKey);
+        }
+        this.#colorCache.set(imageUrl, color);
+        return color;
     }
 
     /**

@@ -427,33 +427,80 @@ export const PageSystem = {
                     }
                 }
 
-                // Render Top Tracks
-                const topTracksCont = document.getElementById('artist-top-tracks-container');
-                const topTracksRow = document.getElementById('artist-top-tracks');
-                if (topTracksCont && topTracksRow) {
-                    topTracksRow.innerHTML = '';
-                    if (topTracks.length > 0) {
-                        topTracks.forEach(track => {
-                            topTracksRow.appendChild(CardSystem.createCard(track));
-                        });
-                        topTracksCont.classList.remove('is-hidden');
-                    } else {
-                        topTracksCont.classList.add('is-hidden');
-                    }
-                }
-
-                // Render Albums
+                // 1. Render Albums Row (Row 1)
                 const albumsCont = document.getElementById('artist-albums-container');
                 const albumsRow = document.getElementById('artist-albums');
                 if (albumsCont && albumsRow) {
-                    albumsRow.innerHTML = '';
                     if (albums.length > 0) {
-                        albums.forEach(album => {
-                            albumsRow.appendChild(CardSystem.createCard(album));
+                        const existingCards = Array.from(albumsRow.children);
+                        albums.forEach((album, index) => {
+                            if (index < existingCards.length) {
+                                CardSystem.hydrateCard(existingCards[index], album);
+                            } else {
+                                albumsRow.appendChild(CardSystem.createCard(album));
+                            }
                         });
+                        if (existingCards.length > albums.length) {
+                            for (let i = albums.length; i < existingCards.length; i++) {
+                                existingCards[i].remove();
+                            }
+                        }
                         albumsCont.classList.remove('is-hidden');
                     } else {
+                        albumsRow.innerHTML = '';
                         albumsCont.classList.add('is-hidden');
+                    }
+                }
+
+                // 2. Render Most Popular Songs Row (Row 2)
+                const popularTracks = topTracks.slice(0, 10);
+                const popularCont = document.getElementById('artist-popular-container');
+                const popularRow = document.getElementById('artist-popular-tracks');
+                if (popularCont && popularRow) {
+                    if (popularTracks.length > 0) {
+                        const existingCards = Array.from(popularRow.children);
+                        popularTracks.forEach((track, index) => {
+                            if (index < existingCards.length) {
+                                CardSystem.hydrateCard(existingCards[index], track);
+                            } else {
+                                popularRow.appendChild(CardSystem.createCard(track));
+                            }
+                        });
+                        if (existingCards.length > popularTracks.length) {
+                            for (let i = popularTracks.length; i < existingCards.length; i++) {
+                                existingCards[i].remove();
+                            }
+                        }
+                        popularCont.classList.remove('is-hidden');
+                    } else {
+                        popularRow.innerHTML = '';
+                        popularCont.classList.add('is-hidden');
+                    }
+                }
+
+                // 3. Render Most Trending Songs Row (Row 3)
+                const trendingTracks = topTracks.slice(10, 20);
+                const trendingCont = document.getElementById('artist-trending-container');
+                const trendingRow = document.getElementById('artist-trending-tracks');
+                if (trendingCont && trendingRow) {
+                    if (trendingTracks.length > 0) {
+                        const existingCards = Array.from(trendingRow.children);
+                        trendingTracks.forEach((track, index) => {
+                            if (index < existingCards.length) {
+                                CardSystem.hydrateCard(existingCards[index], track);
+                            } else {
+                                trendingRow.appendChild(CardSystem.createCard(track));
+                            }
+                        });
+                        if (existingCards.length > trendingTracks.length) {
+                            for (let i = trendingTracks.length; i < existingCards.length; i++) {
+                                existingCards[i].remove();
+                            }
+                        }
+                        trendingCont.classList.remove('is-hidden');
+                    } else {
+                        trendingRow.innerHTML = '';
+                        trendingCont.classList.add('is-hidden');
                     }
                 }
 

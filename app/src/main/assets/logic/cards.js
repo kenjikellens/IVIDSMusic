@@ -72,7 +72,8 @@ export class CardComponentFactory {
         const title = track.title || track.name || 'Unknown';
         const artist = track.artist || track.name || track.title || 'Unknown Artist';
         const artistName = track.name || track.title || track.artist || 'Unknown Artist';
-        const cover = track.cover || 'gui/gemini-logo.png';
+        const rawCover = track.cover || 'gui/gemini-logo.png';
+        const cover = rawCover.includes('dzcdn.net') ? rawCover.replace(/\/\d+x\d+-/, '/160x160-') : rawCover;
         const isExplicit = track.explicit || track.isExplicit;
 
         /* Card HTML template — play button positioned bottom-right inside image box */
