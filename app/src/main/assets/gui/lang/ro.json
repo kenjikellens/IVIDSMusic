@@ -105,5 +105,8 @@
   "queue": "Coadă",
   "clear_queue": "Golește coada",
   "next_up": "Urmează",
-  "queue_empty": "Coada este goală"
+  "queue_empty": "Coada este goală",
+  "albums_from_artist": "Albume de la {artist}",
+  "popular_songs_from_artist": "Cele mai populare piese de la {artist}",
+  "trending_songs_from_artist": "Piese în tendințe de la {artist}"
 }

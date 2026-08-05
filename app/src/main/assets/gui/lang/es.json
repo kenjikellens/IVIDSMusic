@@ -156,5 +156,8 @@
   "log_history_cleared": "Historial de descargas borrado.",
   "log_lang_saved": "Preferencia de idioma guardada: ",
   "dl_meta_original": "Calidad original",
-  "log_concurrency_saved": "Descargas simultáneas establecidas en: "
+  "log_concurrency_saved": "Descargas simultáneas establecidas en: ",
+  "albums_from_artist": "Álbumes de {artist}",
+  "popular_songs_from_artist": "Canciones más populares de {artist}",
+  "trending_songs_from_artist": "Canciones en tendencia de {artist}"
 }

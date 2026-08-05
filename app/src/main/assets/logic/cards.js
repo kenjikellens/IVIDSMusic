@@ -124,7 +124,7 @@ export class CardComponentFactory {
                 if (window.Router) window.Router.loadPage('album', { id: track.id });
             } else {
                 /* Song card click → open song detail page */
-                if (window.Router) window.Router.loadPage('song', { id: track.id });
+                if (window.Router) window.Router.loadPage('song', { id: track.id, track });
             }
         };
 

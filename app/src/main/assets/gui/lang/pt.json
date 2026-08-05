@@ -105,5 +105,8 @@
   "queue": "Fila de reprodução",
   "clear_queue": "Limpar fila",
   "next_up": "A seguir",
-  "queue_empty": "A fila está vazia"
+  "queue_empty": "A fila está vazia",
+  "albums_from_artist": "Álbuns de {artist}",
+  "popular_songs_from_artist": "Músicas mais populares de {artist}",
+  "trending_songs_from_artist": "Músicas em tendência de {artist}"
 }

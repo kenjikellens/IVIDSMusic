@@ -169,5 +169,8 @@
   "log_history_cleared": "Downloadgeschiedenis gewist.",
   "log_lang_saved": "Taalvoorkeur opgeslagen: ",
   "dl_meta_original": "Originele kwaliteit",
-  "log_concurrency_saved": "Gelijktijdige downloads ingesteld op: "
+  "log_concurrency_saved": "Gelijktijdige downloads ingesteld op: ",
+  "albums_from_artist": "Albums van {artist}",
+  "popular_songs_from_artist": "Meest populaire nummers van {artist}",
+  "trending_songs_from_artist": "Meest trending nummers van {artist}"
 }

@@ -12,7 +12,7 @@ android {
         applicationId = "com.kenjigames.ividsmusic"
         minSdk = 24
         targetSdk = 36
-        versionCode = 25
+        versionCode = 28
         versionName = "0.2.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

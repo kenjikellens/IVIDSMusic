@@ -112,5 +112,8 @@
   "queue": "Kuyruk",
   "clear_queue": "Kuyruğu Temizle",
   "next_up": "Sıradaki",
-  "queue_empty": "Kuyruk boş"
+  "queue_empty": "Kuyruk boş",
+  "albums_from_artist": "{artist} albümleri",
+  "popular_songs_from_artist": "{artist} en popüler şarkıları",
+  "trending_songs_from_artist": "{artist} trend şarkıları"
 }

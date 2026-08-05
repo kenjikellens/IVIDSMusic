@@ -2,8 +2,10 @@
   "appId": "com.kenjigames.ividsmusic",
   "productName": "IVIDSMusic",
   "electronVersion": "30.0.0",
+  "icon": "src/main/assets/gui/gemini-logo.png",
   "win": {
-    "target": "portable"
+    "target": "portable",
+    "icon": "src/main/assets/gui/gemini-logo.png"
   },
   "directories": {
     "output": "dist"

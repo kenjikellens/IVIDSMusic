@@ -105,5 +105,8 @@
   "queue": "Coda",
   "clear_queue": "Svuota coda",
   "next_up": "Prossimo",
-  "queue_empty": "La coda è vuota"
+  "queue_empty": "La coda è vuota",
+  "albums_from_artist": "Album di {artist}",
+  "popular_songs_from_artist": "Brani più popolari di {artist}",
+  "trending_songs_from_artist": "Brani di tendenza di {artist}"
 }

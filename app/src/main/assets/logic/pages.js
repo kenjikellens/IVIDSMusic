@@ -839,10 +839,22 @@ export const PageSystem = {
      * @param {Object} [params] - Navigation parameters containing the target track object.
      */
     async initSong(params = {}) {
-        const track = params.track || window.YouTubePlayer?.currentTrack;
         const signal = window.Router.abortController?.signal;
+        let track = params.track;
 
-        // If no track is playing, show an empty state
+        if (!track && params.id) {
+            try {
+                track = await MusicAPI.getTrackDetails(params.id, signal);
+            } catch (e) {
+                track = { id: params.id, title: params.title || '', artist: params.artist || '' };
+            }
+        }
+
+        if (!track) {
+            track = window.YouTubePlayer?.currentTrack || (window.MediaPlayer && window.MediaPlayer.currentTrack);
+        }
+
+        // If no track details or active playback, show an empty state
         if (!track) {
             const main = document.querySelector('.song-page');
             if (main) main.innerHTML = `
@@ -1009,28 +1021,57 @@ export const PageSystem = {
                     }
                 }
 
-                // Fetch artist top tracks for "From the Artist" row
-                if (details.artistId) {
-                    const artistTracks = await MusicAPI.getArtistTopTracks(details.artistId, 12, signal).catch(() => []);
-                    if (signal?.aborted) return;
-                    const artistRow = document.getElementById('song-artist-tracks');
-                    const artistRowContainer = document.getElementById('song-artist-row');
-                    if (artistRow && artistTracks.length > 0) {
-                        artistRow.innerHTML = '';
-                        artistTracks.forEach(t => artistRow.appendChild(CardSystem.createCard(t)));
-                        if (artistRowContainer) artistRowContainer.classList.remove('is-hidden');
-                        if (window.Loader) window.Loader.init();
-                    }
-                }
-            }
+                const artistName = track.artist || details?.artist || '';
+                const artistId = details?.artistId || track.artistId;
 
-            // Related tracks row
-            const relatedRow = document.getElementById('song-related-tracks');
-            const relatedContainer = document.getElementById('song-related-row');
-            if (relatedRow && related.length > 0) {
-                relatedRow.innerHTML = '';
-                related.forEach(t => relatedRow.appendChild(CardSystem.createCard(t)));
-                if (relatedContainer) relatedContainer.classList.remove('is-hidden');
+                // Format row titles dynamically using LanguageManager or fallback template
+                const getTranslatedTitle = (key, fallback, name) => {
+                    let text = window.LanguageManager ? window.LanguageManager.t(key) : fallback;
+                    if (text === key) text = fallback;
+                    return text.replace('{artist}', name);
+                };
+
+                const [albums, popularTracks, trendingTracks] = await Promise.all([
+                    artistId ? MusicAPI.getArtistAlbums(artistId, 20, artistName, signal).catch(() => []) : MusicAPI.search(artistName, 12, 'album', null, 0, false, signal).catch(() => []),
+                    artistId ? MusicAPI.getArtistTopTracks(artistId, 12, signal).catch(() => []) : MusicAPI.search(artistName, 12, 'song', null, 0, false, signal).catch(() => []),
+                    artistId ? MusicAPI.getArtistTrending(artistId, 12, signal).catch(() => []) : Promise.resolve([])
+                ]);
+
+                if (signal?.aborted) return;
+
+                // 1. Row 1: Albums from Artist
+                const albumsRow = document.getElementById('song-albums-tracks');
+                const albumsRowContainer = document.getElementById('song-albums-row');
+                const albumsTitleEl = document.getElementById('song-albums-title');
+                if (albumsRow && albums.length > 0) {
+                    if (albumsTitleEl) albumsTitleEl.textContent = getTranslatedTitle('albums_from_artist', `Albums from ${artistName}`, artistName);
+                    albumsRow.innerHTML = '';
+                    albums.forEach(a => albumsRow.appendChild(CardSystem.createCard(a)));
+                    if (albumsRowContainer) albumsRowContainer.classList.remove('is-hidden');
+                }
+
+                // 2. Row 2: Most Popular Songs from Artist
+                const popularRow = document.getElementById('song-popular-tracks');
+                const popularRowContainer = document.getElementById('song-popular-row');
+                const popularTitleEl = document.getElementById('song-popular-title');
+                if (popularRow && popularTracks.length > 0) {
+                    if (popularTitleEl) popularTitleEl.textContent = getTranslatedTitle('popular_songs_from_artist', `Most popular songs from ${artistName}`, artistName);
+                    popularRow.innerHTML = '';
+                    popularTracks.forEach(t => popularRow.appendChild(CardSystem.createCard(t)));
+                    if (popularRowContainer) popularRowContainer.classList.remove('is-hidden');
+                }
+
+                // 3. Row 3: Most Trending Songs from Artist
+                const trendingRow = document.getElementById('song-trending-tracks');
+                const trendingRowContainer = document.getElementById('song-trending-row');
+                const trendingTitleEl = document.getElementById('song-trending-title');
+                if (trendingRow && trendingTracks.length > 0) {
+                    if (trendingTitleEl) trendingTitleEl.textContent = getTranslatedTitle('trending_songs_from_artist', `Most trending songs from ${artistName}`, artistName);
+                    trendingRow.innerHTML = '';
+                    trendingTracks.forEach(t => trendingRow.appendChild(CardSystem.createCard(t)));
+                    if (trendingRowContainer) trendingRowContainer.classList.remove('is-hidden');
+                }
+
                 if (window.Loader) window.Loader.init();
             }
 

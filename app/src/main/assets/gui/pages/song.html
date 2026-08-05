@@ -76,32 +76,28 @@
       </div>
    </div>
 
-   <!-- From the Artist Row -->
-   <div id="song-artist-row" class="row-scroll-wrapper is-hidden">
+   <!-- 1. Albums from Artist Row -->
+   <div id="song-albums-row" class="row-scroll-wrapper is-hidden">
       <div class="row-header">
-         <h2 class="row-title" data-i18n="from_the_artist">From the Artist</h2>
+         <h2 id="song-albums-title" class="row-title" data-i18n="albums_from_artist">Albums</h2>
       </div>
-      <button class="btn btn-ghost scroll-arrow left" onclick="scrollRow('song-artist-tracks', -1)">
-         <div class="scroll-arrow-icon">❮</div>
-      </button>
-      <div class="scroll-row" id="song-artist-tracks"></div>
-      <button class="btn btn-ghost scroll-arrow right" onclick="scrollRow('song-artist-tracks', 1)">
-         <div class="scroll-arrow-icon">❯</div>
-      </button>
+      <div class="scroll-row" id="song-albums-tracks"></div>
    </div>
 
-   <!-- Similar Tracks Row -->
-   <div id="song-related-row" class="row-scroll-wrapper is-hidden">
+   <!-- 2. Most Popular Songs from Artist Row -->
+   <div id="song-popular-row" class="row-scroll-wrapper is-hidden">
       <div class="row-header">
-         <h2 class="row-title" data-i18n="similar_tracks">Similar Tracks</h2>
+         <h2 id="song-popular-title" class="row-title" data-i18n="popular_songs_from_artist">Most Popular Songs</h2>
       </div>
-      <button class="btn btn-ghost scroll-arrow left" onclick="scrollRow('song-related-tracks', -1)">
-         <div class="scroll-arrow-icon">❮</div>
-      </button>
-      <div class="scroll-row" id="song-related-tracks"></div>
-      <button class="btn btn-ghost scroll-arrow right" onclick="scrollRow('song-related-tracks', 1)">
-         <div class="scroll-arrow-icon">❯</div>
-      </button>
+      <div class="scroll-row" id="song-popular-tracks"></div>
+   </div>
+
+   <!-- 3. Most Trending Songs from Artist Row -->
+   <div id="song-trending-row" class="row-scroll-wrapper is-hidden">
+      <div class="row-header">
+         <h2 id="song-trending-title" class="row-title" data-i18n="trending_songs_from_artist">Most Trending Songs</h2>
+      </div>
+      <div class="scroll-row" id="song-trending-tracks"></div>
    </div>
 
 </div>

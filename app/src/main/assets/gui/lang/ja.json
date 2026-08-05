@@ -105,5 +105,8 @@
   "queue": "キュー",
   "clear_queue": "キューをクリア",
   "next_up": "次に再生",
-  "queue_empty": "キューは空です"
+  "queue_empty": "キューは空です",
+  "albums_from_artist": "{artist} のアルバム",
+  "popular_songs_from_artist": "{artist} の人気曲",
+  "trending_songs_from_artist": "{artist} のトレンド曲"
 }

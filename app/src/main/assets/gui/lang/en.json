@@ -169,5 +169,8 @@
   "log_history_cleared": "Downloads history cleared.",
   "log_lang_saved": "Language preference saved: ",
   "dl_meta_original": "Original Quality",
-  "log_concurrency_saved": "Simultaneous downloads set to: "
+  "log_concurrency_saved": "Simultaneous downloads set to: ",
+  "albums_from_artist": "Albums from {artist}",
+  "popular_songs_from_artist": "Most popular songs from {artist}",
+  "trending_songs_from_artist": "Most trending songs from {artist}"
 }

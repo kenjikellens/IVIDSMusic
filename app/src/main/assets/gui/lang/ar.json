@@ -105,5 +105,8 @@
   "queue": "قائمة الانتظار",
   "clear_queue": "مسح قائمة الانتظار",
   "next_up": "التالي",
-  "queue_empty": "قائمة الانتظار فارغة"
+  "queue_empty": "قائمة الانتظار فارغة",
+  "albums_from_artist": "ألبومات من {artist}",
+  "popular_songs_from_artist": "الأغاني الأكثر شعبية لـ {artist}",
+  "trending_songs_from_artist": "الأغاني الأكثر تداولاً لـ {artist}"
 }

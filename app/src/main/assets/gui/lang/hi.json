@@ -105,5 +105,8 @@
   "queue": "प्लेबैक कतार",
   "clear_queue": "कतार साफ़ करें",
   "next_up": "आगे",
-  "queue_empty": "कतार खाली है"
+  "queue_empty": "कतार खाली है",
+  "albums_from_artist": "{artist} के एल्बम",
+  "popular_songs_from_artist": "{artist} के सबसे लोकप्रिय गाने",
+  "trending_songs_from_artist": "{artist} के ट्रेंडिंग गाने"
 }

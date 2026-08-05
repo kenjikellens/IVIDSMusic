@@ -105,5 +105,8 @@
   "queue": "Очередь",
   "clear_queue": "Очистить очередь",
   "next_up": "Далее",
-  "queue_empty": "Очередь пуста"
+  "queue_empty": "Очередь пуста",
+  "albums_from_artist": "Альбомы {artist}",
+  "popular_songs_from_artist": "Популярные треки {artist}",
+  "trending_songs_from_artist": "Трендовые треки {artist}"
 }

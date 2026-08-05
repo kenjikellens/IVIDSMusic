@@ -378,6 +378,33 @@ export const MusicAPI = {
     },
 
     /**
+     * Gets artist's trending/radio mix tracks formatted for CardSystem.
+     */
+    async getArtistTrending(id, limit = 15, signal = null) {
+        try {
+            const url = `${this.deezerUrl}/artist/${id}/radio?limit=${limit}`;
+            const res = await this._fetch(url, { signal });
+            const data = await res.json();
+
+            if (data && data.data) {
+                return data.data.map(item => ({
+                    type: 'song',
+                    id: item.id,
+                    title: item.title_short || item.title,
+                    artist: item.artist?.name || 'Unknown',
+                    artistId: item.artist?.id || id || null,
+                    album: item.album?.title || 'Unknown',
+                    cover: item.album?.cover_big || item.album?.cover_xl,
+                    previewUrl: item.preview
+                }));
+            }
+        } catch (e) {
+            console.error('[API] Failed to get artist trending tracks', e);
+        }
+        return [];
+    },
+
+    /**
      * Gets artist's albums formatted for CardSystem.
      */
     async getArtistAlbums(id, limit = 50, artistName = 'Unknown', signal = null) {

@@ -112,5 +112,8 @@
   "queue": "Kolejka",
   "clear_queue": "Wyczyść kolejkę",
   "next_up": "Następny",
-  "queue_empty": "Kolejka jest pusta"
+  "queue_empty": "Kolejka jest pusta",
+  "albums_from_artist": "Albumy od {artist}",
+  "popular_songs_from_artist": "Najpopularniejsze utwory {artist}",
+  "trending_songs_from_artist": "Popularne utwory {artist}"
 }

@@ -162,5 +162,8 @@
   "log_history_cleared": "Download-Verlauf gelöscht.",
   "log_lang_saved": "Spracheinstellung gespeichert: ",
   "dl_meta_original": "Originalqualität",
-  "log_concurrency_saved": "Gleichzeitige Downloads festgelegt auf: "
+  "log_concurrency_saved": "Gleichzeitige Downloads festgelegt auf: ",
+  "albums_from_artist": "Alben von {artist}",
+  "popular_songs_from_artist": "Beliebteste Songs von {artist}",
+  "trending_songs_from_artist": "Trending-Songs von {artist}"
 }

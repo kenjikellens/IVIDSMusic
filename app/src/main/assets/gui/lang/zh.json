@@ -105,5 +105,8 @@
   "queue": "播放队列",
   "clear_queue": "清空队列",
   "next_up": "即将播放",
-  "queue_empty": "播放队列为空"
+  "queue_empty": "播放队列为空",
+  "albums_from_artist": "{artist} 的专辑",
+  "popular_songs_from_artist": "{artist} 最热门歌曲",
+  "trending_songs_from_artist": "{artist} 趋势歌曲"
 }
