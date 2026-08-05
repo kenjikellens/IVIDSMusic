@@ -41,7 +41,7 @@ export class DeezerProvider {
                         type: 'artist',
                         id: item.id,
                         name: item.name,
-                        cover: item.picture_big || item.picture_medium,
+                        cover: item.picture_medium || item.picture_big,
                         genre: 'Artist'
                     };
                 } else if (type === 'album') {
@@ -50,7 +50,7 @@ export class DeezerProvider {
                         id: item.id,
                         title: item.title,
                         artist: item.artist?.name || 'Unknown',
-                        cover: item.cover_big || item.cover_xl
+                        cover: item.cover_medium || item.cover_big
                     };
                 } else {
                     return {
@@ -60,7 +60,7 @@ export class DeezerProvider {
                         artist: item.artist?.name || 'Unknown',
                         artistId: item.artist?.id || null,
                         album: item.album?.title || 'Unknown',
-                        cover: item.album?.cover_big || item.album?.cover_xl,
+                        cover: item.album?.cover_medium || item.album?.cover_big,
                         previewUrl: item.preview
                     };
                 }
@@ -108,7 +108,7 @@ export class DeezerProvider {
                             artist: item.artist?.name || 'Unknown',
                             artistId: item.artist?.id || null,
                             album: item.album?.title || 'Unknown',
-                            cover: item.album?.cover_big || item.album?.cover_xl,
+                            cover: item.album?.cover_medium || item.album?.cover_big,
                             previewUrl: item.preview
                         }));
                     }
@@ -155,7 +155,7 @@ export class DeezerProvider {
                 artist: item.artist?.name || 'Unknown',
                 artistId: item.artist?.id || null,
                 album: item.album?.title || 'Unknown',
-                cover: item.album?.cover_big || item.album?.cover_xl,
+                cover: item.album?.cover_medium || item.album?.cover_big,
                 previewUrl: item.preview
             }));
         } catch (error) {

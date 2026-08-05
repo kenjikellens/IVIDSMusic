@@ -11,42 +11,82 @@ export const PageSystem = {
     async initHome() {
         if (window.Loader) window.Loader.init();
 
-
         try {
             const signal = window.Router.abortController?.signal;
-            const rows = await MusicAPI.getRecommendations(signal);
+
+            const populateRow = (category) => {
+                const rowContent = document.getElementById(`content-${category.id}`);
+                if (!rowContent || !category.tracks) return;
+                const existingCards = Array.from(rowContent.children);
+
+                category.tracks.forEach((track, index) => {
+                    if (index < existingCards.length) {
+                        CardSystem.hydrateCard(existingCards[index], track);
+                    } else {
+                        rowContent.appendChild(CardSystem.createCard(track));
+                    }
+                });
+
+                if (existingCards.length > category.tracks.length) {
+                    for (let i = category.tracks.length; i < existingCards.length; i++) {
+                        existingCards[i].remove();
+                    }
+                }
+            };
+
+            // 1. Instantly fetch ONLY the top 2 visible categories (Pop & Rock)
+            const initialCategories = await Promise.all([
+                MusicAPI.getSingleCategory('Pop', signal),
+                MusicAPI.getSingleCategory('Rock', signal)
+            ]);
 
             if (signal?.aborted) return;
 
-            // Target the hardcoded containers and populate them
-            rows.forEach(category => {
-                const rowContent = document.getElementById(`content-${category.id}`);
-                if (rowContent) {
-                    const existingCards = Array.from(rowContent.children);
-
-                    // Replace skeleton content with real data on the same element
-                    category.tracks.forEach((track, index) => {
-                        if (index < existingCards.length) {
-                            CardSystem.hydrateCard(existingCards[index], track);
-                        } else {
-                            rowContent.appendChild(CardSystem.createCard(track));
-                        }
-                    });
-
-                    // Remove any leftover skeletons if API returned fewer tracks
-                    if (existingCards.length > category.tracks.length) {
-                        for (let i = category.tracks.length; i < existingCards.length; i++) {
-                            existingCards[i].remove();
-                        }
-                    }
-                }
-            });
-
-            if (window.Loader) window.Loader.init();
+            initialCategories.forEach(cat => populateRow(cat));
 
             const heroBtn = document.getElementById('play-hero-btn');
-            if (heroBtn && rows[0]?.tracks[0]) {
-                heroBtn.onclick = () => YouTubePlayer.loadTrack(rows[0].tracks[0]);
+            if (heroBtn && initialCategories[0]?.tracks[0]) {
+                heroBtn.onclick = () => YouTubePlayer.loadTrack(initialCategories[0].tracks[0]);
+            }
+
+            // 2. Setup IntersectionObserver for remaining off-screen categories
+            const lazyCategories = [
+                { genre: 'Hip-Hop', id: 'row-hip-hop' },
+                { genre: 'Hardcore', id: 'row-hardcore' },
+                { genre: 'Electronic', id: 'row-electronic' },
+                { genre: 'Jazz', id: 'row-jazz' },
+                { genre: 'Dance', id: 'row-dance' }
+            ];
+
+            if (typeof IntersectionObserver !== 'undefined') {
+                const rowObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const rowEl = entry.target;
+                            const genre = rowEl.dataset.lazyGenre;
+                            if (genre) {
+                                rowEl.removeAttribute('data-lazy-genre');
+                                MusicAPI.getSingleCategory(genre, signal).then(cat => {
+                                    if (!signal?.aborted) populateRow(cat);
+                                }).catch(() => {});
+                            }
+                            observer.unobserve(rowEl);
+                        }
+                    });
+                }, { rootMargin: '400px 0px', threshold: 0.01 });
+
+                lazyCategories.forEach(item => {
+                    const rowEl = document.getElementById(item.id);
+                    if (rowEl) {
+                        rowEl.dataset.lazyGenre = item.genre;
+                        rowObserver.observe(rowEl);
+                    }
+                });
+            } else {
+                // Fallback for environments without IntersectionObserver
+                MusicAPI.getCategories(undefined, signal).then(rows => {
+                    if (!signal?.aborted) rows.forEach(cat => populateRow(cat));
+                }).catch(() => {});
             }
 
             // Hero Dismissal Logic
@@ -288,15 +328,32 @@ export const PageSystem = {
     },
 
     async initArtist(params) {
-        if (!params || !params.name) return;
+        const queryName = params?.name || params?.artist || params?.title || '';
+        if (!queryName && !params?.id) return;
 
         const signal = window.Router.abortController?.signal;
         if (window.Loader) window.Loader.init();
 
+        // Populate artist name immediately if passed in parameters
+        const nameEl = document.getElementById('artist-name');
+        if (nameEl && queryName) nameEl.textContent = queryName;
+
         try {
             // 1. Fetch main artist data
-            const artist = await MusicAPI.getArtistByName(params.name, signal);
+            let artist = null;
+            if (queryName) {
+                artist = await MusicAPI.getArtistByName(queryName, signal).catch(() => null);
+            }
+            if (!artist && params?.id) {
+                artist = await MusicAPI.getArtistById(params.id, signal).catch(() => null);
+            }
+
             if (signal?.aborted) return;
+
+            if (!artist && queryName) {
+                // Fallback basic object if search returned empty
+                artist = { id: params?.id || 'artist-fallback', name: queryName, picture_xl: null };
+            }
 
             if (artist) {
                 const nameEl = document.getElementById('artist-name');
@@ -305,63 +362,115 @@ export const PageSystem = {
                 const fansEl = document.getElementById('artist-fans');
                 const albumsCountEl = document.getElementById('artist-albums-count');
 
-                if (nameEl) nameEl.textContent = artist.name;
-                if (fansEl) fansEl.textContent = `${(artist.nb_fan || 0).toLocaleString()} fans`;
+                if (nameEl) nameEl.textContent = artist.name || queryName;
+                if (fansEl) fansEl.textContent = artist.nb_fan ? `${(artist.nb_fan).toLocaleString()} fans` : 'Artist';
 
-                if (avatarEl && artist.picture_xl) {
+                const avatarSrc = artist.picture_xl || artist.cover || 'gui/gemini-logo.png';
+                if (avatarEl) {
                     avatarEl.onload = () => {
                         avatarEl.style.opacity = '1';
                         if (avatarLoader) avatarLoader.style.display = 'none';
                     };
-                    avatarEl.src = artist.picture_xl;
+                    avatarEl.src = avatarSrc;
                 }
 
-                // Get average color for hero blobs
-                MusicAPI.getAverageColor(artist.picture_xl).then(color => {
+                // Get average color for hero background
+                MusicAPI.getAverageColor(avatarSrc).then(color => {
                     const hero = document.querySelector('.artist-hero');
-                    if (hero) hero.style.setProperty('--primary-color', color);
+                    if (hero) hero.style.setProperty('--artist-color', color);
                 });
 
-                // 2. Fetch Top Tracks & Albums in parallel
-                const [topTracks, albums] = await Promise.all([
-                    MusicAPI.getArtistTopTracks(artist.id, 15, signal).catch(() => []),
-                    MusicAPI.getArtistAlbums(artist.id, 50, artist.name, signal).catch(() => [])
+                // 2. Fetch Top Tracks, Albums, and Related Artists in parallel
+                const artistSearchName = artist.name || queryName;
+                const [topTracks, albums, relatedArtists] = await Promise.all([
+                    MusicAPI.getArtistTopTracks(artist.id, 20, signal).catch(() => []),
+                    MusicAPI.getArtistAlbums(artist.id, 50, artistSearchName, signal).catch(() => []),
+                    MusicAPI.search(artistSearchName, 10, 'artist', null, 0, false, signal).catch(() => [])
                 ]);
 
-                // Update album count with actual studio albums
-                if (albumsCountEl) albumsCountEl.textContent = `${albums.length} albums`;
+                if (albumsCountEl) albumsCountEl.textContent = `${albums.length || 0} albums`;
 
                 if (signal?.aborted) return;
 
                 // Wire up Play button
                 const playBtn = document.getElementById('play-artist-btn');
-                if (playBtn && topTracks.length > 0) {
-                    playBtn.disabled = false;
-                    playBtn.onclick = () => {
-                        YouTubePlayer.loadTrack(topTracks[0]);
-                    };
+                if (playBtn) {
+                    if (topTracks.length > 0) {
+                        playBtn.disabled = false;
+                        playBtn.onclick = () => {
+                            if (window.YouTubePlayer) {
+                                window.YouTubePlayer.queue = [...topTracks];
+                                window.YouTubePlayer.currentIndex = 0;
+                                window.YouTubePlayer.loadTrack(topTracks[0]);
+                            }
+                        };
+                    } else {
+                        playBtn.disabled = true;
+                    }
+                }
+
+                // Wire up Shuffle button
+                const shuffleBtn = document.getElementById('shuffle-artist-btn');
+                if (shuffleBtn) {
+                    if (topTracks.length > 0) {
+                        shuffleBtn.disabled = false;
+                        shuffleBtn.onclick = () => {
+                            if (window.YouTubePlayer) {
+                                const shuffled = [...topTracks].sort(() => Math.random() - 0.5);
+                                window.YouTubePlayer.queue = shuffled;
+                                window.YouTubePlayer.currentIndex = 0;
+                                window.YouTubePlayer.loadTrack(shuffled[0]);
+                            }
+                        };
+                    } else {
+                        shuffleBtn.disabled = true;
+                    }
                 }
 
                 // Render Top Tracks
                 const topTracksCont = document.getElementById('artist-top-tracks-container');
                 const topTracksRow = document.getElementById('artist-top-tracks');
-                if (topTracksCont && topTracksRow && topTracks.length > 0) {
+                if (topTracksCont && topTracksRow) {
                     topTracksRow.innerHTML = '';
-                    topTracks.forEach(track => {
-                        topTracksRow.appendChild(CardSystem.createCard(track));
-                    });
-                    topTracksCont.classList.remove('is-hidden');
+                    if (topTracks.length > 0) {
+                        topTracks.forEach(track => {
+                            topTracksRow.appendChild(CardSystem.createCard(track));
+                        });
+                        topTracksCont.classList.remove('is-hidden');
+                    } else {
+                        topTracksCont.classList.add('is-hidden');
+                    }
                 }
 
                 // Render Albums
                 const albumsCont = document.getElementById('artist-albums-container');
                 const albumsRow = document.getElementById('artist-albums');
-                if (albumsCont && albumsRow && albums.length > 0) {
+                if (albumsCont && albumsRow) {
                     albumsRow.innerHTML = '';
-                    albums.forEach(album => {
-                        albumsRow.appendChild(CardSystem.createCard(album));
-                    });
-                    albumsCont.classList.remove('is-hidden');
+                    if (albums.length > 0) {
+                        albums.forEach(album => {
+                            albumsRow.appendChild(CardSystem.createCard(album));
+                        });
+                        albumsCont.classList.remove('is-hidden');
+                    } else {
+                        albumsCont.classList.add('is-hidden');
+                    }
+                }
+
+                // Render Related Artists
+                const relatedCont = document.getElementById('artist-related-container');
+                const relatedRow = document.getElementById('artist-related');
+                if (relatedCont && relatedRow) {
+                    relatedRow.innerHTML = '';
+                    const filteredRelated = relatedArtists.filter(a => (a.name || a.title) !== artistSearchName);
+                    if (filteredRelated.length > 0) {
+                        filteredRelated.forEach(relArtist => {
+                            relatedRow.appendChild(CardSystem.createCard(relArtist));
+                        });
+                        relatedCont.classList.remove('is-hidden');
+                    } else {
+                        relatedCont.classList.add('is-hidden');
+                    }
                 }
             }
         } catch (e) {
@@ -406,7 +515,7 @@ export const PageSystem = {
             if (history.length === 0) {
                 recentList.innerHTML = `
                     <div class="empty-state">
-                        <div class="empty-icon">🎵</div>
+                        <div class="empty-icon"><img src="svg/library.svg" alt="" style="width: 48px; height: 48px; filter: brightness(0) invert(1); opacity: 0.5;"></div>
                         <p>Nothing played yet. Start listening!</p>
                     </div>`;
             } else {
@@ -1111,7 +1220,7 @@ export const PageSystem = {
             card.dataset.playlistId = pl.id;
             card.innerHTML = `
                 <div class="card-image-box" style="background: ${pl.cover}; display: flex; align-items: center; justify-content: center; border-radius: 8px; position: relative;">
-                    <span style="font-size: 2.8rem;">📂</span>
+                    <img src="svg/library.svg" alt="" style="width: 48px; height: 48px; filter: brightness(0) invert(1); opacity: 0.8;">
                 </div>
                 <div class="card-info-box">
                     <div class="card-title"><span class="marquee-text">${pl.name}</span></div>

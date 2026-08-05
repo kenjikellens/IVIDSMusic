@@ -4,12 +4,16 @@
  */
 export const Loader = {
     /**
-     * Injects the animated SVG loader image into elements with the 'ivids-loader' class
+     * Injects the animated SVG loader image into elements with the 'ivids-loader' class.
+     * Checks innerHTML directly so re-navigating to pages always renders loaders cleanly.
      */
-    init() {
-        const loaders = document.querySelectorAll('.ivids-loader:not(.initialized)');
+    init(container = document) {
+        const scope = container || document;
+        const loaders = scope.querySelectorAll('.ivids-loader');
         loaders.forEach(loader => {
-            loader.innerHTML = `<img src="svg/loader.svg" alt="Loading" class="ivids-loader-img">`;
+            if (!loader.querySelector('.ivids-loader-img')) {
+                loader.innerHTML = `<img src="svg/loader.svg" alt="Loading" class="ivids-loader-img">`;
+            }
             loader.classList.add('initialized');
         });
     },

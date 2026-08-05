@@ -915,7 +915,7 @@ header {
    ========================================================================== */
 .scroll-row {
     display: flex;
-    gap: 0px !important;
+    gap: calc(12px * var(--ui-scale)) !important;
     flex-wrap: nowrap;
     overflow-x: auto;
     padding: 4px 0px calc(24px * var(--ui-scale)) 0px !important;
@@ -1047,19 +1047,18 @@ header {
     width: calc(40px * var(--ui-scale));
     height: calc(40px * var(--ui-scale));
     border-radius: 50%;
-    background: var(--primary-color);
+    background: #ffffff;
     border: none;
-    color: #000;
+    color: #000000;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     opacity: 0;
-    transform: scale(0.85);
-    transition: opacity 0.2s ease, transform 0.2s ease, filter 0.15s ease;
+    transition: opacity 0.2s ease, background-color 0.15s ease;
     z-index: 5;
     padding: 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    box-shadow: none !important;
 }
 
 /* Play button SVG icon sizing */
@@ -1073,12 +1072,11 @@ header {
 .music-card:hover .card-play-btn,
 .music-card:focus-within .card-play-btn {
     opacity: 1;
-    transform: scale(1);
 }
 
-/* Play button hover state — slightly brighter */
+/* Play button hover state */
 .card-play-btn:hover {
-    filter: brightness(1.15);
+    background: #e2e8f0;
 }
 
 .card-info-box {
@@ -1109,39 +1107,31 @@ header {
     text-overflow: clip;
 }
 
+/* Artist Card Styling — Circular Avatar */
 .music-card.type-artist {
     background: transparent !important;
     border-color: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
 }
 
 .music-card.type-artist .card-image-box {
     border-radius: 50%;
-}
-
-.music-card.type-artist:hover .card-image-box {
+    border: 2px solid rgba(255, 255, 255, 0.1);
     box-shadow: none !important;
-}
-
-.music-card.type-artist:hover,
-.music-card.type-artist:focus-visible {
-    background: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-}
-
-.music-card.type-artist::after {
-    display: none !important;
+    transition: border-color 0.2s ease;
 }
 
 .music-card.type-artist:hover .card-image-box,
 .music-card.type-artist:focus-visible .card-image-box {
+    border-color: rgba(255, 255, 255, 0.6) !important;
     box-shadow: none !important;
 }
 
 .music-card.type-artist .card-info-box {
     background: transparent !important;
-    margin: 0;
-    padding: calc(12px * var(--ui-scale)) 0;
+    margin: 0 !important;
+    padding: calc(10px * var(--ui-scale)) 0 !important;
 }
 
 .music-card.type-artist .card-title {
@@ -1150,9 +1140,29 @@ header {
     text-shadow: none;
 }
 
+/* Album Card Styling — Container Background Uses Canvas Extracted Artwork Color */
+.music-card.type-album {
+    position: relative;
+    overflow: hidden;
+    background: var(--surface-color);
+    background: color-mix(in srgb, var(--card-color, #1a1a20) 35%, #0e0e11 65%) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: calc(12px * var(--ui-scale));
+    padding: calc(5px * var(--ui-scale));
+    box-shadow: none !important;
+    transition: background-color 0.3s ease;
+}
+
 .music-card.type-album .card-image-box {
-    overflow: visible;
-    z-index: 1;
+    position: relative;
+    z-index: 2;
+    box-shadow: none !important;
+}
+
+.music-card.type-album .card-info-box {
+    position: relative;
+    z-index: 2;
+    margin-top: calc(8px * var(--ui-scale)) !important;
 }
 
 .music-card.type-album .card-image-box::before,
@@ -1685,6 +1695,7 @@ header {
 }
 
 .scroll-arrow {
+    display: none !important;
     position: absolute;
     top: calc(50px * var(--ui-scale));
 
@@ -2623,13 +2634,15 @@ header {
     .music-card.type-album:hover .card-image-box::before,
     .music-card.type-album:active .card-image-box::before,
     .music-card.type-album:focus-visible .card-image-box::before {
-        transform: translate(6px, 6px) scale(0.98) !important;
+        opacity: 1 !important;
+        box-shadow: -4px 0 16px rgba(77, 208, 225, 0.3) !important;
     }
 
     .music-card.type-album:hover .card-image-box::after,
     .music-card.type-album:active .card-image-box::after,
     .music-card.type-album:focus-visible .card-image-box::after {
-        transform: translate(12px, 12px) scale(0.96) !important;
+        opacity: 1 !important;
+        border-color: rgba(77, 208, 225, 0.3) !important;
     }
 
     #player-bar {

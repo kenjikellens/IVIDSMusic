@@ -1,4 +1,4 @@
-<div class="artist-page page-container">
+<div class="artist-page page-container fade-in">
     <!-- Hero Section -->
     <div class="artist-hero">
         <div class="hero-bg">
@@ -7,13 +7,16 @@
             <div class="blob blob-3"></div>
             <div class="blob blob-4"></div>
         </div>
-        <div class="artist-hero-content fade-in">
+        <div class="artist-hero-content">
             <div class="artist-avatar-wrapper">
                 <div class="ivids-loader poster-loader" id="artist-avatar-loader"></div>
                 <img id="artist-avatar" src="" alt="" class="artist-avatar" style="opacity: 0;">
             </div>
             <div class="artist-info-wrapper">
-                <h1 id="artist-name" class="artist-name" data-i18n="loading">Loading...</h1>
+                <div class="artist-meta-row">
+                    <span class="artist-type-label" data-i18n="view_artist">Artist</span>
+                </div>
+                <h1 id="artist-name" class="artist-name">—</h1>
                 <div class="artist-stats" id="artist-stats">
                     <span id="artist-fans">-- fans</span>
                     <span class="stat-dot">•</span>
@@ -26,7 +29,10 @@
                         </svg>
                         <span data-i18n="play_top_track">Play Top Track</span>
                     </button>
-                    <!-- <button class="btn btn-secondary" id="view-songs-btn">View All Songs</button> -->
+                    <button class="btn btn-secondary" id="shuffle-artist-btn" disabled>
+                        <img src="svg/shuffle.svg" alt="" class="btn-icon" style="filter:brightness(0) invert(1);">
+                        <span data-i18n="shuffle">Shuffle</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -39,13 +45,7 @@
             <div class="row-header">
                 <h2 class="row-title" data-i18n="top_tracks_header">Top Tracks</h2>
             </div>
-            <button class="btn btn-ghost scroll-arrow left" onclick="scrollRow('artist-top-tracks', -1)">
-                <div class="scroll-arrow-icon">❮</div>
-            </button>
             <div class="scroll-row" id="artist-top-tracks"></div>
-            <button class="btn btn-ghost scroll-arrow right" onclick="scrollRow('artist-top-tracks', 1)">
-                <div class="scroll-arrow-icon">❯</div>
-            </button>
         </div>
 
         <!-- Albums -->
@@ -53,13 +53,15 @@
             <div class="row-header">
                 <h2 class="row-title" data-i18n="albums">Albums</h2>
             </div>
-            <button class="btn btn-ghost scroll-arrow left" onclick="scrollRow('artist-albums', -1)">
-                <div class="scroll-arrow-icon">❮</div>
-            </button>
             <div class="scroll-row" id="artist-albums"></div>
-            <button class="btn btn-ghost scroll-arrow right" onclick="scrollRow('artist-albums', 1)">
-                <div class="scroll-arrow-icon">❯</div>
-            </button>
+        </div>
+
+        <!-- Related Artists -->
+        <div id="artist-related-container" class="row-scroll-wrapper is-hidden">
+            <div class="row-header">
+                <h2 class="row-title" data-i18n="top_artists_header">Similar Artists</h2>
+            </div>
+            <div class="scroll-row" id="artist-related"></div>
         </div>
     </div>
 </div>

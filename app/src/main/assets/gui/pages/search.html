@@ -5,7 +5,9 @@
         <input id="browse-search-input" class="browse-search-input" type="text" placeholder="Artists, songs, albums..."
             autocomplete="off" data-i18n="search_placeholder"
             onkeydown="if(event.key==='Enter' && this.value.trim()) { this.blur(); window.performSearch(this.value.trim()); }">
-        <button id="search-clear-btn" class="btn btn-ghost search-clear-btn" style="display: none;">✕</button>
+        <button id="search-clear-btn" class="btn btn-ghost search-clear-btn" style="display: none;">
+            <img src="svg/close.svg" alt="Clear" style="width: 14px; height: 14px; filter: brightness(0) invert(1);">
+        </button>
     </div>
 </div>
 
@@ -34,42 +36,42 @@
         <!-- Pop -->
         <div class="music-card card-category pop container-hover-effect" onclick="window.performSearch('Pop')">
             <span class="category-title">Pop</span>
-            <div class="category-bg-art">✨</div>
+            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
         </div>
         <!-- Hip-Hop -->
         <div class="music-card card-category hiphop container-hover-effect" onclick="window.performSearch('Hip Hop')">
             <span class="category-title">Hip-Hop</span>
-            <div class="category-bg-art">🎤</div>
+            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
         </div>
         <!-- Rock -->
         <div class="music-card card-category rock container-hover-effect" onclick="window.performSearch('Rock')">
             <span class="category-title">Rock</span>
-            <div class="category-bg-art">🎸</div>
+            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
         </div>
         <!-- Dance & Electronic -->
         <div class="music-card card-category electronic container-hover-effect" onclick="window.performSearch('Dance')">
             <span class="category-title">Dance</span>
-            <div class="category-bg-art">🎧</div>
+            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
         </div>
         <!-- Jazz -->
         <div class="music-card card-category jazz container-hover-effect" onclick="window.performSearch('Jazz')">
             <span class="category-title">Jazz</span>
-            <div class="category-bg-art">🎷</div>
+            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
         </div>
         <!-- Classical -->
         <div class="music-card card-category classical container-hover-effect" onclick="window.performSearch('Classical')">
             <span class="category-title">Classical</span>
-            <div class="category-bg-art">🎻</div>
+            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
         </div>
         <!-- Chill & Acoustic -->
         <div class="music-card card-category chill container-hover-effect" onclick="window.performSearch('Chill')">
             <span class="category-title">Chill</span>
-            <div class="category-bg-art">☕</div>
+            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
         </div>
         <!-- Workout -->
         <div class="music-card card-category workout container-hover-effect" onclick="window.performSearch('Workout')">
             <span class="category-title">Workout</span>
-            <div class="category-bg-art">⚡</div>
+            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
         </div>
     </div>
 </div>

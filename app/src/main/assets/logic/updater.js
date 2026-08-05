@@ -259,7 +259,7 @@ export const Updater = {
         overlay.innerHTML = `
             <div class="update-modal glassmorphism">
                 <div class="update-header">
-                    <div class="update-rocket">🚀</div>
+                    <div class="update-rocket"><img src="svg/download.svg" alt="" style="width: 32px; height: 32px; filter: brightness(0) invert(1);"></div>
                     <h2 class="update-title">${translatedTitle}</h2>
                 </div>
                 <div class="update-info-block">

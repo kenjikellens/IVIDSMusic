@@ -2,6 +2,46 @@ import { MusicRepository } from './api/MusicRepository.js';
 import { MediaPlayer } from './player/MediaPlayer.js';
 
 /**
+ * Shared IntersectionObserver instance for viewport-based lazy loading.
+ * Only downloads artwork images when cards scroll into view!
+ */
+export const ImageLazyLoader = {
+    observer: null,
+
+    init() {
+        if (this.observer || typeof IntersectionObserver === 'undefined') return;
+
+        this.observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const src = img.dataset.src;
+                    if (src) {
+                        img.src = src;
+                        img.removeAttribute('data-src');
+                        if (img.decode) img.decode().catch(() => {});
+                    }
+                    observer.unobserve(img);
+                }
+            });
+        }, {
+            rootMargin: '300px 0px',
+            threshold: 0.01
+        });
+    },
+
+    observe(img) {
+        if (!img) return;
+        if (!this.observer) this.init();
+        if (this.observer && img.dataset.src) {
+            this.observer.observe(img);
+        } else if (img.dataset.src) {
+            img.src = img.dataset.src;
+        }
+    }
+};
+
+/**
  * Shared logic for creating, hydrating, and managing music cards across the app,
  * optimized for 60fps rendering, off-main-thread image decoding, and zero layout thrashing.
  */
@@ -30,7 +70,8 @@ export class CardComponentFactory {
         card.dataset.trackJson = JSON.stringify(track);
 
         const title = track.title || track.name || 'Unknown';
-        const artist = track.artist || 'Unknown Artist';
+        const artist = track.artist || track.name || track.title || 'Unknown Artist';
+        const artistName = track.name || track.title || track.artist || 'Unknown Artist';
         const cover = track.cover || 'gui/gemini-logo.png';
         const isExplicit = track.explicit || track.isExplicit;
 
@@ -38,7 +79,7 @@ export class CardComponentFactory {
         card.innerHTML = `
             <div class="card-image-box">
                 ${track.type === 'artist' ? '<div class="ivids-loader poster-loader"></div>' : ''}
-                <img src="${cover}" alt="${title}" class="poster" loading="lazy" style="${track.type === 'artist' ? 'opacity: 0' : ''}">
+                <img data-src="${cover}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E" alt="${title}" class="poster" decoding="async" style="${track.type === 'artist' ? 'opacity: 0' : ''}">
                 ${(track.type === 'song' || track.type === 'album' || !track.type) ? `
                     <button class="card-play-btn" title="Play" tabindex="-1">
                         <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
@@ -58,10 +99,10 @@ export class CardComponentFactory {
             </div>
         `;
 
-        /* Off-main-thread image decoding */
+        /* Viewport-based Lazy Loading */
         const img = card.querySelector('.poster');
-        if (img && img.decode) {
-            img.decode().catch(() => {});
+        if (img) {
+            ImageLazyLoader.observe(img);
         }
 
         /* Extract average color for card accent */
@@ -71,12 +112,17 @@ export class CardComponentFactory {
             }).catch(() => {});
         }
 
-        /* Artist image lazy-load with decode animation */
+        /* Artist image lazy-load with decode animation & color extraction */
         if (track.type === 'artist' && MusicRepository.getArtistImage) {
-            MusicRepository.getArtistImage(artist).then(imgUrl => {
+            MusicRepository.getArtistImage(artistName).then(imgUrl => {
                 const loader = card.querySelector('.poster-loader');
                 if (imgUrl && img) {
                     img.src = imgUrl;
+                    if (MusicRepository.getAverageColor) {
+                        MusicRepository.getAverageColor(imgUrl).then(color => {
+                            if (color) card.style.setProperty('--card-color', color);
+                        }).catch(() => {});
+                    }
                     if (img.decode) {
                         img.decode().then(() => {
                             img.style.opacity = '1';

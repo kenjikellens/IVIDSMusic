@@ -81,7 +81,7 @@ export const MusicAPI = {
                         type: 'artist',
                         id: item.id,
                         name: item.name,
-                        cover: item.picture_big || item.picture_medium,
+                        cover: item.picture_medium || item.picture_big,
                         genre: 'Artist'
                     };
                 } else if (type === 'album') {
@@ -90,7 +90,7 @@ export const MusicAPI = {
                         id: item.id,
                         title: item.title,
                         artist: item.artist?.name || 'Unknown',
-                        cover: item.cover_big || item.cover_xl
+                        cover: item.cover_medium || item.cover_big
                     };
                 } else {
                     return {
@@ -100,7 +100,7 @@ export const MusicAPI = {
                         artist: item.artist?.name || 'Unknown',
                         artistId: item.artist?.id || null,
                         album: item.album?.title || 'Unknown',
-                        cover: item.album?.cover_big || item.album?.cover_xl,
+                        cover: item.album?.cover_medium || item.album?.cover_big,
                         previewUrl: item.preview
                     };
                 }
@@ -182,7 +182,7 @@ export const MusicAPI = {
                             artist: item.artist?.name || 'Unknown',
                             artistId: item.artist?.id || null, // Capture artist ID for recommendation scoring telemetry
                             album: item.album?.title || 'Unknown',
-                            cover: item.album?.cover_big || item.album?.cover_xl,
+                            cover: item.album?.cover_medium || item.album?.cover_big,
                             previewUrl: item.preview
                         }));
                     }
@@ -208,6 +208,48 @@ export const MusicAPI = {
             })
         );
         return results.filter(row => row.tracks.length > 0);
+    },
+
+    async getSingleCategory(genre = 'Pop', signal = null) {
+        try {
+            const genreId = this.genreMap[genre];
+            if (!genreId) return { title: genre, id: genre.toLowerCase(), tracks: [] };
+
+            const url = `${this.deezerUrl}/chart/${genreId}/tracks?limit=30`;
+            const response = await this._fetch(url, { signal });
+            const data = await response.json();
+
+            let tracks = [];
+            if (data.data) {
+                tracks = data.data.map(item => ({
+                    type: 'song',
+                    id: item.id,
+                    title: item.title_short || item.title,
+                    artist: item.artist?.name || 'Unknown',
+                    artistId: item.artist?.id || null,
+                    album: item.album?.title || 'Unknown',
+                    cover: item.album?.cover_medium || item.album?.cover_big,
+                    previewUrl: item.preview
+                }));
+            }
+
+            const seen = new Set();
+            const uniqueTracks = tracks.filter(item => {
+                const key = (item.artist || '').toLowerCase();
+                if (seen.has(key)) return false;
+                seen.add(key);
+                return true;
+            }).slice(0, 12);
+
+            return {
+                title: genre,
+                id: genre.toLowerCase().replace(/\s+/g, '-').replace(/'/g, ''),
+                tracks: uniqueTracks
+            };
+        } catch (e) {
+            console.error(`[API] Single genre ${genre} failed:`, e);
+            return { title: genre, id: genre.toLowerCase(), tracks: [] };
+        }
     },
 
     async getRecommendations(signal = null) {
@@ -367,7 +409,7 @@ export const MusicAPI = {
                     artist: item.artist?.name || 'Unknown',
                     artistId: item.artist?.id || id || null, // Capture artist ID for recommendation scoring telemetry
                     album: item.album?.title || 'Unknown',
-                    cover: item.album?.cover_big || item.album?.cover_xl,
+                    cover: item.album?.cover_medium || item.album?.cover_big,
                     previewUrl: item.preview
                 }));
             }
@@ -394,7 +436,7 @@ export const MusicAPI = {
                     artist: item.artist?.name || 'Unknown',
                     artistId: item.artist?.id || id || null,
                     album: item.album?.title || 'Unknown',
-                    cover: item.album?.cover_big || item.album?.cover_xl,
+                    cover: item.album?.cover_medium || item.album?.cover_big,
                     previewUrl: item.preview
                 }));
             }
@@ -421,7 +463,7 @@ export const MusicAPI = {
                         id: item.id,
                         title: item.title,
                         artist: artistName,
-                        cover: item.cover_big || item.cover_xl,
+                        cover: item.cover_medium || item.cover_big,
                         releaseDate: item.release_date
                     }));
             }
@@ -445,7 +487,7 @@ export const MusicAPI = {
                     id: album.id,
                     title: album.title,
                     artist: album.artist.name,
-                    cover: album.cover_big || album.cover_xl,
+                    cover: album.cover_medium || album.cover_big,
                     releaseDate: album.release_date,
                     nb_tracks: album.nb_tracks,
                     tracks: album.tracks.data.map(item => ({
@@ -455,7 +497,7 @@ export const MusicAPI = {
                         artist: item.artist?.name || album.artist.name,
                         artistId: item.artist?.id || album.artist?.id || null, // Capture artist ID for recommendation scoring telemetry
                         album: album.title,
-                        cover: album.cover_big || album.cover_xl,
+                        cover: album.cover_medium || album.cover_big,
                         previewUrl: item.preview
                     }))
                 };
