@@ -40,6 +40,11 @@ export class LanguageManagerService extends BaseService {
         return this.#translations;
     }
 
+    /** Returns translation for target key or fallback to key */
+    t(key) {
+        return this.#translations[key] || key;
+    }
+
     /**
      * Initializes LanguageManagerService, loading saved preferences or defaults.
      */

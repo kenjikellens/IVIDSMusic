@@ -1026,8 +1026,10 @@ export const PageSystem = {
 
                 // Format row titles dynamically using LanguageManager or fallback template
                 const getTranslatedTitle = (key, fallback, name) => {
-                    let text = window.LanguageManager ? window.LanguageManager.t(key) : fallback;
-                    if (text === key) text = fallback;
+                    let text = (window.LanguageManager && typeof window.LanguageManager.t === 'function') 
+                        ? window.LanguageManager.t(key) 
+                        : (window.LanguageManager?.translations?.[key] || fallback);
+                    if (!text || text === key) text = fallback;
                     return text.replace('{artist}', name);
                 };
 
