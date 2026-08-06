@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IVIDS Music - Settings (Developer Mode Mockup)</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+
+<div class="settings-container">
+    <h1 class="row-title">Settings</h1>
+
+    <!-- Section: Appearance -->
+    <h2 class="settings-section-title">
+        <img class="settings-section-icon" src="svg/settings.svg" alt="">
+        <span>Appearance</span>
+    </h2>
+
+    <div class="settings-section">
+        <div class="settings-item">
+            <div class="settings-info">
+                <div class="settings-label">Interface Scale</div>
+                <div class="settings-desc">Adjust the size of the UI elements.</div>
+            </div>
+            <div class="scale-stepper" id="scale-options-container">
+                <button class="btn btn-ghost" id="scale-decrease">-</button>
+                <div class="scale-value" id="current-scale-display">100%</div>
+                <button class="btn btn-ghost" id="scale-increase">+</button>
+            </div>
+        </div>
+
+        <div class="settings-item">
+            <div class="settings-info">
+                <div class="settings-label">Language</div>
+                <div class="settings-desc">Choose your preferred language.</div>
+            </div>
+            <button class="btn btn-secondary" id="lang-edit-btn" tabindex="0" aria-label="Change language">
+                <span class="lang-current-name" id="current-lang-display">English</span>
+                <img src="svg/edit.svg" alt="Edit" style="width: 14px; height: 14px; filter: brightness(0) invert(1);">
+            </button>
+        </div>
+    </div>
+
+    <!-- Section: Developer Options (NEW FEATURE) -->
+    <h2 class="settings-section-title">
+        <img class="settings-section-icon" src="svg/settings.svg" alt="">
+        <span>Developer Options</span>
+        <span class="badge badge-dev">Dev Mode</span>
+    </h2>
+
+    <div class="settings-section">
+        <div class="settings-item">
+            <div class="settings-info">
+                <div class="settings-label">
+                    <span>Developer Mode</span>
+                    <span class="badge badge-dev" id="dev-mode-badge" style="display: none;">Active</span>
+                </div>
+                <div class="settings-desc">Enable advanced updater controls, custom version selection, and direct Main branch builds.</div>
+            </div>
+            <label class="switch">
+                <input type="checkbox" id="dev-mode-toggle">
+                <span class="slider"></span>
+            </label>
+        </div>
+
+        <!-- Dev Mode Panel (Shown when Dev Mode is toggled on) -->
+        <div class="dev-options-panel" id="dev-options-panel">
+            <div class="settings-label">Updater Mode Target</div>
+            
+            <div class="dev-target-radios">
+                <label class="radio-option">
+                    <input type="radio" name="dev-update-target" value="releases" checked id="radio-releases">
+                    <div class="radio-details">
+                        <span class="radio-title">Select Specific Version</span>
+                        <span class="radio-desc">Choose any published GitHub release version (tag/prerelease).</span>
+                    </div>
+                </label>
+
+                <div class="custom-select-wrapper" id="version-select-container" style="margin-left: 28px;">
+                    <select class="custom-select" id="dev-version-select">
+                        <option value="v0.2.3" selected>v0.2.3 (Latest Release)</option>
+                        <option value="v0.2.2">v0.2.2 (Beta)</option>
+                        <option value="v0.2.1">v0.2.1 (Beta)</option>
+                        <option value="v0.2.0">v0.2.0 (Alpha)</option>
+                    </select>
+                </div>
+
+                <label class="radio-option">
+                    <input type="radio" name="dev-update-target" value="main" id="radio-main">
+                    <div class="radio-details">
+                        <span class="radio-title">Main Branch File (Bleeding Edge)</span>
+                        <span class="radio-desc">Directly download &amp; install the latest executable build compiled on the GitHub main branch root.</span>
+                    </div>
+                </label>
+            </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 6px;">
+                <button class="btn btn-primary" id="btn-open-dev-updater">
+                    <img src="svg/rocket.svg" alt="" style="width: 16px; height: 16px; filter: brightness(0);">
+                    <span>Open Developer Updater</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section: About -->
+    <h2 class="settings-section-title">
+        <img class="settings-section-icon" src="svg/info.svg" alt="">
+        <span>About</span>
+    </h2>
+
+    <div class="settings-section">
+        <div class="settings-item">
+            <div class="settings-info">
+                <div class="settings-label">Version</div>
+                <div class="settings-desc">0.2.3 (Beta)</div>
+            </div>
+            <button class="btn btn-secondary" id="check-updates-btn">Check for Updates</button>
+        </div>
+        <div class="settings-item">
+            <div class="settings-info">
+                <div class="settings-label">Powered by</div>
+                <div class="settings-desc">IVIDS Engine &amp; YouTube Music</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Developer Update Modal (Mockup overlay) -->
+<div class="modal-overlay" id="update-overlay" style="display: none;">
+    <div class="update-modal">
+        <div class="update-header">
+            <div class="update-icon-box">
+                <img src="svg/download.svg" alt="">
+            </div>
+            <div>
+                <h2 class="update-title" id="modal-title">Developer Update Selection</h2>
+                <div style="font-size: 0.8rem; color: var(--text-secondary);" id="modal-subtitle">Target: GitHub Releases API</div>
+            </div>
+        </div>
+
+        <div class="update-info-block">
+            <div class="version-badge-container">
+                <span class="version-badge current">v0.2.3 (Current)</span>
+                <span class="version-arrow">→</span>
+                <span class="version-badge remote" id="modal-target-badge">v0.2.2</span>
+            </div>
+
+            <div class="update-release-name" id="modal-release-name">Release v0.2.2 (Beta)</div>
+            
+            <div class="update-changelog-title">Selected Installation Target Details:</div>
+            <div class="update-changelog-body" id="modal-changelog-body">
+                • Target URL: https://github.com/kenjikellens/IVIDSMusic/releases/tag/v0.2.2<br>
+                • Platform Executable: IVIDSMusic_PC.exe (Desktop)<br>
+                • Status: Ready to download and install.
+            </div>
+        </div>
+
+        <div class="modal-footer-actions">
+            <button class="btn btn-secondary" id="modal-close-btn">Cancel</button>
+            <button class="btn btn-primary" id="modal-install-btn">
+                <img src="svg/rocket.svg" alt="" style="width: 14px; height: 14px; filter: brightness(0);">
+                <span>Install Selected Target</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="main.js"></script>
+</body>
+</html>

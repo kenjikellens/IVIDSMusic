@@ -35,6 +35,11 @@ If the user clearly asks to push/upload/sync the current branch, you may push th
   The source codebase must remain entirely on the `main` branch.
 - **Orphan Release Execution**: Release updates must be coordinated by executing the `.agents/scripts/build-release.js` utility, which compiles the three targets and isolates them in an orphan tag. Do NOT run manual tag or checkout actions for releases unless instructed.
 
+## 5. Implementation Plans & Mockup Rules
+- **Implementation Plans are Artifacts ONLY**: Implementation plans MUST ALWAYS be generated strictly as an IDE artifact (`implementation_plan.md` in the conversation artifact directory).
+- **No Implementation Plan Files in Mockup Folder**: You MUST NEVER create or write an `implementation_plan.md` file inside the `mockup/` folder or any workspace directory. The `mockup/` directory must contain ONLY standalone web files (`index.html`, `main.js`, `main.css`, `svg/`, etc.).
+
 Always follow these rules for every task you perform.
 
 P.S.: NEVER use translate X or Y unless specifically asked for, use preferbly a thick(er) border for buttons on hover/focus or backgroudn change instead!
+

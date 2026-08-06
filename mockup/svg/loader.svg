@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="100%" height="100%">
+  <defs>
+    <!-- Master arc using dynamic CSS accent/primary color and stroke-width 5.5 -->
+    <g id="loader-arc">
+      <path d="M 55.00,30.00 A 25,25 0 0,1 54.88,32.45" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.062" />
+      <path d="M 54.88,32.45 A 25,25 0 0,1 54.52,34.88" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.125" />
+      <path d="M 54.52,34.88 A 25,25 0 0,1 53.92,37.26" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.187" />
+      <path d="M 53.92,37.26 A 25,25 0 0,1 53.09,39.57" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.250" />
+      <path d="M 53.09,39.57 A 25,25 0 0,1 52.05,41.79" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.312" />
+      <path d="M 52.05,41.79 A 25,25 0 0,1 50.79,43.89" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.375" />
+      <path d="M 50.79,43.89 A 25,25 0 0,1 49.32,45.87" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.437" />
+      <path d="M 49.32,45.87 A 25,25 0 0,1 47.68,47.68" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.500" />
+      <path d="M 47.68,47.68 A 25,25 0 0,1 45.87,49.32" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.562" />
+      <path d="M 45.87,49.32 A 25,25 0 0,1 43.89,50.79" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.625" />
+      <path d="M 43.89,50.79 A 25,25 0 0,1 41.79,52.05" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.687" />
+      <path d="M 41.79,52.05 A 25,25 0 0,1 39.57,53.09" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.750" />
+      <path d="M 39.57,53.09 A 25,25 0 0,1 37.26,53.92" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.812" />
+      <path d="M 37.26,53.92 A 25,25 0 0,1 34.88,54.52" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.875" />
+      <path d="M 34.88,54.52 A 25,25 0 0,1 32.45,54.88" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="0.937" />
+      <path d="M 32.45,54.88 A 25,25 0 0,1 30.00,55.00" fill="none" stroke="var(--accent-color, var(--primary-color, #4dd0e1))" stroke-width="5.5" stroke-opacity="1.000" stroke-linecap="round" />
+    </g>
+  </defs>
+
+  <!-- 3 symmetric arcs rotated 120 deg apart -->
+  <g>
+    <animateTransform attributeName="transform" type="rotate" from="0 30 30" to="360 30 30" dur="1.6s" repeatCount="indefinite" />
+    <use href="#loader-arc" transform="rotate(0 30 30)" />
+    <use href="#loader-arc" transform="rotate(120 30 30)" />
+    <use href="#loader-arc" transform="rotate(240 30 30)" />
+  </g>
+</svg>
