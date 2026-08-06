@@ -115,5 +115,22 @@
   "queue_empty": "Kolejka jest pusta",
   "albums_from_artist": "Albumy od {artist}",
   "popular_songs_from_artist": "Najpopularniejsze utwory {artist}",
-  "trending_songs_from_artist": "Popularne utwory {artist}"
+  "trending_songs_from_artist": "Popularne utwory {artist}",
+  "update": "Aktualizacja",
+  "update_mode": "Tryb aktualizacji",
+  "update_mode_desc": "Wybierz sposób sprawdzania i instalowania aktualizacji.",
+  "update_mode_off": "Wyłączone",
+  "update_mode_off_desc": "Całkowicie wyłącz sprawdzanie aktualizacji.",
+  "update_mode_auto": "Automatyczny",
+  "update_mode_auto_desc": "Automatycznie sprawdzaj oficjalne aktualizacje.",
+  "update_mode_manual": "Ręczny",
+  "update_mode_manual_desc": "Sprawdzaj tylko po ręcznym uruchomieniu.",
+  "update_mode_developer": "Tryb Dewelopera",
+  "update_mode_developer_desc": "Wybierz konkretną wersję lub gałąź main.",
+  "publisher": "Wydawca",
+  "license": "Licencja",
+  "check_for_updates": "Sprawdź aktualizacje",
+  "developer_target": "Cel Dewelopera",
+  "release_version": "Wersja Wydania",
+  "main_branch": "Gałąź Main"
 }

@@ -108,5 +108,22 @@
   "queue_empty": "قائمة الانتظار فارغة",
   "albums_from_artist": "ألبومات من {artist}",
   "popular_songs_from_artist": "الأغاني الأكثر شعبية لـ {artist}",
-  "trending_songs_from_artist": "الأغاني الأكثر تداولاً لـ {artist}"
+  "trending_songs_from_artist": "الأغاني الأكثر تداولاً لـ {artist}",
+  "update": "التحديث",
+  "update_mode": "وضع التحديث",
+  "update_mode_desc": "اختر كيفية التحقق من التحديثات وتثبيتها.",
+  "update_mode_off": "إيقاف",
+  "update_mode_off_desc": "تعطيل التحقق من التحديثات تمامًا.",
+  "update_mode_auto": "تلقائي",
+  "update_mode_auto_desc": "التحقق تلقائيًا من التحديثات الرسمية.",
+  "update_mode_manual": "يدوي",
+  "update_mode_manual_desc": "التحقق فقط عند التشغيل يدويًا.",
+  "update_mode_developer": "وضع المطور",
+  "update_mode_developer_desc": "حدد إصدارات محددة أو فرع main.",
+  "publisher": "الناشر",
+  "license": "الترخيص",
+  "check_for_updates": "التحقق من التحديثات",
+  "developer_target": "هدف المطور",
+  "release_version": "إصدار Release",
+  "main_branch": "فرع Main"
 }

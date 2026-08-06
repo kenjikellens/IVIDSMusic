@@ -198,11 +198,113 @@ export const Updater = {
     },
 
     /**
+     * Fetches all published GitHub releases.
+     * @returns {Promise<Array>} Array of release objects.
+     */
+    async fetchReleasesList() {
+        try {
+            if (Config.isElectron && window.ElectronAPI && window.ElectronAPI.fetchPcReleases) {
+                const res = await window.ElectronAPI.fetchPcReleases();
+                if (res && res.status === 'ok' && Array.isArray(res.releases)) {
+                    return res.releases;
+                }
+            }
+
+            const response = await this._fetch(`https://api.github.com/repos/${REPO}/releases`, {
+                headers: { 'Accept': 'application/vnd.github.v3+json' }
+            });
+            if (!response.ok) return [];
+            return await response.json();
+        } catch (e) {
+            console.error('[Updater] Failed to fetch releases list:', e);
+            return [];
+        }
+    },
+
+    /**
+     * Opens the Developer Versions Selection Modal listing all releases and the Main branch.
+     */
+    async openVersionsDialog() {
+        const modalOverlay = document.getElementById('versions-modal-overlay');
+        const listContainer = document.getElementById('versions-modal-list');
+        if (!modalOverlay || !listContainer) return;
+
+        listContainer.innerHTML = '<div style="padding: 12px; color: var(--text-secondary);">Loading available releases...</div>';
+        modalOverlay.style.display = 'flex';
+
+        const releases = await this.fetchReleasesList();
+        const targetPlatform = this.getPlatformTarget();
+        const ext = targetPlatform === 'pc' ? 'exe' : 'apk';
+        const targetUpper = targetPlatform.toUpperCase();
+
+        let html = `
+            <button class="btn btn-secondary version-option-btn" data-type="main" style="justify-content: flex-start; text-align: left; width: 100%; border: 1px dashed var(--primary-color);">
+                <div>
+                    <div style="font-weight: 700; color: var(--primary-color);">Main Branch (Bleeding Edge Build)</div>
+                    <div style="font-size: 0.8rem; color: var(--text-secondary);">Direct download: IVIDSMusic_${targetUpper}.${ext}</div>
+                </div>
+            </button>
+            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 6px; font-weight: 700; text-transform: uppercase;">Published Release Tags</div>
+        `;
+
+        if (releases.length === 0) {
+            html += `<button class="btn btn-secondary version-option-btn" data-type="release" data-tag="${CURRENT_VERSION}" style="justify-content: flex-start; text-align: left; width: 100%;">
+                <div>
+                    <div style="font-weight: 600; color: var(--text-main);">v${CURRENT_VERSION} (Current Version)</div>
+                </div>
+            </button>`;
+        } else {
+            releases.forEach(rel => {
+                const tag = rel.tag_name || 'v0.0.0';
+                const name = rel.name || tag;
+                html += `
+                    <button class="btn btn-secondary version-option-btn" data-type="release" data-tag="${tag}" style="justify-content: flex-start; text-align: left; width: 100%;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--text-main);">${tag}</div>
+                            <div style="font-size: 0.8rem; color: var(--text-secondary);">${name}</div>
+                        </div>
+                    </button>
+                `;
+            });
+        }
+
+        listContainer.innerHTML = html;
+
+        // Bind clicks
+        listContainer.querySelectorAll('.version-option-btn').forEach(btn => {
+            btn.onclick = () => {
+                modalOverlay.style.display = 'none';
+                const type = btn.getAttribute('data-type');
+                if (type === 'main') {
+                    const fallbackUrl = this.getFallbackDownloadUrl(targetPlatform);
+                    this.showUpdateDialog({
+                        tag_name: 'MAIN BRANCH',
+                        name: 'Main Branch Build',
+                        body: `Direct bleeding edge download: ${fallbackUrl}`
+                    });
+                } else {
+                    const tag = btn.getAttribute('data-tag');
+                    const rel = releases.find(r => r.tag_name === tag) || { tag_name: tag, name: `Release ${tag}`, body: 'Custom selected version.' };
+                    this.showUpdateDialog(rel);
+                }
+            };
+        });
+    },
+
+    /**
      * Runs the automated daily update check on app boot.
      * Utilizes local storage timestamp to check native or web release status once every 24 hours.
      */
     async initAutoCheck() {
         try {
+            const mode = window.SettingsManager ? window.SettingsManager.getUpdateMode() : 'Auto';
+            
+            // Respect Update Mode: Off, Manual, and Developer Mode skip auto-checking on boot
+            if (mode !== 'Auto') {
+                console.log(`[Updater] Skipping auto-check: update mode is set to '${mode}'.`);
+                return;
+            }
+
             const now = Date.now();
             const lastCheck = localStorage.getItem(STORAGE_KEY);
             

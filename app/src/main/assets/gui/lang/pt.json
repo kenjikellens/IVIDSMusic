@@ -108,5 +108,22 @@
   "queue_empty": "A fila está vazia",
   "albums_from_artist": "Álbuns de {artist}",
   "popular_songs_from_artist": "Músicas mais populares de {artist}",
-  "trending_songs_from_artist": "Músicas em tendência de {artist}"
+  "trending_songs_from_artist": "Músicas em tendência de {artist}",
+  "update": "Atualização",
+  "update_mode": "Modo de atualização",
+  "update_mode_desc": "Escolha como verificar as atualizações.",
+  "update_mode_off": "Desativado",
+  "update_mode_off_desc": "Desativar verificação de atualizações.",
+  "update_mode_auto": "Auto",
+  "update_mode_auto_desc": "Verificar atualizações automaticamente.",
+  "update_mode_manual": "Manual",
+  "update_mode_manual_desc": "Verificar apenas manualmente.",
+  "update_mode_developer": "Modo Desenvolvedor",
+  "update_mode_developer_desc": "Selecionar releases específicas ou branch main.",
+  "publisher": "Editor",
+  "license": "Licença",
+  "check_for_updates": "Verificar atualizações",
+  "developer_target": "Alvo do Desenvolvedor",
+  "release_version": "Versão da Release",
+  "main_branch": "Branch Main"
 }

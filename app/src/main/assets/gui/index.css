@@ -2451,21 +2451,6 @@ header {
         flex-wrap: nowrap !important;
     }
 
-    .scale-stepper-btn {
-        width: 44px !important;
-        height: 44px !important;
-        min-width: 44px !important;
-        font-size: 20px !important;
-        border-radius: 10px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 0 !important;
-        background: rgba(255, 255, 255, 0.06) !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        color: var(--text-main) !important;
-    }
-
     .scale-value {
         font-size: 18px !important;
         font-weight: 700 !important;
@@ -2500,17 +2485,6 @@ header {
     .lang-edit-icon {
         width: 15px !important;
         height: 15px !important;
-    }
-
-    .check-updates-btn {
-        width: 100% !important;
-        padding: 12px 20px !important;
-        font-size: 16px !important;
-        border-radius: 12px !important;
-        text-align: center !important;
-        background: rgba(var(--primary-rgb), 0.08) !important;
-        border: 1px solid rgba(var(--primary-rgb), 0.25) !important;
-        color: var(--primary-color) !important;
     }
 
     .lang-modal {
@@ -3154,26 +3128,7 @@ body[data-current-page="search"] .unified-search-bar {
     opacity: 0.6;
 }
 
-.chips-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-}
 
-.search-chip {
-    padding: 10px 22px;
-    border-radius: 100px;
-    cursor: pointer;
-    font-size: 0.95rem;
-    font-weight: 500;
-    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease;
-}
-
-.search-chip:hover {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
-    color: black;
-}
 
 /* ============================
    Search Grid & Back
@@ -3551,35 +3506,7 @@ body[data-current-page="search"] .unified-search-bar {
     padding: calc(4px * var(--ui-scale)) calc(8px * var(--ui-scale));
 }
 
-.scale-btn,
-.scale-stepper-btn {
-    padding: calc(8px * var(--ui-scale)) calc(16px * var(--ui-scale));
-    border-radius: calc(8px * var(--ui-scale));
-    background: transparent;
-    border: none;
-    color: var(--text-secondary);
-    font-size: calc(0.85rem * var(--ui-scale));
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
-}
 
-.scale-stepper-btn {
-    font-size: calc(1.2rem * var(--ui-scale));
-    padding: calc(4px * var(--ui-scale)) calc(14px * var(--ui-scale));
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.scale-stepper-btn:hover {
-    color: var(--text-main);
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.scale-stepper-btn:active {
-    transform: scale(0.9);
-}
 
 .scale-value {
     font-size: calc(0.95rem * var(--ui-scale));
@@ -4924,77 +4851,6 @@ svg.btn-icon {
     border-color: rgba(255, 255, 255, 0.3);
 }
 
-.add-to-playlist-popup {
-    background: rgba(18, 18, 18, 0.85) !important;
-    backdrop-filter: blur(20px) !important;
-    -webkit-backdrop-filter: blur(20px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: calc(12px * var(--ui-scale)) !important;
-    box-shadow: 0 calc(8px * var(--ui-scale)) calc(32px * var(--ui-scale)) rgba(0, 0, 0, 0.6) !important;
-    padding: calc(6px * var(--ui-scale)) !important;
-    min-width: calc(180px * var(--ui-scale));
-    max-width: calc(220px * var(--ui-scale));
-    display: flex;
-    flex-direction: column;
-    gap: calc(4px * var(--ui-scale));
-}
-
-.popup-title {
-    font-size: calc(0.75rem * var(--ui-scale));
-    text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
-    padding: calc(6px * var(--ui-scale)) calc(10px * var(--ui-scale));
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    font-weight: 700;
-    letter-spacing: 0.05em;
-}
-
-.popup-empty-state {
-    padding: calc(12px * var(--ui-scale));
-    text-align: center;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: calc(0.85rem * var(--ui-scale));
-}
-
-.popup-empty-state a {
-    color: var(--primary-color, #fff);
-    text-decoration: underline;
-    margin-top: calc(4px * var(--ui-scale));
-    display: inline-block;
-    font-weight: 500;
-}
-
-.popup-list {
-    display: flex;
-    flex-direction: column;
-    gap: calc(2px * var(--ui-scale));
-    max-height: calc(160px * var(--ui-scale));
-    overflow-y: auto;
-}
-
-.popup-item {
-    background: transparent;
-    border: none;
-    text-align: left;
-    padding: calc(8px * var(--ui-scale)) calc(10px * var(--ui-scale));
-    border-radius: calc(6px * var(--ui-scale));
-    color: rgba(255, 255, 255, 0.85);
-    font-size: calc(0.88rem * var(--ui-scale));
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: calc(8px * var(--ui-scale));
-    width: 100%;
-    box-sizing: border-box;
-    font-family: inherit;
-    transition: background 0.15s ease, color 0.15s ease;
-}
-
-.popup-item:hover,
-.popup-item:focus {
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
-}
 
 .playlist-card:hover .delete-playlist-btn {
     opacity: 1 !important;
@@ -5158,67 +5014,6 @@ svg.btn-icon {
     width: 100%;
     justify-content: flex-end;
     margin-top: calc(4px * var(--ui-scale));
-}
-
-.update-footer-actions .btn {
-    padding: calc(10px * var(--ui-scale)) calc(20px * var(--ui-scale));
-    font-size: calc(0.9rem * var(--ui-scale));
-    border-radius: calc(10px * var(--ui-scale));
-    cursor: pointer;
-    font-family: inherit;
-    font-weight: 600;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.update-footer-actions .btn.secondary {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    color: rgba(255, 255, 255, 0.85) !important;
-    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease !important;
-}
-
-.update-footer-actions .btn.secondary:hover,
-.update-footer-actions .btn.secondary:focus {
-    background: rgba(255, 255, 255, 0.12) !important;
-    border-color: rgba(255, 255, 255, 0.8) !important;
-    color: #fff !important;
-    outline: none;
-}
-
-.update-footer-actions .btn.primary {
-    background: rgba(var(--primary-rgb), 0.8) !important;
-    border: 1px solid rgba(var(--primary-rgb), 0.3) !important;
-    color: #fff !important;
-    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease !important;
-}
-
-.update-footer-actions .btn.primary:hover,
-.update-footer-actions .btn.primary:focus {
-    background: var(--primary-color) !important;
-    border-color: rgba(255, 255, 255, 0.85) !important;
-    box-shadow: 0 0 calc(15px * var(--ui-scale)) rgba(var(--primary-rgb), 0.5) !important;
-    outline: none;
-}
-
-.check-updates-btn {
-    background: rgba(255, 255, 255, 0.05) !important;
-    border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    color: rgba(255, 255, 255, 0.9) !important;
-    font-family: inherit;
-    font-weight: 600;
-    transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease !important;
-}
-
-.check-updates-btn:hover,
-.check-updates-btn:focus {
-    background: rgba(var(--primary-rgb), 0.15) !important;
-    border-color: rgba(255, 255, 255, 0.85) !important;
-    color: #fff !important;
-    box-shadow: 0 0 calc(12px * var(--ui-scale)) rgba(var(--primary-rgb), 0.4) !important;
-    outline: none;
 }
 
 /* ============================
@@ -5544,77 +5339,7 @@ svg.btn-icon {
     gap: calc(8px * var(--ui-scale));
 }
 
-.queue-track-card {
-    display: flex;
-    align-items: center;
-    padding: calc(8px * var(--ui-scale));
-    border-radius: calc(6px * var(--ui-scale));
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid transparent;
-    cursor: pointer;
-    transition: background 0.2s ease, border-color 0.2s ease;
-}
 
-.queue-track-card:hover {
-    background: rgba(255, 255, 255, 0.06);
-    border-color: rgba(255, 255, 255, 0.08);
-}
-
-.queue-track-card.active {
-    background: rgba(var(--primary-rgb), 0.1);
-    border-color: rgba(var(--primary-rgb), 0.25);
-}
-
-.queue-track-cover {
-    width: calc(40px * var(--ui-scale));
-    height: calc(40px * var(--ui-scale));
-    border-radius: calc(4px * var(--ui-scale));
-    margin-right: calc(12px * var(--ui-scale));
-    object-fit: cover;
-}
-
-.queue-track-info {
-    flex: 1;
-    min-width: 0;
-}
-
-.queue-track-title {
-    font-size: calc(0.85rem * var(--ui-scale));
-    font-weight: 500;
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.queue-track-artist {
-    font-size: calc(0.75rem * var(--ui-scale));
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-top: calc(2px * var(--ui-scale));
-}
-
-.queue-track-remove {
-    background: none;
-    border: none;
-    color: var(--text-muted);
-    font-size: calc(1.1rem * var(--ui-scale));
-    cursor: pointer;
-    padding: calc(6px * var(--ui-scale));
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: color 0.2s ease, background 0.2s ease;
-    margin-left: calc(8px * var(--ui-scale));
-}
-
-.queue-track-remove:hover {
-    color: #ef4444;
-    background: rgba(239, 68, 68, 0.1);
-}
 
 @keyframes ambient-flow {
     0% {

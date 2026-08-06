@@ -260,6 +260,16 @@ ipcMain.handle('check-pc-update', async () => {
     }
 });
 
+ipcMain.handle('fetch-pc-releases', async () => {
+    try {
+        const releases = await fetchJson('https://api.github.com/repos/kenjikellens/IVIDSMusic/releases');
+        return { status: 'ok', releases: Array.isArray(releases) ? releases : [] };
+    } catch (error) {
+        console.error('Failed to fetch PC releases', error);
+        return { status: 'error', releases: [], message: error.message };
+    }
+});
+
 ipcMain.handle('download-pc-update', async (event, downloadUrl, version) => {
     try {
         const safeVersion = String(version || 'latest').replace(/[^a-zA-Z0-9._-]/g, '');

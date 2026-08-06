@@ -105,6 +105,26 @@ export const SettingsManager = {
             }
         }
         console.log(`[SettingsManager] UI Scale initialized to: ${scale}`);
+    },
+
+    /**
+     * Get active update mode ('Off' | 'Auto' | 'Manual' | 'Developer Mode')
+     */
+    getUpdateMode() {
+        const saved = localStorage.getItem('iv_update_mode');
+        return saved || 'Auto';
+    },
+
+    /**
+     * Set and persist active update mode
+     * @param {string} mode 
+     */
+    setUpdateMode(mode) {
+        const validModes = ['Off', 'Auto', 'Manual', 'Developer Mode'];
+        const modeToSet = validModes.includes(mode) ? mode : 'Auto';
+        localStorage.setItem('iv_update_mode', modeToSet);
+        window.dispatchEvent(new CustomEvent('iv-update-mode-changed', { detail: { updateMode: modeToSet } }));
+        return modeToSet;
     }
 };
 

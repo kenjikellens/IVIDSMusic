@@ -108,5 +108,22 @@
   "queue_empty": "播放队列为空",
   "albums_from_artist": "{artist} 的专辑",
   "popular_songs_from_artist": "{artist} 最热门歌曲",
-  "trending_songs_from_artist": "{artist} 趋势歌曲"
+  "trending_songs_from_artist": "{artist} 趋势歌曲",
+  "update": "更新",
+  "update_mode": "更新模式",
+  "update_mode_desc": "选择应用程序更新的检查与安装方式。",
+  "update_mode_off": "关闭",
+  "update_mode_off_desc": "完全禁用更新检查。",
+  "update_mode_auto": "自动",
+  "update_mode_auto_desc": "自动检查并提示官方更新。",
+  "update_mode_manual": "手动",
+  "update_mode_manual_desc": "仅在手动触发时检查更新。",
+  "update_mode_developer": "开发者模式",
+  "update_mode_developer_desc": "选择特定的 GitHub Release 或 Main 分支构建。",
+  "publisher": "发布者",
+  "license": "许可证",
+  "check_for_updates": "检查更新",
+  "developer_target": "开发者目标",
+  "release_version": "发布版本",
+  "main_branch": "Main 分支"
 }

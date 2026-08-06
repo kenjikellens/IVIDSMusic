@@ -108,5 +108,22 @@
   "queue_empty": "कतार खाली है",
   "albums_from_artist": "{artist} के एल्बम",
   "popular_songs_from_artist": "{artist} के सबसे लोकप्रिय गाने",
-  "trending_songs_from_artist": "{artist} के ट्रेंडिंग गाने"
+  "trending_songs_from_artist": "{artist} के ट्रेंडिंग गाने",
+  "update": "अपडेट",
+  "update_mode": "अपडेट मोड",
+  "update_mode_desc": "चुनें कि अपडेट कैसे चेक और इंस्टॉल किए जाते हैं।",
+  "update_mode_off": "बंद",
+  "update_mode_off_desc": "अपडेट चेकिंग पूरी तरह से बंद करें।",
+  "update_mode_auto": "ऑटो",
+  "update_mode_auto_desc": "स्वचालित रूप से आधिकारिक अपडेट जांचें।",
+  "update_mode_manual": "मैनुअल",
+  "update_mode_manual_desc": "केवल मैनुअल रूप से जांचें।",
+  "update_mode_developer": "डेवलपर मोड",
+  "update_mode_developer_desc": "विशिष्ट रिलीज़ या मेन ब्रांच का चयन करें।",
+  "publisher": "प्रकाशक",
+  "license": "लाइसेंस",
+  "check_for_updates": "अपडेट की जांच करें",
+  "developer_target": "डेवलपर लक्ष्य",
+  "release_version": "रिलीज़ संस्करण",
+  "main_branch": "मेन ब्रांच"
 }

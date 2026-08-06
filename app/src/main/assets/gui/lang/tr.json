@@ -115,5 +115,22 @@
   "queue_empty": "Kuyruk boş",
   "albums_from_artist": "{artist} albümleri",
   "popular_songs_from_artist": "{artist} en popüler şarkıları",
-  "trending_songs_from_artist": "{artist} trend şarkıları"
+  "trending_songs_from_artist": "{artist} trend şarkıları",
+  "update": "Güncelleme",
+  "update_mode": "Güncelleme Modu",
+  "update_mode_desc": "Güncellemelerin nasıl kontrol edilip yükleneceğini seçin.",
+  "update_mode_off": "Kapalı",
+  "update_mode_off_desc": "Güncelleme kontrolünü tamamen kapatın.",
+  "update_mode_auto": "Otomatik",
+  "update_mode_auto_desc": "Resmi güncellemeleri otomatik kontrol et.",
+  "update_mode_manual": "Manuel",
+  "update_mode_manual_desc": "Yalnızca manuel çalıştırıldığında kontrol et.",
+  "update_mode_developer": "Geliştirici Modu",
+  "update_mode_developer_desc": "Belirli bir sürümü veya main dalını seçin.",
+  "publisher": "Yayıncı",
+  "license": "Lisans",
+  "check_for_updates": "Güncellemeleri Kontrol Et",
+  "developer_target": "Geliştirici Hedefi",
+  "release_version": "Sürüm Versiyonu",
+  "main_branch": "Main Dalı"
 }

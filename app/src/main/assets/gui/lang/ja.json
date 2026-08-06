@@ -108,5 +108,22 @@
   "queue_empty": "キューは空です",
   "albums_from_artist": "{artist} のアルバム",
   "popular_songs_from_artist": "{artist} の人気曲",
-  "trending_songs_from_artist": "{artist} のトレンド曲"
+  "trending_songs_from_artist": "{artist} のトレンド曲",
+  "update": "アップデート",
+  "update_mode": "更新モード",
+  "update_mode_desc": "アップデートの確認とインストール方法を選択します。",
+  "update_mode_off": "オフ",
+  "update_mode_off_desc": "アップデートの確認を完全に無効化します。",
+  "update_mode_auto": "自動",
+  "update_mode_auto_desc": "公式アップデートを自動的に確認します。",
+  "update_mode_manual": "手動",
+  "update_mode_manual_desc": "手動で実行した場合のみ確認します。",
+  "update_mode_developer": "開発者モード",
+  "update_mode_developer_desc": "特定リリースまたはMainブランチを選択。",
+  "publisher": "発行者",
+  "license": "ライセンス",
+  "check_for_updates": "更新を確認",
+  "developer_target": "開発者ターゲット",
+  "release_version": "リリースバージョン",
+  "main_branch": "Mainブランチ"
 }

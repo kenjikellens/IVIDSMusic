@@ -108,5 +108,22 @@
   "queue_empty": "Coada este goală",
   "albums_from_artist": "Albume de la {artist}",
   "popular_songs_from_artist": "Cele mai populare piese de la {artist}",
-  "trending_songs_from_artist": "Piese în tendințe de la {artist}"
+  "trending_songs_from_artist": "Piese în tendințe de la {artist}",
+  "update": "Actualizare",
+  "update_mode": "Mod actualizare",
+  "update_mode_desc": "Alegeți cum se verifică actualizările.",
+  "update_mode_off": "Oprit",
+  "update_mode_off_desc": "Dezactivează verificarea actualizărilor.",
+  "update_mode_auto": "Auto",
+  "update_mode_auto_desc": "Verifică automat actualizările.",
+  "update_mode_manual": "Manual",
+  "update_mode_manual_desc": "Verifică doar manual.",
+  "update_mode_developer": "Mod Dezvoltator",
+  "update_mode_developer_desc": "Selectează versiuni release sau ramura main.",
+  "publisher": "Editor",
+  "license": "Licență",
+  "check_for_updates": "Caută actualizări",
+  "developer_target": "Țintă Dezvoltator",
+  "release_version": "Versiune Release",
+  "main_branch": "Ramura Main"
 }

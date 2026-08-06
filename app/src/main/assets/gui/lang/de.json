@@ -165,5 +165,22 @@
   "log_concurrency_saved": "Gleichzeitige Downloads festgelegt auf:",
   "albums_from_artist": "Alben von {artist}",
   "popular_songs_from_artist": "Beliebteste Songs von {artist}",
-  "trending_songs_from_artist": "Trending-Songs von {artist}"
+  "trending_songs_from_artist": "Trending-Songs von {artist}",
+  "update": "Update",
+  "update_mode": "Update-Modus",
+  "update_mode_desc": "Wählen Sie, wie Updates überprüft werden.",
+  "update_mode_off": "Aus",
+  "update_mode_off_desc": "Automatische Update-Prüfung deaktivieren.",
+  "update_mode_auto": "Auto",
+  "update_mode_auto_desc": "Automatisch nach offiziellen Updates suchen.",
+  "update_mode_manual": "Manuell",
+  "update_mode_manual_desc": "Nur bei manueller Auslösung suchen.",
+  "update_mode_developer": "Entwicklermodus",
+  "update_mode_developer_desc": "Benutzerdefinierte Releases oder Main-Branch wählen.",
+  "publisher": "Herausgeber",
+  "license": "Lizenz",
+  "check_for_updates": "Nach Updates suchen",
+  "developer_target": "Entwickler-Ziel",
+  "release_version": "Release-Version",
+  "main_branch": "Main-Branch"
 }

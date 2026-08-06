@@ -47,6 +47,13 @@ contextBridge.exposeInMainWorld('ElectronAPI', {
     checkPcUpdate: () => ipcRenderer.invoke('check-pc-update'),
 
     /**
+     * Fetches all published GitHub releases for Developer Mode target selection.
+     *
+     * @returns {Promise<Object>} Releases list payload.
+     */
+    fetchPcReleases: () => ipcRenderer.invoke('fetch-pc-releases'),
+
+    /**
      * Downloads a portable PC update executable.
      *
      * @param {string} downloadUrl The selected GitHub asset or raw-main URL.

@@ -172,5 +172,22 @@
   "log_concurrency_saved": "Simultaneous downloads set to:",
   "albums_from_artist": "Albums from {artist}",
   "popular_songs_from_artist": "Most popular songs from {artist}",
-  "trending_songs_from_artist": "Most trending songs from {artist}"
+  "trending_songs_from_artist": "Most trending songs from {artist}",
+  "update": "Update",
+  "update_mode": "Update Mode",
+  "update_mode_desc": "Choose how application updates are checked and installed.",
+  "update_mode_off": "Off",
+  "update_mode_off_desc": "Disable update checking completely.",
+  "update_mode_auto": "Auto",
+  "update_mode_auto_desc": "Automatically check and prompt for official updates.",
+  "update_mode_manual": "Manual",
+  "update_mode_manual_desc": "Only check for updates when manually triggered.",
+  "update_mode_developer": "Developer Mode",
+  "update_mode_developer_desc": "Select custom release tags or main branch builds.",
+  "publisher": "Publisher",
+  "license": "License",
+  "check_for_updates": "Check for Updates",
+  "developer_target": "Developer Target",
+  "release_version": "Release Version",
+  "main_branch": "Main Branch"
 }

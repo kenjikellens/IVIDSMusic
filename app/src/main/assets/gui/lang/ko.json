@@ -115,5 +115,22 @@
   "queue_empty": "대기열이 비어 있습니다",
   "albums_from_artist": "{artist}의 앨범",
   "popular_songs_from_artist": "{artist}의 인기 곡",
-  "trending_songs_from_artist": "{artist}의 트렌딩 곡"
+  "trending_songs_from_artist": "{artist}의 트렌딩 곡",
+  "update": "업데이트",
+  "update_mode": "업데이트 모드",
+  "update_mode_desc": "업데이트 확인 및 설치 방식을 선택합니다.",
+  "update_mode_off": "끄기",
+  "update_mode_off_desc": "업데이트 확인을 완전 비활성화합니다.",
+  "update_mode_auto": "자동",
+  "update_mode_auto_desc": "공식 업데이트를 자동으로 확인합니다.",
+  "update_mode_manual": "수동",
+  "update_mode_manual_desc": "수동으로 실행할 때만 확인합니다.",
+  "update_mode_developer": "개발자 모드",
+  "update_mode_developer_desc": "특정 릴리스 버전을 선택하거나 main 브랜치를 선택합니다.",
+  "publisher": "게시자",
+  "license": "라이선스",
+  "check_for_updates": "업데이트 확인",
+  "developer_target": "개발자 타겟",
+  "release_version": "릴리스 버전",
+  "main_branch": "Main 브랜치"
 }

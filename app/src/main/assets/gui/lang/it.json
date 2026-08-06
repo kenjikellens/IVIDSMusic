@@ -108,5 +108,22 @@
   "queue_empty": "La coda è vuota",
   "albums_from_artist": "Album di {artist}",
   "popular_songs_from_artist": "Brani più popolari di {artist}",
-  "trending_songs_from_artist": "Brani di tendenza di {artist}"
+  "trending_songs_from_artist": "Brani di tendenza di {artist}",
+  "update": "Aggiornamento",
+  "update_mode": "Modalità di aggiornamento",
+  "update_mode_desc": "Scegli come verificare gli aggiornamenti.",
+  "update_mode_off": "Disattivato",
+  "update_mode_off_desc": "Disattiva controllo aggiornamenti.",
+  "update_mode_auto": "Auto",
+  "update_mode_auto_desc": "Verifica automaticamente aggiornamenti.",
+  "update_mode_manual": "Manuale",
+  "update_mode_manual_desc": "Verifica solo manualmente.",
+  "update_mode_developer": "Modalità Sviluppatore",
+  "update_mode_developer_desc": "Seleziona release specifiche o main branch.",
+  "publisher": "Editore",
+  "license": "Licenza",
+  "check_for_updates": "Controlla aggiornamenti",
+  "developer_target": "Target Sviluppatore",
+  "release_version": "Versione Release",
+  "main_branch": "Ramo Main"
 }

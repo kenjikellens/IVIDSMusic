@@ -108,5 +108,22 @@
   "queue_empty": "Очередь пуста",
   "albums_from_artist": "Альбомы {artist}",
   "popular_songs_from_artist": "Популярные треки {artist}",
-  "trending_songs_from_artist": "Трендовые треки {artist}"
+  "trending_songs_from_artist": "Трендовые треки {artist}",
+  "update": "Обновление",
+  "update_mode": "Режим обновления",
+  "update_mode_desc": "Выберите способ проверки обновлений.",
+  "update_mode_off": "Выкл",
+  "update_mode_off_desc": "Отключить проверку обновлений.",
+  "update_mode_auto": "Авто",
+  "update_mode_auto_desc": "Автоматическая проверка обновлений.",
+  "update_mode_manual": "Вручную",
+  "update_mode_manual_desc": "Проверять только вручную.",
+  "update_mode_developer": "Режим разработчика",
+  "update_mode_developer_desc": "Выбор версий релизов или ветки main.",
+  "publisher": "Издатель",
+  "license": "Лицензия",
+  "check_for_updates": "Проверить обновления",
+  "developer_target": "Цель разработчика",
+  "release_version": "Версия релиза",
+  "main_branch": "Ветка Main"
 }
