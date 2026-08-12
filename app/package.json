@@ -1,6 +1,6 @@
 {
   "name": "ividsmusic-pc",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "IVIDS Music Standalone Desktop App",
   "main": "main.js",
   "scripts": {
