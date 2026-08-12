@@ -1,154 +1,126 @@
-<!-- Unified Search Input Bar (Visible only on TV/Mobile, hidden on Desktop PC) -->
-<div class="unified-search-bar" id="unified-search-bar">
-    <div class="browse-search-wrapper">
-        <img class="browse-search-icon" src="svg/search.svg" alt="">
-        <input id="browse-search-input" class="browse-search-input" type="text" placeholder="Artists, songs, albums..."
-            autocomplete="off" data-i18n="search_placeholder"
-            onkeydown="if(event.key==='Enter' && this.value.trim()) { this.blur(); window.performSearch(this.value.trim()); }">
-        <button id="search-clear-btn" class="btn btn-ghost search-clear-btn" style="display: none;">
-            <img src="svg/close.svg" alt="Clear" style="width: 14px; height: 14px; filter: brightness(0) invert(1);">
-        </button>
-    </div>
-</div>
-
-<!-- State 1: Browse Hero (No Query) -->
-<div id="browse-hero" class="browse-hero is-hidden">
-    <p class="browse-tagline" data-i18n="tagline">Your World of Music</p>
-    <h1 class="browse-hero-title" data-i18n="search">Search</h1>
-
-    <!-- Search Promo (Mini Hero style) -->
-    <div id="search-promo" class="search-hero-promo">
-        <button class="promo-close-btn" onclick="this.parentElement.remove()">
-            <img src="svg/close.svg" alt="Close">
-        </button>
-        <div class="hero-bg">
-            <div class="blob blob-1"></div>
-            <div class="blob blob-2"></div>
-        </div>
-        <div class="hero-content">
-            <h2 class="hero-title" data-i18n="start_experience_title">Start Your Experience</h2>
-            <p class="hero-desc" data-i18n="start_experience_desc">Explore millions of tracks and discover your next favorite artist.</p>
+<div class="search-page page-container fade-in">
+    <!-- Unified Search Input Bar (Visible only on TV/Mobile, hidden on Desktop PC) -->
+    <div class="unified-search-bar" id="unified-search-bar">
+        <div class="browse-search-wrapper">
+            <img class="browse-search-icon" src="svg/search.svg" alt="">
+            <input id="browse-search-input" class="browse-search-input" type="text" placeholder="Artists, songs, albums..."
+                autocomplete="off" data-i18n="search_placeholder"
+                onkeydown="if(event.key==='Enter' && this.value.trim()) { this.blur(); window.performSearch(this.value.trim()); }">
+            <button id="search-clear-btn" class="btn btn-ghost search-clear-btn" style="display: none;">
+                <img src="svg/close.svg" alt="Clear" style="width: 14px; height: 14px; filter: brightness(0) invert(1);">
+            </button>
         </div>
     </div>
 
-    <!-- Browse Categories Grid -->
-    <div class="search-categories-grid">
-        <!-- Pop -->
-        <div class="music-card card-category pop container-hover-effect" onclick="window.performSearch('Pop')">
-            <span class="category-title">Pop</span>
-            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
-        </div>
-        <!-- Hip-Hop -->
-        <div class="music-card card-category hiphop container-hover-effect" onclick="window.performSearch('Hip Hop')">
-            <span class="category-title">Hip-Hop</span>
-            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
-        </div>
-        <!-- Rock -->
-        <div class="music-card card-category rock container-hover-effect" onclick="window.performSearch('Rock')">
-            <span class="category-title">Rock</span>
-            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
-        </div>
-        <!-- Dance & Electronic -->
-        <div class="music-card card-category electronic container-hover-effect" onclick="window.performSearch('Dance')">
-            <span class="category-title">Dance</span>
-            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
-        </div>
-        <!-- Jazz -->
-        <div class="music-card card-category jazz container-hover-effect" onclick="window.performSearch('Jazz')">
-            <span class="category-title">Jazz</span>
-            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
-        </div>
-        <!-- Classical -->
-        <div class="music-card card-category classical container-hover-effect" onclick="window.performSearch('Classical')">
-            <span class="category-title">Classical</span>
-            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
-        </div>
-        <!-- Chill & Acoustic -->
-        <div class="music-card card-category chill container-hover-effect" onclick="window.performSearch('Chill')">
-            <span class="category-title">Chill</span>
-            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
-        </div>
-        <!-- Workout -->
-        <div class="music-card card-category workout container-hover-effect" onclick="window.performSearch('Workout')">
-            <span class="category-title">Workout</span>
-            <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
-        </div>
-    </div>
-</div>
+    <!-- State 1: Browse Hero (No Query) -->
+    <div id="browse-hero" class="browse-hero is-hidden">
+        <p class="browse-tagline" data-i18n="tagline">Your World of Music</p>
+        <h1 class="browse-hero-title" data-i18n="search">Search</h1>
 
-<!-- State 2: Results Header -->
-<!-- 
-  ID: results-header
-  Class: search-page-header
-  Purpose: Main container for search page heading titles and filtering controls.
--->
-<div id="results-header" class="search-page-header is-hidden">
-    <!-- 
-      Class: search-page-title-group
-      Purpose: Groups the primary 'Search Results' text and the 'Results for [query]' dynamic subtitle.
-    -->
-    <div class="search-page-title-group">
-        <h1 id="search-title" class="search-page-title" data-i18n="results_title">Search Results</h1>
-        <p id="search-subtitle" class="search-page-subtitle"></p>
-    </div>
-    <!-- 
-      ID: search-filters
-      Class: search-filter-bar
-      Purpose: Houses the horizontal categories filter chips and year capsule, supporting overflow-x scrolling.
-    -->
-    <div id="search-filters" class="search-filter-bar">
-        <button class="btn btn-ghost filter-chip active" id="filter-chip-all" onclick="window.setSearchFilter(null)" data-i18n="filter_all">All</button>
-        <button class="btn btn-ghost filter-chip" id="filter-chip-track" onclick="window.setSearchFilter('all')" data-i18n="songs">Songs</button>
-        <button class="btn btn-ghost filter-chip" id="filter-chip-artist" onclick="window.setSearchFilter('artist')" data-i18n="artists">Artists</button>
-        <button class="btn btn-ghost filter-chip" id="filter-chip-album" onclick="window.setSearchFilter('album')" data-i18n="albums">Albums</button>
-        <!-- 
-          Class: year-filter-wrapper
-          Purpose: Premium pill wrapper that houses the year calendar icon and input to filter results by year.
-        -->
-        <div class="year-filter-wrapper">
-            <img class="year-filter-icon" src="svg/library.svg" alt="Calendar">
-            <input type="number" id="year-input" placeholder="Year" class="year-filter-input" onchange="applyYearFilter()" data-i18n="year">
+        <!-- Search Promo (Mini Hero style) -->
+        <div id="search-promo" class="search-hero-promo">
+            <button class="promo-close-btn" onclick="this.parentElement.remove()">
+                <img src="svg/close.svg" alt="Close">
+            </button>
+            <div class="hero-bg">
+                <div class="blob blob-1"></div>
+                <div class="blob blob-2"></div>
+            </div>
+            <div class="hero-content">
+                <h2 class="hero-title" data-i18n="start_experience_title">Start Your Experience</h2>
+                <p class="hero-desc" data-i18n="start_experience_desc">Explore millions of tracks and discover your next favorite artist.</p>
+            </div>
         </div>
-    </div>
-</div>
 
-
-<!-- State 3: Dynamic Results container -->
-<div id="results-rows-container" class="is-hidden">
-    <div id="artists-row-container" class="row-scroll-wrapper is-hidden">
-        <div class="row-header">
-            <h2 class="row-title" data-i18n="artists">Artists</h2>
-            <a class="more-link" onclick="setSearchFilter('artist')"><span data-i18n="see_all">See all</span></a>
+        <!-- Browse Categories Grid -->
+        <div class="search-categories-grid">
+            <!-- Pop -->
+            <div class="music-card card-category pop container-hover-effect" onclick="window.performSearch('Pop')">
+                <span class="category-title">Pop</span>
+                <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
+            </div>
+            <!-- Hip-Hop -->
+            <div class="music-card card-category hiphop container-hover-effect" onclick="window.performSearch('Hip Hop')">
+                <span class="category-title">Hip-Hop</span>
+                <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
+            </div>
+            <!-- Rock -->
+            <div class="music-card card-category rock container-hover-effect" onclick="window.performSearch('Rock')">
+                <span class="category-title">Rock</span>
+                <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
+            </div>
+            <!-- Dance & Electronic -->
+            <div class="music-card card-category electronic container-hover-effect" onclick="window.performSearch('Dance')">
+                <span class="category-title">Dance</span>
+                <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
+            </div>
+            <!-- Jazz -->
+            <div class="music-card card-category jazz container-hover-effect" onclick="window.performSearch('Jazz')">
+                <span class="category-title">Jazz</span>
+                <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
+            </div>
+            <!-- Classical -->
+            <div class="music-card card-category classical container-hover-effect" onclick="window.performSearch('Classical')">
+                <span class="category-title">Classical</span>
+                <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
+            </div>
+            <!-- Chill & Acoustic -->
+            <div class="music-card card-category chill container-hover-effect" onclick="window.performSearch('Chill')">
+                <span class="category-title">Chill</span>
+                <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
+            </div>
+            <!-- Workout -->
+            <div class="music-card card-category workout container-hover-effect" onclick="window.performSearch('Workout')">
+                <span class="category-title">Workout</span>
+                <img src="svg/music.svg" alt="" class="category-bg-art" style="filter: brightness(0) invert(1); opacity: 0.15;">
+            </div>
         </div>
-        <div class="scroll-row" id="artists-results"></div>
     </div>
 
-    <div id="songs-row-container" class="row-scroll-wrapper is-hidden">
-        <div class="row-header">
-            <h2 class="row-title" data-i18n="songs">Songs</h2>
-            <a class="more-link" onclick="setSearchFilter('all')"><span data-i18n="see_all">See all</span></a>
+    <!-- State 2: Results Header -->
+    <div id="results-header" class="search-page-header is-hidden">
+        <div class="search-page-title-group">
+            <h1 id="search-title" class="search-page-title" data-i18n="results_title">Search Results</h1>
+            <p id="search-subtitle" class="search-page-subtitle"></p>
         </div>
-        <div class="scroll-row" id="songs-results"></div>
     </div>
 
-    <div id="albums-row-container" class="row-scroll-wrapper is-hidden">
-        <div class="row-header">
-            <h2 class="row-title" data-i18n="albums">Albums</h2>
-            <a class="more-link" onclick="setSearchFilter('album')"><span data-i18n="see_all">See all</span></a>
+    <!-- State 3: Dynamic Results container -->
+    <div id="results-rows-container" class="is-hidden">
+        <div id="artists-row-container" class="row-scroll-wrapper is-hidden">
+            <div class="row-header">
+                <h2 class="row-title" data-i18n="artists">Artists</h2>
+                <button class="btn btn-ghost more-link" onclick="window.setSearchFilter('artist')"><span data-i18n="see_all">See all</span></button>
+            </div>
+            <div class="scroll-row" id="artists-results"></div>
         </div>
-        <div class="scroll-row" id="albums-results"></div>
-    </div>
-</div>
 
-<!-- State 4: Grid View -->
-<div id="single-category-grid" class="is-hidden">
-    <div class="grid-header">
-        <button class="btn btn-secondary back-button" onclick="setSearchFilter(null)" data-i18n="back">Back</button>
-        <h2 class="row-title" id="grid-title" data-i18n="results_title">Results</h2>
+        <div id="songs-row-container" class="row-scroll-wrapper is-hidden">
+            <div class="row-header">
+                <h2 class="row-title" data-i18n="songs">Songs</h2>
+                <button class="btn btn-ghost more-link" onclick="window.setSearchFilter('song')"><span data-i18n="see_all">See all</span></button>
+            </div>
+            <div class="scroll-row" id="songs-results"></div>
+        </div>
+
+        <div id="albums-row-container" class="row-scroll-wrapper is-hidden">
+            <div class="row-header">
+                <h2 class="row-title" data-i18n="albums">Albums</h2>
+                <button class="btn btn-ghost more-link" onclick="window.setSearchFilter('album')"><span data-i18n="see_all">See all</span></button>
+            </div>
+            <div class="scroll-row" id="albums-results"></div>
+        </div>
     </div>
-    <div class="grid-results" id="grid-results"></div>
-    <div id="load-more-container" class="is-hidden">
-        <button id="load-more-btn" class="btn btn-secondary" onclick="loadMoreResults()" data-i18n="load_more">Load
-            More</button>
+
+    <!-- State 4: Grid View -->
+    <div id="single-category-grid" class="is-hidden">
+        <div class="grid-header">
+            <button class="btn btn-secondary back-button" onclick="setSearchFilter(null)" data-i18n="back">Back</button>
+            <h2 class="row-title" id="grid-title" data-i18n="results_title">Results</h2>
+        </div>
+        <div class="grid-results" id="grid-results"></div>
+        <div id="load-more-container" class="is-hidden">
+            <button id="load-more-btn" class="btn btn-secondary" onclick="loadMoreResults()" data-i18n="load_more">Load More</button>
+        </div>
     </div>
 </div>

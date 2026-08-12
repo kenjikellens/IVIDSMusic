@@ -37,8 +37,15 @@ export const SettingsManager = {
      * @param {number} value 
      */
     applyScale(value) {
-        // Apply as user multiplier; base scale is controlled by media queries
+        // Apply user scale multiplier and update --ui-user-scale & --ui-scale
         document.documentElement.style.setProperty('--ui-user-scale', String(value));
+        
+        try {
+            const baseScaleStr = getComputedStyle(document.documentElement).getPropertyValue('--ui-base-scale');
+            const baseScale = parseFloat(baseScaleStr) || 1;
+            document.documentElement.style.setProperty('--ui-scale', String(value * baseScale));
+        } catch (e) {}
+
         // Dispatch event for components that might need manual adjustment
         window.dispatchEvent(new CustomEvent('iv-scale-changed', { detail: { userScale: value } }));
     },
@@ -65,10 +72,14 @@ export const SettingsManager = {
             if (!this._scaleListenerBound) {
                 document.body.addEventListener('click', (ev) => {
                     const target = ev.target;
+                    if (!target || !target.closest) return;
 
-                    if (target.id === 'scale-decrease') {
+                    const decBtn = target.closest('#scale-decrease');
+                    const incBtn = target.closest('#scale-increase');
+
+                    if (decBtn) {
                         this.setScale(this.getScale() - 0.1);
-                    } else if (target.id === 'scale-increase') {
+                    } else if (incBtn) {
                         this.setScale(this.getScale() + 0.1);
                     }
                 });

@@ -1,4 +1,5 @@
 import { ProxyService } from './ProxyService.js';
+import { DTOMapper } from '../domain/DTOMapper.js';
 
 /**
  * iTunesProvider handles supplemental music metadata searches via iTunes Search API.
@@ -20,18 +21,11 @@ export class iTunesProvider {
             const data = await response.json();
             if (!data.results) return [];
 
-            return data.results.map(item => ({
-                type: 'song',
-                id: item.trackId || item.collectionId,
-                title: item.trackName || item.collectionName,
-                artist: item.artistName || 'Unknown',
-                album: item.collectionName || 'Unknown',
-                cover: item.artworkUrl100 ? item.artworkUrl100.replace('100x100bb', '600x600bb') : '',
-                previewUrl: item.previewUrl
-            }));
+            return data.results.map(item => DTOMapper.toSong(item));
         } catch (error) {
             console.error('[iTunesProvider] Search error:', error);
             return [];
         }
     }
 }
+

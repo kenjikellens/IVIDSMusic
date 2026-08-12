@@ -65,7 +65,8 @@ export class CardComponentFactory {
     static hydrateCard(card, track) {
         if (!card || !track) return card;
 
-        card.className = `music-card container-hover-effect type-${track.type || 'song'}`;
+        const isArtist = track.type === 'artist';
+        card.className = `music-card ${isArtist ? '' : 'container-hover-effect'} type-${track.type || 'song'}`;
         card.tabIndex = 0;
         card.dataset.trackJson = JSON.stringify(track);
 
@@ -78,7 +79,7 @@ export class CardComponentFactory {
 
         /* Card HTML template — play button positioned bottom-right inside image box */
         card.innerHTML = `
-            <div class="card-image-box">
+            <div class="card-image-box ${isArtist ? 'container-hover-effect' : ''}">
                 ${track.type === 'artist' ? '<div class="ivids-loader poster-loader"></div>' : ''}
                 <img data-src="${cover}" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1 1'%3E%3C/svg%3E" alt="${title}" class="poster" decoding="async" style="${track.type === 'artist' ? 'opacity: 0' : ''}">
                 ${(track.type === 'song' || track.type === 'album' || !track.type) ? `
@@ -114,36 +115,34 @@ export class CardComponentFactory {
         }
 
         /* Artist image lazy-load with decode animation & color extraction */
-        if (track.type === 'artist' && MusicRepository.getArtistImage) {
-            MusicRepository.getArtistImage(artistName).then(imgUrl => {
-                const loader = card.querySelector('.poster-loader');
-                if (imgUrl && img) {
-                    img.src = imgUrl;
-                    if (MusicRepository.getAverageColor) {
-                        MusicRepository.getAverageColor(imgUrl).then(color => {
-                            if (color) card.style.setProperty('--card-color', color);
-                        }).catch(() => {});
+        if (track.type === 'artist') {
+            const loader = card.querySelector('.poster-loader');
+            const hasValidCover = cover && !cover.includes('svg/user.svg') && !cover.includes('gemini-logo.png');
+
+            if (hasValidCover && img) {
+                img.src = cover;
+                img.style.opacity = '1';
+                if (loader) loader.remove();
+            } else if (MusicRepository.getArtistImage) {
+                MusicRepository.getArtistImage(artistName).then(imgUrl => {
+                    if (imgUrl && img) {
+                        img.src = imgUrl;
+                        if (MusicRepository.getAverageColor) {
+                            MusicRepository.getAverageColor(imgUrl).then(c => {
+                                if (c) card.style.setProperty('--card-color', c);
+                            }).catch(() => {});
+                        }
                     }
-                    if (img.decode) {
-                        img.decode().then(() => {
-                            img.style.opacity = '1';
-                            if (loader) loader.remove();
-                        }).catch(() => {
-                            img.style.opacity = '1';
-                            if (loader) loader.remove();
-                        });
-                    } else {
-                        img.onload = () => { img.style.opacity = '1'; if (loader) loader.remove(); };
-                    }
-                } else if (img) {
-                    img.style.opacity = '1';
+                    if (img) img.style.opacity = '1';
                     if (loader) loader.remove();
-                }
-            }).catch(() => {
-                const loader = card.querySelector('.poster-loader');
+                }).catch(() => {
+                    if (img) img.style.opacity = '1';
+                    if (loader) loader.remove();
+                });
+            } else {
                 if (img) img.style.opacity = '1';
                 if (loader) loader.remove();
-            });
+            }
         }
 
         /* Play button click → start playback directly (stopPropagation prevents card navigation) */

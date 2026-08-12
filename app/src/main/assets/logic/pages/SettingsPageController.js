@@ -1,5 +1,7 @@
 import { BasePageController } from './BasePageController.js';
 import { SettingsManager } from '../settings-manager.js';
+import { LanguageManager } from '../language-manager.js';
+
 
 /**
  * SettingsPageController manages application settings, theme toggles, and i18n language options.
@@ -17,9 +19,11 @@ export class SettingsPageController extends BasePageController {
 
     /** Binds settings UI interaction handlers */
     bindEvents() {
+        SettingsManager.bindScaleUI();
         LanguageManager.bindLanguageUI();
         this.bindUpdateModeUI();
     }
+
 
     /** Binds Update Mode and Developer Versions modal interactions */
     bindUpdateModeUI() {

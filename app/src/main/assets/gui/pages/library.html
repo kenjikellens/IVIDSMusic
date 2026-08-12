@@ -22,13 +22,13 @@
     <!-- Action Bar -->
     <div class="library-action-bar">
         <div class="action-left">
-            <button id="library-play-all" class="btn btn-primary" onclick="YouTubePlayer.playAllSaved()">
+            <button id="library-play-all" class="btn btn-primary" onclick="window.MediaPlayer && window.MediaPlayer.playQueue()">
                 <svg class="btn-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                     <path d="M8 5v14l11-7z" />
                 </svg>
                 <span data-i18n="play_all">Play All</span>
             </button>
-            <button id="library-shuffle" class="btn btn-secondary" onclick="YouTubePlayer.shuffleSaved()">
+            <button id="library-shuffle" class="btn btn-secondary" onclick="window.MediaPlayer && window.MediaPlayer.shuffle()">
                 <img src="svg/shuffle.svg" alt="Shuffle" class="btn-icon">
                 <span data-i18n="shuffle">Shuffle</span>
             </button>
@@ -37,7 +37,7 @@
             <div class="library-search-box">
                 <img src="svg/search.svg" alt="" class="lib-search-icon">
                 <input type="text" id="library-track-search" placeholder="Search in library..."
-                    data-i18n="search_library_placeholder" oninput="PageSystem.filterLibrary(this.value)">
+                    data-i18n="search_library_placeholder">
             </div>
         </div>
     </div>
@@ -46,10 +46,10 @@
     <div id="recent-row-container" class="row-scroll-wrapper is-hidden">
         <div class="row-header">
             <h2 class="row-title" data-i18n="recently_listened">Recently Listened</h2>
-            <button class="btn btn-ghost btn-text-only" onclick="PageSystem.clearHistory()" data-i18n="clear_all">Clear All</button>
+            <button class="btn btn-ghost btn-text-only" id="library-clear-history-btn" data-i18n="clear_all">Clear All</button>
         </div>
         <div id="library-recent-list" class="scroll-row">
-            <!-- Rendered by pages.js -->
+            <!-- Rendered dynamically -->
         </div>
     </div>
 
@@ -57,7 +57,7 @@
     <div id="playlists-row-container" class="row-scroll-wrapper">
         <div class="row-header">
             <h2 class="row-title" data-i18n="playlists">Playlists</h2>
-            <button id="playlist-create-btn" class="btn btn-secondary small" onclick="PageSystem.openCreatePlaylistModal()">
+            <button id="playlist-create-btn" class="btn btn-secondary small">
                 <span data-i18n="create_playlist">+ Create</span>
             </button>
         </div>
@@ -71,16 +71,16 @@
         </div>
 
         <div id="library-playlists-list" class="scroll-row is-hidden">
-            <!-- Rendered by pages.js -->
+            <!-- Rendered dynamically -->
         </div>
     </div>
 
     <!-- Create Playlist Modal -->
-    <div id="playlist-modal-overlay" class="modal-overlay is-hidden" onclick="PageSystem.closeCreatePlaylistModal(event)">
+    <div id="playlist-modal-overlay" class="modal-overlay is-hidden">
         <div class="modal-content glassmorphism">
             <div class="modal-header">
                 <h3 data-i18n="create_playlist">Create Playlist</h3>
-                <button class="btn btn-ghost modal-close-btn" onclick="PageSystem.closeCreatePlaylistModal(event, true)">&times;</button>
+                <button class="btn btn-ghost modal-close-btn" id="playlist-modal-close-btn">&times;</button>
             </div>
             <div class="modal-body">
                 <div class="input-group">
@@ -93,11 +93,12 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-secondary" onclick="PageSystem.closeCreatePlaylistModal(event, true)" data-i18n="close">Close</button>
-                <button class="btn btn-primary" onclick="PageSystem.submitCreatePlaylist()" data-i18n="profile_save">Save</button>
+                <button class="btn btn-secondary" id="playlist-modal-cancel-btn" data-i18n="close">Close</button>
+                <button class="btn btn-primary" id="playlist-modal-save-btn" data-i18n="profile_save">Save</button>
             </div>
         </div>
     </div>
+
 
     <div class="row-scroll-wrapper">
         <div class="row-header">

@@ -5,25 +5,62 @@ import { InvidiousResolver } from './InvidiousResolver.js';
 
 /**
  * MusicRepositoryService provides a unified facade for metadata searching, charts, genres, and stream resolution.
- * All memory caching has been removed to ensure real-time, live data on every query.
+ * Utilizes high-performance TTL in-memory caching for category rows and search queries.
  */
 export class MusicRepositoryService extends BaseService {
     #deezer = new DeezerProvider();
     #itunes = new iTunesProvider();
     #invidious = new InvidiousResolver();
+    #cache = new Map();
+    #ttlMs = 15 * 60 * 1000; // 15 minutes TTL
 
-    /**
-     * Universal metadata search across music providers without in-memory caching.
-     */
-    async search(query = 'top hits', limit = 20, type = 'all', yearRange = null, offset = 0, unique = false, signal = null) {
-        return await this.#deezer.search(query, limit, type, yearRange, offset, unique, signal);
+    #getCache(key) {
+        const entry = this.#cache.get(key);
+        if (!entry) return null;
+        if (Date.now() - entry.timestamp > this.#ttlMs) {
+            this.#cache.delete(key);
+            return null;
+        }
+        return entry.data;
+    }
+
+    #setCache(key, data) {
+        if (this.#cache.size > 200) {
+            const oldestKey = this.#cache.keys().next().value;
+            this.#cache.delete(oldestKey);
+        }
+        this.#cache.set(key, { data, timestamp: Date.now() });
     }
 
     /**
-     * Fetch category rows using genre chart endpoints directly.
+     * Universal metadata search across music providers with in-memory TTL caching.
+     */
+    async search(query = 'top hits', limit = 20, type = 'all', yearRange = null, offset = 0, unique = false, signal = null) {
+        const cacheKey = `search:${query}:${limit}:${type}:${yearRange}:${offset}:${unique}`;
+        const cached = this.#getCache(cacheKey);
+        if (cached) return cached;
+
+        const results = await this.#deezer.search(query, limit, type, yearRange, offset, unique, signal);
+        if (results && results.length > 0) {
+            this.#setCache(cacheKey, results);
+        }
+        return results;
+    }
+
+    /**
+     * Fetch category rows using genre chart endpoints directly with TTL caching.
      */
     async getCategories(genres, signal = null) {
-        return await this.#deezer.getCategories(genres, signal);
+        const genreKey = genres ? genres.join(',') : 'default';
+        const cacheKey = `categories:${genreKey}`;
+        const cached = this.#getCache(cacheKey);
+        if (cached) return cached;
+
+        const categories = await this.#deezer.getCategories(genres, signal);
+        if (categories && categories.length > 0) {
+            this.#setCache(cacheKey, categories);
+        }
+        return categories;
     }
 
     /**
@@ -37,7 +74,15 @@ export class MusicRepositoryService extends BaseService {
      * Retrieves top chart tracks directly.
      */
     async getChart(limit = 20) {
-        return await this.#deezer.getChart(limit);
+        const cacheKey = `chart:${limit}`;
+        const cached = this.#getCache(cacheKey);
+        if (cached) return cached;
+
+        const chart = await this.#deezer.getChart(limit);
+        if (chart && chart.length > 0) {
+            this.#setCache(cacheKey, chart);
+        }
+        return chart;
     }
 
     /**
@@ -101,3 +146,4 @@ export class MusicRepositoryService extends BaseService {
 /** MusicRepository singleton instance */
 export const MusicRepository = new MusicRepositoryService();
 export const MusicAPI = MusicRepository;
+

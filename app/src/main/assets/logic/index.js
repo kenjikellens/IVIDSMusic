@@ -28,6 +28,16 @@ export class Application {
                 TVNav.init()
             ]).catch(err => console.error('[IVIDS Music] Service init warning:', err));
 
+            // Enable horizontal mouse wheel scrolling for all .scroll-row containers
+            document.addEventListener('wheel', (e) => {
+                const scrollRow = e.target.closest('.scroll-row');
+                if (!scrollRow) return;
+                if (e.deltaY !== 0 && scrollRow.scrollWidth > scrollRow.clientWidth) {
+                    e.preventDefault();
+                    scrollRow.scrollLeft += e.deltaY;
+                }
+            }, { passive: false });
+
             console.log('[IVIDS Music] Application booted successfully.');
         } catch (err) {
             console.error('[IVIDS Music] Application bootstrap error:', err);

@@ -10,15 +10,14 @@ This document defines the strict, standardized protocol for launching new releas
 
 ## 🛠️ Step-by-Step Release Protocol
 
-### 1. Inquire the Target Version and Release Type (Mandatory Step)
-- **ACTION**: The AI Agent MUST ask the developer/user explicitly:
-  1. What the target version should be (or ask to calculate it using semantic versioning rules).
-  2. Whether the release is a **Beta**, **Prerelease**, or a full **Production Release** (i.e. final build). Do NOT assume, auto-select, or hardcode the release type without developer confirmation.
+### 1. Inquire the Target Version (Mandatory Step)
+- **ACTION**: The AI Agent MUST ask the developer/user explicitly what the target version should be (or ask to calculate it using semantic versioning rules).
+- **Release Type**: All IVIDS Music releases are **always full Production releases**. NEVER create a GitHub prerelease or mark a release as Beta/Prerelease. Do NOT ask the user about release type.
 - **Semantic Versioning Bumps**: If the user specifies the type of release bump instead of a direct version string, locate the current version tag (`vX.Y.Z`) and calculate the target version as follows:
   - **Small release**: Increment the patch/smallest digit `Z` by +1 (e.g., `v0.2.2` -> `v0.2.3`).
   - **Medium release**: Increment the minor/middle digit `Y` by +1 and reset `Z` to 0 (e.g., `v0.2.2` -> `v0.3.0`).
   - **Large release**: Increment the major/first digit `X` by +1 and reset `Y` and `Z` to 0 (e.g., `v0.2.2` -> `v1.0.0`).
-- **Title and Description Generation**: Upon receiving or calculating the version name and release type, the Agent must formulate a high-quality, professional release title (e.g., `Release v1.1.0 (Beta)` or `Release v1.1.0`) and a detailed, feature-rich release description highlighting all visual, audio, performance, and core logic improvements.
+- **Title and Description Generation**: Upon receiving or calculating the version name, the Agent must formulate a high-quality, professional release title (e.g., `Release v1.1.0`) and a detailed, feature-rich release description highlighting all visual, audio, performance, and core logic improvements.
 
 ### 2. Clean Temporary Build Folders and Run the Release Packager Script
 - **ACTION**: Clean up existing temp build/output directories to ensure a clean build and avoid bloated release caches, then execute the release script:

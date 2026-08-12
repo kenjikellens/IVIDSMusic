@@ -12,17 +12,19 @@ import { DownloaderPageController } from './pages/DownloaderPageController.js';
 
 /**
  * RouterService orchestrates SPA page transitions and PageController lifecycle.
- * In-memory template caching has been removed to ensure fresh page HTML loads.
+ * Features in-memory HTML template caching and idle route prewarming for 0ms latency transitions.
  */
 export class RouterService extends BaseService {
     #currentPage = null;
     #currentParams = null;
     #activeController = null;
     #controllers = new Map();
+    #templateCache = new Map();
 
     constructor() {
         super();
         this.#registerControllers();
+        this.prewarmTemplates();
     }
 
     #registerControllers() {
@@ -44,14 +46,54 @@ export class RouterService extends BaseService {
     get currentParams() { return this.#currentParams; }
 
     /**
-     * No-op stub for backward compatibility.
+     * Prewarms static HTML templates during browser idle periods.
+     */
+    prewarmTemplates() {
+        const pages = ['home', 'search', 'recommended', 'library', 'downloader', 'settings', 'artist', 'album', 'song'];
+        const idleCallback = typeof window !== 'undefined' && window.requestIdleCallback ? window.requestIdleCallback : (fn) => setTimeout(fn, 1000);
+
+        idleCallback(() => {
+            pages.forEach(async (page) => {
+                if (!this.#templateCache.has(page)) {
+                    try {
+                        const res = await fetch(`pages/${page}.html`);
+                        if (res.ok) {
+                            const html = await res.text();
+                            this.#templateCache.set(page, html);
+                        }
+                    } catch (e) {
+                        // Silent prewarm catch
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+     * Prefetches and caches specific page HTML template.
+     * @param {string} pageName
+     */
+    async prefetchPage(pageName) {
+        if (this.#templateCache.has(pageName)) return;
+        try {
+            const response = await fetch(`pages/${pageName}.html`);
+            if (response.ok) {
+                const html = await response.text();
+                this.#templateCache.set(pageName, html);
+            }
+        } catch (e) {}
+    }
+
+    /**
+     * Backward compatibility stub for page prefetching.
      */
     async prefetchAllPages() {
+        this.prewarmTemplates();
         return Promise.resolve();
     }
 
     /**
-     * Dynamically loads a specified page into the main view with direct live HTML fetching.
+     * Dynamically loads a specified page into the main view with zero latency.
      * @param {string} pageName
      * @param {Object} [params]
      */
@@ -69,9 +111,13 @@ export class RouterService extends BaseService {
         }
 
         try {
-            const response = await fetch(`pages/${pageName}.html`, { cache: 'no-store' });
-            if (!response.ok) throw new Error(`Could not load page: ${pageName}`);
-            const html = await response.text();
+            let html = this.#templateCache.get(pageName);
+            if (!html) {
+                const response = await fetch(`pages/${pageName}.html`);
+                if (!response.ok) throw new Error(`Could not load page: ${pageName}`);
+                html = await response.text();
+                this.#templateCache.set(pageName, html);
+            }
 
             this.#currentPage = pageName;
             this.#currentParams = params;
@@ -85,9 +131,11 @@ export class RouterService extends BaseService {
             LanguageManager.translateUI(mainView);
             if (window.Loader) window.Loader.init();
 
-            document.querySelectorAll('.nav-links a').forEach(link => {
+            document.querySelectorAll('.nav-links a, .bottom-nav a').forEach(link => {
                 link.classList.remove('active');
-                if (link.id === `nav-${pageName}`) link.classList.add('active');
+                if (link.id === `nav-${pageName}` || link.id === `mobile-nav-${pageName}`) {
+                    link.classList.add('active');
+                }
             });
 
             const controller = this.#controllers.get(pageName);
@@ -112,3 +160,4 @@ export const Router = new RouterService();
 if (typeof window !== 'undefined') {
     window.Router = Router;
 }
+

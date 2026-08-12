@@ -3,7 +3,9 @@
  * Locally manages interest scores for tracks, artists, and genres.
  */
 
-import { MusicAPI } from './api.js';
+import { MusicRepository } from './api/MusicRepository.js';
+const MusicAPI = MusicRepository;
+
 
 const STORAGE_KEY = 'iv_discovery_scores';
 const MAX_SCORE = 100;

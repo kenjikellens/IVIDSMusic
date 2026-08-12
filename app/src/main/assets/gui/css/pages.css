@@ -1,0 +1,108 @@
+/* ==========================================================================
+   4. PAGE-SPECIFIC LAYOUTS & OVERRIDES
+   ========================================================================== */
+
+/* Settings Page Layout */
+.settings-container {
+    max-width: calc(720px * var(--ui-scale));
+    margin: 0 auto;
+    padding: calc(24px * var(--ui-scale)) calc(16px * var(--ui-scale));
+}
+
+.settings-section-title {
+    font-size: calc(1.1rem * var(--ui-scale));
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: calc(16px * var(--ui-scale));
+    display: flex;
+    align-items: center;
+    gap: calc(10px * var(--ui-scale));
+}
+
+.settings-section-icon {
+    width: calc(20px * var(--ui-scale));
+    height: calc(20px * var(--ui-scale));
+    filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
+}
+
+.settings-section {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: calc(16px * var(--ui-scale));
+    padding: calc(8px * var(--ui-scale)) calc(20px * var(--ui-scale));
+    margin-bottom: calc(32px * var(--ui-scale));
+}
+
+.settings-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(16px * var(--ui-scale)) 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-info {
+    flex: 1;
+    margin-right: calc(16px * var(--ui-scale));
+}
+
+.settings-label {
+    font-size: calc(0.95rem * var(--ui-scale));
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: calc(4px * var(--ui-scale));
+}
+
+.settings-desc {
+    font-size: calc(0.82rem * var(--ui-scale));
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+/* Un-contained Plain Text About Section */
+.about-plain-info {
+    font-size: calc(0.85rem * var(--ui-scale));
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: calc(4px * var(--ui-scale));
+    padding: calc(4px * var(--ui-scale)) calc(8px * var(--ui-scale));
+    line-height: 1.5;
+}
+
+/* For You Hero Banner */
+.foryou-container {
+    position: relative;
+    min-height: 100%;
+}
+
+.hero {
+    position: relative;
+    border-radius: calc(16px * var(--ui-scale));
+    background: rgba(10, 10, 10, 0.3);
+    backdrop-filter: blur(35px);
+    -webkit-backdrop-filter: blur(35px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    min-height: calc(280px * var(--ui-scale));
+    display: flex;
+    align-items: flex-end;
+    padding: calc(40px * var(--ui-scale));
+    margin: 0 calc(20px * var(--ui-scale)) calc(40px * var(--ui-scale));
+}
+
+.hero-title {
+    font-size: calc(2.4rem * var(--ui-scale));
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: calc(12px * var(--ui-scale));
+    background: linear-gradient(135deg, var(--text-main) 60%, var(--primary-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+

@@ -1,4 +1,5 @@
 import { ProxyService } from './ProxyService.js';
+import { DTOMapper } from '../domain/DTOMapper.js';
 
 /**
  * DeezerProvider handles music discovery, metadata searching, genres, and chart endpoints via Deezer API.
@@ -36,34 +37,9 @@ export class DeezerProvider {
             if (!data.data) return [];
 
             let results = data.data.map(item => {
-                if (type === 'artist') {
-                    return {
-                        type: 'artist',
-                        id: item.id,
-                        name: item.name,
-                        cover: item.picture_medium || item.picture_big,
-                        genre: 'Artist'
-                    };
-                } else if (type === 'album') {
-                    return {
-                        type: 'album',
-                        id: item.id,
-                        title: item.title,
-                        artist: item.artist?.name || 'Unknown',
-                        cover: item.cover_medium || item.cover_big
-                    };
-                } else {
-                    return {
-                        type: 'song',
-                        id: item.id,
-                        title: item.title_short || item.title,
-                        artist: item.artist?.name || 'Unknown',
-                        artistId: item.artist?.id || null,
-                        album: item.album?.title || 'Unknown',
-                        cover: item.album?.cover_medium || item.album?.cover_big,
-                        previewUrl: item.preview
-                    };
-                }
+                if (type === 'artist') return DTOMapper.toArtist(item);
+                if (type === 'album') return DTOMapper.toAlbum(item);
+                return DTOMapper.toSong(item);
             });
 
             if (unique) {
@@ -101,16 +77,7 @@ export class DeezerProvider {
 
                     let tracks = [];
                     if (data && data.data) {
-                        tracks = data.data.map(item => ({
-                            type: 'song',
-                            id: item.id,
-                            title: item.title_short || item.title,
-                            artist: item.artist?.name || 'Unknown',
-                            artistId: item.artist?.id || null,
-                            album: item.album?.title || 'Unknown',
-                            cover: item.album?.cover_medium || item.album?.cover_big,
-                            previewUrl: item.preview
-                        }));
+                        tracks = data.data.map(item => DTOMapper.toSong(item));
                     }
 
                     // Variety filter: max 1 track per artist
@@ -148,16 +115,7 @@ export class DeezerProvider {
             const data = await response.json();
             if (!data.data) return [];
 
-            return data.data.map(item => ({
-                type: 'song',
-                id: item.id,
-                title: item.title_short || item.title,
-                artist: item.artist?.name || 'Unknown',
-                artistId: item.artist?.id || null,
-                album: item.album?.title || 'Unknown',
-                cover: item.album?.cover_medium || item.album?.cover_big,
-                previewUrl: item.preview
-            }));
+            return data.data.map(item => DTOMapper.toSong(item));
         } catch (error) {
             if (error.name !== 'AbortError') {
                 console.error('[DeezerProvider] Chart error:', error);
@@ -166,3 +124,4 @@ export class DeezerProvider {
         }
     }
 }
+
