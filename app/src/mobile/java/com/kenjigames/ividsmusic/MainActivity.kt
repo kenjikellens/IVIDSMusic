@@ -9,6 +9,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.webkit.WebViewAssetLoader
 import okhttp3.OkHttpClient
@@ -22,7 +23,7 @@ import java.util.concurrent.TimeUnit
 
 /**
  * Main Activity container hosting the IVIDS Music web interface for the Android Mobile app flavor (WebView wrapper).
- * Sets up a fullscreen WebView, registers JavaScript interfaces (AndroidAPI and AndroidUpdate),
+ * Sets up an edge-to-edge fullscreen WebView, registers JavaScript interfaces (AndroidAPI and AndroidUpdate),
  * and intercepts network requests to perform native proxy networking, stream resolution, and local track storage.
  */
 class MainActivity : AppCompatActivity() {
@@ -52,6 +53,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 

@@ -43,6 +43,8 @@
     --main-vertical-padding: calc(64px * var(--ui-scale));
 
     --bottom-nav-height: 0px;
+    --safe-area-top: env(safe-area-inset-top, 0px);
+    --safe-area-bottom: env(safe-area-inset-bottom, 0px);
 
     --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
     --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
