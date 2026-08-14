@@ -124,10 +124,11 @@ html {
     box-sizing: border-box;
 }
 
-.bottom-nav-item:hover,
 .bottom-nav-item.active {
-    color: var(--primary-color);
-    background: rgba(255, 255, 255, 0.03);
+    color: #ffffff !important;
+    background: #0288d1 !important;
+    border-radius: calc(14px * var(--ui-scale)) !important;
+    margin: calc(6px * var(--ui-scale)) calc(4px * var(--ui-scale)) !important;
 }
 
 .bottom-nav-item img.nav-icon {
@@ -137,8 +138,8 @@ html {
 }
 
 .bottom-nav-item.active img.nav-icon {
-    opacity: 1;
-    filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%);
+    opacity: 1 !important;
+    filter: brightness(0) invert(1) !important;
 }
 
 @media (orientation: portrait) and (max-width: 768px),
@@ -564,11 +565,16 @@ img.player-volume-icon {
 }
 
 .nav-links a.active {
-    color: var(--primary-color);
-    background: transparent !important;
-    border: none !important;
-    box-shadow: none !important;
+    color: #ffffff !important;
+    background: #0288d1 !important;
+    border-radius: calc(8px * var(--ui-scale)) !important;
+    box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3) !important;
     font-weight: 600;
+}
+
+.nav-links a.active .nav-icon {
+    opacity: 1 !important;
+    filter: brightness(0) invert(1) !important;
 }
 
 .nav-divider {
@@ -5493,8 +5499,10 @@ svg.btn-icon {
     }
 
     .bottom-nav-item.active {
-        color: var(--primary-color) !important;
-        background: rgba(255, 255, 255, 0.03) !important;
+        color: #ffffff !important;
+        background: #0288d1 !important;
+        border-radius: calc(14px * var(--ui-scale)) !important;
+        margin: calc(6px * var(--ui-scale)) calc(4px * var(--ui-scale)) !important;
     }
 
     .bottom-nav-item:hover,
@@ -5510,7 +5518,7 @@ svg.btn-icon {
 
     .bottom-nav-item.active img.nav-icon {
         opacity: 1 !important;
-        filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%) !important;
+        filter: brightness(0) invert(1) !important;
     }
 
     #player-bar {
