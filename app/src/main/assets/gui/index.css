@@ -128,14 +128,14 @@ html {
 .bottom-nav-item:hover,
 .bottom-nav-item:focus-visible {
     border-color: #ffffff;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 255, 255, 0.08);
     color: var(--text-main);
 }
 
 .bottom-nav-item.active {
     color: #ffffff !important;
     background: #0288d1 !important;
-    border: 1.5px solid #ffffff !important;
+    border: 2.5px solid #ffffff !important;
     border-radius: calc(12px * var(--ui-scale)) !important;
 }
 
@@ -579,16 +579,17 @@ img.player-volume-icon {
 }
 
 .nav-links a.active {
-    color: #ffffff !important;
-    background: #0288d1 !important;
+    color: var(--primary-color);
+    background: rgba(var(--primary-rgb), 0.1) !important;
+    border: none !important;
+    box-shadow: none !important;
     border-radius: calc(8px * var(--ui-scale)) !important;
-    box-shadow: 0 4px 12px rgba(2, 136, 209, 0.3) !important;
     font-weight: 600;
 }
 
 .nav-links a.active .nav-icon {
-    opacity: 1 !important;
-    filter: brightness(0) invert(1) !important;
+    filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%) !important;
+    opacity: 1;
 }
 
 .nav-divider {
@@ -5516,14 +5517,14 @@ svg.btn-icon {
     .bottom-nav-item:hover,
     .bottom-nav-item:focus-visible {
         border-color: #ffffff !important;
-        background: rgba(255, 255, 255, 0.06) !important;
+        background: rgba(255, 255, 255, 0.08) !important;
         color: var(--text-main) !important;
     }
 
     .bottom-nav-item.active {
         color: #ffffff !important;
         background: #0288d1 !important;
-        border: 1.5px solid #ffffff !important;
+        border: 2.5px solid #ffffff !important;
         border-radius: calc(12px * var(--ui-scale)) !important;
     }
 
