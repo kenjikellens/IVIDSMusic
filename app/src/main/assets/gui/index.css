@@ -104,7 +104,8 @@ html {
     z-index: 1000;
     justify-content: space-around;
     align-items: center;
-    padding: 0 0 env(safe-area-inset-bottom, 0px) 0;
+    padding: calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(env(safe-area-inset-bottom, 0px) + 4px * var(--ui-scale)) calc(6px * var(--ui-scale));
+    gap: calc(6px * var(--ui-scale));
     box-sizing: border-box;
 }
 
@@ -113,28 +114,41 @@ html {
     flex: 1;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    height: calc(42px * var(--ui-scale));
     color: var(--text-secondary);
     text-decoration: none;
-    border: none;
-    border-radius: 0;
+    border: 1.5px solid transparent;
+    border-radius: calc(12px * var(--ui-scale));
     padding: 0;
     background: transparent;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     box-sizing: border-box;
+}
+
+.bottom-nav-item:hover,
+.bottom-nav-item:focus-visible {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--text-main);
 }
 
 .bottom-nav-item.active {
     color: #ffffff !important;
     background: #0288d1 !important;
-    border-radius: calc(14px * var(--ui-scale)) !important;
-    margin: calc(6px * var(--ui-scale)) calc(4px * var(--ui-scale)) !important;
+    border: 1.5px solid #ffffff !important;
+    border-radius: calc(12px * var(--ui-scale)) !important;
 }
 
 .bottom-nav-item img.nav-icon {
-    width: calc(24px * var(--ui-scale));
-    height: calc(24px * var(--ui-scale));
+    width: calc(22px * var(--ui-scale));
+    height: calc(22px * var(--ui-scale));
     opacity: 0.6;
+    transition: opacity 0.15s ease;
+}
+
+.bottom-nav-item:hover img.nav-icon,
+.bottom-nav-item:focus-visible img.nav-icon {
+    opacity: 1;
 }
 
 .bottom-nav-item.active img.nav-icon {
@@ -5478,7 +5492,8 @@ svg.btn-icon {
         z-index: 1000 !important;
         justify-content: space-around !important;
         align-items: center !important;
-        padding: 0 0 env(safe-area-inset-bottom, 0px) 0 !important;
+        padding: calc(4px * var(--ui-scale)) calc(6px * var(--ui-scale)) calc(env(safe-area-inset-bottom, 0px) + 4px * var(--ui-scale)) calc(6px * var(--ui-scale)) !important;
+        gap: calc(6px * var(--ui-scale)) !important;
         box-sizing: border-box !important;
     }
 
@@ -5487,33 +5502,41 @@ svg.btn-icon {
         flex: 1 !important;
         align-items: center !important;
         justify-content: center !important;
-        height: 100% !important;
+        height: calc(42px * var(--ui-scale)) !important;
         color: var(--text-secondary) !important;
         text-decoration: none !important;
-        border: none !important;
-        border-radius: 0 !important;
+        border: 1.5px solid transparent !important;
+        border-radius: calc(12px * var(--ui-scale)) !important;
         padding: 0 !important;
         background: transparent !important;
-        transition: background-color 0.15s ease, color 0.15s ease !important;
+        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease !important;
         box-sizing: border-box !important;
+    }
+
+    .bottom-nav-item:hover,
+    .bottom-nav-item:focus-visible {
+        border-color: #ffffff !important;
+        background: rgba(255, 255, 255, 0.06) !important;
+        color: var(--text-main) !important;
     }
 
     .bottom-nav-item.active {
         color: #ffffff !important;
         background: #0288d1 !important;
-        border-radius: calc(14px * var(--ui-scale)) !important;
-        margin: calc(6px * var(--ui-scale)) calc(4px * var(--ui-scale)) !important;
-    }
-
-    .bottom-nav-item:hover,
-    .bottom-nav-item:focus-visible {
-        color: var(--text-main) !important;
+        border: 1.5px solid #ffffff !important;
+        border-radius: calc(12px * var(--ui-scale)) !important;
     }
 
     .bottom-nav-item img.nav-icon {
-        width: calc(24px * var(--ui-scale)) !important;
-        height: calc(24px * var(--ui-scale)) !important;
+        width: calc(22px * var(--ui-scale)) !important;
+        height: calc(22px * var(--ui-scale)) !important;
         opacity: 0.6 !important;
+        transition: opacity 0.15s ease;
+    }
+
+    .bottom-nav-item:hover img.nav-icon,
+    .bottom-nav-item:focus-visible img.nav-icon {
+        opacity: 1 !important;
     }
 
     .bottom-nav-item.active img.nav-icon {
