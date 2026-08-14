@@ -17,18 +17,45 @@ export class Application {
         try {
             document.body.setAttribute('data-current-page', 'home');
 
-            // Trigger home controller rendering immediately so loaders are instantly active
-            Router.loadPage('home').catch(e => console.error(e));
-
-            // Initialize background services concurrently
+            // Initialize background services
+            await LanguageManager.init().catch(err => console.error(err));
             Promise.all([
-                LanguageManager.init(),
                 MediaPlayer.init(),
                 DownloadManager.init(),
                 TVNav.init()
             ]).catch(err => console.error('[IVIDS Music] Service init warning:', err));
 
-            // Enable horizontal mouse wheel scrolling for all .scroll-row containers
+            // Trigger initial route rendering
+            Router.loadPage('home').catch(e => console.error(e));
+
+            // Enable horizontal mouse wheel and drag scrolling for all .scroll-row containers
+            let isDown = false;
+            let startX = 0;
+            let scrollLeftVal = 0;
+            let activeRow = null;
+
+            document.addEventListener('mousedown', (e) => {
+                const scrollRow = e.target.closest('.scroll-row');
+                if (!scrollRow) return;
+                isDown = true;
+                activeRow = scrollRow;
+                startX = e.pageX - scrollRow.offsetLeft;
+                scrollLeftVal = scrollRow.scrollLeft;
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDown = false;
+                activeRow = null;
+            });
+
+            document.addEventListener('mousemove', (e) => {
+                if (!isDown || !activeRow) return;
+                e.preventDefault();
+                const x = e.pageX - activeRow.offsetLeft;
+                const walk = (x - startX) * 1.5;
+                activeRow.scrollLeft = scrollLeftVal - walk;
+            });
+
             document.addEventListener('wheel', (e) => {
                 const scrollRow = e.target.closest('.scroll-row');
                 if (!scrollRow) return;

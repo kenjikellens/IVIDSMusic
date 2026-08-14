@@ -129,6 +129,24 @@ export class RouterService extends BaseService {
 
             mainView.innerHTML = temp.innerHTML;
             LanguageManager.translateUI(mainView);
+
+            // Update mobile header page title
+            const headerPageTitle = document.getElementById('header-page-title');
+            if (headerPageTitle) {
+                const titleKeyMap = {
+                    'home': 'home',
+                    'recommended': 'nav_foryou',
+                    'search': 'search',
+                    'library': 'library',
+                    'profile': 'you',
+                    'downloader': 'nav_downloader',
+                    'settings': 'settings'
+                };
+                const key = titleKeyMap[pageName] || pageName;
+                headerPageTitle.setAttribute('data-i18n', key);
+                headerPageTitle.textContent = LanguageManager.t(key) || (pageName.charAt(0).toUpperCase() + pageName.slice(1));
+            }
+
             if (window.Loader) window.Loader.init();
 
             document.querySelectorAll('.nav-links a, .bottom-nav a').forEach(link => {

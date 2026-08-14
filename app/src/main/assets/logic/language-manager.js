@@ -45,6 +45,11 @@ export class LanguageManagerService extends BaseService {
         return this.#translations[key] || key;
     }
 
+    /** Alias for t(key) */
+    get(key) {
+        return this.t(key);
+    }
+
     /**
      * Initializes LanguageManagerService, loading saved preferences or defaults.
      */
@@ -90,8 +95,6 @@ export class LanguageManagerService extends BaseService {
             if (translation) {
                 if (el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'search' || el.type === 'number')) {
                     el.placeholder = translation;
-                } else if (el.hasAttribute('title')) {
-                    el.title = translation;
                 } else if (el.children.length === 0) {
                     el.textContent = translation;
                 }
