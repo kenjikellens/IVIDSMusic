@@ -32,22 +32,23 @@ export const SettingsManager = {
         this.updateScaleDisplay(clampedValue);
     },
 
-    /**
-     * Applies the scale factor to the document root
-     * @param {number} value 
-     */
     applyScale(value) {
         // Apply user scale multiplier and update --ui-user-scale & --ui-scale
         document.documentElement.style.setProperty('--ui-user-scale', String(value));
         
+        let totalScale = value;
         try {
             const baseScaleStr = getComputedStyle(document.documentElement).getPropertyValue('--ui-base-scale');
             const baseScale = parseFloat(baseScaleStr) || 1;
-            document.documentElement.style.setProperty('--ui-scale', String(value * baseScale));
+            totalScale = value * baseScale;
+            document.documentElement.style.setProperty('--ui-scale', String(totalScale));
         } catch (e) {}
 
+        // Ensure no leftover inline font-size overrides standard 16px rem base
+        document.documentElement.style.fontSize = '';
+
         // Dispatch event for components that might need manual adjustment
-        window.dispatchEvent(new CustomEvent('iv-scale-changed', { detail: { userScale: value } }));
+        window.dispatchEvent(new CustomEvent('iv-scale-changed', { detail: { userScale: value, totalScale: totalScale } }));
     },
 
     /**
@@ -115,6 +116,13 @@ export const SettingsManager = {
                 LanguageManager.bindLanguageUI();
             }
         }
+        // Listen for viewport resize to recalculate base scale across breakpoints
+        if (typeof window !== 'undefined') {
+            window.addEventListener('resize', () => {
+                this.applyScale(this.getScale());
+            });
+        }
+
         console.log(`[SettingsManager] UI Scale initialized to: ${scale}`);
     },
 
