@@ -125,5 +125,15 @@
   "check_for_updates": "更新を確認",
   "developer_target": "開発者ターゲット",
   "release_version": "リリースバージョン",
-  "main_branch": "Mainブランチ"
+  "main_branch": "Mainブランチ",
+  "layout_mode": "レイアウトモード",
+  "layout_mode_desc": "UIレイアウトを選択: 自動、モバイル/縦向き、デスクトップ、TV。",
+  "layout_auto": "自動（レスポンシブ）",
+  "layout_auto_desc": "画面サイズと向きに応じて自動調整します。",
+  "layout_mobile": "モバイル（スマホ）",
+  "layout_mobile_desc": "下部ナビゲーションバーとフローティングミニプレーヤーを固定表示。",
+  "layout_desktop": "デスクトップモード",
+  "layout_desktop_desc": "サイドバーナビゲーションとワイドプレーヤーを表示。",
+  "layout_tv": "TVモード",
+  "layout_tv_desc": "リモコン十字キーのフォーカス表示に最適化。"
 }

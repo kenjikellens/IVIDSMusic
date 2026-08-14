@@ -189,5 +189,15 @@
   "check_for_updates": "Check for Updates",
   "developer_target": "Developer Target",
   "release_version": "Release Version",
-  "main_branch": "Main Branch"
+  "main_branch": "Main Branch",
+  "layout_mode": "Layout Mode",
+  "layout_mode_desc": "Choose UI layout: Auto, Mobile/Portrait, Desktop, or TV.",
+  "layout_auto": "Auto (Responsive)",
+  "layout_auto_desc": "Automatically adjusts to screen size and orientation.",
+  "layout_mobile": "Mobile (Phone)",
+  "layout_mobile_desc": "Forces bottom navigation dock and floating mini player.",
+  "layout_desktop": "Desktop Mode",
+  "layout_desktop_desc": "Forces full sidebar navigation and wide desktop player.",
+  "layout_tv": "TV Mode",
+  "layout_tv_desc": "Optimized for TV with D-pad spatial navigation focus rings."
 }

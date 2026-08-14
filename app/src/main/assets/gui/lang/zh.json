@@ -125,5 +125,15 @@
   "check_for_updates": "检查更新",
   "developer_target": "开发者目标",
   "release_version": "发布版本",
-  "main_branch": "Main 分支"
+  "main_branch": "Main 分支",
+  "layout_mode": "布局模式",
+  "layout_mode_desc": "选择界面布局：自动、移动/纵向、桌面或电视模式。",
+  "layout_auto": "自动（自适应）",
+  "layout_auto_desc": "根据屏幕尺寸和方向自动调整。",
+  "layout_mobile": "移动端（手机）",
+  "layout_mobile_desc": "强制启用底部导航栏和悬浮迷你播放器。",
+  "layout_desktop": "桌面模式",
+  "layout_desktop_desc": "强制启用侧边栏导航和宽屏播放器。",
+  "layout_tv": "电视模式",
+  "layout_tv_desc": "专为电视优化，支持遥控器方向键导航聚焦。"
 }

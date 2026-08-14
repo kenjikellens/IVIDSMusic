@@ -132,5 +132,15 @@
   "check_for_updates": "Sprawdź aktualizacje",
   "developer_target": "Cel Dewelopera",
   "release_version": "Wersja Wydania",
-  "main_branch": "Gałąź Main"
+  "main_branch": "Gałąź Main",
+  "layout_mode": "Tryb Układu",
+  "layout_mode_desc": "Wybierz układ interfejsu: Auto, Mobilny/Pionowy, Pulpit lub TV.",
+  "layout_auto": "Automatyczny (Responsywny)",
+  "layout_auto_desc": "Dostosowuje się automatycznie do rozmiaru i orientacji ekranu.",
+  "layout_mobile": "Mobilny (Telefon)",
+  "layout_mobile_desc": "Wymusza dolny pasek nawigacji i pływający mini odtwarzacz.",
+  "layout_desktop": "Tryb Pulpitu",
+  "layout_desktop_desc": "Wymusza boczny pasek nawigacji i pełny odtwarzacz.",
+  "layout_tv": "Tryb TV",
+  "layout_tv_desc": "Zoptymalizowany dla telewizorów z nawigacją pilotem."
 }

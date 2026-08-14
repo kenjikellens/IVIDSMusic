@@ -125,5 +125,15 @@
   "check_for_updates": "Verificar atualizações",
   "developer_target": "Alvo do Desenvolvedor",
   "release_version": "Versão da Release",
-  "main_branch": "Branch Main"
+  "main_branch": "Branch Main",
+  "layout_mode": "Modo de Layout",
+  "layout_mode_desc": "Escolha o layout: Automático, Móvel/Retrato, Desktop ou TV.",
+  "layout_auto": "Automático (Responsivo)",
+  "layout_auto_desc": "Ajusta-se automaticamente ao tamanho e orientação da tela.",
+  "layout_mobile": "Móvel (Celular)",
+  "layout_mobile_desc": "Força a barra de navegação inferior e o mini player flutuante.",
+  "layout_desktop": "Modo Desktop",
+  "layout_desktop_desc": "Força a navegação na barra lateral e player desktop amplo.",
+  "layout_tv": "Modo TV",
+  "layout_tv_desc": "Otimizado para TV com foco de navegação direcional D-pad."
 }

@@ -132,5 +132,15 @@
   "check_for_updates": "업데이트 확인",
   "developer_target": "개발자 타겟",
   "release_version": "릴리스 버전",
-  "main_branch": "Main 브랜치"
+  "main_branch": "Main 브랜치",
+  "layout_mode": "레이아웃 모드",
+  "layout_mode_desc": "UI 레이아웃 선택: 자동, 모바일/세로, 데스크톱 또는 TV.",
+  "layout_auto": "자동 (반응형)",
+  "layout_auto_desc": "화면 크기 및 방향에 따라 자동으로 조정됩니다.",
+  "layout_mobile": "모바일 (스마트폰)",
+  "layout_mobile_desc": "하단 내비게이션 바와 플로팅 미니 플레이어를 표시합니다.",
+  "layout_desktop": "데스크톱 모드",
+  "layout_desktop_desc": "사이드바 내비게이션 및 와이드 플레이어를 표시합니다.",
+  "layout_tv": "TV 모드",
+  "layout_tv_desc": "리모컨 방향키 탐색 포커스에 최적화되었습니다."
 }

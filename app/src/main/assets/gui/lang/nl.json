@@ -189,5 +189,15 @@
   "check_for_updates": "Controleren op updates",
   "developer_target": "Developer Doel",
   "release_version": "Release Versie",
-  "main_branch": "Main Branch"
+  "main_branch": "Main Branch",
+  "layout_mode": "Indelingsmodus",
+  "layout_mode_desc": "Kies UI-indeling: Automatisch, Mobiel/Portret, Desktop of TV.",
+  "layout_auto": "Automatisch (Responsief)",
+  "layout_auto_desc": "Past zich automatisch aan schermgrootte en oriëntatie aan.",
+  "layout_mobile": "Mobiel (Telefoon)",
+  "layout_mobile_desc": "Forceert navigatiebalk onderaan en zwevende minispeler.",
+  "layout_desktop": "Desktopmodus",
+  "layout_desktop_desc": "Forceert zijbalknavigatie en brede desktopspeler.",
+  "layout_tv": "TV-modus",
+  "layout_tv_desc": "Geoptimaliseerd voor TV met D-pad focusmarkering."
 }

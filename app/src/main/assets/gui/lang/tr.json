@@ -132,5 +132,15 @@
   "check_for_updates": "Güncellemeleri Kontrol Et",
   "developer_target": "Geliştirici Hedefi",
   "release_version": "Sürüm Versiyonu",
-  "main_branch": "Main Dalı"
+  "main_branch": "Main Dalı",
+  "layout_mode": "Düzen Modu",
+  "layout_mode_desc": "Arayüz düzenini seçin: Otomatik, Mobil/Dikey, Masaüstü veya TV.",
+  "layout_auto": "Otomatik (Duyarlı)",
+  "layout_auto_desc": "Ekran boyutuna ve yönüne göre otomatik olarak ayarlanır.",
+  "layout_mobile": "Mobil (Telefon)",
+  "layout_mobile_desc": "Alt gezinme çubuğunu ve kayan mini oynatıcıyı zorlar.",
+  "layout_desktop": "Masaüstü Modu",
+  "layout_desktop_desc": "Kenar çubuğu gezinmesini ve geniş oynatıcıyı zorlar.",
+  "layout_tv": "TV Modu",
+  "layout_tv_desc": "Kumanda yön tuşları odaklaması ile TV için optimize edilmiştir."
 }

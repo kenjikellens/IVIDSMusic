@@ -125,5 +125,15 @@
   "check_for_updates": "Caută actualizări",
   "developer_target": "Țintă Dezvoltator",
   "release_version": "Versiune Release",
-  "main_branch": "Ramura Main"
+  "main_branch": "Ramura Main",
+  "layout_mode": "Mod Aspect",
+  "layout_mode_desc": "Alege aspectul: Automat, Mobil/Portret, Desktop sau TV.",
+  "layout_auto": "Automat (Adaptiv)",
+  "layout_auto_desc": "Se ajustează automat la dimensiunea și orientarea ecranului.",
+  "layout_mobile": "Mobil (Telefon)",
+  "layout_mobile_desc": "Forțează bara de navigare inferioară și mini playerul plutitor.",
+  "layout_desktop": "Mod Desktop",
+  "layout_desktop_desc": "Forțează bara laterală și playerul complet desktop.",
+  "layout_tv": "Mod TV",
+  "layout_tv_desc": "Optimizat pentru TV cu navigare D-pad."
 }

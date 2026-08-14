@@ -125,5 +125,15 @@
   "check_for_updates": "التحقق من التحديثات",
   "developer_target": "هدف المطور",
   "release_version": "إصدار Release",
-  "main_branch": "فرع Main"
+  "main_branch": "فرع Main",
+  "layout_mode": "وضع التخطيط",
+  "layout_mode_desc": "اختر تخطيط الواجهة: تلقائي، هاتف/عمودي، سطح مكتب، أو تلفزيون.",
+  "layout_auto": "تلقائي (متجاوب)",
+  "layout_auto_desc": "يتكيف تلقائيًا مع حجم الشاشة واتجاهها.",
+  "layout_mobile": "هاتف محمول",
+  "layout_mobile_desc": "يفرض شريط التنقل السفلي والمشغل المصغر العائم.",
+  "layout_desktop": "وضع سطح المكتب",
+  "layout_desktop_desc": "يفرض الشريط الجانبي ومشغل سطح المكتب الكامل.",
+  "layout_tv": "وضع التلفزيون",
+  "layout_tv_desc": "مخصص للتلفزيون مع دعم التنقل بمفاتيح الاتجاهات."
 }

@@ -182,5 +182,15 @@
   "check_for_updates": "Nach Updates suchen",
   "developer_target": "Entwickler-Ziel",
   "release_version": "Release-Version",
-  "main_branch": "Main-Branch"
+  "main_branch": "Main-Branch",
+  "layout_mode": "Layout-Modus",
+  "layout_mode_desc": "Wählen Sie das UI-Layout: Auto, Mobil/Porträt, Desktop oder TV.",
+  "layout_auto": "Automatisch (Responsiv)",
+  "layout_auto_desc": "Passt sich automatisch an Bildschirmgröße und Ausrichtung an.",
+  "layout_mobile": "Mobil (Telefon)",
+  "layout_mobile_desc": "Erzwingt untere Navigationsleiste und schwebenden Mini-Player.",
+  "layout_desktop": "Desktop-Modus",
+  "layout_desktop_desc": "Erzwingt vollständige Seitenleistennavigation und breiten Player.",
+  "layout_tv": "TV-Modus",
+  "layout_tv_desc": "Optimiert für Fernseher mit D-Pad-Fokussteuerung."
 }

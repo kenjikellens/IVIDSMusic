@@ -176,5 +176,15 @@
   "check_for_updates": "Buscar actualizaciones",
   "developer_target": "Objetivo Desarrollador",
   "release_version": "Versión de Release",
-  "main_branch": "Rama Main"
+  "main_branch": "Rama Main",
+  "layout_mode": "Modo de Diseño",
+  "layout_mode_desc": "Elija el diseño: Automático, Móvil/Retrato, Escritorio o TV.",
+  "layout_auto": "Automático (Adaptable)",
+  "layout_auto_desc": "Se ajusta automáticamente al tamaño de pantalla y orientación.",
+  "layout_mobile": "Móvil (Teléfono)",
+  "layout_mobile_desc": "Fuerza la barra de navegación inferior y el mini reproductor flotante.",
+  "layout_desktop": "Modo Escritorio",
+  "layout_desktop_desc": "Fuerza la navegación lateral y el reproductor de escritorio.",
+  "layout_tv": "Modo TV",
+  "layout_tv_desc": "Optimizado para TV con navegación direccional D-pad."
 }

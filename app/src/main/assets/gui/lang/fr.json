@@ -182,5 +182,15 @@
   "check_for_updates": "Rechercher des mises à jour",
   "developer_target": "Cible Développeur",
   "release_version": "Version de release",
-  "main_branch": "Branche Main"
+  "main_branch": "Branche Main",
+  "layout_mode": "Mode de Disposition",
+  "layout_mode_desc": "Choisissez la disposition: Auto, Mobile/Portrait, Bureau ou TV.",
+  "layout_auto": "Automatique (Adaptatif)",
+  "layout_auto_desc": "S'adapte automatiquement à la taille de l'écran et à l'orientation.",
+  "layout_mobile": "Mobile (Téléphone)",
+  "layout_mobile_desc": "Force la barre de navigation inférieure et le mini-lecteur flottant.",
+  "layout_desktop": "Mode Bureau",
+  "layout_desktop_desc": "Force la navigation latérale et le lecteur bureau large.",
+  "layout_tv": "Mode TV",
+  "layout_tv_desc": "Optimisé pour TV avec navigation spatiale par croix directionnelle."
 }
