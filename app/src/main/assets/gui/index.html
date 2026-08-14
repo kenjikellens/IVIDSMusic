@@ -110,6 +110,12 @@
             <a href="#" class="bottom-nav-item" onclick="Router.loadPage('profile')" id="mobile-nav-profile" title="You" aria-label="You">
                 <img class="nav-icon" src="svg/user.svg" alt="You">
             </a>
+            <a href="#" class="bottom-nav-item" onclick="Router.loadPage('downloader')" id="mobile-nav-downloader" title="Downloader" aria-label="Downloader">
+                <img class="nav-icon" src="svg/download.svg" alt="Downloader">
+            </a>
+            <a href="#" class="bottom-nav-item" onclick="Router.loadPage('settings')" id="mobile-nav-settings" title="Settings" aria-label="Settings">
+                <img class="nav-icon" src="svg/settings.svg" alt="Settings">
+            </a>
         </nav>
 
         <!-- Content Area with Header -->
@@ -123,9 +129,6 @@
                         onkeydown="if(event.key === 'Enter') { this.blur(); Router.loadPage('search', { query: this.value }); }">
                 </div>
                 <div class="header-right">
-                    <button class="header-action-btn" id="header-settings-btn" title="Settings" data-i18n-title="settings" onclick="Router.loadPage('settings')" aria-label="Settings">
-                        <img src="svg/settings.svg" alt="Settings">
-                    </button>
                     <div class="user-profile" title="User Profile" data-i18n="you" onclick="Router.loadPage('profile')"
                         tabindex="0" onkeydown="if(event.key === 'Enter') this.click()">
                         <img src="svg/user.svg" alt="Profile">
