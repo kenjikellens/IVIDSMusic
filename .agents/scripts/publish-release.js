@@ -103,21 +103,21 @@ function extractAssets(tagName) {
 
 function releaseNotes(versionName) {
     return [
-        `## IVIDS Music ${versionName} Beta`,
+        `## IVIDS Music ${versionName}`,
         '',
-        'This release strengthens the multi-platform IVIDS Music experience across Android Mobile, Android TV, and PC Desktop.',
+        'This release brings major UI/UX improvements, responsive design architecture, and enhanced media streaming performance across Android Mobile, Android TV, and PC Desktop.',
         '',
         '### Highlights',
-        '- Improved update handling with expanded native UpdateManager support.',
-        '- Refined Android Mobile UI styling for cards, player controls, and search interactions.',
-        '- Updated platform build configuration for the current multi-target release pipeline.',
-        '- Continued PC playback reliability improvements through Electron/API integration fixes.',
-        '- Preserved the isolated release artifact flow so distribution tags contain only compiled binaries.',
+        '- **Responsive UI & Navigation**: Implemented One UI 7-inspired navigation bar, responsive orientation shifting, and enhanced mini-player controls.',
+        '- **Core Domain & API Engine**: Integrated Deezer & iTunes API providers with unified domain entities and DTO mappers.',
+        '- **Multi-Language Support**: Full internationalization across 16 supported languages with dynamic locale switching.',
+        '- **Update Management**: Streamlined self-update flow and update notification handling across platforms.',
+        '- **Release Target Isolation**: Clean distribution packages containing verified binaries for Android Mobile, TV, and PC Desktop.',
         '',
         '### Distribution Assets',
-        '- IVIDSMusic_Mobile.apk',
-        '- IVIDSMusic_TV.apk',
-        '- IVIDSMusic_PC.exe',
+        '- `IVIDSMusic_Mobile.apk` (Android Mobile Application)',
+        '- `IVIDSMusic_TV.apk` (Android TV Application)',
+        '- `IVIDSMusic_PC.exe` (PC Desktop Electron Portable)',
     ].join('\n');
 }
 
@@ -136,7 +136,7 @@ function main() {
 
     const tagName = versionArg.startsWith('v') ? versionArg : `v${versionArg}`;
     const versionName = tagName.replace(/^v/, 'v');
-    const title = `Release ${tagName} (Beta)`;
+    const title = `Release ${tagName}`;
     const notesPath = path.join(os.tmpdir(), `ividsmusic-${tagName}-release-notes.md`);
 
     ensureCommand('gh', ['--version']);
