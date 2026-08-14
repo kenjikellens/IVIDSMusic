@@ -29,32 +29,44 @@ export class Application {
             Router.loadPage('home').catch(e => console.error(e));
 
             // Enable horizontal mouse wheel and drag scrolling for all .scroll-row containers
-            let isDown = false;
+            let isDragging = false;
             let startX = 0;
             let scrollLeftVal = 0;
             let activeRow = null;
+            let hasMoved = false;
 
             document.addEventListener('mousedown', (e) => {
                 const scrollRow = e.target.closest('.scroll-row');
                 if (!scrollRow) return;
-                isDown = true;
+                isDragging = true;
+                hasMoved = false;
                 activeRow = scrollRow;
-                startX = e.pageX - scrollRow.offsetLeft;
+                startX = e.clientX;
                 scrollLeftVal = scrollRow.scrollLeft;
             });
 
             window.addEventListener('mouseup', () => {
-                isDown = false;
+                isDragging = false;
                 activeRow = null;
             });
 
             document.addEventListener('mousemove', (e) => {
-                if (!isDown || !activeRow) return;
-                e.preventDefault();
-                const x = e.pageX - activeRow.offsetLeft;
-                const walk = (x - startX) * 1.5;
-                activeRow.scrollLeft = scrollLeftVal - walk;
+                if (!isDragging || !activeRow) return;
+                const dx = e.clientX - startX;
+                if (Math.abs(dx) > 3) {
+                    hasMoved = true;
+                    e.preventDefault();
+                    activeRow.scrollLeft = scrollLeftVal - (dx * 1.3);
+                }
             });
+
+            document.addEventListener('click', (e) => {
+                if (hasMoved && e.target.closest('.scroll-row')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    hasMoved = false;
+                }
+            }, true);
 
             document.addEventListener('wheel', (e) => {
                 const scrollRow = e.target.closest('.scroll-row');

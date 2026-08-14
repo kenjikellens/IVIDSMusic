@@ -1032,29 +1032,52 @@ header {
    Row Containers â€” Album Grids
    ============================ */
 /* Container for content rows with tight, compact bottom spacing between sections */
-.row-container {
-    margin-bottom: calc(18px * var(--ui-scale));
-    position: relative;
-    z-index: 1;
+.row-container,
+.row-scroll-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    margin-bottom: calc(24px * var(--ui-scale)) !important;
+    position: relative !important;
+    z-index: 1 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
 }
 
 .row-container:hover,
-.row-container:focus-within {
+.row-container:focus-within,
+.row-scroll-wrapper:hover,
+.row-scroll-wrapper:focus-within {
     z-index: 20;
+}
+
+.row-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    margin-bottom: calc(10px * var(--ui-scale)) !important;
+    position: relative !important;
+    z-index: 10 !important;
+    width: 100% !important;
 }
 
 /* Section title header typography with clean decorated accent underline */
 .row-title {
     position: relative;
-    display: inline-block;
-    font-size: calc(1.3rem * var(--ui-scale));
-    font-weight: 800;
-    margin-bottom: calc(6px * var(--ui-scale)) !important;
-    padding: 0 0 calc(6px * var(--ui-scale)) 0;
-    color: var(--text-main);
+    display: inline-block !important;
+    font-size: calc(1.35rem * var(--ui-scale)) !important;
+    font-weight: 800 !important;
+    margin-bottom: 0 !important;
+    padding: 0 0 calc(6px * var(--ui-scale)) 0 !important;
+    color: #f0f4f8 !important;
     letter-spacing: -0.3px;
-    background: none;
-    border: none;
+    background: none !important;
+    border: none !important;
+    z-index: 10 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 /* Soft ambient faded glow line extending smoothly underneath section titles */
@@ -1073,30 +1096,27 @@ header {
     pointer-events: none;
 }
 
-
-
-
-
 /* ==========================================================================
    Horizontal Scroll Container Component (.scroll-row)
    ========================================================================== */
 .scroll-row {
-    display: flex;
+    display: flex !important;
     gap: calc(20px * var(--ui-scale)) !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
-    overflow-y: hidden;
+    overflow-y: hidden !important;
     padding: calc(10px * var(--ui-scale)) 0px calc(24px * var(--ui-scale)) 0px !important;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    touch-action: pan-x;
-    cursor: grab;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    -webkit-overflow-scrolling: touch !important;
+    overscroll-behavior-x: contain !important;
+    touch-action: pan-x !important;
+    cursor: grab !important;
+    width: 100% !important;
 }
 
 .scroll-row::-webkit-scrollbar {
-    display: none;
+    display: none !important;
 }
 
 /* ==========================================================================
@@ -1257,34 +1277,6 @@ header {
     background: #e2e8f0;
 }
 
-.card-info-box {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px !important;
-    overflow: hidden;
-    transform: none !important;
-}
-
-.card-title {
-    font-weight: 600;
-    font-size: calc(0.85rem * var(--ui-scale));
-    color: var(--text-main);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: clip;
-}
-
-.card-artist {
-    font-size: calc(0.75rem * var(--ui-scale));
-    font-weight: 400;
-    color: var(--text-secondary);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: clip;
-}
-
 /* Artist Card Styling — Circular Avatar */
 .music-card.type-artist {
     background: transparent !important;
@@ -1355,46 +1347,55 @@ header {
     box-shadow: none !important;
 }
 
+.card-info-box,
 .music-card .card-info-box,
 .card .card-info-box {
-    padding: 0 !important;
+    padding: calc(6px * var(--ui-scale)) 0 0 0 !important;
     background: transparent !important;
     margin: 0 !important;
     z-index: 2;
     border-radius: 0 !important;
-    display: flex;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: calc(4px * var(--ui-scale)) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
     box-shadow: none !important;
+    overflow: hidden !important;
 }
 
 .card-title {
     font-weight: 700;
     font-size: calc(0.88rem * var(--ui-scale));
-    color: var(--text-main);
-    margin: 0;
-    padding: 0;
+    color: var(--text-main) !important;
+    margin: 0 !important;
+    padding: 0 !important;
     text-align: left;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box;
-    display: block;
+    display: block !important;
     line-height: 1.35;
 }
 
 .card-artist {
     font-size: calc(0.78rem * var(--ui-scale));
     font-weight: 400;
-    color: var(--text-secondary);
-    margin: 0;
-    padding: 0;
+    color: var(--text-secondary) !important;
+    margin: 0 !important;
+    padding: 0 !important;
     text-align: left;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
     width: 100% !important;
+    max-width: 100% !important;
     box-sizing: border-box;
-    display: block;
+    display: block !important;
     line-height: 1.35;
 }
 
@@ -2034,7 +2035,14 @@ header {
    Home Page
    ============================ */
 .home-rows-container {
-    padding: 0;
+    width: calc(100% - calc(40px * var(--ui-scale))) !important;
+    max-width: calc(1400px * var(--ui-scale)) !important;
+    margin: 0 auto !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 0 !important;
 }
 
 /* ============================
