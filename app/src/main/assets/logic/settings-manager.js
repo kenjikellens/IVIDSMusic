@@ -94,69 +94,11 @@ export const SettingsManager = {
     },
 
     /**
-     * Get active layout mode ('auto' | 'mobile' | 'desktop' | 'tv')
-     */
-    getLayoutMode() {
-        const saved = localStorage.getItem('iv_layout_mode');
-        return saved || 'auto';
-    },
-
-    /**
-     * Set and persist active layout mode
-     * @param {string} mode 
-     */
-    setLayoutMode(mode) {
-        const validModes = ['auto', 'mobile', 'desktop', 'tv'];
-        const modeToSet = validModes.includes(mode) ? mode : 'auto';
-        localStorage.setItem('iv_layout_mode', modeToSet);
-        this.applyLayoutMode(modeToSet);
-        window.dispatchEvent(new CustomEvent('iv-layout-mode-changed', { detail: { layoutMode: modeToSet } }));
-        return modeToSet;
-    },
-
-    /**
-     * Applies layout mode classes to the document body
-     * @param {string} mode 
-     */
-    applyLayoutMode(mode) {
-        if (typeof document === 'undefined' || !document.body) return;
-
-        document.body.classList.remove('layout-mobile', 'is-mobile-layout', 'layout-desktop', 'layout-tv', 'tv-mode');
-
-        if (mode === 'mobile') {
-            document.body.classList.add('layout-mobile', 'is-mobile-layout');
-        } else if (mode === 'desktop') {
-            document.body.classList.add('layout-desktop');
-        } else if (mode === 'tv') {
-            document.body.classList.add('layout-tv', 'tv-mode');
-        } else {
-            // Auto mode: sync is-mobile-layout dynamically
-            const mql = window.matchMedia && window.matchMedia('(orientation: portrait), (max-width: 768px)');
-            if (mql && mql.matches) {
-                document.body.classList.add('is-mobile-layout');
-            }
-        }
-    },
-
-    /**
      * Initialize settings on app load
      */
     async init() {
         const scale = this.getScale();
         this.applyScale(scale);
-
-        const layoutMode = this.getLayoutMode();
-        this.applyLayoutMode(layoutMode);
-
-        // Listen for screen orientation / resize in auto mode
-        if (typeof window !== 'undefined' && window.matchMedia) {
-            const mql = window.matchMedia('(orientation: portrait), (max-width: 768px)');
-            mql.addEventListener('change', () => {
-                if (this.getLayoutMode() === 'auto') {
-                    this.applyLayoutMode('auto');
-                }
-            });
-        }
 
         // Initialize LanguageManager
         await LanguageManager.init();
@@ -173,7 +115,7 @@ export const SettingsManager = {
                 LanguageManager.bindLanguageUI();
             }
         }
-        console.log(`[SettingsManager] UI Scale initialized to: ${scale}, Layout mode: ${layoutMode}`);
+        console.log(`[SettingsManager] UI Scale initialized to: ${scale}`);
     },
 
     /**

@@ -22,17 +22,6 @@
 
         <div class="settings-item">
             <div class="settings-info">
-                <div class="settings-label" data-i18n="layout_mode">Layout Mode</div>
-                <div class="settings-desc" id="layout-mode-desc" data-i18n="layout_mode_desc">Choose UI layout: Auto, Mobile/Portrait, Desktop, or TV.</div>
-            </div>
-            <button class="btn btn-secondary" id="layout-mode-btn" tabindex="0" aria-label="Layout Mode">
-                <span id="current-layout-mode-display">Auto</span>
-                <img src="svg/edit.svg" alt="Edit" style="width: 14px; height: 14px; opacity: 0.7; margin-left: 6px;">
-            </button>
-        </div>
-
-        <div class="settings-item">
-            <div class="settings-info">
                 <div class="settings-label" data-i18n="language">Language</div>
                 <div class="settings-desc" data-i18n="language_desc">Choose your preferred language.</div>
             </div>
@@ -88,7 +77,7 @@
     <div class="about-plain-info" style="font-size: calc(0.85rem * var(--ui-scale)); color: var(--text-secondary); display: flex; flex-direction: column; gap: calc(4px * var(--ui-scale)); padding: calc(4px * var(--ui-scale)) calc(8px * var(--ui-scale)); line-height: 1.5;">
         <div><strong data-i18n="name">Naam:</strong> IVIDS Music</div>
         <div><strong data-i18n="publisher">Uitgever:</strong> KenjiGames</div>
-        <div><strong data-i18n="version">Versie:</strong> <span id="about-version-display">0.2.5</span></div>
+        <div><strong data-i18n="version">Versie:</strong> 0.2.3 (Beta)</div>
         <div><strong data-i18n="license">Licentie:</strong> ISC License</div>
     </div>
 </div>
@@ -104,44 +93,6 @@
         </div>
         <div class="lang-modal-list" id="lang-modal-list">
             <!-- Language options are generated dynamically by LanguageManager -->
-        </div>
-    </div>
-</div>
-
-<!-- Layout Mode Selector Modal -->
-<div class="modal-overlay" id="layout-mode-modal-overlay" style="display: none;">
-    <div class="lang-modal" role="dialog" aria-label="Select Layout Mode" style="max-width: 420px;">
-        <div class="lang-modal-header">
-            <h3 class="lang-modal-title" data-i18n="layout_mode">Select Layout Mode</h3>
-            <button class="lang-modal-close" id="layout-mode-modal-close" tabindex="0" aria-label="Close">
-                <img src="svg/close.svg" alt="Close">
-            </button>
-        </div>
-        <div class="layout-mode-list" style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
-            <button class="btn btn-secondary layout-mode-option-btn" data-layout="auto" style="justify-content: flex-start; text-align: left; width: 100%;">
-                <div style="pointer-events: none;">
-                    <div style="font-weight: 600; color: var(--text-main);" data-i18n="layout_auto">Auto (Responsive)</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);" data-i18n="layout_auto_desc">Automatically adjusts to screen size and orientation.</div>
-                </div>
-            </button>
-            <button class="btn btn-secondary layout-mode-option-btn" data-layout="mobile" style="justify-content: flex-start; text-align: left; width: 100%;">
-                <div style="pointer-events: none;">
-                    <div style="font-weight: 600; color: var(--text-main);" data-i18n="layout_mobile">Mobile (Phone)</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);" data-i18n="layout_mobile_desc">Forces bottom navigation dock and floating mini player.</div>
-                </div>
-            </button>
-            <button class="btn btn-secondary layout-mode-option-btn" data-layout="desktop" style="justify-content: flex-start; text-align: left; width: 100%;">
-                <div style="pointer-events: none;">
-                    <div style="font-weight: 600; color: var(--text-main);" data-i18n="layout_desktop">Desktop Mode</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);" data-i18n="layout_desktop_desc">Forces full sidebar navigation and wide desktop player.</div>
-                </div>
-            </button>
-            <button class="btn btn-secondary layout-mode-option-btn" data-layout="tv" style="justify-content: flex-start; text-align: left; width: 100%;">
-                <div style="pointer-events: none;">
-                    <div style="font-weight: 600; color: var(--text-main);" data-i18n="layout_tv">TV Mode</div>
-                    <div style="font-size: 0.8rem; color: var(--text-secondary);" data-i18n="layout_tv_desc">Optimized for TV with D-pad spatial navigation focus rings.</div>
-                </div>
-            </button>
         </div>
     </div>
 </div>

@@ -14,97 +14,14 @@ export class SettingsPageController extends BasePageController {
     async render(params = {}) {
         this.resetAbortController();
         this.bindEvents();
-        this.updateLayoutModeUIState(SettingsManager.getLayoutMode());
         this.updateModeUIState(SettingsManager.getUpdateMode());
-        this.updateAboutVersion();
     }
 
     /** Binds settings UI interaction handlers */
     bindEvents() {
         SettingsManager.bindScaleUI();
         LanguageManager.bindLanguageUI();
-        this.bindLayoutModeUI();
         this.bindUpdateModeUI();
-    }
-
-    /** Updates the displayed application version in the About section */
-    updateAboutVersion() {
-        const verDisplay = document.getElementById('about-version-display');
-        if (verDisplay) {
-            const ver = (window.Updater && window.Updater.currentVersion) ? window.Updater.currentVersion : '0.2.5';
-            verDisplay.textContent = ver;
-        }
-    }
-
-    /** Binds Layout Mode modal interactions */
-    bindLayoutModeUI() {
-        const layoutModeBtn = document.getElementById('layout-mode-btn');
-        const layoutModeModalOverlay = document.getElementById('layout-mode-modal-overlay');
-        const layoutModeModalClose = document.getElementById('layout-mode-modal-close');
-        const layoutModeOptions = document.querySelectorAll('.layout-mode-option-btn');
-
-        if (layoutModeBtn && layoutModeModalOverlay) {
-            layoutModeBtn.onclick = () => {
-                layoutModeModalOverlay.style.display = 'flex';
-            };
-        }
-
-        if (layoutModeModalClose && layoutModeModalOverlay) {
-            layoutModeModalClose.onclick = () => {
-                layoutModeModalOverlay.style.display = 'none';
-            };
-        }
-
-        layoutModeOptions.forEach(btn => {
-            btn.onclick = () => {
-                const layout = btn.getAttribute('data-layout');
-                const setLayout = SettingsManager.setLayoutMode(layout);
-                this.updateLayoutModeUIState(setLayout);
-                if (layoutModeModalOverlay) layoutModeModalOverlay.style.display = 'none';
-            };
-        });
-    }
-
-    /** Updates UI state based on active layout mode */
-    updateLayoutModeUIState(mode) {
-        const display = document.getElementById('current-layout-mode-display');
-        const desc = document.getElementById('layout-mode-desc');
-        const options = document.querySelectorAll('.layout-mode-option-btn');
-
-        const t = (key, fallback) => (window.LanguageManager && typeof window.LanguageManager.t === 'function') 
-            ? window.LanguageManager.t(key) 
-            : fallback;
-
-        const modeLabels = {
-            auto: t('layout_auto', 'Auto (Responsive)'),
-            mobile: t('layout_mobile', 'Mobile (Phone)'),
-            desktop: t('layout_desktop', 'Desktop Mode'),
-            tv: t('layout_tv', 'TV Mode')
-        };
-
-        const modeDescs = {
-            auto: t('layout_auto_desc', 'Automatically adjusts to screen size and orientation.'),
-            mobile: t('layout_mobile_desc', 'Forces bottom navigation dock and floating mini player.'),
-            desktop: t('layout_desktop_desc', 'Forces full sidebar navigation and wide desktop player.'),
-            tv: t('layout_tv_desc', 'Optimized for TV with D-pad spatial navigation focus rings.')
-        };
-
-        if (display) {
-            display.textContent = modeLabels[mode] || modeLabels.auto;
-        }
-        if (desc) {
-            desc.textContent = modeDescs[mode] || modeDescs.auto;
-        }
-
-        options.forEach(opt => {
-            if (opt.getAttribute('data-layout') === mode) {
-                opt.style.borderColor = 'var(--primary-color)';
-                opt.style.background = 'rgba(var(--primary-rgb), 0.15)';
-            } else {
-                opt.style.borderColor = '';
-                opt.style.background = '';
-            }
-        });
     }
 
 
