@@ -49,7 +49,7 @@ export class RouterService extends BaseService {
      * Prewarms static HTML templates during browser idle periods.
      */
     prewarmTemplates() {
-        const pages = ['home', 'search', 'recommended', 'library', 'downloader', 'settings', 'artist', 'album', 'song'];
+        const pages = ['home', 'search', 'recommended', 'library', 'downloader', 'settings', 'profile', 'artist', 'album', 'song'];
         const idleCallback = typeof window !== 'undefined' && window.requestIdleCallback ? window.requestIdleCallback : (fn) => setTimeout(fn, 1000);
 
         idleCallback(() => {

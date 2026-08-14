@@ -11,8 +11,16 @@
         No bio yet.
       </p>
       <div class="profile-actions">
-        <button class="btn btn-primary" data-i18n="edit_profile">
+        <button class="btn btn-primary" id="profile-edit-btn" data-i18n="edit_profile">
           Edit Profile
+        </button>
+        <button class="btn btn-secondary" id="profile-settings-btn" onclick="Router.loadPage('settings')">
+          <img src="svg/settings.svg" alt="" class="btn-icon">
+          <span data-i18n="settings">Settings</span>
+        </button>
+        <button class="btn btn-secondary" id="profile-downloader-btn" onclick="Router.loadPage('downloader')">
+          <img src="svg/download.svg" alt="" class="btn-icon">
+          <span data-i18n="nav_downloader">Downloader</span>
         </button>
       </div>
     </div>

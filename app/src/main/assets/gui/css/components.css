@@ -55,6 +55,46 @@
     color: var(--text-main);
 }
 
+/* Icon inside action buttons */
+.btn-icon {
+    width: calc(16px * var(--ui-scale));
+    height: calc(16px * var(--ui-scale));
+    margin-right: calc(6px * var(--ui-scale));
+    vertical-align: middle;
+}
+
+/* Header Action Buttons (Settings, Profile, etc.) */
+.header-action-btn {
+    width: calc(36px * var(--ui-scale));
+    height: calc(36px * var(--ui-scale));
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    padding: 0;
+    outline: none;
+    box-sizing: border-box;
+}
+
+/* Header Action Button Hover & Focus States */
+.header-action-btn:hover,
+.header-action-btn:focus-visible {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: #ffffff;
+}
+
+/* Header Action Button Icon Size */
+.header-action-btn img,
+.header-action-btn svg {
+    width: calc(18px * var(--ui-scale));
+    height: calc(18px * var(--ui-scale));
+}
+
+
 /* Modals & Overlays */
 .modal-overlay {
     position: fixed;

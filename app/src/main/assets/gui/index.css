@@ -137,11 +137,11 @@ html {
     height: calc(20px * var(--ui-scale));
 }
 
-@media (orientation: portrait),
-(max-width: 768px) {
+@media (orientation: portrait) and (max-width: 768px),
+(max-width: 700px) {
     :root {
         --sidebar-width: 0px;
-        --bottom-nav-height: calc(60px * var(--ui-scale));
+        --bottom-nav-height: calc(56px * var(--ui-scale));
         --header-height: calc(56px * var(--ui-scale) + env(safe-area-inset-top, 0px));
     }
 
@@ -152,6 +152,10 @@ html {
     .bottom-nav,
     #bottom-nav {
         display: flex !important;
+    }
+
+    .bottom-nav-item span {
+        display: none !important;
     }
 }
 
@@ -1977,13 +1981,13 @@ header {
     }
 }
 
-@media (orientation: portrait) {
+@media (orientation: portrait) and (max-width: 768px) {
 
     :root {
         --ui-base-scale: 0.85;
         --player-height: auto;
         --sidebar-width: 0px;
-        --bottom-nav-height: 60px !important;
+        --bottom-nav-height: 56px !important;
         --main-vertical-padding: calc(40px * var(--ui-scale));
     }
 
@@ -5288,7 +5292,7 @@ svg.btn-icon {
     display: none;
 }
 
-@media (orientation: portrait), (max-width: 768px) {
+@media (orientation: portrait) and (max-width: 768px), (max-width: 700px) {
 
     /* Translucent top header with status bar safe-area integration */
     header {

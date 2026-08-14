@@ -33,11 +33,11 @@
     }
 }
 
-/* Portrait Mode Vertical Orientation Shift (One UI 7/8 Style Edge-to-Edge) */
-@media (orientation: portrait), (max-width: 768px) {
+/* Portrait Mode Vertical Orientation Shift (One UI 7/8 Style Edge-to-Edge) - strictly for mobile portrait <= 768px or narrow screens <= 700px */
+@media (orientation: portrait) and (max-width: 768px), (max-width: 700px) {
     :root {
         --sidebar-width: 0px;
-        --bottom-nav-height: calc(60px * var(--ui-scale));
+        --bottom-nav-height: calc(56px * var(--ui-scale));
         --header-height: calc(56px * var(--ui-scale) + env(safe-area-inset-top, 0px));
     }
 
@@ -105,7 +105,7 @@
         left: calc(12px * var(--ui-scale)) !important;
         right: calc(12px * var(--ui-scale)) !important;
         width: auto !important;
-        max-width: calc(480px * var(--ui-scale)) !important;
+        max-width: calc(420px * var(--ui-scale)) !important;
         margin: 0 auto !important;
         height: var(--bottom-nav-height) !important;
         background: rgba(18, 18, 22, 0.82) !important;
@@ -121,30 +121,32 @@
         box-sizing: border-box !important;
     }
 
-    /* Navigation item pill styling */
+    /* Icon-only Navigation Item Circular Button */
     .bottom-nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: calc(2px * var(--ui-scale));
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: calc(42px * var(--ui-scale)) !important;
+        height: calc(42px * var(--ui-scale)) !important;
         color: var(--text-secondary);
         text-decoration: none;
-        font-size: calc(0.7rem * var(--ui-scale));
-        font-weight: 500;
         border: 1.5px solid transparent;
-        border-radius: calc(18px * var(--ui-scale));
-        padding: calc(4px * var(--ui-scale)) calc(10px * var(--ui-scale));
+        border-radius: 50% !important;
+        padding: 0 !important;
         transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
         box-sizing: border-box;
+    }
+
+    /* Hide any text inside bottom navigation items */
+    .bottom-nav-item span {
+        display: none !important;
     }
 
     /* Active navigation item highlight */
     .bottom-nav-item.active {
         color: var(--primary-color) !important;
-        background: rgba(var(--primary-rgb), 0.12) !important;
-        border-color: rgba(var(--primary-rgb), 0.35) !important;
-        font-weight: 600 !important;
+        background: rgba(var(--primary-rgb), 0.15) !important;
+        border-color: rgba(var(--primary-rgb), 0.4) !important;
     }
 
     /* Navigation item hover / focus accessibility */
@@ -155,8 +157,8 @@
 
     /* Navigation icon size */
     .bottom-nav-item img.nav-icon {
-        width: calc(20px * var(--ui-scale));
-        height: calc(20px * var(--ui-scale));
+        width: calc(22px * var(--ui-scale)) !important;
+        height: calc(22px * var(--ui-scale)) !important;
     }
 
     /* One UI 7/8 Floating Mini Player Pill */
@@ -341,6 +343,44 @@
 
     .queue-drawer.is-active {
         right: 0 !important;
+    }
+
+    /* Mobile header right container alignment */
+    .header-right {
+        display: flex !important;
+        align-items: center !important;
+        gap: calc(10px * var(--ui-scale)) !important;
+        margin-left: auto !important;
+    }
+
+    /* Mobile portrait profile header layout */
+    .profile-header {
+        flex-direction: column !important;
+        align-items: center !important;
+        text-align: center !important;
+        gap: calc(16px * var(--ui-scale)) !important;
+        padding: calc(20px * var(--ui-scale)) !important;
+        margin-bottom: calc(24px * var(--ui-scale)) !important;
+    }
+
+    /* Mobile profile avatar size */
+    .profile-avatar-wrapper {
+        width: calc(100px * var(--ui-scale)) !important;
+        height: calc(100px * var(--ui-scale)) !important;
+    }
+
+    /* Mobile profile action button group */
+    .profile-actions {
+        display: flex !important;
+        flex-wrap: wrap !important;
+        justify-content: center !important;
+        gap: calc(8px * var(--ui-scale)) !important;
+        margin-top: calc(12px * var(--ui-scale)) !important;
+    }
+
+    .profile-actions .btn {
+        padding: calc(8px * var(--ui-scale)) calc(14px * var(--ui-scale)) !important;
+        font-size: calc(0.82rem * var(--ui-scale)) !important;
     }
 }
 
