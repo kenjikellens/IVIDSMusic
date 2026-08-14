@@ -20,8 +20,15 @@ export class InvidiousResolver {
         if (Config.isNative) {
             return `/api/play?videoId=${encodeURIComponent(videoId)}`;
         }
-        if (Config.isElectron) {
-            return `saved-media://${videoId}`;
+        if (Config.isElectron && window.ElectronAPI?.playTrack) {
+            try {
+                const res = await window.ElectronAPI.playTrack(videoId);
+                if (res && res.status === 'ready' && res.url) {
+                    return res.url;
+                }
+            } catch (e) {
+                console.error('[InvidiousResolver] Electron playTrack error:', e);
+            }
         }
 
         const resolveInstance = async (instance) => {

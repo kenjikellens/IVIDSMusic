@@ -142,9 +142,11 @@ export class MediaPlayerService extends BaseService {
      */
     async playTrack(track) {
         if (!track) return;
+        this.#queueManager.setQueue([track], 0);
         this.#updatePlayerBarInfo(track);
+        this.#enableActionButtons(true);
         try {
-            let streamUrl = track.url || track.audioUrl;
+            let streamUrl = track.url || track.audioUrl || track.previewUrl || track.preview;
             if (!streamUrl && track.videoId) {
                 streamUrl = await MusicRepository.getAudioStreamUrl(track.videoId);
             }
@@ -165,6 +167,13 @@ export class MediaPlayerService extends BaseService {
         }
     }
 
+    #enableActionButtons(enabled) {
+        ['save-track-btn', 'like-track-btn', 'dislike-track-btn', 'more-info-btn'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.disabled = !enabled;
+        });
+    }
+
     /** Toggles play / pause state */
     toggle() {
         this.#audioEngine.toggle();
@@ -182,16 +191,59 @@ export class MediaPlayerService extends BaseService {
         if (prevTrack) await this.playTrack(prevTrack);
     }
 
+    /** Saves active playing track */
+    async saveTrack() {
+        const track = this.currentTrack;
+        if (!track) return;
+        if (window.DownloadManager) {
+            window.DownloadManager.enqueueTrack(track);
+        }
+    }
+
+    /** Toggles like state */
+    toggleLike() {
+        const track = this.currentTrack;
+        if (!track) return;
+        const btn = document.getElementById('like-track-btn');
+        if (btn) btn.classList.toggle('active');
+    }
+
+    /** Toggles dislike state */
+    toggleDislike() {
+        const track = this.currentTrack;
+        if (!track) return;
+        const btn = document.getElementById('dislike-track-btn');
+        if (btn) btn.classList.toggle('active');
+    }
+
+    /** Clears queue */
+    clearQueue() {
+        this.#queueManager.clear();
+        const nowPlayingList = document.getElementById('queue-now-playing');
+        const upcomingList = document.getElementById('queue-upcoming');
+        if (nowPlayingList) nowPlayingList.innerHTML = '';
+        if (upcomingList) upcomingList.innerHTML = '';
+    }
+
     /**
-     * Binds player DOM elements (play button, progress slider, volume slider, time labels).
+     * Binds player DOM elements (play button, progress slider, volume slider, time labels, queue drawer).
      */
     bindUI() {
         const playBtn = document.getElementById('play-pause-btn');
         const progressSlider = document.getElementById('progress-slider');
         const volumeSlider = document.getElementById('volume-slider');
+        const queueBtn = document.getElementById('queue-toggle-btn');
+        const closeQueueBtn = document.getElementById('close-queue-btn');
+        const queueDrawer = document.getElementById('queue-drawer');
 
         if (playBtn) {
             playBtn.onclick = () => this.toggle();
+        }
+        if (queueBtn && queueDrawer) {
+            queueBtn.onclick = () => queueDrawer.classList.toggle('is-active');
+        }
+        if (closeQueueBtn && queueDrawer) {
+            closeQueueBtn.onclick = () => queueDrawer.classList.remove('is-active');
         }
         if (volumeSlider) {
             volumeSlider.oninput = (e) => {
@@ -219,3 +271,8 @@ export class MediaPlayerService extends BaseService {
 /** MediaPlayer singleton instance */
 export const MediaPlayer = new MediaPlayerService();
 export const YouTubePlayer = MediaPlayer;
+
+if (typeof window !== 'undefined') {
+    window.MediaPlayer = MediaPlayer;
+    window.YouTubePlayer = MediaPlayer;
+}
