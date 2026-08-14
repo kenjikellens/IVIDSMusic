@@ -96,44 +96,46 @@
         box-sizing: border-box;
     }
 
-    /* One UI 7/8 Floating Frosted Glass Bottom Navigation Bar Dock */
+    /* Standard Edge-to-Edge Mobile Bottom Navigation Bar */
     .bottom-nav,
     #bottom-nav {
         display: flex !important;
         position: fixed !important;
-        bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
-        left: calc(12px * var(--ui-scale)) !important;
-        right: calc(12px * var(--ui-scale)) !important;
-        width: auto !important;
-        max-width: calc(420px * var(--ui-scale)) !important;
-        margin: 0 auto !important;
-        height: var(--bottom-nav-height) !important;
-        background: rgba(18, 18, 22, 0.82) !important;
-        backdrop-filter: blur(32px) saturate(1.9) !important;
-        -webkit-backdrop-filter: blur(32px) saturate(1.9) !important;
-        border: 1px solid rgba(255, 255, 255, 0.12) !important;
-        border-radius: calc(30px * var(--ui-scale)) !important;
-        box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px)) !important;
+        background: rgba(14, 14, 18, 0.96) !important;
+        backdrop-filter: blur(20px) saturate(1.8) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(1.8) !important;
+        border: none !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 0 !important;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3) !important;
         z-index: 1000 !important;
         justify-content: space-around !important;
         align-items: center !important;
-        padding: 0 calc(8px * var(--ui-scale)) !important;
+        padding: 0 0 env(safe-area-inset-bottom, 0px) 0 !important;
         box-sizing: border-box !important;
     }
 
-    /* Icon-only Navigation Item Circular Button */
+    /* Icon-only Navigation Item */
     .bottom-nav-item {
         display: flex !important;
+        flex: 1 !important;
         align-items: center !important;
         justify-content: center !important;
-        width: calc(42px * var(--ui-scale)) !important;
-        height: calc(42px * var(--ui-scale)) !important;
+        height: 100% !important;
         color: var(--text-secondary);
         text-decoration: none;
-        border: 1.5px solid transparent;
-        border-radius: 50% !important;
+        border: none !important;
+        border-radius: 0 !important;
         padding: 0 !important;
-        transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        background: transparent !important;
+        transition: background-color 0.15s ease, color 0.15s ease;
         box-sizing: border-box;
     }
 
@@ -145,45 +147,46 @@
     /* Active navigation item highlight */
     .bottom-nav-item.active {
         color: var(--primary-color) !important;
-        background: rgba(var(--primary-rgb), 0.15) !important;
-        border-color: rgba(var(--primary-rgb), 0.4) !important;
+        background: rgba(255, 255, 255, 0.03) !important;
     }
 
-    /* Navigation item hover / focus accessibility */
-    .bottom-nav-item:hover,
-    .bottom-nav-item:focus-visible {
-        border-color: rgba(255, 255, 255, 0.3);
-    }
-
-    /* Navigation icon size */
+    /* Navigation icon size & state */
     .bottom-nav-item img.nav-icon {
-        width: calc(22px * var(--ui-scale)) !important;
-        height: calc(22px * var(--ui-scale)) !important;
+        width: calc(24px * var(--ui-scale)) !important;
+        height: calc(24px * var(--ui-scale)) !important;
+        opacity: 0.6 !important;
+        transition: opacity 0.15s ease;
     }
 
-    /* One UI 7/8 Floating Mini Player Pill */
+    .bottom-nav-item.active img.nav-icon {
+        opacity: 1 !important;
+        filter: invert(72%) sepia(98%) saturate(1000%) hue-rotate(155deg) brightness(104%) contrast(104%) !important;
+    }
+
+    /* Mobile Edge-to-Edge Mini Player Bar */
     #player-bar {
         display: flex !important;
         flex-direction: row !important;
         align-items: center !important;
         justify-content: space-between !important;
         position: fixed !important;
-        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + 20px) !important;
-        left: calc(12px * var(--ui-scale)) !important;
-        right: calc(12px * var(--ui-scale)) !important;
-        width: auto !important;
-        max-width: calc(480px * var(--ui-scale)) !important;
-        margin: 0 auto !important;
-        height: calc(58px * var(--ui-scale)) !important;
-        min-height: calc(58px * var(--ui-scale)) !important;
-        background: rgba(22, 22, 28, 0.88) !important;
-        backdrop-filter: blur(35px) saturate(1.9) !important;
-        -webkit-backdrop-filter: blur(35px) saturate(1.9) !important;
-        border: 1px solid rgba(255, 255, 255, 0.14) !important;
-        border-radius: calc(20px * var(--ui-scale)) !important;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.1) !important;
+        bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px)) !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        height: calc(56px * var(--ui-scale)) !important;
+        min-height: calc(56px * var(--ui-scale)) !important;
+        background: rgba(20, 20, 26, 0.98) !important;
+        backdrop-filter: blur(25px) saturate(1.8) !important;
+        -webkit-backdrop-filter: blur(25px) saturate(1.8) !important;
+        border: none !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 0 !important;
+        box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.25) !important;
         z-index: 999 !important;
-        padding: 0 calc(12px * var(--ui-scale)) !important;
+        padding: 0 calc(14px * var(--ui-scale)) !important;
         box-sizing: border-box !important;
         overflow: hidden !important;
     }
