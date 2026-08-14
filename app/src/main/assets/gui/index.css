@@ -640,6 +640,96 @@ header {
         0 0 20px rgba(var(--primary-rgb), 0.08);
 }
 
+/* ==========================================================================
+   Buttons & Actions
+   ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: calc(10px * var(--ui-scale)) calc(20px * var(--ui-scale));
+    border-radius: calc(10px * var(--ui-scale));
+    font-size: calc(0.9rem * var(--ui-scale));
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    box-sizing: border-box;
+    outline: none;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: #000;
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+    background-color: #80deea;
+    border-color: #ffffff;
+}
+
+.btn-secondary {
+    background-color: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.1);
+    color: var(--text-main);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+    background-color: rgba(255, 255, 255, 0.12);
+    border-color: #ffffff;
+}
+
+.btn-ghost {
+    background-color: transparent;
+    border-color: transparent;
+    color: var(--text-secondary);
+}
+
+.btn-ghost:hover,
+.btn-ghost:focus-visible {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: #ffffff;
+    color: var(--text-main);
+}
+
+.btn-icon {
+    width: calc(16px * var(--ui-scale));
+    height: calc(16px * var(--ui-scale));
+    margin-right: calc(6px * var(--ui-scale));
+    vertical-align: middle;
+}
+
+.header-action-btn {
+    width: calc(36px * var(--ui-scale));
+    height: calc(36px * var(--ui-scale));
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+    padding: 0;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.header-action-btn:hover,
+.header-action-btn:focus-visible {
+    background-color: rgba(255, 255, 255, 0.14);
+    border-color: #ffffff;
+}
+
+.header-action-btn img,
+.header-action-btn svg {
+    width: calc(18px * var(--ui-scale));
+    height: calc(18px * var(--ui-scale));
+}
+
 .header-right {
     display: flex;
     align-items: center;
