@@ -1,5 +1,6 @@
 ---
-description: Version and release update
+name: version-and-release-update
+description: Standardized protocol for launching new release builds, compiling Android packages, and configuring distribution binaries for IVIDS Music.
 ---
 
 # Version and Release Update Workflow
@@ -64,3 +65,4 @@ This document defines the strict, standardized protocol for launching new releas
 - **CLI Authentication Fallback**:
   - If the `gh` tool returns a `401 Unauthorized` or requests login, command the developer to run `gh auth login` and re-run the publish helper command (removing the sandboxed dummy token via `$env:GITHUB_TOKEN=$null` on Windows PowerShell).
   - Alternatively, if CLI tools are unavailable, guide the developer to create the release manually on GitHub targeting the pushed tag `vX.Y.Z`, uploading the three binaries from the root of the workspace.
+
