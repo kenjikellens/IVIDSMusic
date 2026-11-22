@@ -1,5 +1,6 @@
 package com.kenjigames.ividsmusic.ui.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
@@ -15,8 +16,8 @@ import com.kenjigames.ividsmusic.resources.plus_jakarta_sans_semibold
 import org.jetbrains.compose.resources.Font
 
 /**
- * Builds and remembers the Compose Material 3 Typography backed by bundled Plus Jakarta Sans
- * display fonts and Inter body fonts, ensuring consistent visual hierarchy across platforms.
+ * Builds and remembers the crisp Compose Material 3 Typography backed by bundled Plus Jakarta Sans
+ * display fonts and Inter body fonts with clear desktop and mobile typographic hierarchy.
  */
 @Composable
 fun rememberIvidsTypography(): Typography {
@@ -33,41 +34,42 @@ fun rememberIvidsTypography(): Typography {
         displaySmall = TextStyle(
             fontFamily = displayFamily,
             fontWeight = FontWeight.Bold,
-            fontSize = 32.sp,
-            lineHeight = 38.sp,
-            letterSpacing = (-0.5).sp
+            fontSize = 36.sp,
+            lineHeight = 42.sp,
+            letterSpacing = (-0.75).sp
         ),
         headlineMedium = TextStyle(
             fontFamily = displayFamily,
             fontWeight = FontWeight.Bold,
-            fontSize = 24.sp,
-            lineHeight = 30.sp,
-            letterSpacing = (-0.3).sp
+            fontSize = 28.sp,
+            lineHeight = 34.sp,
+            letterSpacing = (-0.45).sp
         ),
         headlineSmall = TextStyle(
             fontFamily = displayFamily,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 20.sp,
-            lineHeight = 26.sp,
-            letterSpacing = (-0.2).sp
+            fontSize = 22.sp,
+            lineHeight = 28.sp,
+            letterSpacing = (-0.3).sp
         ),
         titleLarge = TextStyle(
             fontFamily = displayFamily,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 18.sp,
-            lineHeight = 24.sp
+            fontSize = 19.sp,
+            lineHeight = 25.sp,
+            letterSpacing = (-0.15).sp
         ),
         titleMedium = TextStyle(
             fontFamily = bodyFamily,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 15.sp,
-            lineHeight = 20.sp
+            fontSize = 16.sp,
+            lineHeight = 22.sp
         ),
         titleSmall = TextStyle(
             fontFamily = bodyFamily,
             fontWeight = FontWeight.Medium,
-            fontSize = 13.sp,
-            lineHeight = 18.sp
+            fontSize = 15.sp,
+            lineHeight = 20.sp
         ),
         bodyLarge = TextStyle(
             fontFamily = bodyFamily,
@@ -78,32 +80,32 @@ fun rememberIvidsTypography(): Typography {
         bodyMedium = TextStyle(
             fontFamily = bodyFamily,
             fontWeight = FontWeight.Normal,
-            fontSize = 13.sp,
-            lineHeight = 18.sp
+            fontSize = 14.sp,
+            lineHeight = 20.sp
         ),
         bodySmall = TextStyle(
             fontFamily = bodyFamily,
             fontWeight = FontWeight.Normal,
-            fontSize = 12.sp,
-            lineHeight = 16.sp
+            fontSize = 13.sp,
+            lineHeight = 18.sp
         ),
         labelLarge = TextStyle(
             fontFamily = bodyFamily,
             fontWeight = FontWeight.SemiBold,
-            fontSize = 13.sp,
-            lineHeight = 16.sp
+            fontSize = 14.sp,
+            lineHeight = 18.sp
         ),
         labelMedium = TextStyle(
             fontFamily = bodyFamily,
             fontWeight = FontWeight.Medium,
-            fontSize = 11.sp,
-            lineHeight = 14.sp
+            fontSize = 12.sp,
+            lineHeight = 16.sp
         ),
         labelSmall = TextStyle(
             fontFamily = bodyFamily,
             fontWeight = FontWeight.Medium,
-            fontSize = 10.sp,
-            lineHeight = 13.sp
+            fontSize = 11.sp,
+            lineHeight = 14.sp
         )
     )
 }
@@ -115,11 +117,11 @@ fun rememberIvidsTypography(): Typography {
 object IvidsTextStyles {
 
     /**
-     * Returns a tabular monospace-aligned TextStyle derived from the active body typography
-     * for live playback scrubbers and track duration counters.
+     * Returns a tabular numeric TextStyle derived from bodySmall for live playback scrubbers
+     * and track duration counters.
      */
     @Composable
-    fun tabularTime(): TextStyle = androidx.compose.material3.MaterialTheme.typography.bodySmall.copy(
+    fun tabularTime(): TextStyle = MaterialTheme.typography.bodySmall.copy(
         fontFeatureSettings = "tnum"
     )
 
@@ -128,7 +130,7 @@ object IvidsTextStyles {
      * such as 4–320 kbps selectors.
      */
     @Composable
-    fun tabularBadge(): TextStyle = androidx.compose.material3.MaterialTheme.typography.labelMedium.copy(
+    fun tabularBadge(): TextStyle = MaterialTheme.typography.labelMedium.copy(
         fontFeatureSettings = "tnum"
     )
 }

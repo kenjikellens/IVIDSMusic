@@ -13,10 +13,11 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
+import kotlin.math.abs
 
 /**
- * Applies IVIDS Music's Obsidian & Cyan dark theme, 450ms animated album-art accent color,
- * RTL/LTR layout direction, TV mode flag, and user UI scale factor (75%..150%).
+ * Applies IVIDS Lumina's layered dark theme, 450ms animated album-art accent color, RTL/LTR layout
+ * direction, TV mode flag, and user UI scale factor (keeping 100% 1:1 native crispness on HiDPI).
  */
 @Composable
 fun IvidsTheme(
@@ -35,10 +36,14 @@ fun IvidsTheme(
     )
     val clampedScale = uiScale.coerceIn(0.75f, 1.50f)
     val baseDensity = LocalDensity.current
-    val scaledDensity = Density(
-        density = baseDensity.density * clampedScale,
-        fontScale = baseDensity.fontScale
-    )
+    val effectiveDensity = if (abs(clampedScale - 1.0f) > 0.01f) {
+        Density(
+            density = baseDensity.density * clampedScale,
+            fontScale = baseDensity.fontScale
+        )
+    } else {
+        baseDensity
+    }
 
     val colorScheme = darkColorScheme(
         primary = animatedAccent,
@@ -48,11 +53,11 @@ fun IvidsTheme(
         tertiary = IvidsColorTokens.CyanHighlight,
         background = IvidsColorTokens.ObsidianStage,
         onBackground = IvidsColorTokens.ChalkInk,
-        surface = IvidsColorTokens.VinylSurface,
+        surface = IvidsColorTokens.GlassSurface,
         onSurface = IvidsColorTokens.ChalkInk,
-        surfaceVariant = IvidsColorTokens.GrooveElevated,
+        surfaceVariant = IvidsColorTokens.GlassHover,
         onSurfaceVariant = IvidsColorTokens.SlateMuted,
-        outline = IvidsColorTokens.HairlineBorder,
+        outline = IvidsColorTokens.HairlineSubtle,
         error = IvidsColorTokens.DangerCoral,
         onError = IvidsColorTokens.ChalkInk
     )
@@ -63,7 +68,7 @@ fun IvidsTheme(
         LocalUiScale provides clampedScale,
         LocalIsTvMode provides isTvMode,
         LocalLayoutDirection provides layoutDirection,
-        LocalDensity provides scaledDensity
+        LocalDensity provides effectiveDensity
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

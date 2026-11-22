@@ -28,10 +28,23 @@ import org.koin.core.context.stopKoin
 import java.io.File
 
 /**
+ * Configures JVM and Skiko rendering system properties before AWT/Swing initializes so Windows
+ * fractional HiDPI displays (e.g., 125%/150%) render crisp typography and VSync-paced frames.
+ */
+private fun configureDesktopRenderingHints() {
+    System.setProperty("sun.java2d.dpiaware", "true")
+    System.setProperty("sun.java2d.uiScale.enabled", "true")
+    System.setProperty("awt.useSystemAAFontSettings", "lcd")
+    System.setProperty("swing.aatext", "true")
+    System.setProperty("skiko.vsync.enabled", "true")
+}
+
+/**
  * Windows Desktop JVM entrypoint bootstrapping Koin DI, bundled native tool lookup (`yt-dlp.exe`),
  * Compose Desktop Window, and global media keyboard shortcuts (`Space`, `Ctrl+K`, `Left/Right`, `M`).
  */
 fun main() {
+    configureDesktopRenderingHints()
     val directories = resolveDesktopDirectories()
     val koinApp = initKoin(directories)
     val koin = koinApp.koin

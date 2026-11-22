@@ -168,6 +168,13 @@ tasks.configureEach {
 compose.desktop {
     application {
         mainClass = "com.kenjigames.ividsmusic.MainKt"
+        jvmArgs += listOf(
+            "-Dsun.java2d.dpiaware=true",
+            "-Dsun.java2d.uiScale.enabled=true",
+            "-Dawt.useSystemAAFontSettings=lcd",
+            "-Dswing.aatext=true",
+            "-Dskiko.vsync.enabled=true"
+        )
 
         nativeDistributions {
             targetFormats(TargetFormat.Exe, TargetFormat.AppImage)

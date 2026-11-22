@@ -1,16 +1,21 @@
 package com.kenjigames.ividsmusic.ui.shell
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -26,10 +31,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -67,13 +74,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -83,9 +87,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
@@ -99,6 +108,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.resources.Res
 import com.kenjigames.ividsmusic.resources.ic_ivids_brand
+import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.navigation.AppNavigator
@@ -146,8 +156,8 @@ private data class NavEntry(
 )
 
 /**
- * Adaptive root layout container rendering Desktop NavigationRail + PlayerDeck, Mobile BottomBar +
- * floating MiniPlayerBar, or Android TV Leanback drawer, plus expandable NowPlayingSheet.
+ * Adaptive root layout container rendering the IVIDS Lumina Desktop AbyssRail + compact Search Pill +
+ * sleek PlayerDeck, Mobile BottomBar + floating MiniPlayerBar, or TV Leanback drawer.
  */
 @Composable
 fun AdaptiveAppShell(
@@ -166,6 +176,7 @@ fun AdaptiveAppShell(
 ) {
     var nowPlayingExpanded by remember { mutableStateOf(false) }
     var desktopQueueOpen by remember { mutableStateOf(false) }
+    val accent = LocalDynamicAccent.current
 
     Box(modifier = modifier.fillMaxSize().background(IvidsColorTokens.ObsidianStage)) {
         when (shellMode) {
@@ -188,7 +199,7 @@ fun AdaptiveAppShell(
                                 onToggleLike = playerViewModel::toggleLikeCurrent,
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
-                                    .padding(horizontal = 12.dp, vertical = 8.dp)
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
                             )
                         }
                     }
@@ -210,33 +221,64 @@ fun AdaptiveAppShell(
                                 isTv = shellMode == ShellMode.TV,
                                 onSelectRoute = { navigator.switchRootTab(it) }
                             )
-                            Column(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                                DesktopTopBar(
-                                    canNavigateBack = canNavigateBack,
-                                    searchFocusTrigger = searchFocusTrigger,
-                                    onBack = { navigator.navigateBack() },
-                                    onSearchSubmit = onHeaderSearchSubmit,
-                                    onOpenProfile = { navigator.switchRootTab(AppRoute.Profile) }
-                                )
-                                Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                                    content(currentRoute, shellMode)
+                            VerticalDivider(
+                                thickness = 1.dp,
+                                color = IvidsColorTokens.HairlineSubtle
+                            )
+
+                            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                                Canvas(modifier = Modifier.matchParentSize()) {
+                                    drawRect(
+                                        brush = Brush.radialGradient(
+                                            colors = listOf(
+                                                accent.copy(alpha = 0.08f),
+                                                IvidsColorTokens.OceanAccent.copy(alpha = 0.04f),
+                                                Color.Transparent
+                                            ),
+                                            center = Offset(size.width * 0.22f, 0f),
+                                            radius = size.maxDimension * 0.65f
+                                        )
+                                    )
+                                }
+                                Column(modifier = Modifier.fillMaxSize()) {
+                                    DesktopTopBar(
+                                        canNavigateBack = canNavigateBack,
+                                        searchFocusTrigger = searchFocusTrigger,
+                                        onBack = { navigator.navigateBack() },
+                                        onSearchSubmit = onHeaderSearchSubmit,
+                                        onOpenProfile = { navigator.switchRootTab(AppRoute.Profile) }
+                                    )
+                                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                                        content(currentRoute, shellMode)
+                                    }
                                 }
                             }
+
                             AnimatedVisibility(
                                 visible = desktopQueueOpen,
                                 enter = slideInHorizontally { it } + fadeIn(),
                                 exit = slideOutHorizontally { it } + fadeOut()
                             ) {
-                                QueueSideSheet(
-                                    playerState = playerState,
-                                    onJumpTo = playerViewModel::jumpToQueueIndex,
-                                    onRemove = playerViewModel::removeFromQueue,
-                                    onClear = playerViewModel::clearQueue,
-                                    onClose = { desktopQueueOpen = false }
-                                )
+                                Row {
+                                    VerticalDivider(
+                                        thickness = 1.dp,
+                                        color = IvidsColorTokens.HairlineSubtle
+                                    )
+                                    QueueSideSheet(
+                                        playerState = playerState,
+                                        onJumpTo = playerViewModel::jumpToQueueIndex,
+                                        onRemove = playerViewModel::removeFromQueue,
+                                        onClear = playerViewModel::clearQueue,
+                                        onClose = { desktopQueueOpen = false }
+                                    )
+                                }
                             }
                         }
 
+                        HorizontalDivider(
+                            thickness = 1.dp,
+                            color = IvidsColorTokens.HairlineSubtle
+                        )
                         DesktopPlayerDeck(
                             playerState = playerState,
                             queueOpen = desktopQueueOpen,
@@ -274,8 +316,8 @@ fun AdaptiveAppShell(
 }
 
 /**
- * Renders the top navigation header on Mobile screens with back navigation and quick Downloader
- * and Settings shortcuts.
+ * Renders the borderless top navigation header on Mobile screens with back navigation and quick
+ * Downloader and Settings shortcuts.
  */
 @Composable
 private fun MobileTopHeader(
@@ -288,12 +330,9 @@ private fun MobileTopHeader(
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
 
-    Surface(
-        color = IvidsColorTokens.VinylSurface,
-        border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder)
-    ) {
+    Column(modifier = Modifier.fillMaxWidth().background(IvidsColorTokens.ObsidianStage)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -345,6 +384,7 @@ private fun MobileTopHeader(
                 }
             }
         }
+        HorizontalDivider(thickness = 1.dp, color = IvidsColorTokens.HairlineSubtle)
     }
 }
 
@@ -368,44 +408,47 @@ private fun MobileBottomBar(
         )
     }
 
-    NavigationBar(
-        containerColor = IvidsColorTokens.VinylSurface,
-        contentColor = IvidsColorTokens.ChalkInk,
-        modifier = Modifier.navigationBarsPadding()
-    ) {
-        items.forEach { entry ->
-            val selected = entry.matcher(currentRoute)
-            NavigationBarItem(
-                selected = selected,
-                onClick = { onSelectRoute(entry.route) },
-                icon = {
-                    Icon(
-                        imageVector = entry.icon,
-                        contentDescription = strings[entry.labelKey]
+    Column(modifier = Modifier.fillMaxWidth().background(IvidsColorTokens.AbyssRail)) {
+        HorizontalDivider(thickness = 1.dp, color = IvidsColorTokens.HairlineSubtle)
+        NavigationBar(
+            containerColor = IvidsColorTokens.AbyssRail,
+            contentColor = IvidsColorTokens.ChalkInk,
+            modifier = Modifier.navigationBarsPadding()
+        ) {
+            items.forEach { entry ->
+                val selected = entry.matcher(currentRoute)
+                NavigationBarItem(
+                    selected = selected,
+                    onClick = { onSelectRoute(entry.route) },
+                    icon = {
+                        Icon(
+                            imageVector = entry.icon,
+                            contentDescription = strings[entry.labelKey]
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = strings[entry.labelKey],
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
+                    colors = NavigationBarItemDefaults.colors(
+                        selectedIconColor = IvidsColorTokens.OnAccentDark,
+                        selectedTextColor = accent,
+                        indicatorColor = accent,
+                        unselectedIconColor = IvidsColorTokens.SlateMuted,
+                        unselectedTextColor = IvidsColorTokens.SlateMuted
                     )
-                },
-                label = {
-                    Text(
-                        text = strings[entry.labelKey],
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = IvidsColorTokens.OnAccentDark,
-                    selectedTextColor = accent,
-                    indicatorColor = accent,
-                    unselectedIconColor = IvidsColorTokens.SlateMuted,
-                    unselectedTextColor = IvidsColorTokens.SlateMuted
                 )
-            )
+            }
         }
     }
 }
 
 /**
- * Floating compact mini-player bar anchored above MobileBottomBar with progress bar, like button,
- * and play/pause toggle; tapping opens [NowPlayingSheet].
+ * Floating borderless mini-player bar anchored above MobileBottomBar with ambient progress bar,
+ * like toggle, and play/pause action; tapping opens [NowPlayingSheet].
  */
 @Composable
 private fun MiniPlayerBar(
@@ -426,23 +469,22 @@ private fun MiniPlayerBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .shadow(16.dp, RoundedCornerShape(18.dp), ambientColor = Color.Black, spotColor = Color.Black)
             .clickable(onClick = onExpand),
-        shape = RoundedCornerShape(16.dp),
-        color = IvidsColorTokens.GrooveElevated,
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.45f)),
-        shadowElevation = 10.dp
+        shape = RoundedCornerShape(18.dp),
+        color = IvidsColorTokens.GlassSurface
     ) {
         Column {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .size(44.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(IvidsColorTokens.VinylSurface),
+                        .background(IvidsColorTokens.RecessedTrough),
                     contentAlignment = Alignment.Center
                 ) {
                     if (track.coverUrl.isNotBlank()) {
@@ -513,15 +555,15 @@ private fun MiniPlayerBar(
             LinearProgressIndicator(
                 progress = { progress },
                 color = accent,
-                trackColor = IvidsColorTokens.HairlineBorder,
-                modifier = Modifier.fillMaxWidth().height(2.dp)
+                trackColor = IvidsColorTokens.RecessedTrough,
+                modifier = Modifier.fillMaxWidth().height(2.5.dp)
             )
         }
     }
 }
 
 /**
- * Left sidebar navigation rail rendered on Desktop (`>= 600dp`) and Android TV Leanback shells.
+ * Deep obsidian borderless sidebar navigation rail rendered on Desktop (`>= 600dp`) and Android TV.
  */
 @Composable
 private fun SidebarNavigationRail(
@@ -548,17 +590,18 @@ private fun SidebarNavigationRail(
         )
     }
 
-    Surface(
-        modifier = Modifier.fillMaxHeight().width(if (expanded) 224.dp else 78.dp),
-        color = IvidsColorTokens.VinylSurface,
-        border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder)
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(if (expanded) 236.dp else 78.dp)
+            .background(IvidsColorTokens.AbyssRail)
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(12.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             Row(
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 10.dp),
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
@@ -568,7 +611,10 @@ private fun SidebarNavigationRail(
                     modifier = Modifier.size(32.dp).clip(RoundedCornerShape(8.dp))
                 )
                 if (expanded) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
                         Text(
                             text = "IVIDS",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
@@ -576,12 +622,14 @@ private fun SidebarNavigationRail(
                         )
                         Text(
                             text = if (isTv) "TV" else "MUSIC",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = MaterialTheme.typography.titleSmall,
                             color = IvidsColorTokens.ChalkInk
                         )
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(6.dp))
 
             primaryEntries.forEach { entry ->
                 SidebarNavButton(
@@ -594,8 +642,8 @@ private fun SidebarNavigationRail(
             }
 
             HorizontalDivider(
-                color = IvidsColorTokens.HairlineBorder,
-                modifier = Modifier.padding(vertical = 8.dp)
+                color = IvidsColorTokens.HairlineSubtle,
+                modifier = Modifier.padding(vertical = 12.dp, horizontal = 8.dp)
             )
 
             utilityEntries.forEach { entry ->
@@ -612,7 +660,7 @@ private fun SidebarNavigationRail(
 }
 
 /**
- * Single focusable navigation item inside [SidebarNavigationRail].
+ * Single borderless hoverable navigation pill inside [SidebarNavigationRail].
  */
 @Composable
 private fun SidebarNavButton(
@@ -623,20 +671,31 @@ private fun SidebarNavButton(
     onClick: () -> Unit
 ) {
     val accent = LocalDynamicAccent.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    val bgColor by animateColorAsState(
+        targetValue = when {
+            selected -> accent.copy(alpha = 0.14f)
+            isHovered -> IvidsColorTokens.GlassHover.copy(alpha = 0.7f)
+            else -> Color.Transparent
+        },
+        animationSpec = tween(150),
+        label = "NavButtonBg"
+    )
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .tvFocusable(shape = RoundedCornerShape(12.dp))
+            .height(44.dp)
+            .tvFocusable(shape = RoundedCornerShape(10.dp))
+            .hoverable(interactionSource)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        color = if (selected) accent.copy(alpha = 0.16f) else Color.Transparent,
-        border = BorderStroke(
-            1.dp,
-            if (selected) accent.copy(alpha = 0.55f) else Color.Transparent
-        )
+        shape = RoundedCornerShape(10.dp),
+        color = bgColor
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 11.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = if (expanded) Arrangement.Start else Arrangement.Center
         ) {
@@ -644,25 +703,36 @@ private fun SidebarNavButton(
                 imageVector = icon,
                 contentDescription = label,
                 tint = if (selected) accent else IvidsColorTokens.SlateMuted,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(21.dp)
             )
             if (expanded) {
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
                     text = label,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
+                    ),
                     color = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
+                if (selected) {
+                    Box(
+                        modifier = Modifier
+                            .size(5.dp)
+                            .clip(CircleShape)
+                            .background(accent)
+                    )
+                }
             }
         }
     }
 }
 
 /**
- * Top bar for Desktop & TV shells containing back button, `Ctrl+K` focusable search bar,
- * and profile shortcut chip.
+ * Frameless Desktop & TV header containing back navigation, a compact 440dp recessed search pill
+ * with `Ctrl+K` hint, and profile shortcut button.
  */
 @Composable
 private fun DesktopTopBar(
@@ -675,6 +745,7 @@ private fun DesktopTopBar(
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
     var query by remember { mutableStateOf("") }
+    var searchFocused by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(searchFocusTrigger) {
@@ -683,91 +754,142 @@ private fun DesktopTopBar(
         }
     }
 
-    Surface(
-        color = IvidsColorTokens.ObsidianStage,
-        border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder.copy(alpha = 0.6f))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(68.dp)
+            .padding(horizontal = 24.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.weight(1f)
         ) {
             if (canNavigateBack) {
-                IconButton(
+                Surface(
                     onClick = onBack,
-                    modifier = Modifier.tvFocusable(shape = CircleShape)
+                    shape = CircleShape,
+                    color = IvidsColorTokens.RecessedTrough,
+                    modifier = Modifier.size(38.dp).tvFocusable(shape = CircleShape)
                 ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                        contentDescription = strings["back"],
-                        tint = IvidsColorTokens.ChalkInk
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                            contentDescription = strings["back"],
+                            tint = IvidsColorTokens.ChalkInk,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
 
-            OutlinedTextField(
-                value = query,
-                onValueChange = { query = it },
-                placeholder = {
-                    Text(
-                        text = "${strings["search_placeholder"]} (Ctrl+K)",
-                        color = IvidsColorTokens.SlateMuted,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                },
-                leadingIcon = {
-                    Icon(Icons.Rounded.Search, null, tint = accent)
-                },
-                trailingIcon = {
-                    if (query.isNotEmpty()) {
-                        IconButton(onClick = { query = "" }) {
-                            Icon(Icons.Rounded.Close, strings["close"], tint = IvidsColorTokens.SlateMuted)
-                        }
-                    }
-                },
-                singleLine = true,
-                shape = RoundedCornerShape(14.dp),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = {
-                    if (query.isNotBlank()) onSearchSubmit(query.trim())
-                }),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = IvidsColorTokens.GrooveElevated,
-                    unfocusedContainerColor = IvidsColorTokens.VinylSurface,
-                    focusedBorderColor = accent,
-                    unfocusedBorderColor = IvidsColorTokens.HairlineBorder,
-                    focusedTextColor = IvidsColorTokens.ChalkInk,
-                    unfocusedTextColor = IvidsColorTokens.ChalkInk
-                ),
-                modifier = Modifier
-                    .weight(1f)
-                    .focusRequester(searchFocusRequester)
-                    .tvFocusable(shape = RoundedCornerShape(14.dp))
+            val pillColor by animateColorAsState(
+                targetValue = if (searchFocused) IvidsColorTokens.GlassSurface else IvidsColorTokens.RecessedTrough,
+                animationSpec = tween(160),
+                label = "SearchPillColor"
             )
 
             Surface(
-                onClick = onOpenProfile,
                 shape = CircleShape,
-                color = IvidsColorTokens.GrooveElevated,
-                border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder),
-                modifier = Modifier.size(42.dp).tvFocusable(shape = CircleShape)
+                color = pillColor,
+                modifier = Modifier
+                    .widthIn(min = 240.dp, max = 440.dp)
+                    .fillMaxWidth()
+                    .height(42.dp)
+                    .tvFocusable(shape = CircleShape)
             ) {
-                Box(contentAlignment = Alignment.Center) {
+                Row(
+                    modifier = Modifier.fillMaxSize().padding(horizontal = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
                     Icon(
-                        imageVector = Icons.Rounded.Person,
-                        contentDescription = strings["you"],
-                        tint = accent
+                        imageVector = Icons.Rounded.Search,
+                        contentDescription = null,
+                        tint = if (searchFocused) accent else IvidsColorTokens.SlateMuted,
+                        modifier = Modifier.size(18.dp)
                     )
+                    Box(
+                        modifier = Modifier.weight(1f),
+                        contentAlignment = Alignment.CenterStart
+                    ) {
+                        if (query.isEmpty()) {
+                            Text(
+                                text = strings["search_placeholder"],
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = IvidsColorTokens.SlateMuted,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        BasicTextField(
+                            value = query,
+                            onValueChange = { query = it },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(color = IvidsColorTokens.ChalkInk),
+                            cursorBrush = SolidColor(accent),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = {
+                                if (query.isNotBlank()) onSearchSubmit(query.trim())
+                            }),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(searchFocusRequester)
+                                .onFocusChanged { searchFocused = it.isFocused }
+                        )
+                    }
+                    if (query.isNotEmpty()) {
+                        IconButton(
+                            onClick = { query = "" },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Close,
+                                contentDescription = strings["close"],
+                                tint = IvidsColorTokens.SlateMuted,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    } else {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = Color(0x12FFFFFF)
+                        ) {
+                            Text(
+                                text = "Ctrl+K",
+                                style = IvidsTextStyles.tabularBadge(),
+                                color = IvidsColorTokens.SlateMuted,
+                                modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp)
+                            )
+                        }
+                    }
                 }
+            }
+        }
+
+        Surface(
+            onClick = onOpenProfile,
+            shape = CircleShape,
+            color = IvidsColorTokens.GlassSurface,
+            modifier = Modifier.size(40.dp).tvFocusable(shape = CircleShape)
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = Icons.Rounded.Person,
+                    contentDescription = strings["you"],
+                    tint = accent,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
 }
 
 /**
- * Persistent bottom player deck rendered across Desktop and Android TV layouts with transport
- * buttons, tabular scrubber timestamps, quality download badge, volume slider, and queue toggle.
+ * Persistent 84dp hi-fi player deck across Desktop and Android TV featuring snug track info,
+ * centered transport controls, custom [IvidsScrubber] seek & volume bars, and queue toggle.
  */
 @Composable
 private fun DesktopPlayerDeck(
@@ -786,27 +908,28 @@ private fun DesktopPlayerDeck(
     val maxDur = playerState.durationMs.coerceAtLeast(1L).toFloat()
     val sliderPos = dragPos ?: playerState.positionMs.toFloat().coerceIn(0f, maxDur)
 
-    Surface(
-        color = IvidsColorTokens.VinylSurface,
-        border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder),
-        modifier = Modifier.fillMaxWidth()
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(84.dp)
+            .background(IvidsColorTokens.RecessedTrough)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+            modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Row(
-                modifier = Modifier.weight(0.32f),
+                modifier = Modifier.weight(0.30f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Box(
                     modifier = Modifier
-                        .size(54.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(IvidsColorTokens.GrooveElevated)
-                        .tvFocusable(shape = RoundedCornerShape(12.dp))
+                        .size(52.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(IvidsColorTokens.GlassSurface)
+                        .tvFocusable(shape = RoundedCornerShape(10.dp))
                         .clickable(enabled = track != null, onClick = onOpenNowPlaying),
                     contentAlignment = Alignment.Center
                 ) {
@@ -818,83 +941,60 @@ private fun DesktopPlayerDeck(
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
-                        Icon(Icons.Rounded.MusicNote, null, tint = accent)
+                        Icon(Icons.Rounded.MusicNote, null, tint = accent.copy(alpha = 0.7f))
                     }
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = track?.title ?: strings["song_no_track"],
                         style = MaterialTheme.typography.titleMedium,
-                        color = IvidsColorTokens.ChalkInk,
+                        color = if (track != null) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.clickable(enabled = track != null, onClick = onOpenNowPlaying)
                     )
-                    Text(
-                        text = track?.artist ?: "—",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = IvidsColorTokens.SlateMuted,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.clickable(enabled = track != null) {
-                            if (track != null) onOpenArtist(track.artistId, track.artist)
-                        }
-                    )
+                    if (track != null) {
+                        Text(
+                            text = track.artist,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = IvidsColorTokens.SlateMuted,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.clickable { onOpenArtist(track.artistId, track.artist) }
+                        )
+                    }
                 }
-                IconButton(
-                    onClick = playerViewModel::toggleLikeCurrent,
-                    enabled = track != null,
-                    modifier = Modifier.tvFocusable(shape = CircleShape)
-                ) {
-                    Icon(
-                        imageVector = if (playerState.isCurrentLiked) {
-                            Icons.Rounded.Favorite
-                        } else {
-                            Icons.Rounded.FavoriteBorder
-                        },
-                        contentDescription = strings["like"],
-                        tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted
-                    )
-                }
-                IconButton(
-                    onClick = { playerViewModel.downloadCurrent() },
-                    enabled = track != null,
-                    modifier = Modifier.tvFocusable(shape = CircleShape)
-                ) {
-                    Icon(
-                        imageVector = if (playerState.isCurrentDownloaded) {
-                            Icons.Rounded.DownloadDone
-                        } else {
-                            Icons.Rounded.Download
-                        },
-                        contentDescription = strings["download_track"],
-                        tint = if (playerState.isCurrentDownloaded) IvidsColorTokens.SuccessMint else accent
-                    )
-                }
-                IconButton(
-                    onClick = { if (track != null) onOpenSongDetail(track.id) },
-                    enabled = track != null,
-                    modifier = Modifier.tvFocusable(shape = CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Info,
-                        contentDescription = strings["more_info"],
-                        tint = IvidsColorTokens.SlateMuted
-                    )
+                if (track != null) {
+                    IconButton(
+                        onClick = playerViewModel::toggleLikeCurrent,
+                        modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = if (playerState.isCurrentLiked) {
+                                Icons.Rounded.Favorite
+                            } else {
+                                Icons.Rounded.FavoriteBorder
+                            },
+                            contentDescription = strings["like"],
+                            tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 
             Column(
-                modifier = Modifier.weight(0.42f),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.weight(0.44f),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     IconButton(
                         onClick = playerViewModel::toggleShuffle,
-                        modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
+                        modifier = Modifier.size(32.dp).tvFocusable(shape = CircleShape)
                     ) {
                         Icon(
                             imageVector = Icons.Rounded.Shuffle,
@@ -905,7 +1005,7 @@ private fun DesktopPlayerDeck(
                     }
                     IconButton(
                         onClick = playerViewModel::previous,
-                        modifier = Modifier.size(38.dp).tvFocusable(shape = CircleShape)
+                        modifier = Modifier.size(36.dp).tvFocusable(shape = CircleShape)
                     ) {
                         Icon(Icons.Rounded.SkipPrevious, strings["previous"], tint = IvidsColorTokens.ChalkInk)
                     }
@@ -913,14 +1013,15 @@ private fun DesktopPlayerDeck(
                         onClick = playerViewModel::togglePlayPause,
                         shape = CircleShape,
                         color = accent,
-                        modifier = Modifier.size(42.dp).tvFocusable(shape = CircleShape)
+                        shadowElevation = 6.dp,
+                        modifier = Modifier.size(40.dp).tvFocusable(shape = CircleShape)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             if (playerState.isBuffering) {
                                 CircularProgressIndicator(
                                     color = IvidsColorTokens.OnAccentDark,
                                     strokeWidth = 2.dp,
-                                    modifier = Modifier.size(20.dp)
+                                    modifier = Modifier.size(19.dp)
                                 )
                             } else {
                                 Icon(
@@ -930,20 +1031,21 @@ private fun DesktopPlayerDeck(
                                         Icons.Rounded.PlayArrow
                                     },
                                     contentDescription = strings["play"],
-                                    tint = IvidsColorTokens.OnAccentDark
+                                    tint = IvidsColorTokens.OnAccentDark,
+                                    modifier = Modifier.size(22.dp)
                                 )
                             }
                         }
                     }
                     IconButton(
                         onClick = playerViewModel::next,
-                        modifier = Modifier.size(38.dp).tvFocusable(shape = CircleShape)
+                        modifier = Modifier.size(36.dp).tvFocusable(shape = CircleShape)
                     ) {
                         Icon(Icons.Rounded.SkipNext, strings["next"], tint = IvidsColorTokens.ChalkInk)
                     }
                     IconButton(
                         onClick = playerViewModel::cycleRepeatMode,
-                        modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
+                        modifier = Modifier.size(32.dp).tvFocusable(shape = CircleShape)
                     ) {
                         Icon(
                             imageVector = if (playerState.repeatMode == RepeatMode.ONE) {
@@ -960,14 +1062,14 @@ private fun DesktopPlayerDeck(
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Text(
                         text = formatDurationMillis(sliderPos.toLong()),
                         style = IvidsTextStyles.tabularTime(),
                         color = IvidsColorTokens.SlateMuted
                     )
-                    Slider(
+                    IvidsScrubber(
                         value = sliderPos,
                         onValueChange = { dragPos = it },
                         onValueChangeFinished = {
@@ -975,12 +1077,8 @@ private fun DesktopPlayerDeck(
                             dragPos = null
                         },
                         valueRange = 0f..maxDur,
-                        colors = SliderDefaults.colors(
-                            thumbColor = accent,
-                            activeTrackColor = accent,
-                            inactiveTrackColor = IvidsColorTokens.HairlineBorder
-                        ),
-                        modifier = Modifier.weight(1f).height(24.dp)
+                        enabled = track != null,
+                        modifier = Modifier.weight(1f)
                     )
                     Text(
                         text = formatDurationMillis(playerState.durationMs),
@@ -995,19 +1093,48 @@ private fun DesktopPlayerDeck(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
+                if (track != null) {
+                    IconButton(
+                        onClick = { playerViewModel.downloadCurrent() },
+                        modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = if (playerState.isCurrentDownloaded) {
+                                Icons.Rounded.DownloadDone
+                            } else {
+                                Icons.Rounded.Download
+                            },
+                            contentDescription = strings["download_track"],
+                            tint = if (playerState.isCurrentDownloaded) IvidsColorTokens.SuccessMint else IvidsColorTokens.SlateMuted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                    IconButton(
+                        onClick = { onOpenSongDetail(track.id) },
+                        modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Info,
+                            contentDescription = strings["more_info"],
+                            tint = IvidsColorTokens.SlateMuted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
                 IconButton(
                     onClick = onToggleQueue,
-                    modifier = Modifier.tvFocusable(shape = CircleShape)
+                    modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.QueueMusic,
                         contentDescription = strings["queue"],
-                        tint = if (queueOpen) accent else IvidsColorTokens.SlateMuted
+                        tint = if (queueOpen) accent else IvidsColorTokens.SlateMuted,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
                 IconButton(
                     onClick = playerViewModel::toggleMute,
-                    modifier = Modifier.tvFocusable(shape = CircleShape)
+                    modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
                 ) {
                     Icon(
                         imageVector = if (playerState.isMuted) {
@@ -1016,19 +1143,15 @@ private fun DesktopPlayerDeck(
                             Icons.AutoMirrored.Rounded.VolumeUp
                         },
                         contentDescription = strings["volume"],
-                        tint = IvidsColorTokens.SlateMuted
+                        tint = IvidsColorTokens.SlateMuted,
+                        modifier = Modifier.size(19.dp)
                     )
                 }
-                Slider(
+                IvidsScrubber(
                     value = playerState.volume,
                     onValueChange = playerViewModel::setVolume,
                     valueRange = 0f..1f,
-                    colors = SliderDefaults.colors(
-                        thumbColor = accent,
-                        activeTrackColor = accent,
-                        inactiveTrackColor = IvidsColorTokens.HairlineBorder
-                    ),
-                    modifier = Modifier.width(105.dp)
+                    modifier = Modifier.width(98.dp)
                 )
             }
         }
@@ -1036,7 +1159,7 @@ private fun DesktopPlayerDeck(
 }
 
 /**
- * Collapsible right-hand queue drawer on Desktop allowing quick track jumps, removals, and clear.
+ * Collapsible borderless right-hand queue drawer on Desktop allowing quick track jumps and removal.
  */
 @Composable
 private fun QueueSideSheet(
@@ -1049,12 +1172,13 @@ private fun QueueSideSheet(
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
 
-    Surface(
-        modifier = Modifier.fillMaxHeight().width(310.dp),
-        color = IvidsColorTokens.VinylSurface,
-        border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder)
+    Box(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(316.dp)
+            .background(IvidsColorTokens.AbyssRail)
     ) {
-        Column(modifier = Modifier.fillMaxSize().padding(14.dp)) {
+        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1065,7 +1189,7 @@ private fun QueueSideSheet(
                     style = MaterialTheme.typography.titleLarge,
                     color = IvidsColorTokens.ChalkInk
                 )
-                Row {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     if (playerState.queue.isNotEmpty()) {
                         TextButton(onClick = onClear) {
                             Icon(Icons.Rounded.DeleteSweep, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
@@ -1079,14 +1203,14 @@ private fun QueueSideSheet(
                 }
             }
 
-            HorizontalDivider(color = IvidsColorTokens.HairlineBorder, modifier = Modifier.padding(vertical = 8.dp))
+            HorizontalDivider(color = IvidsColorTokens.HairlineSubtle, modifier = Modifier.padding(vertical = 10.dp))
 
             if (playerState.queue.isEmpty()) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(strings["queue_empty"], color = IvidsColorTokens.SlateMuted)
+                    Text(strings["queue_empty"], style = MaterialTheme.typography.bodyMedium, color = IvidsColorTokens.SlateMuted)
                 }
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     itemsIndexed(playerState.queue, key = { idx, t -> "${idx}_${t.id}" }) { idx, item ->
                         val active = idx == playerState.currentIndex
                         Surface(
@@ -1095,13 +1219,12 @@ private fun QueueSideSheet(
                                 .tvFocusable(shape = RoundedCornerShape(10.dp))
                                 .clickable { onJumpTo(idx) },
                             shape = RoundedCornerShape(10.dp),
-                            color = if (active) accent.copy(alpha = 0.14f) else IvidsColorTokens.GrooveElevated,
-                            border = BorderStroke(1.dp, if (active) accent else IvidsColorTokens.HairlineBorder)
+                            color = if (active) accent.copy(alpha = 0.14f) else IvidsColorTokens.GlassSurface
                         ) {
                             Row(
-                                modifier = Modifier.padding(10.dp),
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
                                 Text(
                                     text = (idx + 1).toString(),

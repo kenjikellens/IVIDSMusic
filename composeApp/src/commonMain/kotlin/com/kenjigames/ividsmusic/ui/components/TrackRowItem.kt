@@ -1,13 +1,16 @@
 package com.kenjigames.ividsmusic.ui.components
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -74,8 +77,8 @@ fun formatDurationMillis(durationMs: Long): String {
 }
 
 /**
- * Displays an interactive track list row with tabular track index, cover thumbnail, active
- * playback indicator, offline badge, like button, and overflow actions menu.
+ * Displays a sleek borderless interactive track row with hover elevation, active equalizer tint,
+ * tabular duration/bitrate badges, like toggle, and overflow actions menu.
  */
 @Composable
 fun TrackRowItem(
@@ -98,37 +101,38 @@ fun TrackRowItem(
     val accent = LocalDynamicAccent.current
     val strings = LocalStrings.current
     var menuExpanded by remember { mutableStateOf(false) }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
 
-    val rowBg = if (isCurrentlyPlaying) {
-        accent.copy(alpha = 0.12f)
-    } else {
-        IvidsColorTokens.VinylSurface.copy(alpha = 0.85f)
-    }
-    val borderColor = if (isCurrentlyPlaying) {
-        accent.copy(alpha = 0.45f)
-    } else {
-        IvidsColorTokens.HairlineBorder.copy(alpha = 0.7f)
-    }
+    val rowBg by animateColorAsState(
+        targetValue = when {
+            isCurrentlyPlaying -> accent.copy(alpha = 0.13f)
+            isHovered -> IvidsColorTokens.GlassHover
+            else -> Color.Transparent
+        },
+        animationSpec = tween(150),
+        label = "TrackRowBg"
+    )
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .tvFocusable(shape = RoundedCornerShape(14.dp))
+            .tvFocusable(shape = RoundedCornerShape(12.dp))
+            .hoverable(interactionSource)
             .clickable(onClick = onPlay),
-        shape = RoundedCornerShape(14.dp),
-        color = rowBg,
-        border = BorderStroke(1.dp, borderColor)
+        shape = RoundedCornerShape(12.dp),
+        color = rowBg
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 12.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             if (index != null) {
                 Box(
-                    modifier = Modifier.width(28.dp),
+                    modifier = Modifier.width(26.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isCurrentlyPlaying) {
@@ -150,9 +154,9 @@ fun TrackRowItem(
 
             Box(
                 modifier = Modifier
-                    .size(48.dp)
+                    .size(46.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(IvidsColorTokens.GrooveElevated),
+                    .background(IvidsColorTokens.GlassSurface),
                 contentAlignment = Alignment.Center
             ) {
                 if (track.coverUrl.isNotBlank()) {
@@ -160,7 +164,7 @@ fun TrackRowItem(
                         model = track.coverUrl,
                         contentDescription = track.title,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(48.dp)
+                        modifier = Modifier.size(46.dp)
                     )
                 } else {
                     Icon(
@@ -182,7 +186,7 @@ fun TrackRowItem(
                 )
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
                         text = track.artist,
@@ -201,11 +205,17 @@ fun TrackRowItem(
                         )
                     }
                     track.bitrateKbps?.takeIf { isDownloaded && it > 0 }?.let { kbps ->
-                        Text(
-                            text = "$kbps kbps",
-                            style = IvidsTextStyles.tabularBadge(),
-                            color = accent
-                        )
+                        Surface(
+                            color = accent.copy(alpha = 0.14f),
+                            shape = RoundedCornerShape(6.dp)
+                        ) {
+                            Text(
+                                text = "$kbps kbps",
+                                style = IvidsTextStyles.tabularBadge(),
+                                color = accent,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -254,7 +264,7 @@ fun TrackRowItem(
                 DropdownMenu(
                     expanded = menuExpanded,
                     onDismissRequest = { menuExpanded = false },
-                    containerColor = IvidsColorTokens.GrooveElevated
+                    containerColor = IvidsColorTokens.GlassHover
                 ) {
                     DropdownMenuItem(
                         text = { Text(strings["play_next"], color = IvidsColorTokens.ChalkInk) },
