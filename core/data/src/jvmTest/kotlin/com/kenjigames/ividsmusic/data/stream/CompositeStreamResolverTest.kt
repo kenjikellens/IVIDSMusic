@@ -13,6 +13,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -127,7 +128,7 @@ class CompositeStreamResolverTest {
 
     /** Confirms Tier 3 failure falls through to Tier 4a Invidious parallel race selecting closest audio/mp4 format. */
     @Test
-    fun invidiousParallelRacePicksFastestHealthyMirrorWithinDurationTolerance() = runTest {
+    fun invidiousParallelRacePicksFastestHealthyMirrorWithinDurationTolerance() = runBlocking {
         val mockEngine = MockEngine { request ->
             val host = request.url.host
             val path = request.url.encodedPath

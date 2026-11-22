@@ -143,6 +143,16 @@ class LibraryViewModel(
     }
 
     /**
+     * Typed snapshot aggregating the four SQLite library flows prior to projecting [LibraryUiState].
+     */
+    private data class LibrarySnapshot(
+        val liked: List<Track>,
+        val albums: List<Album>,
+        val playlists: List<Playlist>,
+        val history: List<HistoryEntry>
+    )
+
+    /**
      * Combines liked tracks, saved albums, playlists, and recent history flows into [_uiState].
      */
     private fun observeLibraryCollections() {
@@ -153,15 +163,14 @@ class LibraryViewModel(
                 libraryRepository.observePlaylists(),
                 libraryRepository.observeHistory()
             ) { liked, albums, playlists, history ->
-                arrayOf<Any>(liked, albums, playlists, history)
-            }.collectLatest { tuple ->
-                @Suppress("UNCHECKED_CAST")
+                LibrarySnapshot(liked, albums, playlists, history)
+            }.collectLatest { snap ->
                 _uiState.update {
                     it.copy(
-                        likedTracks = tuple[0] as List<Track>,
-                        savedAlbums = tuple[1] as List<Album>,
-                        playlists = tuple[2] as List<Playlist>,
-                        recentlyListened = tuple[3] as List<HistoryEntry>
+                        likedTracks = snap.liked,
+                        savedAlbums = snap.albums,
+                        playlists = snap.playlists,
+                        recentlyListened = snap.history
                     )
                 }
             }

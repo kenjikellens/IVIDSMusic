@@ -13,7 +13,6 @@ import java.awt.Desktop
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URI
-import java.net.URL
 import javax.swing.JFileChooser
 import javax.swing.SwingUtilities
 
@@ -79,7 +78,7 @@ actual class AppUpdateChecker(
         withContext(Dispatchers.IO) {
             var connection: HttpURLConnection? = null
             try {
-                connection = (URL(GITHUB_RELEASE_URL).openConnection() as HttpURLConnection).apply {
+                connection = (URI.create(GITHUB_RELEASE_URL).toURL().openConnection() as HttpURLConnection).apply {
                     connectTimeout = 8_000
                     readTimeout = 8_000
                     setRequestProperty("Accept", "application/vnd.github.v3+json")

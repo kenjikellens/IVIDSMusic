@@ -18,7 +18,7 @@ import kotlinx.serialization.json.jsonPrimitive
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 
 /**
  * Android implementation of [PlatformBridge] using PackageManager Leanback detection and Action Intents.
@@ -76,7 +76,7 @@ actual class AppUpdateChecker(
         withContext(Dispatchers.IO) {
             var connection: HttpURLConnection? = null
             try {
-                connection = (URL(GITHUB_RELEASE_URL).openConnection() as HttpURLConnection).apply {
+                connection = (URI.create(GITHUB_RELEASE_URL).toURL().openConnection() as HttpURLConnection).apply {
                     connectTimeout = 8_000
                     readTimeout = 8_000
                     setRequestProperty("Accept", "application/vnd.github.v3+json")
@@ -137,7 +137,7 @@ actual class AppUpdateChecker(
                 _state.value = AppUpdateState.Downloading(0f)
                 val updateDir = File(context.cacheDir, "updates").apply { mkdirs() }
                 val apkFile = File(updateDir, "IVIDSMusic-update.apk")
-                connection = (URL(current.downloadUrl).openConnection() as HttpURLConnection).apply {
+                connection = (URI.create(current.downloadUrl).toURL().openConnection() as HttpURLConnection).apply {
                     connectTimeout = 12_000
                     readTimeout = 20_000
                     instanceFollowRedirects = true

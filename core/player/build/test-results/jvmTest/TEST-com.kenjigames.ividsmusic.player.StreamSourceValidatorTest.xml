@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.kenjigames.ividsmusic.player.StreamSourceValidatorTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-11-22T22:58:23.264Z" hostname="KENJI-GAMING-PC" time="0.022">
-  <properties/>
-  <testcase name="validSourcesPassValidation[jvm]" classname="com.kenjigames.ividsmusic.player.StreamSourceValidatorTest" time="0.021"/>
-  <testcase name="invalidSourcesReturnValidationErrors[jvm]" classname="com.kenjigames.ividsmusic.player.StreamSourceValidatorTest" time="0.001"/>
-  <testcase name="clampingEnforcesSafeRanges[jvm]" classname="com.kenjigames.ividsmusic.player.StreamSourceValidatorTest" time="0.0"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>

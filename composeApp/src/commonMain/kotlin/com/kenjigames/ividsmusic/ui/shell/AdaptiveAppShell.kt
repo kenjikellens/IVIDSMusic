@@ -137,6 +137,7 @@ fun resolveShellMode(layoutMode: LayoutMode, isTvDevice: Boolean, widthDp: Dp): 
         }
     }
 
+/** Describes a primary sidebar or bottom navigation tab paired with its route matcher. */
 private data class NavEntry(
     val route: AppRoute,
     val labelKey: String,

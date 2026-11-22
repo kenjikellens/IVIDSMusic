@@ -8,7 +8,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 
 /**
  * Android implementation of [ColorExtractor] backed by AndroidX Palette and a bounded LRU cache.
@@ -20,6 +20,7 @@ actual object ColorExtractor {
 
     private val cacheLock = Any()
     private val colorCache = object : LinkedHashMap<String, Color>(MAX_CACHE_ENTRIES, 0.75f, true) {
+        /** Evicts the least-recently-used artwork swatch once [colorCache] exceeds 40 entries. */
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Color>?): Boolean =
             size > MAX_CACHE_ENTRIES
     }
@@ -37,7 +38,7 @@ actual object ColorExtractor {
             var bitmap: Bitmap? = null
             var connection: HttpURLConnection? = null
             try {
-                connection = (URL(imageUrl).openConnection() as HttpURLConnection).apply {
+                connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
                     connectTimeout = 4_000
                     readTimeout = 4_000
                     setRequestProperty("User-Agent", "IVIDS-Music-Android")

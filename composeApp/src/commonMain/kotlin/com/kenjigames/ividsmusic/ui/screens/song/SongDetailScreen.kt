@@ -20,12 +20,12 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
+import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.Person
-import androidx.compose.material.icons.rounded.PlaylistPlay
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
@@ -184,7 +184,7 @@ fun SongDetailScreen(
                         }
                         if (track.albumId.isNotBlank()) {
                             TextButton(onClick = { onOpenAlbum(track.albumId) }) {
-                                Icon(Icons.Rounded.PlaylistPlay, null, tint = accent)
+                                Icon(Icons.AutoMirrored.Rounded.PlaylistPlay, null, tint = accent)
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(track.album.ifBlank { strings["albums"] }, color = accent)
                             }

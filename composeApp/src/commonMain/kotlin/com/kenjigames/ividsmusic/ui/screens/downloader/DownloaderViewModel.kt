@@ -243,6 +243,16 @@ class DownloaderViewModel(
     }
 
     /**
+     * Typed bundle holding observed downloader streams before projecting into [DownloaderUiState].
+     */
+    private data class DownloadObserverSnapshot(
+        val downloads: List<DownloadItem>,
+        val dirPath: String,
+        val savedTracks: List<Track>,
+        val defaultQuality: AudioQuality
+    )
+
+    /**
      * Observes download tasks, output path, saved offline tracks, and default bitrate preference.
      */
     private fun observeDownloadsAndSavedTracks() {
@@ -253,19 +263,14 @@ class DownloaderViewModel(
                 libraryRepository.observeDownloadedTracks(),
                 preferencesRepository.preferences
             ) { downloads, dirPath, savedTracks, prefs ->
-                arrayOf<Any>(downloads, dirPath, savedTracks, prefs.downloadQuality)
-            }.collectLatest { tuple ->
-                @Suppress("UNCHECKED_CAST")
-                val downloads = tuple[0] as List<DownloadItem>
-                val dirPath = tuple[1] as String
-                val savedTracks = tuple[2] as List<Track>
-                val defaultQuality = tuple[3] as AudioQuality
+                DownloadObserverSnapshot(downloads, dirPath, savedTracks, prefs.downloadQuality)
+            }.collectLatest { snap ->
                 _uiState.update { current ->
                     current.copy(
-                        activeDownloads = downloads,
-                        saveDirectoryPath = dirPath,
-                        savedTracks = savedTracks,
-                        selectedQuality = if (userOverrodeQuality) current.selectedQuality else defaultQuality
+                        activeDownloads = snap.downloads,
+                        saveDirectoryPath = snap.dirPath,
+                        savedTracks = snap.savedTracks,
+                        selectedQuality = if (userOverrodeQuality) current.selectedQuality else snap.defaultQuality
                     )
                 }
                 refreshStorageMetrics()

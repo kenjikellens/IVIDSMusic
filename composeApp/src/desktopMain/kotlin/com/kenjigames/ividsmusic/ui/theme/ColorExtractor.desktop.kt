@@ -10,7 +10,7 @@ import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.Rect
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
-import java.net.URL
+import java.net.URI
 import kotlin.math.max
 import kotlin.math.min
 
@@ -25,6 +25,7 @@ actual object ColorExtractor {
 
     private val cacheLock = Any()
     private val colorCache = object : LinkedHashMap<String, Color>(MAX_CACHE_ENTRIES, 0.75f, true) {
+        /** Evicts the least-recently-used artwork swatch once [colorCache] exceeds 40 entries. */
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Color>?): Boolean =
             size > MAX_CACHE_ENTRIES
     }
@@ -41,7 +42,7 @@ actual object ColorExtractor {
         return withContext(Dispatchers.IO) {
             var connection: HttpURLConnection? = null
             try {
-                connection = (URL(imageUrl).openConnection() as HttpURLConnection).apply {
+                connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
                     connectTimeout = 4_000
                     readTimeout = 4_000
                     setRequestProperty("User-Agent", "IVIDS-Music-Desktop")

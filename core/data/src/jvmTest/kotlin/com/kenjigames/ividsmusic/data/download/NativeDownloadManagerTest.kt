@@ -21,9 +21,11 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import okhttp3.OkHttpClient
 import okio.Path.Companion.toPath
 import java.io.File
@@ -102,7 +104,7 @@ class NativeDownloadManagerTest {
 
     /** Verifies real streaming download writes `.part` then atomically renames to `.m4a` when ffmpeg is absent. */
     @Test
-    fun enqueueStreamsToPartAtomicallyPromotesAndGracefullySkipsAbsentFfmpeg() = runTest {
+    fun enqueueStreamsToPartAtomicallyPromotesAndGracefullySkipsAbsentFfmpeg() = runBlocking {
         val dirs = AppStorageDirectories(
             cacheDir = cacheDir.absolutePath,
             filesDir = filesDir.absolutePath,
@@ -150,20 +152,25 @@ class NativeDownloadManagerTest {
         )
 
         val track = Track(id = "dl_1", title = "Cyan Waves", artist = "Kenji")
+        val observedStates = mutableListOf<DownloadState>()
+        val collectorJob = launch {
+            manager.downloads.collect { list ->
+                list.firstOrNull()?.state?.let { observedStates.add(it) }
+            }
+        }
         val enqueueRes = manager.enqueue(track, AudioQuality.Q320)
         val downloadId = (enqueueRes as AppResult.Success).data
 
-        var completedState: DownloadState.Completed? = null
-        repeat(60) {
-            val current = manager.downloads.value.firstOrNull { it.id == downloadId }?.state
-            if (current is DownloadState.Completed) {
-                completedState = current
-                return@repeat
-            }
-            delay(50L)
+        val completedItem = withTimeout(5_000L) {
+            manager.downloads.first { items ->
+                val state = items.firstOrNull { it.id == downloadId }?.state
+                state is DownloadState.Completed || state is DownloadState.Failed
+            }.first { it.id == downloadId }
         }
+        collectorJob.cancel()
 
-        val finalState = assertIs<DownloadState.Completed>(completedState)
+        val finalState = assertIs<DownloadState.Completed>(completedItem.state)
+        assertTrue(observedStates.any { it is DownloadState.Downloading && it.progress >= 0f })
         assertEquals(AudioQuality.Q128, finalState.quality)
         val outFile = File(finalState.filePath)
         assertTrue(outFile.exists())

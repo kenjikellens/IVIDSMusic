@@ -1,4 +1,4 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
+﻿import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -10,6 +10,10 @@ plugins {
 }
 
 kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-Xexpect-actual-classes")
+    }
+
     androidTarget {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
@@ -85,7 +89,7 @@ android {
         applicationId = "com.kenjigames.ividsmusic"
         minSdk = 24
         targetSdk = 36
-        versionCode = 31
+        versionCode = 32
         versionName = "0.2.5"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -169,7 +173,7 @@ compose.desktop {
             targetFormats(TargetFormat.Exe, TargetFormat.AppImage)
             packageName = "IVIDS Music"
             packageVersion = "0.2.5"
-            description = "IVIDS Music — High-Fidelity Native Music Player & Downloader"
+            description = "IVIDS Music â€” High-Fidelity Native Music Player & Downloader"
             vendor = "KenjiGames"
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 

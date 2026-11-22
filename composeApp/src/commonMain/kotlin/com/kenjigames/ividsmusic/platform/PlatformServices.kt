@@ -26,16 +26,23 @@ expect class PlatformBridge {
  */
 @Immutable
 sealed interface AppUpdateState {
+    /** No update check has been triggered or any active prompt was dismissed. */
     data object Idle : AppUpdateState
+    /** Currently querying GitHub Releases API for newer release metadata. */
     data class Checking(val statusKey: String) : AppUpdateState
+    /** Installed build matches or exceeds the latest published GitHub release. */
     data object UpToDate : AppUpdateState
+    /** A newer release binary and changelog are available to download and install. */
     data class Available(
         val version: String,
         val changelog: String,
         val downloadUrl: String
     ) : AppUpdateState
+    /** Streaming the update package onto local storage with normalized progress. */
     data class Downloading(val progress: Float) : AppUpdateState
+    /** Package downloaded or installer launched cleanly. */
     data class ReadyToInstall(val message: String) : AppUpdateState
+    /** Release check or package download failed with a diagnostic error message. */
     data class Error(val message: String) : AppUpdateState
 }
 

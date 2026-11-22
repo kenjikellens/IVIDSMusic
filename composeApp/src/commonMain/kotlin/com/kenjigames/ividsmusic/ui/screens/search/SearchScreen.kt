@@ -75,6 +75,7 @@ import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
+/** Visual tile descriptor for a browse genre card shown when the Search query is empty. */
 private data class BrowseCategoryTile(val label: String, val query: String, val tint: Color)
 
 /**

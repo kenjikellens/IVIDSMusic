@@ -11,6 +11,7 @@ import com.kenjigames.ividsmusic.domain.model.SearchOverview
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.domain.port.MusicDiscoveryRepository
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
