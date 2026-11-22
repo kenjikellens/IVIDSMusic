@@ -8,6 +8,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -56,7 +57,7 @@ import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
  * Custom antialiased hi-fi scrubber and volume bar replacing default Material 3 Sliders with a
- * sleek gradient track that thickens slightly and reveals a crisp circular thumb on hover/drag.
+ * sleek artwork-tinted track that thickens slightly and reveals a crisp circular thumb on hover/drag.
  */
 @Composable
 fun IvidsScrubber(
@@ -154,7 +155,7 @@ fun IvidsScrubber(
             if (fillWidth > 0.5f) {
                 drawRoundRect(
                     brush = Brush.horizontalGradient(
-                        colors = listOf(IvidsColorTokens.OceanAccent, accent)
+                        colors = listOf(accent.copy(alpha = 0.72f), accent)
                     ),
                     topLeft = Offset(0f, barTop),
                     size = Size(fillWidth, barH),
@@ -181,8 +182,7 @@ fun IvidsScrubber(
 }
 
 /**
- * Custom smooth hi-fi pill toggle with crisp white elevated thumb, avoiding low-contrast Material 3
- * default track/thumb tinting on dark cyan surfaces.
+ * Custom smooth hi-fi pill toggle with crisp white elevated thumb and signature IVIDS cyan active track.
  */
 @Composable
 fun IvidsSwitch(
@@ -191,9 +191,8 @@ fun IvidsSwitch(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
-    val accent = LocalDynamicAccent.current
     val trackColor by animateColorAsState(
-        targetValue = if (checked) accent else IvidsColorTokens.RecessedTrough,
+        targetValue = if (checked) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.RecessedTrough,
         animationSpec = tween(200),
         label = "SwitchTrack"
     )
@@ -235,8 +234,8 @@ fun IvidsSwitch(
 }
 
 /**
- * Recessed pill trough container hosting selectable option pills without noisy wireframe outlines.
- * Automatically wraps cleanly via FlowRow on narrower screens and aligns tabular labels if needed.
+ * Recessed pill trough container hosting selectable option pills using a refined neutral graphite
+ * active pill with crisp white text so Settings and filter bars are not flooded with cyan buttons.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -248,8 +247,6 @@ fun <T> IvidsSegmentedBar(
     modifier: Modifier = Modifier,
     tabular: Boolean = false
 ) {
-    val accent = LocalDynamicAccent.current
-
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(14.dp),
@@ -263,20 +260,26 @@ fun <T> IvidsSegmentedBar(
             items.forEach { item ->
                 val isSelected = item == selected
                 val bg by animateColorAsState(
-                    targetValue = if (isSelected) accent else Color.Transparent,
+                    targetValue = if (isSelected) Color(0xFF28282E) else Color.Transparent,
                     animationSpec = tween(180),
                     label = "SegmentBg"
                 )
                 val fg by animateColorAsState(
-                    targetValue = if (isSelected) IvidsColorTokens.OnAccentDark else IvidsColorTokens.SlateMuted,
+                    targetValue = if (isSelected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                     animationSpec = tween(180),
                     label = "SegmentFg"
+                )
+                val borderColor by animateColorAsState(
+                    targetValue = if (isSelected) Color(0x2EFFFFFF) else Color.Transparent,
+                    animationSpec = tween(180),
+                    label = "SegmentBorder"
                 )
 
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(10.dp))
                         .background(bg)
+                        .border(1.dp, borderColor, RoundedCornerShape(10.dp))
                         .tvFocusable(shape = RoundedCornerShape(10.dp))
                         .clickable { onSelect(item) }
                         .padding(horizontal = 13.dp, vertical = 8.dp),

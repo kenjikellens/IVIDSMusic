@@ -1,7 +1,6 @@
 package com.kenjigames.ividsmusic.ui.player
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -62,8 +61,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
@@ -72,6 +69,7 @@ import coil3.compose.AsyncImage
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.domain.model.Track
+import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
 import com.kenjigames.ividsmusic.ui.components.PlaylistPickerDialog
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
@@ -82,8 +80,8 @@ import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Full-screen expandable Now Playing sheet featuring Living Album ambient glow, split-pane
- * Desktop layout (artwork/controls left, live Queue right), and custom [IvidsScrubber] controls.
+ * Full-screen expandable Now Playing sheet featuring a full-bleed blurred album-artwork backdrop
+ * ([BlurredArtworkBackdrop]), split-pane Desktop layout, and custom [IvidsScrubber] controls.
  */
 @Composable
 fun NowPlayingSheet(
@@ -121,19 +119,14 @@ fun NowPlayingSheet(
         color = IvidsColorTokens.ObsidianStage
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            Canvas(modifier = Modifier.matchParentSize()) {
-                drawRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            accent.copy(alpha = 0.28f),
-                            IvidsColorTokens.OceanAccent.copy(alpha = 0.14f),
-                            Color.Transparent
-                        ),
-                        center = Offset(size.width * 0.35f, size.height * 0.28f),
-                        radius = size.maxDimension * 0.75f
-                    )
-                )
-            }
+            BlurredArtworkBackdrop(
+                artworkUrl = track?.coverUrl,
+                tintColor = accent,
+                scrimAlpha = 0.62f,
+                blurRadius = 64.dp,
+                fallbackColor = IvidsColorTokens.ObsidianStage,
+                modifier = Modifier.matchParentSize()
+            )
 
             Column(
                 modifier = Modifier
@@ -175,7 +168,7 @@ fun NowPlayingSheet(
                         Icon(
                             imageVector = Icons.Rounded.Info,
                             contentDescription = strings["more_info"],
-                            tint = accent
+                            tint = IvidsColorTokens.ChalkInk
                         )
                     }
                 }
@@ -438,7 +431,7 @@ private fun NowPlayingHeroCard(
                 .widthIn(max = 310.dp)
                 .fillMaxWidth(0.76f)
                 .aspectRatio(1f)
-                .shadow(28.dp, RoundedCornerShape(24.dp), ambientColor = accent, spotColor = accent)
+                .shadow(28.dp, RoundedCornerShape(24.dp), ambientColor = Color.Black, spotColor = Color.Black)
                 .clip(RoundedCornerShape(24.dp))
                 .background(IvidsColorTokens.GlassSurface),
             contentAlignment = Alignment.Center
@@ -454,7 +447,7 @@ private fun NowPlayingHeroCard(
                 Icon(
                     imageVector = Icons.Rounded.MusicNote,
                     contentDescription = null,
-                    tint = accent,
+                    tint = IvidsColorTokens.SlateMuted,
                     modifier = Modifier.size(72.dp)
                 )
             }
@@ -473,7 +466,7 @@ private fun NowPlayingHeroCard(
         Text(
             text = track?.artist ?: "—",
             style = MaterialTheme.typography.titleMedium,
-            color = accent,
+            color = IvidsColorTokens.SlateMuted,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.clickable(enabled = track != null, onClick = onOpenArtist)
@@ -634,7 +627,7 @@ private fun NowPlayingHeroCard(
             Surface(
                 onClick = { playerViewModel.downloadCurrent() },
                 shape = CircleShape,
-                color = IvidsColorTokens.GlassSurface,
+                color = IvidsColorTokens.GlassSurface.copy(alpha = 0.85f),
                 border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
                 modifier = Modifier.tvFocusable(shape = CircleShape)
             ) {
@@ -653,7 +646,7 @@ private fun NowPlayingHeroCard(
                         tint = if (playerState.isCurrentDownloaded) {
                             IvidsColorTokens.SuccessMint
                         } else {
-                            accent
+                            IvidsColorTokens.ChalkInk
                         },
                         modifier = Modifier.size(18.dp)
                     )

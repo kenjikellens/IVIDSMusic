@@ -11,16 +11,16 @@ import java.net.HttpURLConnection
 import java.net.URI
 
 /**
- * Android implementation of [ColorExtractor] backed by AndroidX Palette and a bounded LRU cache.
+ * Android implementation of [ColorExtractor] backed by AndroidX Palette and a bounded 120-entry LRU cache.
  */
 actual object ColorExtractor {
 
-    private const val MAX_CACHE_ENTRIES = 40
+    private const val MAX_CACHE_ENTRIES = 120
     private const val MAX_BYTES = 2 * 1024 * 1024
 
     private val cacheLock = Any()
     private val colorCache = object : LinkedHashMap<String, Color>(MAX_CACHE_ENTRIES, 0.75f, true) {
-        /** Evicts the least-recently-used artwork swatch once [colorCache] exceeds 40 entries. */
+        /** Evicts the least-recently-used artwork swatch once [colorCache] exceeds 120 entries. */
         override fun removeEldestEntry(eldest: MutableMap.MutableEntry<String, Color>?): Boolean =
             size > MAX_CACHE_ENTRIES
     }
@@ -30,9 +30,21 @@ actual object ColorExtractor {
      * Palette swatch, recycles the temporary Bitmap deterministically, and caches the result.
      */
     actual suspend fun extractDominantColor(imageUrl: String?, fallback: Color): Color {
-        if (imageUrl.isNullOrBlank()) return fallback
+        val tint = extractCardTintColor(imageUrl)
+        return tint ?: fallback
+    }
+
+    /**
+     * Samples the true dominant color of [imageUrl] for card and backdrop tinting, returning `null`
+     * for blank URLs, network failures, or monochrome covers so neutral surfaces stay uncolored.
+     */
+    actual suspend fun extractCardTintColor(imageUrl: String?): Color? {
+        if (imageUrl.isNullOrBlank()) return null
         synchronized(cacheLock) {
-            colorCache[imageUrl]?.let { return it }
+            if (colorCache.containsKey(imageUrl)) {
+                val cached = colorCache[imageUrl]
+                return cached?.takeIf { it != Color.Unspecified }
+            }
         }
         return withContext(Dispatchers.IO) {
             var bitmap: Bitmap? = null
@@ -43,7 +55,7 @@ actual object ColorExtractor {
                     readTimeout = 4_000
                     setRequestProperty("User-Agent", "IVIDS-Music-Android")
                 }
-                if (connection.responseCode !in 200..299) return@withContext fallback
+                if (connection.responseCode !in 200..299) return@withContext null
                 val bytes = connection.inputStream.use { input ->
                     val buffer = ByteArrayOutputStream()
                     val chunk = ByteArray(8192)
@@ -57,7 +69,7 @@ actual object ColorExtractor {
                     }
                     buffer.toByteArray()
                 }
-                if (bytes.isEmpty()) return@withContext fallback
+                if (bytes.isEmpty()) return@withContext null
 
                 val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                 BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
@@ -67,21 +79,21 @@ actual object ColorExtractor {
 
                 val decodeOpts = BitmapFactory.Options().apply { inSampleSize = sample }
                 bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, decodeOpts)
-                    ?: return@withContext fallback
+                    ?: return@withContext null
 
                 val palette = Palette.from(bitmap).generate()
                 val rawRgb = palette.vibrantSwatch?.rgb
                     ?: palette.lightVibrantSwatch?.rgb
                     ?: palette.dominantSwatch?.rgb
-                    ?: return@withContext fallback
+                    ?: return@withContext null
 
-                val clamped = clampAccentContrast(rawRgb, fallback)
+                val clamped = clampAccentContrast(rawRgb, Color.Unspecified)
                 synchronized(cacheLock) {
                     colorCache[imageUrl] = clamped
                 }
-                clamped
+                clamped.takeIf { it != Color.Unspecified }
             } catch (_: Exception) {
-                fallback
+                null
             } finally {
                 bitmap?.recycle()
                 connection?.disconnect()

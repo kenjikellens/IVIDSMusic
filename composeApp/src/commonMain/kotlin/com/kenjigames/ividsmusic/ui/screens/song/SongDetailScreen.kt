@@ -181,12 +181,13 @@ fun SongDetailScreen(
                                 track.genres.forEach { genre ->
                                     Surface(
                                         shape = CircleShape,
-                                        color = accent.copy(alpha = 0.14f)
+                                        color = IvidsColorTokens.GlassSurface,
+                                        border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle)
                                     ) {
                                         Text(
                                             text = genre,
                                             style = MaterialTheme.typography.labelLarge,
-                                            color = accent,
+                                            color = IvidsColorTokens.SlateMuted,
                                             modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
                                         )
                                     }
@@ -272,7 +273,7 @@ private fun SongActionPill(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Icon(icon, null, tint = accent, modifier = Modifier.size(18.dp))
+            Icon(icon, null, tint = if (highlighted) accent else IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,

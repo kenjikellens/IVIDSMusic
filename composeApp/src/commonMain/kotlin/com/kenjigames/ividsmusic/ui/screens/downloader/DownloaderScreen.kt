@@ -177,7 +177,7 @@ fun DownloaderScreen(
                                         verticalAlignment = Alignment.CenterVertically,
                                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
-                                        Icon(Icons.Rounded.FolderOpen, null, tint = accent, modifier = Modifier.size(16.dp))
+                                        Icon(Icons.Rounded.FolderOpen, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
                                         Text(strings["home_browse"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                                     }
                                 }
@@ -309,7 +309,7 @@ fun DownloaderScreen(
                             Text(
                                 text = "${formatBytes(state.storageUsedBytes)} • ${state.savedTracks.size} ${strings["saved_tracks"]}",
                                 style = IvidsTextStyles.tabularBadge(),
-                                color = accent
+                                color = IvidsColorTokens.SlateMuted
                             )
                         }
                         Surface(
@@ -324,7 +324,7 @@ fun DownloaderScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(6.dp)
                             ) {
-                                Icon(Icons.Rounded.Refresh, null, tint = accent, modifier = Modifier.size(16.dp))
+                                Icon(Icons.Rounded.Refresh, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
                                 Text(strings["rescan_saved"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                             }
                         }

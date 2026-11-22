@@ -9,7 +9,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -91,8 +90,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -108,6 +105,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.resources.Res
 import com.kenjigames.ividsmusic.resources.ic_ivids_brand
+import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
@@ -156,8 +154,8 @@ private data class NavEntry(
 )
 
 /**
- * Adaptive root layout container rendering the IVIDS Lumina Desktop AbyssRail + compact Search Pill +
- * sleek PlayerDeck, Mobile BottomBar + floating MiniPlayerBar, or TV Leanback drawer.
+ * Adaptive root layout container rendering the pure neutral dark IVIDS Desktop AbyssRail +
+ * compact Search Pill + artwork-blurred PlayerDeck, Mobile BottomBar + floating MiniPlayerBar, or TV drawer.
  */
 @Composable
 fun AdaptiveAppShell(
@@ -176,7 +174,6 @@ fun AdaptiveAppShell(
 ) {
     var nowPlayingExpanded by remember { mutableStateOf(false) }
     var desktopQueueOpen by remember { mutableStateOf(false) }
-    val accent = LocalDynamicAccent.current
 
     Box(modifier = modifier.fillMaxSize().background(IvidsColorTokens.ObsidianStage)) {
         when (shellMode) {
@@ -227,19 +224,6 @@ fun AdaptiveAppShell(
                             )
 
                             Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
-                                Canvas(modifier = Modifier.matchParentSize()) {
-                                    drawRect(
-                                        brush = Brush.radialGradient(
-                                            colors = listOf(
-                                                accent.copy(alpha = 0.08f),
-                                                IvidsColorTokens.OceanAccent.copy(alpha = 0.04f),
-                                                Color.Transparent
-                                            ),
-                                            center = Offset(size.width * 0.22f, 0f),
-                                            radius = size.maxDimension * 0.65f
-                                        )
-                                    )
-                                }
                                 Column(modifier = Modifier.fillMaxSize()) {
                                     DesktopTopBar(
                                         canNavigateBack = canNavigateBack,
@@ -328,7 +312,6 @@ private fun MobileTopHeader(
     onOpenSettings: () -> Unit
 ) {
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
 
     Column(modifier = Modifier.fillMaxWidth().background(IvidsColorTokens.ObsidianStage)) {
         Row(
@@ -358,7 +341,7 @@ private fun MobileTopHeader(
                 Text(
                     text = "IVIDS",
                     style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = accent
+                    color = IvidsColorTokens.PrimaryCyan
                 )
                 Text(
                     text = "MUSIC",
@@ -372,14 +355,14 @@ private fun MobileTopHeader(
                     Icon(
                         imageVector = Icons.Rounded.Download,
                         contentDescription = strings["nav_downloader"],
-                        tint = if (currentRoute is AppRoute.Downloader) accent else IvidsColorTokens.SlateMuted
+                        tint = if (currentRoute is AppRoute.Downloader) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
                     )
                 }
                 IconButton(onClick = onOpenSettings) {
                     Icon(
                         imageVector = Icons.Rounded.Settings,
                         contentDescription = strings["settings"],
-                        tint = if (currentRoute is AppRoute.Settings) accent else IvidsColorTokens.SlateMuted
+                        tint = if (currentRoute is AppRoute.Settings) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
                     )
                 }
             }
@@ -397,7 +380,6 @@ private fun MobileBottomBar(
     onSelectRoute: (AppRoute) -> Unit
 ) {
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val items = remember {
         listOf(
             NavEntry(AppRoute.Home, "home", Icons.Rounded.Home) { it is AppRoute.Home },
@@ -434,9 +416,9 @@ private fun MobileBottomBar(
                         )
                     },
                     colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = IvidsColorTokens.OnAccentDark,
-                        selectedTextColor = accent,
-                        indicatorColor = accent,
+                        selectedIconColor = IvidsColorTokens.PrimaryCyan,
+                        selectedTextColor = IvidsColorTokens.ChalkInk,
+                        indicatorColor = IvidsColorTokens.PrimaryCyan.copy(alpha = 0.14f),
                         unselectedIconColor = IvidsColorTokens.SlateMuted,
                         unselectedTextColor = IvidsColorTokens.SlateMuted
                     )
@@ -447,8 +429,8 @@ private fun MobileBottomBar(
 }
 
 /**
- * Floating borderless mini-player bar anchored above MobileBottomBar with ambient progress bar,
- * like toggle, and play/pause action; tapping opens [NowPlayingSheet].
+ * Floating borderless mini-player bar anchored above MobileBottomBar with blurred track artwork
+ * backdrop, progress bar, like toggle, and play/pause action; tapping opens [NowPlayingSheet].
  */
 @Composable
 private fun MiniPlayerBar(
@@ -474,96 +456,106 @@ private fun MiniPlayerBar(
         shape = RoundedCornerShape(18.dp),
         color = IvidsColorTokens.GlassSurface
     ) {
-        Column {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(IvidsColorTokens.RecessedTrough),
-                    contentAlignment = Alignment.Center
+        Box(modifier = Modifier.fillMaxWidth()) {
+            BlurredArtworkBackdrop(
+                artworkUrl = track.coverUrl,
+                tintColor = accent,
+                scrimAlpha = 0.74f,
+                blurRadius = 32.dp,
+                fallbackColor = IvidsColorTokens.GlassSurface,
+                modifier = Modifier.matchParentSize()
+            )
+            Column {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    if (track.coverUrl.isNotBlank()) {
-                        AsyncImage(
-                            model = track.coverUrl,
-                            contentDescription = track.title,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    } else {
-                        Icon(Icons.Rounded.MusicNote, null, tint = accent)
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(IvidsColorTokens.RecessedTrough),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (track.coverUrl.isNotBlank()) {
+                            AsyncImage(
+                                model = track.coverUrl,
+                                contentDescription = track.title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
+                            Icon(Icons.Rounded.MusicNote, null, tint = IvidsColorTokens.SlateMuted)
+                        }
                     }
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = track.title,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = IvidsColorTokens.ChalkInk,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = track.artist,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = IvidsColorTokens.SlateMuted,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-                IconButton(onClick = onToggleLike, modifier = Modifier.size(36.dp)) {
-                    Icon(
-                        imageVector = if (playerState.isCurrentLiked) {
-                            Icons.Rounded.Favorite
-                        } else {
-                            Icons.Rounded.FavoriteBorder
-                        },
-                        contentDescription = null,
-                        tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted
-                    )
-                }
-                Surface(
-                    onClick = onTogglePlayPause,
-                    shape = CircleShape,
-                    color = accent,
-                    modifier = Modifier.size(38.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        if (playerState.isBuffering) {
-                            CircularProgressIndicator(
-                                color = IvidsColorTokens.OnAccentDark,
-                                strokeWidth = 2.dp,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        } else {
-                            Icon(
-                                imageVector = if (playerState.isPlaying) {
-                                    Icons.Rounded.Pause
-                                } else {
-                                    Icons.Rounded.PlayArrow
-                                },
-                                contentDescription = null,
-                                tint = IvidsColorTokens.OnAccentDark
-                            )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = track.title,
+                            style = MaterialTheme.typography.titleSmall,
+                            color = IvidsColorTokens.ChalkInk,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Text(
+                            text = track.artist,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = IvidsColorTokens.SlateMuted,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                    IconButton(onClick = onToggleLike, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = if (playerState.isCurrentLiked) {
+                                Icons.Rounded.Favorite
+                            } else {
+                                Icons.Rounded.FavoriteBorder
+                            },
+                            contentDescription = null,
+                            tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted
+                        )
+                    }
+                    Surface(
+                        onClick = onTogglePlayPause,
+                        shape = CircleShape,
+                        color = accent,
+                        modifier = Modifier.size(38.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center) {
+                            if (playerState.isBuffering) {
+                                CircularProgressIndicator(
+                                    color = IvidsColorTokens.OnAccentDark,
+                                    strokeWidth = 2.dp,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = if (playerState.isPlaying) {
+                                        Icons.Rounded.Pause
+                                    } else {
+                                        Icons.Rounded.PlayArrow
+                                    },
+                                    contentDescription = null,
+                                    tint = IvidsColorTokens.OnAccentDark
+                                )
+                            }
                         }
                     }
                 }
+                LinearProgressIndicator(
+                    progress = { progress },
+                    color = accent,
+                    trackColor = IvidsColorTokens.RecessedTrough.copy(alpha = 0.6f),
+                    modifier = Modifier.fillMaxWidth().height(2.5.dp)
+                )
             }
-            LinearProgressIndicator(
-                progress = { progress },
-                color = accent,
-                trackColor = IvidsColorTokens.RecessedTrough,
-                modifier = Modifier.fillMaxWidth().height(2.5.dp)
-            )
         }
     }
 }
 
 /**
- * Deep obsidian borderless sidebar navigation rail rendered on Desktop (`>= 600dp`) and Android TV.
+ * Pure neutral dark borderless sidebar navigation rail rendered on Desktop (`>= 600dp`) and Android TV.
  */
 @Composable
 private fun SidebarNavigationRail(
@@ -573,7 +565,6 @@ private fun SidebarNavigationRail(
     onSelectRoute: (AppRoute) -> Unit
 ) {
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val primaryEntries = remember {
         listOf(
             NavEntry(AppRoute.Home, "home", Icons.Rounded.Home) { it is AppRoute.Home },
@@ -618,7 +609,7 @@ private fun SidebarNavigationRail(
                         Text(
                             text = "IVIDS",
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                            color = accent
+                            color = IvidsColorTokens.PrimaryCyan
                         )
                         Text(
                             text = if (isTv) "TV" else "MUSIC",
@@ -660,7 +651,8 @@ private fun SidebarNavigationRail(
 }
 
 /**
- * Single borderless hoverable navigation pill inside [SidebarNavigationRail].
+ * Single borderless navigation pill inside [SidebarNavigationRail]: ONLY the opened ([selected])
+ * item receives the signature IVIDS cyan accent, while hovered inactive items use a neutral grey hover.
  */
 @Composable
 private fun SidebarNavButton(
@@ -670,18 +662,34 @@ private fun SidebarNavButton(
     expanded: Boolean,
     onClick: () -> Unit
 ) {
-    val accent = LocalDynamicAccent.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     val bgColor by animateColorAsState(
         targetValue = when {
-            selected -> accent.copy(alpha = 0.14f)
-            isHovered -> IvidsColorTokens.GlassHover.copy(alpha = 0.7f)
+            selected -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.12f)
+            isHovered -> IvidsColorTokens.GlassHover
             else -> Color.Transparent
         },
         animationSpec = tween(150),
         label = "NavButtonBg"
+    )
+    val iconColor by animateColorAsState(
+        targetValue = when {
+            selected -> IvidsColorTokens.PrimaryCyan
+            isHovered -> IvidsColorTokens.ChalkInk
+            else -> IvidsColorTokens.SlateMuted
+        },
+        animationSpec = tween(150),
+        label = "NavButtonIcon"
+    )
+    val textColor by animateColorAsState(
+        targetValue = when {
+            selected || isHovered -> IvidsColorTokens.ChalkInk
+            else -> IvidsColorTokens.SlateMuted
+        },
+        animationSpec = tween(150),
+        label = "NavButtonText"
     )
 
     Surface(
@@ -702,7 +710,7 @@ private fun SidebarNavButton(
             Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = if (selected) accent else IvidsColorTokens.SlateMuted,
+                tint = iconColor,
                 modifier = Modifier.size(21.dp)
             )
             if (expanded) {
@@ -712,7 +720,7 @@ private fun SidebarNavButton(
                     style = MaterialTheme.typography.titleSmall.copy(
                         fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium
                     ),
-                    color = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
+                    color = textColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -722,7 +730,7 @@ private fun SidebarNavButton(
                         modifier = Modifier
                             .size(5.dp)
                             .clip(CircleShape)
-                            .background(accent)
+                            .background(IvidsColorTokens.PrimaryCyan)
                     )
                 }
             }
@@ -732,7 +740,7 @@ private fun SidebarNavButton(
 
 /**
  * Frameless Desktop & TV header containing back navigation, a compact 440dp recessed search pill
- * with `Ctrl+K` hint, and profile shortcut button.
+ * with `Ctrl+K` hint, and a neutral profile shortcut button.
  */
 @Composable
 private fun DesktopTopBar(
@@ -743,7 +751,6 @@ private fun DesktopTopBar(
     onOpenProfile: () -> Unit
 ) {
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     var query by remember { mutableStateOf("") }
     var searchFocused by remember { mutableStateOf(false) }
     val searchFocusRequester = remember { FocusRequester() }
@@ -808,7 +815,7 @@ private fun DesktopTopBar(
                     Icon(
                         imageVector = Icons.Rounded.Search,
                         contentDescription = null,
-                        tint = if (searchFocused) accent else IvidsColorTokens.SlateMuted,
+                        tint = if (searchFocused) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                         modifier = Modifier.size(18.dp)
                     )
                     Box(
@@ -829,7 +836,7 @@ private fun DesktopTopBar(
                             onValueChange = { query = it },
                             singleLine = true,
                             textStyle = MaterialTheme.typography.bodyMedium.copy(color = IvidsColorTokens.ChalkInk),
-                            cursorBrush = SolidColor(accent),
+                            cursorBrush = SolidColor(IvidsColorTokens.PrimaryCyan),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                             keyboardActions = KeyboardActions(onSearch = {
                                 if (query.isNotBlank()) onSearchSubmit(query.trim())
@@ -879,7 +886,7 @@ private fun DesktopTopBar(
                 Icon(
                     imageVector = Icons.Rounded.Person,
                     contentDescription = strings["you"],
-                    tint = accent,
+                    tint = IvidsColorTokens.ChalkInk,
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -888,8 +895,9 @@ private fun DesktopTopBar(
 }
 
 /**
- * Persistent 84dp hi-fi player deck across Desktop and Android TV featuring snug track info,
- * centered transport controls, custom [IvidsScrubber] seek & volume bars, and queue toggle.
+ * Persistent 84dp hi-fi player deck across Desktop and Android TV featuring a live blurred
+ * cover-artwork backdrop ([BlurredArtworkBackdrop]), centered transport controls with signature
+ * Play button, custom [IvidsScrubber] seek & volume bars, and queue toggle.
  */
 @Composable
 private fun DesktopPlayerDeck(
@@ -914,6 +922,17 @@ private fun DesktopPlayerDeck(
             .height(84.dp)
             .background(IvidsColorTokens.RecessedTrough)
     ) {
+        if (track != null) {
+            BlurredArtworkBackdrop(
+                artworkUrl = track.coverUrl,
+                tintColor = accent,
+                scrimAlpha = 0.76f,
+                blurRadius = 38.dp,
+                fallbackColor = IvidsColorTokens.RecessedTrough,
+                modifier = Modifier.matchParentSize()
+            )
+        }
+
         Row(
             modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -941,7 +960,7 @@ private fun DesktopPlayerDeck(
                             modifier = Modifier.fillMaxSize()
                         )
                     } else {
-                        Icon(Icons.Rounded.MusicNote, null, tint = accent.copy(alpha = 0.7f))
+                        Icon(Icons.Rounded.MusicNote, null, tint = IvidsColorTokens.SlateMuted)
                     }
                 }
                 Column(modifier = Modifier.weight(1f)) {

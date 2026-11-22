@@ -289,7 +289,7 @@ private fun ProfilePillAction(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Icon(icon, null, tint = accent, modifier = Modifier.size(16.dp))
+            Icon(icon, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
             Text(label, style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
         }
     }
@@ -304,7 +304,6 @@ private fun ProfileStatCard(
     label: String,
     modifier: Modifier = Modifier
 ) {
-    val accent = LocalDynamicAccent.current
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(18.dp),
@@ -318,7 +317,7 @@ private fun ProfileStatCard(
             Text(
                 text = value,
                 style = MaterialTheme.typography.displaySmall.copy(fontFeatureSettings = "tnum"),
-                color = accent
+                color = IvidsColorTokens.ChalkInk
             )
             Text(
                 text = label,

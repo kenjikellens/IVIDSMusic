@@ -9,7 +9,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -43,21 +42,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.kenjigames.ividsmusic.ui.theme.ColorExtractor
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
@@ -65,8 +67,9 @@ import com.kenjigames.ividsmusic.ui.theme.LocalIsTvMode
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Renders a borderless tonal artwork card for tracks, albums, or circular artist portraits with
- * smooth hover elevation and a hover/focus-revealed play action button.
+ * Renders a borderless tonal artwork card for tracks, albums, or circular artist portraits that
+ * softly blends its own cover artwork's dominant color into the card surface and reveals a
+ * signature IVIDS-cyan play button on hover.
  */
 @Composable
 fun MusicCard(
@@ -85,9 +88,28 @@ fun MusicCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
+    var cardTint by remember(artworkUrl) { mutableStateOf<Color?>(null) }
+    LaunchedEffect(artworkUrl) {
+        cardTint = if (!artworkUrl.isNullOrBlank()) {
+            ColorExtractor.extractCardTintColor(artworkUrl)
+        } else {
+            null
+        }
+    }
+
+    val targetCardSurface = remember(cardTint, isHovered) {
+        val base = if (isHovered) IvidsColorTokens.GlassHover else IvidsColorTokens.GlassSurface
+        val tint = cardTint
+        if (tint != null) {
+            lerp(base, tint, if (isHovered) 0.28f else 0.18f)
+        } else {
+            base
+        }
+    }
+
     val surfaceColor by animateColorAsState(
-        targetValue = if (isHovered) IvidsColorTokens.GlassHover else IvidsColorTokens.GlassSurface,
-        animationSpec = tween(180),
+        targetValue = targetCardSurface,
+        animationSpec = tween(220),
         label = "MusicCardSurface"
     )
     val playFabAlpha by animateFloatAsState(
@@ -136,7 +158,7 @@ fun MusicCard(
                     Icon(
                         imageVector = Icons.Rounded.MusicNote,
                         contentDescription = null,
-                        tint = accent.copy(alpha = 0.65f),
+                        tint = IvidsColorTokens.SlateMuted,
                         modifier = Modifier.size(44.dp)
                     )
                 }
@@ -152,7 +174,7 @@ fun MusicCard(
                         Text(
                             text = badgeText,
                             style = IvidsTextStyles.tabularBadge(),
-                            color = accent,
+                            color = IvidsColorTokens.ChalkInk,
                             modifier = Modifier.padding(horizontal = 7.dp, vertical = 3.dp)
                         )
                     }
@@ -211,8 +233,8 @@ fun MusicCard(
 }
 
 /**
- * Renders the signature Living Album Hero banner using borderless tonal surfaces, ambient radial
- * dynamic album-art glow, generous artwork framing, and tactile pill action controls.
+ * Renders the signature Living Album Hero banner using a true blurred cover-art backdrop
+ * ([BlurredArtworkBackdrop]), crisp cover framing, and a signature IVIDS primary Play button.
  */
 @Composable
 fun LivingAlbumHero(
@@ -235,29 +257,14 @@ fun LivingAlbumHero(
         color = IvidsColorTokens.GlassSurface
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
-            Canvas(modifier = Modifier.matchParentSize()) {
-                drawRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            accent.copy(alpha = 0.24f),
-                            IvidsColorTokens.OceanAccent.copy(alpha = 0.14f),
-                            Color.Transparent
-                        ),
-                        center = Offset(size.width * 0.16f, size.height * 0.30f),
-                        radius = size.maxDimension * 0.78f
-                    )
-                )
-                drawRect(
-                    brush = Brush.radialGradient(
-                        colors = listOf(
-                            IvidsColorTokens.OceanAccent.copy(alpha = 0.18f),
-                            Color.Transparent
-                        ),
-                        center = Offset(size.width * 0.88f, size.height * 0.85f),
-                        radius = size.maxDimension * 0.58f
-                    )
-                )
-            }
+            BlurredArtworkBackdrop(
+                artworkUrl = artworkUrl,
+                tintColor = null,
+                scrimAlpha = 0.68f,
+                blurRadius = 46.dp,
+                fallbackColor = IvidsColorTokens.GlassSurface,
+                modifier = Modifier.matchParentSize()
+            )
 
             if (onDismiss != null) {
                 IconButton(
@@ -292,8 +299,8 @@ fun LivingAlbumHero(
                             .shadow(
                                 elevation = 18.dp,
                                 shape = RoundedCornerShape(18.dp),
-                                ambientColor = accent,
-                                spotColor = accent
+                                ambientColor = Color.Black,
+                                spotColor = Color.Black
                             )
                             .clip(RoundedCornerShape(18.dp))
                             .background(IvidsColorTokens.RecessedTrough)
@@ -353,7 +360,7 @@ fun LivingAlbumHero(
                             Surface(
                                 onClick = onSecondaryAction,
                                 shape = CircleShape,
-                                color = Color(0x16FFFFFF),
+                                color = Color(0x18FFFFFF),
                                 border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
                                 modifier = Modifier.tvFocusable(shape = CircleShape)
                             ) {

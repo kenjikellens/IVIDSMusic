@@ -132,7 +132,7 @@ fun LibraryScreen(
                             value = state.searchQuery,
                             onValueChange = viewModel::onSearchQueryChanged,
                             placeholder = { Text(strings["search_library_placeholder"], color = IvidsColorTokens.SlateMuted) },
-                            leadingIcon = { Icon(Icons.Rounded.Search, null, tint = accent) },
+                            leadingIcon = { Icon(Icons.Rounded.Search, null, tint = IvidsColorTokens.SlateMuted) },
                             trailingIcon = {
                                 if (state.searchQuery.isNotEmpty()) {
                                     IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
@@ -145,7 +145,7 @@ fun LibraryScreen(
                             colors = OutlinedTextFieldDefaults.colors(
                                 focusedContainerColor = IvidsColorTokens.GlassSurface,
                                 unfocusedContainerColor = IvidsColorTokens.RecessedTrough,
-                                focusedBorderColor = accent,
+                                focusedBorderColor = IvidsColorTokens.HairlineBorder,
                                 unfocusedBorderColor = Color.Transparent,
                                 focusedTextColor = IvidsColorTokens.ChalkInk,
                                 unfocusedTextColor = IvidsColorTokens.ChalkInk
@@ -168,7 +168,7 @@ fun LibraryScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(Icons.Rounded.Shuffle, null, tint = accent, modifier = Modifier.size(18.dp))
+                                Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
                                 Text(strings["shuffle"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                             }
                         }

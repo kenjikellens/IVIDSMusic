@@ -134,7 +134,7 @@ fun SearchScreen(
                         value = state.query,
                         onValueChange = viewModel::onQueryChanged,
                         placeholder = { Text(strings["search_placeholder"], color = IvidsColorTokens.SlateMuted) },
-                        leadingIcon = { Icon(Icons.Rounded.Search, null, tint = accent) },
+                        leadingIcon = { Icon(Icons.Rounded.Search, null, tint = IvidsColorTokens.SlateMuted) },
                         trailingIcon = {
                             Row {
                                 IconButton(onClick = { showYearPanel = !showYearPanel }) {
@@ -158,7 +158,7 @@ fun SearchScreen(
                         colors = OutlinedTextFieldDefaults.colors(
                             focusedContainerColor = IvidsColorTokens.GlassSurface,
                             unfocusedContainerColor = IvidsColorTokens.RecessedTrough,
-                            focusedBorderColor = accent,
+                            focusedBorderColor = IvidsColorTokens.HairlineBorder,
                             unfocusedBorderColor = Color.Transparent,
                             focusedTextColor = IvidsColorTokens.ChalkInk,
                             unfocusedTextColor = IvidsColorTokens.ChalkInk

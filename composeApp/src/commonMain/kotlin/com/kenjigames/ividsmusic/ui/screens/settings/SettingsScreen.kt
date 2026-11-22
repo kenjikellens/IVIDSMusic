@@ -178,7 +178,7 @@ fun SettingsScreen(
                                     Text(
                                         text = "${(state.uiScale * 100).roundToInt()}%",
                                         style = IvidsTextStyles.tabularBadge(),
-                                        color = accent
+                                        color = IvidsColorTokens.ChalkInk
                                     )
                                     TextButton(
                                         onClick = { viewModel.setUiScale(state.uiScale + 0.10f) },
@@ -223,7 +223,7 @@ fun SettingsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                Icon(Icons.Rounded.Language, null, tint = accent, modifier = Modifier.size(18.dp))
+                                Icon(Icons.Rounded.Language, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
                                 Text(state.language.displayName, style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                             }
                         }
@@ -332,7 +332,7 @@ fun SettingsScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Icon(Icons.Rounded.SystemUpdate, null, tint = accent, modifier = Modifier.size(18.dp))
+                                    Icon(Icons.Rounded.SystemUpdate, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
                                     Text(strings["check_updates"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                                 }
                             }

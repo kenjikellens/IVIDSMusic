@@ -100,13 +100,13 @@ fun RecommendedScreen(
                                 },
                                 shape = CircleShape,
                                 color = IvidsColorTokens.GlassSurface,
-                                border = BorderStroke(1.dp, accent.copy(alpha = 0.28f)),
+                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
                                 modifier = Modifier.tvFocusable(shape = CircleShape)
                             ) {
                                 Text(
                                     text = "${score.displayName} (${score.score})",
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = accent,
+                                    color = IvidsColorTokens.ChalkInk,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp)
                                 )
                             }
