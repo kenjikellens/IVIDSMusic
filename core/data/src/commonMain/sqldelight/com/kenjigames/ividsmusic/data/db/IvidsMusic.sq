@@ -1,0 +1,209 @@
+CREATE TABLE tracks (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    artist_name TEXT NOT NULL,
+    artist_id TEXT NOT NULL DEFAULT '',
+    album_title TEXT NOT NULL DEFAULT '',
+    album_id TEXT NOT NULL DEFAULT '',
+    cover_url TEXT NOT NULL DEFAULT '',
+    duration_seconds INTEGER NOT NULL DEFAULT 0,
+    preview_url TEXT NOT NULL DEFAULT '',
+    genres_csv TEXT NOT NULL DEFAULT '',
+    release_year INTEGER,
+    rank INTEGER NOT NULL DEFAULT 0,
+    video_id TEXT,
+    is_liked INTEGER NOT NULL DEFAULT 0,
+    is_downloaded INTEGER NOT NULL DEFAULT 0,
+    local_file_path TEXT,
+    bitrate_kbps INTEGER,
+    added_timestamp_ms INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE playlists (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    title TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    cover_gradient_index INTEGER NOT NULL DEFAULT 0,
+    created_timestamp_ms INTEGER NOT NULL
+);
+
+CREATE TABLE playlist_tracks (
+    playlist_id INTEGER NOT NULL REFERENCES playlists(id) ON DELETE CASCADE,
+    track_id TEXT NOT NULL REFERENCES tracks(id) ON DELETE CASCADE,
+    position_index INTEGER NOT NULL,
+    PRIMARY KEY (playlist_id, track_id)
+);
+
+CREATE INDEX idx_playlist_tracks_order ON playlist_tracks(playlist_id, position_index);
+
+CREATE TABLE listen_history (
+    track_id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    artist_name TEXT NOT NULL,
+    artist_id TEXT NOT NULL DEFAULT '',
+    album_title TEXT NOT NULL DEFAULT '',
+    album_id TEXT NOT NULL DEFAULT '',
+    cover_url TEXT NOT NULL DEFAULT '',
+    duration_seconds INTEGER NOT NULL DEFAULT 0,
+    played_timestamp_ms INTEGER NOT NULL
+);
+
+CREATE TABLE discovery_scores (
+    entity_key TEXT NOT NULL PRIMARY KEY,
+    entity_type TEXT NOT NULL,
+    entity_id TEXT NOT NULL,
+    display_name TEXT NOT NULL,
+    score INTEGER NOT NULL DEFAULT 0 CHECK (score >= 0 AND score <= 100),
+    last_updated_ms INTEGER NOT NULL
+);
+
+CREATE TABLE saved_albums (
+    id TEXT NOT NULL PRIMARY KEY,
+    title TEXT NOT NULL,
+    artist_name TEXT NOT NULL,
+    artist_id TEXT NOT NULL DEFAULT '',
+    cover_url TEXT NOT NULL DEFAULT '',
+    track_count INTEGER NOT NULL DEFAULT 0,
+    release_year INTEGER,
+    saved_timestamp_ms INTEGER NOT NULL
+);
+
+selectTrackById:
+SELECT * FROM tracks WHERE id = ?;
+
+selectAllTracks:
+SELECT * FROM tracks;
+
+selectLikedTracks:
+SELECT * FROM tracks WHERE is_liked = 1 ORDER BY added_timestamp_ms DESC;
+
+selectDownloadedTracks:
+SELECT * FROM tracks WHERE is_downloaded = 1 ORDER BY added_timestamp_ms DESC;
+
+insertTrackIgnore:
+INSERT OR IGNORE INTO tracks(
+    id, title, artist_name, artist_id, album_title, album_id,
+    cover_url, duration_seconds, preview_url, genres_csv, release_year,
+    rank, video_id, is_liked, is_downloaded, local_file_path, bitrate_kbps, added_timestamp_ms
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateTrackMetadataPreserveFlags:
+UPDATE tracks SET
+    title = :title,
+    artist_name = :artistName,
+    artist_id = :artistId,
+    album_title = :albumTitle,
+    album_id = :albumId,
+    cover_url = CASE WHEN :coverUrl != '' THEN :coverUrl ELSE cover_url END,
+    duration_seconds = CASE WHEN :durationSeconds > 0 THEN :durationSeconds ELSE duration_seconds END,
+    preview_url = CASE WHEN :previewUrl != '' THEN :previewUrl ELSE preview_url END,
+    genres_csv = CASE WHEN :genresCsv != '' THEN :genresCsv ELSE genres_csv END,
+    release_year = COALESCE(:releaseYear, release_year),
+    rank = CASE WHEN :rank > 0 THEN :rank ELSE rank END,
+    video_id = COALESCE(:videoId, video_id)
+WHERE id = :id;
+
+updateTrackLiked:
+UPDATE tracks SET is_liked = ?, added_timestamp_ms = ? WHERE id = ?;
+
+updateTrackDownloaded:
+UPDATE tracks SET is_downloaded = 1, local_file_path = ?, bitrate_kbps = ?, added_timestamp_ms = ? WHERE id = ?;
+
+clearTrackDownloaded:
+UPDATE tracks SET is_downloaded = 0, local_file_path = NULL, bitrate_kbps = NULL WHERE id = ?;
+
+selectSavedAlbums:
+SELECT * FROM saved_albums ORDER BY saved_timestamp_ms DESC;
+
+upsertSavedAlbum:
+INSERT OR REPLACE INTO saved_albums(
+    id, title, artist_name, artist_id, cover_url, track_count, release_year, saved_timestamp_ms
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteSavedAlbum:
+DELETE FROM saved_albums WHERE id = ?;
+
+selectAllPlaylists:
+SELECT * FROM playlists ORDER BY created_timestamp_ms ASC, id ASC;
+
+selectPlaylistById:
+SELECT * FROM playlists WHERE id = ?;
+
+insertPlaylist:
+INSERT INTO playlists(title, description, cover_gradient_index, created_timestamp_ms)
+VALUES (?, ?, ?, ?);
+
+lastInsertRowId:
+SELECT last_insert_rowid();
+
+updatePlaylist:
+UPDATE playlists SET title = ?, description = ? WHERE id = ?;
+
+deletePlaylistById:
+DELETE FROM playlists WHERE id = ?;
+
+selectTracksForPlaylist:
+SELECT t.* FROM tracks t
+INNER JOIN playlist_tracks pt ON t.id = pt.track_id
+WHERE pt.playlist_id = ?
+ORDER BY pt.position_index ASC;
+
+selectAllPlaylistTrackRelations:
+SELECT pt.playlist_id, pt.position_index, t.*
+FROM playlist_tracks pt
+INNER JOIN tracks t ON t.id = pt.track_id
+ORDER BY pt.playlist_id ASC, pt.position_index ASC;
+
+selectMaxPositionInPlaylist:
+SELECT COALESCE(MAX(position_index), -1) FROM playlist_tracks WHERE playlist_id = ?;
+
+insertPlaylistTrackIgnore:
+INSERT OR IGNORE INTO playlist_tracks(playlist_id, track_id, position_index)
+VALUES (?, ?, ?);
+
+deleteTrackFromPlaylist:
+DELETE FROM playlist_tracks WHERE playlist_id = ? AND track_id = ?;
+
+deleteAllTracksFromPlaylist:
+DELETE FROM playlist_tracks WHERE playlist_id = ?;
+
+updatePlaylistTrackPosition:
+UPDATE playlist_tracks SET position_index = ? WHERE playlist_id = ? AND track_id = ?;
+
+selectHistory:
+SELECT * FROM listen_history ORDER BY played_timestamp_ms DESC;
+
+selectLatestHistoryTimestamp:
+SELECT COALESCE(MAX(played_timestamp_ms), 0) FROM listen_history;
+
+upsertHistory:
+INSERT OR REPLACE INTO listen_history(
+    track_id, title, artist_name, artist_id, album_title, album_id,
+    cover_url, duration_seconds, played_timestamp_ms
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+trimHistoryToTwenty:
+DELETE FROM listen_history
+WHERE track_id NOT IN (
+    SELECT track_id
+    FROM listen_history
+    ORDER BY played_timestamp_ms DESC
+    LIMIT 20
+);
+
+clearHistory:
+DELETE FROM listen_history;
+
+selectAllScores:
+SELECT * FROM discovery_scores ORDER BY score DESC, last_updated_ms DESC;
+
+selectScoreByKey:
+SELECT * FROM discovery_scores WHERE entity_key = ?;
+
+upsertScore:
+INSERT OR REPLACE INTO discovery_scores(
+    entity_key, entity_type, entity_id, display_name, score, last_updated_ms
+) VALUES (?, ?, ?, ?, ?, ?);
+
+clearAllScores:
+DELETE FROM discovery_scores;

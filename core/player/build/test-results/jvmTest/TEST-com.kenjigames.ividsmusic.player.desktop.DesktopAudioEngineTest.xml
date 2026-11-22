@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.kenjigames.ividsmusic.player.desktop.DesktopAudioEngineTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-11-22T22:58:23.288Z" hostname="KENJI-GAMING-PC" time="0.36">
+  <properties/>
+  <testcase name="volumeAndSeekClampingEnforcedAcrossTracks[jvm]" classname="com.kenjigames.ividsmusic.player.desktop.DesktopAudioEngineTest" time="0.103"/>
+  <testcase name="releaseAlwaysDisposesEvenWhenStopThrows[jvm]" classname="com.kenjigames.ividsmusic.player.desktop.DesktopAudioEngineTest" time="0.186"/>
+  <testcase name="trackSwitchDeterministicallyStopsAndDisposesPreviousHandle[jvm]" classname="com.kenjigames.ividsmusic.player.desktop.DesktopAudioEngineTest" time="0.005"/>
+  <testcase name="localFilesValidateExistenceAndEncodeSpaces[jvm]" classname="com.kenjigames.ividsmusic.player.desktop.DesktopAudioEngineTest" time="0.051"/>
+  <testcase name="errorsMapToCanonicalDomainErrors[jvm]" classname="com.kenjigames.ividsmusic.player.desktop.DesktopAudioEngineTest" time="0.004"/>
+  <testcase name="playPollsPositionAndCompletesToEnded[jvm]" classname="com.kenjigames.ividsmusic.player.desktop.DesktopAudioEngineTest" time="0.005"/>
+  <testcase name="externalCommandsEmitToObservers[jvm]" classname="com.kenjigames.ividsmusic.player.desktop.DesktopAudioEngineTest" time="0.006"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
