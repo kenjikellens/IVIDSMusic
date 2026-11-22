@@ -5,14 +5,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.ArrowDownward
@@ -25,7 +24,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -40,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.ConfirmationDialog
+import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
@@ -52,8 +51,8 @@ import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Displays a custom playlist with inline title/description editing, track reordering, track removal,
- * batch Play/Shuffle controls, and playlist deletion.
+ * Displays a framed custom playlist page (max 1360dp) with inline metadata editing, track
+ * reordering, track removal, batch Play/Shuffle controls, and playlist deletion.
  */
 @Composable
 fun PlaylistDetailScreen(
@@ -90,147 +89,165 @@ fun PlaylistDetailScreen(
         )
     }
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 100.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+    FramedScreenContainer(
+        maxWidth = 1360.dp,
+        modifier = modifier.fillMaxSize()
     ) {
-        val playlist = state.playlist
-        if (playlist == null) {
-            item(key = "pl_empty") {
-                Text(strings["loading"], color = IvidsColorTokens.SlateMuted)
-            }
-        } else {
-            item(key = "pl_hero") {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LivingAlbumHero(
-                        eyebrow = strings["playlists"],
-                        title = playlist.title,
-                        subtitle = "${playlist.description.ifBlank { strings["library_desc"] }} • ${playlist.tracks.size} ${strings["songs"]}",
-                        artworkUrl = playlist.tracks.firstOrNull()?.coverUrl,
-                        primaryActionLabel = strings["play_all"],
-                        onPrimaryAction = {
-                            if (playlist.tracks.isNotEmpty()) playerViewModel.playQueue(playlist.tracks)
-                        },
-                        secondaryActionLabel = strings["shuffle"],
-                        onSecondaryAction = {
-                            if (playlist.tracks.isNotEmpty()) playerViewModel.playQueue(playlist.tracks, shuffled = true)
-                        }
-                    )
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        OutlinedButton(
-                            onClick = { viewModel.setEditing(!state.isEditing) },
-                            border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder),
-                            modifier = Modifier.tvFocusable(shape = RoundedCornerShape(12.dp))
-                        ) {
-                            Icon(Icons.Rounded.Edit, null, tint = accent, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(strings["rename"], color = IvidsColorTokens.ChalkInk)
-                        }
-                        OutlinedButton(
-                            onClick = { viewModel.setDeleteConfirmVisible(true) },
-                            border = BorderStroke(1.dp, IvidsColorTokens.DangerCoral.copy(alpha = 0.5f)),
-                            modifier = Modifier.tvFocusable(shape = RoundedCornerShape(12.dp))
-                        ) {
-                            Icon(Icons.Rounded.Delete, null, tint = IvidsColorTokens.DangerCoral, modifier = Modifier.size(16.dp))
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(strings["delete_playlist"], color = IvidsColorTokens.DangerCoral)
-                        }
-                    }
-
-                    if (state.isEditing) {
-                        Surface(
-                            shape = RoundedCornerShape(14.dp),
-                            color = IvidsColorTokens.VinylSurface,
-                            border = BorderStroke(1.dp, accent.copy(alpha = 0.5f))
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(14.dp),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                OutlinedTextField(
-                                    value = state.editTitle,
-                                    onValueChange = viewModel::onEditTitleChanged,
-                                    label = { Text(strings["playlist_name"]) },
-                                    singleLine = true,
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                OutlinedTextField(
-                                    value = state.editDescription,
-                                    onValueChange = viewModel::onEditDescriptionChanged,
-                                    label = { Text(strings["playlist_desc"]) },
-                                    modifier = Modifier.fillMaxWidth()
-                                )
-                                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                                    Button(
-                                        onClick = viewModel::saveMetadata,
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = accent,
-                                            contentColor = IvidsColorTokens.OnAccentDark
-                                        )
-                                    ) {
-                                        Text(strings["profile_save"])
-                                    }
-                                    TextButton(onClick = { viewModel.setEditing(false) }) {
-                                        Text(strings["cancel"], color = IvidsColorTokens.SlateMuted)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (playlist.tracks.isEmpty()) {
-                item(key = "pl_no_tracks") {
-                    Text(
-                        text = strings["library_empty_desc"],
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = IvidsColorTokens.SlateMuted
-                    )
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
+            val playlist = state.playlist
+            if (playlist == null) {
+                item(key = "pl_empty") {
+                    Text(strings["loading"], color = IvidsColorTokens.SlateMuted)
                 }
             } else {
-                itemsIndexed(playlist.tracks, key = { idx, t -> "pl_${playlist.id}_${idx}_${t.id}" }) { idx, track ->
-                    TrackRowItem(
-                        index = idx + 1,
-                        track = track,
-                        isCurrentlyPlaying = playerState.currentTrack?.id == track.id,
-                        isLiked = track.id in likedIds || track.isLiked,
-                        isDownloaded = track.id in downloadedIds || track.isDownloaded,
-                        onPlay = { playerViewModel.playTrack(track, playlist.tracks) },
-                        onToggleLike = { playerViewModel.toggleTrackLike(track) },
-                        onPlayNext = { playerViewModel.enqueueNext(track) },
-                        onAddToQueue = { playerViewModel.enqueueLast(track) },
-                        onAddToPlaylist = { playlistModal.openPicker(track) },
-                        onDownload = { playerViewModel.downloadTrack(track) },
-                        onOpenArtist = { onOpenArtist(track.artistId, track.artist) },
-                        onOpenSongDetail = { onOpenSongDetail(track.id) },
-                        trailingContent = {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                IconButton(
-                                    onClick = { viewModel.moveTrack(idx, -1) },
-                                    enabled = idx > 0,
-                                    modifier = Modifier.size(30.dp)
+                item(key = "pl_hero") {
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        LivingAlbumHero(
+                            eyebrow = strings["playlists"],
+                            title = playlist.title,
+                            subtitle = "${playlist.description.ifBlank { strings["library_desc"] }} • ${playlist.tracks.size} ${strings["songs"]}",
+                            artworkUrl = playlist.tracks.firstOrNull()?.coverUrl,
+                            primaryActionLabel = strings["play_all"],
+                            onPrimaryAction = {
+                                if (playlist.tracks.isNotEmpty()) playerViewModel.playQueue(playlist.tracks)
+                            },
+                            secondaryActionLabel = strings["shuffle"],
+                            onSecondaryAction = {
+                                if (playlist.tracks.isNotEmpty()) playerViewModel.playQueue(playlist.tracks, shuffled = true)
+                            }
+                        )
+
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Surface(
+                                onClick = { viewModel.setEditing(!state.isEditing) },
+                                shape = CircleShape,
+                                color = IvidsColorTokens.GlassSurface,
+                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
+                                modifier = Modifier.tvFocusable(shape = CircleShape)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    Icon(Icons.Rounded.ArrowUpward, strings["move_up"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
+                                    Icon(Icons.Rounded.Edit, null, tint = accent, modifier = Modifier.size(16.dp))
+                                    Text(strings["rename"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                                 }
-                                IconButton(
-                                    onClick = { viewModel.moveTrack(idx, 1) },
-                                    enabled = idx < playlist.tracks.lastIndex,
-                                    modifier = Modifier.size(30.dp)
+                            }
+                            Surface(
+                                onClick = { viewModel.setDeleteConfirmVisible(true) },
+                                shape = CircleShape,
+                                color = IvidsColorTokens.DangerCoral.copy(alpha = 0.14f),
+                                modifier = Modifier.tvFocusable(shape = CircleShape)
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    Icon(Icons.Rounded.ArrowDownward, strings["move_down"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-                                }
-                                IconButton(
-                                    onClick = { viewModel.removeTrack(track.id) },
-                                    modifier = Modifier.size(30.dp)
-                                ) {
-                                    Icon(Icons.Rounded.RemoveCircleOutline, strings["remove"], tint = IvidsColorTokens.DangerCoral, modifier = Modifier.size(16.dp))
+                                    Icon(Icons.Rounded.Delete, null, tint = IvidsColorTokens.DangerCoral, modifier = Modifier.size(16.dp))
+                                    Text(strings["delete_playlist"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.DangerCoral)
                                 }
                             }
                         }
-                    )
+
+                        if (state.isEditing) {
+                            Surface(
+                                shape = RoundedCornerShape(18.dp),
+                                color = IvidsColorTokens.GlassSurface
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(18.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    OutlinedTextField(
+                                        value = state.editTitle,
+                                        onValueChange = viewModel::onEditTitleChanged,
+                                        label = { Text(strings["playlist_name"]) },
+                                        singleLine = true,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    OutlinedTextField(
+                                        value = state.editDescription,
+                                        onValueChange = viewModel::onEditDescriptionChanged,
+                                        label = { Text(strings["playlist_desc"]) },
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                                        Button(
+                                            onClick = viewModel::saveMetadata,
+                                            shape = CircleShape,
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = accent,
+                                                contentColor = IvidsColorTokens.OnAccentDark
+                                            )
+                                        ) {
+                                            Text(strings["profile_save"])
+                                        }
+                                        TextButton(onClick = { viewModel.setEditing(false) }) {
+                                            Text(strings["cancel"], color = IvidsColorTokens.SlateMuted)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (playlist.tracks.isEmpty()) {
+                    item(key = "pl_no_tracks") {
+                        Text(
+                            text = strings["library_empty_desc"],
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = IvidsColorTokens.SlateMuted
+                        )
+                    }
+                } else {
+                    itemsIndexed(playlist.tracks, key = { idx, t -> "pl_${playlist.id}_${idx}_${t.id}" }) { idx, track ->
+                        TrackRowItem(
+                            index = idx + 1,
+                            track = track,
+                            isCurrentlyPlaying = playerState.currentTrack?.id == track.id,
+                            isLiked = track.id in likedIds || track.isLiked,
+                            isDownloaded = track.id in downloadedIds || track.isDownloaded,
+                            onPlay = { playerViewModel.playTrack(track, playlist.tracks) },
+                            onToggleLike = { playerViewModel.toggleTrackLike(track) },
+                            onPlayNext = { playerViewModel.enqueueNext(track) },
+                            onAddToQueue = { playerViewModel.enqueueLast(track) },
+                            onAddToPlaylist = { playlistModal.openPicker(track) },
+                            onDownload = { playerViewModel.downloadTrack(track) },
+                            onOpenArtist = { onOpenArtist(track.artistId, track.artist) },
+                            onOpenSongDetail = { onOpenSongDetail(track.id) },
+                            trailingContent = {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    IconButton(
+                                        onClick = { viewModel.moveTrack(idx, -1) },
+                                        enabled = idx > 0,
+                                        modifier = Modifier.size(30.dp)
+                                    ) {
+                                        Icon(Icons.Rounded.ArrowUpward, strings["move_up"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
+                                    }
+                                    IconButton(
+                                        onClick = { viewModel.moveTrack(idx, 1) },
+                                        enabled = idx < playlist.tracks.lastIndex,
+                                        modifier = Modifier.size(30.dp)
+                                    ) {
+                                        Icon(Icons.Rounded.ArrowDownward, strings["move_down"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
+                                    }
+                                    IconButton(
+                                        onClick = { viewModel.removeTrack(track.id) },
+                                        modifier = Modifier.size(30.dp)
+                                    ) {
+                                        Icon(Icons.Rounded.RemoveCircleOutline, strings["remove"], tint = IvidsColorTokens.DangerCoral, modifier = Modifier.size(16.dp))
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }

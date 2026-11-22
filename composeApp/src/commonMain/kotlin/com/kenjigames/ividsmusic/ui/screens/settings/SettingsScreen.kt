@@ -3,9 +3,8 @@ package com.kenjigames.ividsmusic.ui.screens.settings
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,9 +12,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -24,15 +25,11 @@ import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -40,12 +37,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.LayoutMode
 import com.kenjigames.ividsmusic.domain.model.UpdateMode
 import com.kenjigames.ividsmusic.platform.AppUpdateState
 import com.kenjigames.ividsmusic.ui.components.BitrateSelector
 import com.kenjigames.ividsmusic.ui.components.ConfirmationDialog
+import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
+import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.i18n.SupportedLanguage
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
@@ -55,11 +56,9 @@ import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 import kotlin.math.roundToInt
 
 /**
- * Renders the Settings screen with UI scale selector (75%..150%), 16-language instant picker,
- * default download bitrate selector (4..320 kbps), dynamic tint toggle, layout override, native
- * app update checker, and cache/score data management.
+ * Renders the centered Settings screen (max 860dp) featuring borderless tonal panels, recessed
+ * segmented selectors, custom [IvidsSwitch] toggles, 16-language picker, and 4–320 kbps selector.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -72,35 +71,31 @@ fun SettingsScreen(
     if (state.isLanguageModalOpen) {
         AlertDialog(
             onDismissRequest = { viewModel.setLanguageModalOpen(false) },
-            containerColor = IvidsColorTokens.VinylSurface,
-            title = { Text(strings["language"], color = IvidsColorTokens.ChalkInk) },
+            containerColor = IvidsColorTokens.GlassSurface,
+            title = { Text(strings["language"], style = MaterialTheme.typography.titleLarge, color = IvidsColorTokens.ChalkInk) },
             text = {
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth().heightIn(max = 360.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 380.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     items(SupportedLanguage.entries, key = { it.code }) { lang ->
                         val selected = lang == state.language
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .tvFocusable(shape = RoundedCornerShape(10.dp))
+                                .tvFocusable(shape = RoundedCornerShape(12.dp))
                                 .clickable { viewModel.selectLanguage(lang) },
-                            shape = RoundedCornerShape(10.dp),
-                            color = if (selected) accent.copy(alpha = 0.16f) else IvidsColorTokens.GrooveElevated,
-                            border = BorderStroke(
-                                1.dp,
-                                if (selected) accent else IvidsColorTokens.HairlineBorder
-                            )
+                            shape = RoundedCornerShape(12.dp),
+                            color = if (selected) accent.copy(alpha = 0.16f) else IvidsColorTokens.RecessedTrough
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(lang.displayName, color = IvidsColorTokens.ChalkInk)
+                                Text(lang.displayName, style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
                                 if (selected) {
-                                    Icon(Icons.Rounded.Check, null, tint = accent)
+                                    Icon(Icons.Rounded.Check, null, tint = accent, modifier = Modifier.size(20.dp))
                                 }
                             }
                         }
@@ -137,135 +132,145 @@ fun SettingsScreen(
         )
     }
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 100.dp),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
+    FramedScreenContainer(
+        maxWidth = 860.dp,
+        modifier = modifier.fillMaxSize()
     ) {
-        item(key = "settings_title") {
-            Text(strings["settings"], style = MaterialTheme.typography.headlineMedium, color = IvidsColorTokens.ChalkInk)
-        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 104.dp),
+            verticalArrangement = Arrangement.spacedBy(22.dp)
+        ) {
+            item(key = "settings_title") {
+                Text(
+                    text = strings["settings"],
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = IvidsColorTokens.ChalkInk
+                )
+            }
 
-        item(key = "appearance_card") {
-            SettingsCard(title = strings["appearance"]) {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(strings["interface_scale"], style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
-                            Text(strings["interface_scale_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
-                        }
+            item(key = "appearance_card") {
+                SettingsGroupPanel(title = strings["appearance"]) {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            OutlinedButton(
-                                onClick = { viewModel.setUiScale(state.uiScale - 0.10f) },
-                                enabled = state.uiScale > 0.76f,
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                            ) { Text("-", color = IvidsColorTokens.ChalkInk) }
-                            Text(
-                                text = "${(state.uiScale * 100).roundToInt()}%",
-                                style = IvidsTextStyles.tabularBadge(),
-                                color = accent
-                            )
-                            OutlinedButton(
-                                onClick = { viewModel.setUiScale(state.uiScale + 0.10f) },
-                                enabled = state.uiScale < 1.49f,
-                                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
-                            ) { Text("+", color = IvidsColorTokens.ChalkInk) }
+                            Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                                Text(strings["interface_scale"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
+                                Text(strings["interface_scale_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+                            }
+                            Surface(
+                                shape = CircleShape,
+                                color = IvidsColorTokens.RecessedTrough
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                ) {
+                                    TextButton(
+                                        onClick = { viewModel.setUiScale(state.uiScale - 0.10f) },
+                                        enabled = state.uiScale > 0.76f,
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                    ) { Text("-", color = IvidsColorTokens.ChalkInk) }
+                                    Text(
+                                        text = "${(state.uiScale * 100).roundToInt()}%",
+                                        style = IvidsTextStyles.tabularBadge(),
+                                        color = accent
+                                    )
+                                    TextButton(
+                                        onClick = { viewModel.setUiScale(state.uiScale + 0.10f) },
+                                        enabled = state.uiScale < 1.49f,
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                    ) { Text("+", color = IvidsColorTokens.ChalkInk) }
+                                }
+                            }
                         }
-                    }
 
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf(0.75f, 0.90f, 1.00f, 1.10f, 1.25f, 1.50f).forEach { factor ->
-                            val selected = kotlin.math.abs(state.uiScale - factor) < 0.03f
-                            FilterChip(
-                                selected = selected,
-                                onClick = { viewModel.setUiScale(factor) },
-                                label = { Text("${(factor * 100).roundToInt()}%", style = IvidsTextStyles.tabularBadge()) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = accent,
-                                    selectedLabelColor = IvidsColorTokens.OnAccentDark,
-                                    containerColor = IvidsColorTokens.GrooveElevated,
-                                    labelColor = IvidsColorTokens.ChalkInk
-                                )
-                            )
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(strings["language"], style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
-                            Text(strings["language_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
-                        }
-                        OutlinedButton(
-                            onClick = { viewModel.setLanguageModalOpen(true) },
-                            border = BorderStroke(1.dp, accent),
-                            modifier = Modifier.tvFocusable(shape = RoundedCornerShape(10.dp))
-                        ) {
-                            Icon(Icons.Rounded.Language, null, tint = accent)
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(state.language.displayName, color = IvidsColorTokens.ChalkInk)
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(strings["dynamic_tint"], style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
-                            Text(strings["dynamic_tint_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
-                        }
-                        Switch(
-                            checked = state.dynamicTintEnabled,
-                            onCheckedChange = viewModel::setDynamicTintEnabled,
-                            colors = SwitchDefaults.colors(checkedThumbColor = accent)
+                        val scalePresets = listOf(0.75f, 0.90f, 1.00f, 1.10f, 1.25f, 1.50f)
+                        val activeScalePreset = scalePresets.minByOrNull { kotlin.math.abs(it - state.uiScale) } ?: 1.00f
+                        IvidsSegmentedBar(
+                            items = scalePresets,
+                            selected = activeScalePreset,
+                            labelProvider = { "${(it * 100).roundToInt()}%" },
+                            onSelect = viewModel::setUiScale,
+                            tabular = true
                         )
                     }
 
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(strings["layout_mode"], style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
-                        Text(strings["layout_mode_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
-                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                            val modes = listOf(
-                                LayoutMode.AUTO to strings["layout_auto"],
-                                LayoutMode.MOBILE to strings["layout_mobile"],
-                                LayoutMode.DESKTOP to strings["layout_desktop"],
-                                LayoutMode.TV to strings["layout_tv"]
-                            )
-                            modes.forEach { (mode, label) ->
-                                val selected = state.layoutMode == mode
-                                FilterChip(
-                                    selected = selected,
-                                    onClick = { viewModel.setLayoutMode(mode) },
-                                    label = { Text(label) },
-                                    colors = FilterChipDefaults.filterChipColors(
-                                        selectedContainerColor = accent,
-                                        selectedLabelColor = IvidsColorTokens.OnAccentDark,
-                                        containerColor = IvidsColorTokens.GrooveElevated,
-                                        labelColor = IvidsColorTokens.ChalkInk
-                                    )
-                                )
+                    HorizontalDivider(color = IvidsColorTokens.HairlineSubtle)
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                            Text(strings["language"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
+                            Text(strings["language_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+                        }
+                        Surface(
+                            onClick = { viewModel.setLanguageModalOpen(true) },
+                            shape = CircleShape,
+                            color = IvidsColorTokens.RecessedTrough,
+                            border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
+                            modifier = Modifier.tvFocusable(shape = CircleShape)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                Icon(Icons.Rounded.Language, null, tint = accent, modifier = Modifier.size(18.dp))
+                                Text(state.language.displayName, style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                             }
                         }
                     }
+
+                    HorizontalDivider(color = IvidsColorTokens.HairlineSubtle)
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                            Text(strings["dynamic_tint"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
+                            Text(strings["dynamic_tint_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+                        }
+                        IvidsSwitch(
+                            checked = state.dynamicTintEnabled,
+                            onCheckedChange = viewModel::setDynamicTintEnabled
+                        )
+                    }
+
+                    HorizontalDivider(color = IvidsColorTokens.HairlineSubtle)
+
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Column {
+                            Text(strings["layout_mode"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
+                            Text(strings["layout_mode_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+                        }
+                        val layoutOptions = listOf(
+                            LayoutMode.AUTO to strings["layout_auto"],
+                            LayoutMode.MOBILE to strings["layout_mobile"],
+                            LayoutMode.DESKTOP to strings["layout_desktop"],
+                            LayoutMode.TV to strings["layout_tv"]
+                        )
+                        IvidsSegmentedBar(
+                            items = layoutOptions.map { it.first },
+                            selected = state.layoutMode,
+                            labelProvider = { mode -> layoutOptions.first { it.first == mode }.second },
+                            onSelect = viewModel::setLayoutMode
+                        )
+                    }
                 }
             }
-        }
 
-        item(key = "quality_card") {
-            SettingsCard(title = strings["default_quality"]) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            item(key = "quality_card") {
+                SettingsGroupPanel(title = strings["default_quality"]) {
                     Text(strings["default_quality_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
                     BitrateSelector(
                         selected = state.defaultQuality,
@@ -273,40 +278,28 @@ fun SettingsScreen(
                     )
                 }
             }
-        }
 
-        item(key = "update_card") {
-            SettingsCard(title = strings["update"]) {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        val updateModes = listOf(
-                            UpdateMode.AUTO to strings["update_mode_auto"],
-                            UpdateMode.MANUAL to strings["update_mode_manual"],
-                            UpdateMode.OFF to strings["update_mode_off"],
-                            UpdateMode.DEVELOPER to strings["update_mode_developer"]
-                        )
-                        updateModes.forEach { (mode, label) ->
-                            val selected = state.updateMode == mode
-                            FilterChip(
-                                selected = selected,
-                                onClick = { viewModel.setUpdateMode(mode) },
-                                label = { Text(label) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = accent,
-                                    selectedLabelColor = IvidsColorTokens.OnAccentDark,
-                                    containerColor = IvidsColorTokens.GrooveElevated,
-                                    labelColor = IvidsColorTokens.ChalkInk
-                                )
-                            )
-                        }
-                    }
+            item(key = "update_card") {
+                SettingsGroupPanel(title = strings["update"]) {
+                    val updateOptions = listOf(
+                        UpdateMode.AUTO to strings["update_mode_auto"],
+                        UpdateMode.MANUAL to strings["update_mode_manual"],
+                        UpdateMode.OFF to strings["update_mode_off"],
+                        UpdateMode.DEVELOPER to strings["update_mode_developer"]
+                    )
+                    IvidsSegmentedBar(
+                        items = updateOptions.map { it.first },
+                        selected = state.updateMode,
+                        labelProvider = { mode -> updateOptions.first { it.first == mode }.second },
+                        onSelect = viewModel::setUpdateMode
+                    )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f)) {
+                        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
                             Text("${strings["version"]}: ${state.appVersion}", style = IvidsTextStyles.tabularBadge(), color = IvidsColorTokens.ChalkInk)
                             when (val upd = state.updateState) {
                                 is AppUpdateState.Idle -> Unit
@@ -318,89 +311,72 @@ fun SettingsScreen(
                                 is AppUpdateState.Error -> Text(upd.message, style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.DangerCoral)
                             }
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
                         if (state.updateState is AppUpdateState.Available) {
                             Button(
                                 onClick = viewModel::downloadAndInstallUpdate,
+                                shape = CircleShape,
                                 colors = ButtonDefaults.buttonColors(containerColor = accent, contentColor = IvidsColorTokens.OnAccentDark)
                             ) {
-                                Text(strings["update_now"])
+                                Text(strings["update_now"], style = MaterialTheme.typography.labelLarge)
                             }
                         } else {
-                            OutlinedButton(
+                            Surface(
                                 onClick = viewModel::checkForUpdates,
-                                border = BorderStroke(1.dp, accent),
-                                modifier = Modifier.tvFocusable(shape = RoundedCornerShape(10.dp))
+                                shape = CircleShape,
+                                color = IvidsColorTokens.RecessedTrough,
+                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
+                                modifier = Modifier.tvFocusable(shape = CircleShape)
                             ) {
-                                Icon(Icons.Rounded.SystemUpdate, null, tint = accent)
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(strings["check_updates"], color = IvidsColorTokens.ChalkInk)
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Icon(Icons.Rounded.SystemUpdate, null, tint = accent, modifier = Modifier.size(18.dp))
+                                    Text(strings["check_updates"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        item(key = "data_card") {
-            SettingsCard(title = strings["data_management"]) {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(strings["clear_cache"], style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
-                            Text(strings["clear_cache_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
-                        }
-                        OutlinedButton(onClick = viewModel::clearAudioCache) {
-                            Text(strings["clear_cache"], color = IvidsColorTokens.ChalkInk)
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(strings["clear_scores"], style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
-                            Text(strings["clear_scores_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
-                        }
-                        OutlinedButton(
-                            onClick = { viewModel.setResetScoresConfirmOpen(true) },
-                            border = BorderStroke(1.dp, IvidsColorTokens.DangerCoral.copy(alpha = 0.5f))
-                        ) {
-                            Text(strings["clear_scores"], color = IvidsColorTokens.DangerCoral)
-                        }
-                    }
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(strings["reset_defaults"], style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
-                            Text(strings["reset_defaults_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
-                        }
-                        OutlinedButton(
-                            onClick = { viewModel.setResetDefaultsConfirmOpen(true) },
-                            border = BorderStroke(1.dp, IvidsColorTokens.DangerCoral.copy(alpha = 0.5f))
-                        ) {
-                            Text(strings["reset_defaults"], color = IvidsColorTokens.DangerCoral)
-                        }
-                    }
+            item(key = "data_card") {
+                SettingsGroupPanel(title = strings["data_management"]) {
+                    SettingsActionRow(
+                        title = strings["clear_cache"],
+                        subtitle = strings["clear_cache_desc"],
+                        actionLabel = strings["clear_cache"],
+                        isDestructive = false,
+                        onClick = viewModel::clearAudioCache
+                    )
+                    HorizontalDivider(color = IvidsColorTokens.HairlineSubtle)
+                    SettingsActionRow(
+                        title = strings["clear_scores"],
+                        subtitle = strings["clear_scores_desc"],
+                        actionLabel = strings["clear_scores"],
+                        isDestructive = true,
+                        onClick = { viewModel.setResetScoresConfirmOpen(true) }
+                    )
+                    HorizontalDivider(color = IvidsColorTokens.HairlineSubtle)
+                    SettingsActionRow(
+                        title = strings["reset_defaults"],
+                        subtitle = strings["reset_defaults_desc"],
+                        actionLabel = strings["reset_defaults"],
+                        isDestructive = true,
+                        onClick = { viewModel.setResetDefaultsConfirmOpen(true) }
+                    )
                 }
             }
-        }
 
-        item(key = "about_card") {
-            SettingsCard(title = strings["about"]) {
-                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    Text("IVIDS Music", style = MaterialTheme.typography.titleMedium, color = accent)
-                    Text("${strings["publisher"]}: KenjiGames", style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
-                    Text("${strings["version"]}: ${state.appVersion}", style = IvidsTextStyles.tabularBadge(), color = IvidsColorTokens.SlateMuted)
-                    Text("${strings["license"]}: ISC License", style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+            item(key = "about_card") {
+                SettingsGroupPanel(title = strings["about"]) {
+                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                        Text("IVIDS Music", style = MaterialTheme.typography.titleMedium, color = accent)
+                        Text("${strings["publisher"]}: KenjiGames", style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+                        Text("${strings["version"]}: ${state.appVersion}", style = IvidsTextStyles.tabularBadge(), color = IvidsColorTokens.SlateMuted)
+                        Text("${strings["license"]}: ISC License", style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+                    }
                 }
             }
         }
@@ -408,25 +384,67 @@ fun SettingsScreen(
 }
 
 /**
- * Renders a titled elevated section card grouping related settings controls inside [SettingsScreen].
+ * Renders a single label + pill action row inside a [SettingsGroupPanel].
  */
 @Composable
-private fun SettingsCard(
+private fun SettingsActionRow(
+    title: String,
+    subtitle: String,
+    actionLabel: String,
+    isDestructive: Boolean,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+            Text(title, style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
+            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+        }
+        Surface(
+            onClick = onClick,
+            shape = CircleShape,
+            color = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.14f) else IvidsColorTokens.RecessedTrough,
+            modifier = Modifier.tvFocusable(shape = CircleShape)
+        ) {
+            Text(
+                text = actionLabel,
+                style = MaterialTheme.typography.labelLarge,
+                color = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp)
+            )
+        }
+    }
+}
+
+/**
+ * Renders a borderless elevated tonal group card for logically related settings rows.
+ */
+@Composable
+private fun SettingsGroupPanel(
     title: String,
     content: @Composable () -> Unit
 ) {
-    Surface(
-        shape = RoundedCornerShape(18.dp),
-        color = IvidsColorTokens.VinylSurface,
-        border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(18.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = IvidsColorTokens.ChalkInk,
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
+        Surface(
+            shape = RoundedCornerShape(20.dp),
+            color = IvidsColorTokens.GlassSurface,
+            modifier = Modifier.fillMaxWidth()
         ) {
-            Text(title, style = MaterialTheme.typography.titleLarge, color = IvidsColorTokens.ChalkInk)
-            content()
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                content()
+            }
         }
     }
 }

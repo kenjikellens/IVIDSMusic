@@ -16,11 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AutoAwesome
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -35,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.ScoreEntityType
 import com.kenjigames.ividsmusic.domain.model.Track
+import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -42,10 +42,11 @@ import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Displays the personalized For You feed with interest topic chips, Discovery Mix, Genre Fusion,
- * and Taste Match sections, plus Refresh Taste action.
+ * Displays the personalized For You feed inside a framed viewport (max 1360dp) with borderless
+ * interest pills, Discovery Mix, Genre Fusion, and Taste Match shelves.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -62,118 +63,127 @@ fun RecommendedScreen(
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(start = 20.dp, end = 20.dp, top = 20.dp, bottom = 100.dp),
-        verticalArrangement = Arrangement.spacedBy(22.dp)
+    FramedScreenContainer(
+        maxWidth = 1360.dp,
+        modifier = modifier.fillMaxSize()
     ) {
-        item(key = "rec_hero") {
-            LivingAlbumHero(
-                eyebrow = strings["nav_foryou"],
-                title = strings["nav_foryou"],
-                subtitle = strings["foryou_desc"],
-                artworkUrl = state.feed.discoveryMix.firstOrNull()?.coverUrl,
-                primaryActionLabel = strings["refresh_taste"],
-                onPrimaryAction = viewModel::refresh
-            )
-        }
-
-        if (state.topInterests.isNotEmpty()) {
-            item(key = "rec_interests") {
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    state.topInterests.forEach { score ->
-                        AssistChip(
-                            onClick = {
-                                if (score.entityType == ScoreEntityType.ARTIST) {
-                                    onOpenArtist(score.entityId, score.displayName)
-                                } else {
-                                    onSearchTopic(score.displayName)
-                                }
-                            },
-                            label = {
-                                Text("${score.displayName} (${score.score})", color = accent)
-                            },
-                            colors = AssistChipDefaults.assistChipColors(
-                                containerColor = IvidsColorTokens.GrooveElevated
-                            ),
-                            border = BorderStroke(1.dp, accent.copy(alpha = 0.4f))
-                        )
-                    }
-                }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
+        ) {
+            item(key = "rec_hero") {
+                LivingAlbumHero(
+                    eyebrow = strings["nav_foryou"],
+                    title = strings["nav_foryou"],
+                    subtitle = strings["foryou_desc"],
+                    artworkUrl = state.feed.discoveryMix.firstOrNull()?.coverUrl,
+                    primaryActionLabel = strings["refresh_taste"],
+                    onPrimaryAction = viewModel::refresh
+                )
             }
-        }
 
-        if (state.isLoading) {
-            item(key = "rec_loading") {
-                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    Text(strings["loading_recommendations"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.SlateMuted)
-                    ShimmerSkeletonRow()
-                }
-            }
-        } else if (!state.feed.hasHistory) {
-            item(key = "rec_empty") {
-                Surface(
-                    shape = RoundedCornerShape(18.dp),
-                    color = IvidsColorTokens.VinylSurface,
-                    border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(28.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+            if (state.topInterests.isNotEmpty()) {
+                item(key = "rec_interests") {
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Icon(Icons.Rounded.AutoAwesome, null, tint = accent, modifier = Modifier.size(44.dp))
-                        Text(strings["foryou_empty_title"], style = MaterialTheme.typography.titleLarge, color = IvidsColorTokens.ChalkInk)
-                        Text(strings["foryou_empty_desc"], style = MaterialTheme.typography.bodyMedium, color = IvidsColorTokens.SlateMuted)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Button(
-                            onClick = onExploreMusic,
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = accent,
-                                contentColor = IvidsColorTokens.OnAccentDark
-                            )
-                        ) {
-                            Text(strings["explore_music"])
+                        state.topInterests.forEach { score ->
+                            Surface(
+                                onClick = {
+                                    if (score.entityType == ScoreEntityType.ARTIST) {
+                                        onOpenArtist(score.entityId, score.displayName)
+                                    } else {
+                                        onSearchTopic(score.displayName)
+                                    }
+                                },
+                                shape = CircleShape,
+                                color = IvidsColorTokens.GlassSurface,
+                                border = BorderStroke(1.dp, accent.copy(alpha = 0.28f)),
+                                modifier = Modifier.tvFocusable(shape = CircleShape)
+                            ) {
+                                Text(
+                                    text = "${score.displayName} (${score.score})",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = accent,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp)
+                                )
+                            }
                         }
                     }
                 }
             }
-        } else {
-            val sections = buildList<Pair<String, List<Track>>> {
-                if (state.feed.discoveryMix.isNotEmpty()) {
-                    add("Discovery Mix" to state.feed.discoveryMix)
-                }
-                val gfTitle = state.feed.genreFusionTitle
-                if (!gfTitle.isNullOrBlank() && state.feed.genreFusionTracks.isNotEmpty()) {
-                    add(gfTitle to state.feed.genreFusionTracks)
-                }
-                val tmTitle = state.feed.tasteMatchTitle
-                if (!tmTitle.isNullOrBlank() && state.feed.tasteMatchTracks.isNotEmpty()) {
-                    add(tmTitle to state.feed.tasteMatchTracks)
-                }
-            }
-            items(sections, key = { (title, _) -> "rec_$title" }) { (title, tracks) ->
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(title, style = MaterialTheme.typography.headlineSmall, color = IvidsColorTokens.ChalkInk)
+
+            if (state.isLoading) {
+                item(key = "rec_loading") {
+                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Text(strings["loading_recommendations"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.SlateMuted)
+                        ShimmerSkeletonRow()
                     }
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                        items(tracks, key = { "rt_${title}_${it.id}" }) { track ->
-                            MusicCard(
-                                title = track.title,
-                                subtitle = track.artist,
-                                artworkUrl = track.coverUrl,
-                                onClick = { onOpenSongDetail(track.id) },
-                                onPlayClick = { playerViewModel.playTrack(track, tracks) }
-                            )
+                }
+            } else if (!state.feed.hasHistory) {
+                item(key = "rec_empty") {
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = IvidsColorTokens.GlassSurface,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(32.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Icon(Icons.Rounded.AutoAwesome, null, tint = accent, modifier = Modifier.size(46.dp))
+                            Text(strings["foryou_empty_title"], style = MaterialTheme.typography.titleLarge, color = IvidsColorTokens.ChalkInk)
+                            Text(strings["foryou_empty_desc"], style = MaterialTheme.typography.bodyMedium, color = IvidsColorTokens.SlateMuted)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Button(
+                                onClick = onExploreMusic,
+                                shape = CircleShape,
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = accent,
+                                    contentColor = IvidsColorTokens.OnAccentDark
+                                )
+                            ) {
+                                Text(strings["explore_music"])
+                            }
+                        }
+                    }
+                }
+            } else {
+                val sections = buildList<Pair<String, List<Track>>> {
+                    if (state.feed.discoveryMix.isNotEmpty()) {
+                        add("Discovery Mix" to state.feed.discoveryMix)
+                    }
+                    val gfTitle = state.feed.genreFusionTitle
+                    if (!gfTitle.isNullOrBlank() && state.feed.genreFusionTracks.isNotEmpty()) {
+                        add(gfTitle to state.feed.genreFusionTracks)
+                    }
+                    val tmTitle = state.feed.tasteMatchTitle
+                    if (!tmTitle.isNullOrBlank() && state.feed.tasteMatchTracks.isNotEmpty()) {
+                        add(tmTitle to state.feed.tasteMatchTracks)
+                    }
+                }
+                items(sections, key = { (title, _) -> "rec_$title" }) { (title, tracks) ->
+                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(title, style = MaterialTheme.typography.headlineSmall, color = IvidsColorTokens.ChalkInk)
+                        }
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                            items(tracks, key = { "rt_${title}_${it.id}" }) { track ->
+                                MusicCard(
+                                    title = track.title,
+                                    subtitle = track.artist,
+                                    artworkUrl = track.coverUrl,
+                                    onClick = { onOpenSongDetail(track.id) },
+                                    onPlayClick = { playerViewModel.playTrack(track, tracks) }
+                                )
+                            }
                         }
                     }
                 }
