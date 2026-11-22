@@ -19,4 +19,9 @@ pc/node_modules/
 dist/
 pc/dist/
 ividsmusic_release_temp/
+**/build/
+.kotlin/
+composeApp/resources/windows/
+IVIDSMusic*.apk
+IVIDSMusic*.exe
 

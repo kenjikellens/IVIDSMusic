@@ -2,70 +2,74 @@
 setlocal enabledelayedexpansion
 
 echo ============================================================
-echo   IVIDS Music - Local Multi-Platform Build Script
+echo   IVIDS Music - Native Multiplatform Build Script
 echo ============================================================
 
-set NODE_OPTIONS=--max-old-space-size=8192
-
-echo [1/5] Updating versionCode in app/build.gradle.kts...
-node -e "const fs = require('fs'); const p = 'app/build.gradle.kts'; if (fs.existsSync(p)) { let c = fs.readFileSync(p, 'utf8'); c = c.replace(/versionCode\s*=\s*(\d+)/, (m, v) => 'versionCode = ' + (parseInt(v, 10) + 1)); fs.writeFileSync(p, c, 'utf8'); console.log('✔ versionCode updated.'); }"
+echo [1/5] Updating versionCode in composeApp\build.gradle.kts...
+powershell -NoProfile -Command "$p='composeApp\build.gradle.kts'; if (Test-Path $p) { $c = Get-Content $p -Raw; $c = [regex]::Replace($c, 'versionCode\s*=\s*(\d+)', { param($m) 'versionCode = ' + ([int]$m.Groups[1].Value + 1) }); Set-Content $p $c -NoNewline -Encoding UTF8; Write-Host 'OK versionCode updated.' }"
 
 echo.
 echo [2/5] Compiling Mobile Release APK...
-call gradlew.bat assembleMobileRelease
-if %ERRORLEVEL% EQU 0 (
-    if exist "app\build\outputs\apk\mobile\release\app-mobile-release.apk" (
-        copy /Y "app\build\outputs\apk\mobile\release\app-mobile-release.apk" "IVIDSMusic_Mobile.apk" >nul
-        copy /Y "app\build\outputs\apk\mobile\release\app-mobile-release.apk" "IVIDSMusic.apk" >nul
-        echo ✔ Mobile APK compiled and updated in root directory!
-    )
-) else (
+call gradlew.bat :composeApp:assembleMobileRelease
+if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Mobile APK compilation failed!
     exit /b %ERRORLEVEL%
+)
+if exist "composeApp\build\outputs\apk\mobile\release\composeApp-mobile-release.apk" (
+    copy /Y "composeApp\build\outputs\apk\mobile\release\composeApp-mobile-release.apk" "IVIDSMusic_Mobile.apk" >nul
+    copy /Y "composeApp\build\outputs\apk\mobile\release\composeApp-mobile-release.apk" "IVIDSMusic.apk" >nul
+    echo OK Mobile APK compiled and copied to root directory!
 )
 
 echo.
 echo [3/5] Compiling TV Release APK...
-call gradlew.bat assembleTvRelease
-if %ERRORLEVEL% EQU 0 (
-    if exist "app\build\outputs\apk\tv\release\app-tv-release.apk" (
-        copy /Y "app\build\outputs\apk\tv\release\app-tv-release.apk" "IVIDSMusic_TV.apk" >nul
-        echo ✔ TV APK compiled and updated in root directory!
-    )
-) else (
+call gradlew.bat :composeApp:assembleTvRelease
+if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] TV APK compilation failed!
     exit /b %ERRORLEVEL%
 )
+if exist "composeApp\build\outputs\apk\tv\release\composeApp-tv-release.apk" (
+    copy /Y "composeApp\build\outputs\apk\tv\release\composeApp-tv-release.apk" "IVIDSMusic_TV.apk" >nul
+    echo OK TV APK compiled and copied to root directory!
+)
 
 echo.
-echo [4/5] Compiling PC Desktop Executable...
-call npm --prefix app run dist
-if %ERRORLEVEL% EQU 0 (
-    if exist "app\dist\*.exe" (
-        copy /Y "app\dist\*.exe" "IVIDSMusic_PC.exe" >nul
-        echo ✔ PC Desktop executable compiled and updated in root directory!
-    )
-) else (
-    echo [ERROR] PC Desktop executable compilation failed!
+echo [4/5] Building Windows Desktop App Image & Installer (.exe)...
+call gradlew.bat :composeApp:createDistributable
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] Windows Desktop distributable build failed!
     exit /b %ERRORLEVEL%
 )
-
-echo.
-echo [5/5] Cleaning up temporary build directories...
-if exist "app\dist" (
-    rmdir /s /q "app\dist"
-    echo ✔ Deleted temporary app\dist directory
+if exist "composeApp\build\compose\binaries\main\app\IVIDS Music\IVIDS Music.exe" (
+    if exist "dist\IVIDSMusic_PC" rmdir /s /q "dist\IVIDSMusic_PC"
+    mkdir "dist\IVIDSMusic_PC" >nul 2>nul
+    xcopy /E /I /Y /Q "composeApp\build\compose\binaries\main\app\IVIDS Music\*" "dist\IVIDSMusic_PC\" >nul
+    echo OK Standalone Desktop app ready: dist\IVIDSMusic_PC\IVIDS Music.exe
 )
 
+call gradlew.bat :composeApp:packageExe
+if %ERRORLEVEL% EQU 0 (
+    if exist "composeApp\build\compose\binaries\main\exe\*.exe" (
+        for %%f in ("composeApp\build\compose\binaries\main\exe\*.exe") do (
+            copy /Y "%%f" "IVIDSMusic_PC.exe" >nul
+        )
+        echo OK Windows installer packaged: IVIDSMusic_PC.exe
+    )
+) else (
+    echo [WARN] Windows installer packaging skipped or failed; standalone app remains ready at dist\IVIDSMusic_PC\IVIDS Music.exe
+)
+
+echo.
+echo [5/5] Cleaning temporary staging directories...
 if exist "..\ividsmusic_release_temp" (
     rmdir /s /q "..\ividsmusic_release_temp"
-    echo ✔ Deleted temporary release directory
+    echo OK Deleted temporary release directory
 )
 
 echo.
 echo ============================================================
-echo   SUCCESS: All platform binaries compiled, updated, and cleaned!
-echo   - IVIDSMusic_Mobile.apk / IVIDSMusic.apk
-echo   - IVIDSMusic_TV.apk
-echo   - IVIDSMusic_PC.exe
+echo   SUCCESS: All native binaries built!
+echo   - Mobile APK : IVIDSMusic_Mobile.apk / IVIDSMusic.apk
+echo   - TV APK     : IVIDSMusic_TV.apk
+echo   - Desktop PC : dist\IVIDSMusic_PC\IVIDS Music.exe / IVIDSMusic_PC.exe
 echo ============================================================
