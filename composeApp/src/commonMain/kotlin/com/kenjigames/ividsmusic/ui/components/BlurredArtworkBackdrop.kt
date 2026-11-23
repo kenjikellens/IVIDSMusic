@@ -106,3 +106,37 @@ fun BlurredArtworkBackdrop(
         }
     }
 }
+
+/**
+ * Renders a top-aligned blurred artwork wash that smoothly fades into [IvidsColorTokens.ObsidianStage]
+ * behind Song, Album, Artist, and Playlist detail screens.
+ */
+@Composable
+fun DetailHeaderArtworkWash(
+    artworkUrl: String?,
+    modifier: Modifier = Modifier
+) {
+    if (artworkUrl.isNullOrBlank()) return
+    Box(modifier = modifier) {
+        BlurredArtworkBackdrop(
+            artworkUrl = artworkUrl,
+            scrimAlpha = 0.56f,
+            blurRadius = 56.dp,
+            fallbackColor = IvidsColorTokens.ObsidianStage,
+            modifier = Modifier.fillMaxSize()
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            IvidsColorTokens.ObsidianStage.copy(alpha = 0.55f),
+                            IvidsColorTokens.ObsidianStage
+                        )
+                    )
+                )
+        )
+    }
+}

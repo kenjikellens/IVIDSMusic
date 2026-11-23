@@ -1,5 +1,6 @@
 package com.kenjigames.ividsmusic
 
+import androidx.compose.ui.graphics.Color
 import com.kenjigames.ividsmusic.data.local.AppStorageDirectories
 import com.kenjigames.ividsmusic.di.initKoin
 import com.kenjigames.ividsmusic.domain.model.AudioQuality
@@ -17,6 +18,9 @@ import com.kenjigames.ividsmusic.ui.screens.recommended.RecommendedViewModel
 import com.kenjigames.ividsmusic.ui.screens.search.SearchViewModel
 import com.kenjigames.ividsmusic.ui.screens.settings.SettingsViewModel
 import com.kenjigames.ividsmusic.ui.screens.song.SongDetailViewModel
+import com.kenjigames.ividsmusic.ui.theme.ColorExtractor
+import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
+import com.kenjigames.ividsmusic.ui.theme.clampAccentContrast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
@@ -32,6 +36,7 @@ import java.io.File
 import java.nio.file.Files
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 /**
@@ -130,5 +135,23 @@ class DesktopIntegrationTest {
             Dispatchers.resetMain()
             tempRoot.deleteRecursively()
         }
+    }
+
+    /**
+     * Verifies that monochrome/blank artwork preserves neutral surfaces without forcing cyan blue,
+     * while vibrant artwork colors retain their natural hue without artificial blue-channel inflation.
+     */
+    @Test
+    fun colorExtractorPreservesNeutralAndTrueArtworkHues() = runBlocking {
+        assertNull(ColorExtractor.extractCardTintColor(null))
+        assertNull(ColorExtractor.extractCardTintColor("   "))
+
+        val grayRgb = (0xFF shl 24) or (90 shl 16) or (90 shl 8) or 90
+        assertEquals(Color.Unspecified, clampAccentContrast(grayRgb, Color.Unspecified))
+
+        val warmRedRgb = (0xFF shl 24) or (220 shl 16) or (40 shl 8) or 20
+        val extractedRed = clampAccentContrast(warmRedRgb, IvidsColorTokens.PrimaryCyan)
+        assertTrue(extractedRed.red > 0.75f, "Expected warm red channel to dominate")
+        assertTrue(extractedRed.blue < 0.20f, "Expected no forced 0.22 blue floor on warm red artwork")
     }
 }

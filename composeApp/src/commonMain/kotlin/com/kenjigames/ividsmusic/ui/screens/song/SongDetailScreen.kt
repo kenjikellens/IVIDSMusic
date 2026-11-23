@@ -2,6 +2,7 @@ package com.kenjigames.ividsmusic.ui.screens.song
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -43,6 +45,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
+import com.kenjigames.ividsmusic.ui.components.DetailHeaderArtworkWash
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
@@ -83,10 +86,15 @@ fun SongDetailScreen(
     val accent = LocalDynamicAccent.current
     val playlistModal = rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
 
-    FramedScreenContainer(
-        maxWidth = 1360.dp,
-        modifier = modifier.fillMaxSize()
-    ) {
+    Box(modifier = modifier.fillMaxSize()) {
+        DetailHeaderArtworkWash(
+            artworkUrl = state.track?.coverUrl,
+            modifier = Modifier.fillMaxWidth().height(340.dp)
+        )
+        FramedScreenContainer(
+            maxWidth = 1360.dp,
+            modifier = Modifier.fillMaxSize()
+        ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
@@ -169,9 +177,9 @@ fun SongDetailScreen(
                             )
                             if (track.albumId.isNotBlank()) {
                                 TextButton(onClick = { onOpenAlbum(track.albumId) }) {
-                                    Icon(Icons.AutoMirrored.Rounded.PlaylistPlay, null, tint = accent)
+                                    Icon(Icons.AutoMirrored.Rounded.PlaylistPlay, null, tint = IvidsColorTokens.SlateMuted)
                                     Spacer(modifier = Modifier.width(4.dp))
-                                    Text(track.album.ifBlank { strings["albums"] }, color = accent)
+                                    Text(track.album.ifBlank { strings["albums"] }, color = IvidsColorTokens.ChalkInk)
                                 }
                             }
                         }
@@ -247,6 +255,7 @@ fun SongDetailScreen(
                 }
             }
         }
+    }
     }
 }
 

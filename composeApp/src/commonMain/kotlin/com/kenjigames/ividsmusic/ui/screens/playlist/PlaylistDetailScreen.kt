@@ -2,11 +2,13 @@ package com.kenjigames.ividsmusic.ui.screens.playlist
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -38,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.ConfirmationDialog
+import com.kenjigames.ividsmusic.ui.components.DetailHeaderArtworkWash
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.ToastController
@@ -89,10 +92,15 @@ fun PlaylistDetailScreen(
         )
     }
 
-    FramedScreenContainer(
-        maxWidth = 1360.dp,
-        modifier = modifier.fillMaxSize()
-    ) {
+    Box(modifier = modifier.fillMaxSize()) {
+        DetailHeaderArtworkWash(
+            artworkUrl = state.playlist?.tracks?.firstOrNull()?.coverUrl,
+            modifier = Modifier.fillMaxWidth().height(340.dp)
+        )
+        FramedScreenContainer(
+            maxWidth = 1360.dp,
+            modifier = Modifier.fillMaxSize()
+        ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
@@ -134,7 +142,7 @@ fun PlaylistDetailScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                                 ) {
-                                    Icon(Icons.Rounded.Edit, null, tint = accent, modifier = Modifier.size(16.dp))
+                                    Icon(Icons.Rounded.Edit, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
                                     Text(strings["rename"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                                 }
                             }
@@ -251,5 +259,6 @@ fun PlaylistDetailScreen(
                 }
             }
         }
+    }
     }
 }

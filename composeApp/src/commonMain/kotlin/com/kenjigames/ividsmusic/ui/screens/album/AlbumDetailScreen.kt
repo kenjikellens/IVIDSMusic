@@ -2,11 +2,13 @@ package com.kenjigames.ividsmusic.ui.screens.album
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -29,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
+import com.kenjigames.ividsmusic.ui.components.DetailHeaderArtworkWash
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -66,10 +69,15 @@ fun AlbumDetailScreen(
     val accent = LocalDynamicAccent.current
     val playlistModal = rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
 
-    FramedScreenContainer(
-        maxWidth = 1360.dp,
-        modifier = modifier.fillMaxSize()
-    ) {
+    Box(modifier = modifier.fillMaxSize()) {
+        DetailHeaderArtworkWash(
+            artworkUrl = state.album?.coverUrl,
+            modifier = Modifier.fillMaxWidth().height(340.dp)
+        )
+        FramedScreenContainer(
+            maxWidth = 1360.dp,
+            modifier = Modifier.fillMaxSize()
+        ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
@@ -121,7 +129,7 @@ fun AlbumDetailScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 TextButton(onClick = { onOpenArtist(album.artistId, album.artist) }) {
-                                    Text("${strings["view_artist"]}: ${album.artist}", color = accent)
+                                    Text("${strings["view_artist"]}: ${album.artist}", color = IvidsColorTokens.ChalkInk)
                                 }
                                 Surface(
                                     onClick = viewModel::toggleSaved,
@@ -172,5 +180,6 @@ fun AlbumDetailScreen(
                 }
             }
         }
+    }
     }
 }
