@@ -995,7 +995,7 @@ private fun DesktopPlayerDeck(
                                 Icons.Rounded.FavoriteBorder
                             },
                             contentDescription = strings["like"],
-                            tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted,
+                            tint = if (playerState.isCurrentLiked) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1238,7 +1238,7 @@ private fun QueueSideSheet(
                                 .tvFocusable(shape = RoundedCornerShape(10.dp))
                                 .clickable { onJumpTo(idx) },
                             shape = RoundedCornerShape(10.dp),
-                            color = if (active) accent.copy(alpha = 0.14f) else IvidsColorTokens.GlassSurface
+                            color = if (active) Color(0x1CFFFFFF) else IvidsColorTokens.GlassSurface
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -1248,13 +1248,13 @@ private fun QueueSideSheet(
                                 Text(
                                     text = (idx + 1).toString(),
                                     style = IvidsTextStyles.tabularBadge(),
-                                    color = if (active) accent else IvidsColorTokens.SlateMuted
+                                    color = if (active) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
                                 )
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = item.title,
                                         style = MaterialTheme.typography.titleSmall,
-                                        color = if (active) accent else IvidsColorTokens.ChalkInk,
+                                        color = IvidsColorTokens.ChalkInk,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )

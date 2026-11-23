@@ -166,7 +166,7 @@ fun HomeScreen(
                                 color = IvidsColorTokens.ChalkInk
                             )
                             TextButton(onClick = { onPlayTrack(section.tracks.first(), section.tracks) }) {
-                                Text(strings["play_all"], style = MaterialTheme.typography.labelLarge, color = accent)
+                                Text(strings["play_all"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.SlateMuted)
                             }
                         }
                         LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {

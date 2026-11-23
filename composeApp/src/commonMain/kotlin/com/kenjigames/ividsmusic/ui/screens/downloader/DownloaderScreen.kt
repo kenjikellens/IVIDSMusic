@@ -250,7 +250,7 @@ fun DownloaderScreen(
                         )
                         Row {
                             TextButton(onClick = { viewModel.selectAllPreview(true) }) {
-                                Text(strings["preview_select_all"], color = accent)
+                                Text(strings["preview_select_all"], color = IvidsColorTokens.ChalkInk)
                             }
                             TextButton(onClick = { viewModel.selectAllPreview(false) }) {
                                 Text(strings["preview_deselect_all"], color = IvidsColorTokens.SlateMuted)
@@ -404,7 +404,7 @@ private fun ActiveDownloadRow(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(item.track.title, style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    Text(statusLabel, style = IvidsTextStyles.tabularBadge(), color = accent, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                    Text(statusLabel, style = IvidsTextStyles.tabularBadge(), color = IvidsColorTokens.SlateMuted, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
                 if (canCancel) {
                     IconButton(onClick = onCancel) {

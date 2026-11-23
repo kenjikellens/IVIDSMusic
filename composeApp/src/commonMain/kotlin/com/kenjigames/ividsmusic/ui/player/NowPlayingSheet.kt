@@ -360,7 +360,7 @@ private fun NowPlayingQueueRow(
             .tvFocusable(shape = RoundedCornerShape(12.dp))
             .clickable(onClick = onJump),
         shape = RoundedCornerShape(12.dp),
-        color = if (isActive) accent.copy(alpha = 0.14f) else Color(0x0AFFFFFF)
+        color = if (isActive) Color(0x1CFFFFFF) else Color(0x0AFFFFFF)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -370,14 +370,14 @@ private fun NowPlayingQueueRow(
             Text(
                 text = (index + 1).toString(),
                 style = IvidsTextStyles.tabularBadge(),
-                color = if (isActive) accent else IvidsColorTokens.SlateMuted,
+                color = if (isActive) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                 modifier = Modifier.width(24.dp)
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.titleSmall,
-                    color = if (isActive) accent else IvidsColorTokens.ChalkInk,
+                    color = IvidsColorTokens.ChalkInk,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -600,7 +600,7 @@ private fun NowPlayingHeroCard(
                         Icons.Rounded.FavoriteBorder
                     },
                     contentDescription = strings["like"],
-                    tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted
+                    tint = if (playerState.isCurrentLiked) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted
                 )
             }
             IconButton(

@@ -294,7 +294,7 @@ fun SearchScreen(
                                 Text(strings["artists"], style = MaterialTheme.typography.headlineSmall, color = IvidsColorTokens.ChalkInk)
                                 if (state.filterType == SearchFilterType.ALL) {
                                     TextButton(onClick = { viewModel.setFilterType(SearchFilterType.ARTIST) }) {
-                                        Text(strings["see_all"], color = accent)
+                                        Text(strings["see_all"], color = IvidsColorTokens.SlateMuted)
                                     }
                                 }
                             }
@@ -324,7 +324,7 @@ fun SearchScreen(
                                 Text(strings["albums"], style = MaterialTheme.typography.headlineSmall, color = IvidsColorTokens.ChalkInk)
                                 if (state.filterType == SearchFilterType.ALL) {
                                     TextButton(onClick = { viewModel.setFilterType(SearchFilterType.ALBUM) }) {
-                                        Text(strings["see_all"], color = accent)
+                                        Text(strings["see_all"], color = IvidsColorTokens.SlateMuted)
                                     }
                                 }
                             }
@@ -353,7 +353,7 @@ fun SearchScreen(
                             Text(strings["songs"], style = MaterialTheme.typography.headlineSmall, color = IvidsColorTokens.ChalkInk)
                             if (state.filterType == SearchFilterType.ALL) {
                                 TextButton(onClick = { viewModel.setFilterType(SearchFilterType.SONG) }) {
-                                    Text(strings["see_all"], color = accent)
+                                    Text(strings["see_all"], color = IvidsColorTokens.SlateMuted)
                                 }
                             }
                         }
@@ -383,13 +383,13 @@ fun SearchScreen(
                                 onClick = { if (!state.isLoadingMore) viewModel.loadMore() },
                                 shape = CircleShape,
                                 color = IvidsColorTokens.GlassSurface,
-                                border = BorderStroke(1.dp, accent.copy(alpha = 0.55f)),
+                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder),
                                 modifier = Modifier.tvFocusable(shape = CircleShape)
                             ) {
                                 Text(
                                     text = if (state.isLoadingMore) strings["loading"] else strings["load_more"],
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = accent,
+                                    color = IvidsColorTokens.ChalkInk,
                                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
                                 )
                             }

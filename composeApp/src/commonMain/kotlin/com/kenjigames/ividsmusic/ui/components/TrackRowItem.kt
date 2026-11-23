@@ -106,7 +106,7 @@ fun TrackRowItem(
 
     val rowBg by animateColorAsState(
         targetValue = when {
-            isCurrentlyPlaying -> accent.copy(alpha = 0.13f)
+            isCurrentlyPlaying -> Color(0x1CFFFFFF)
             isHovered -> IvidsColorTokens.GlassHover
             else -> Color.Transparent
         },
@@ -139,7 +139,7 @@ fun TrackRowItem(
                         Icon(
                             imageVector = Icons.Rounded.GraphicEq,
                             contentDescription = null,
-                            tint = accent,
+                            tint = IvidsColorTokens.ChalkInk,
                             modifier = Modifier.size(18.dp)
                         )
                     } else {
@@ -170,7 +170,7 @@ fun TrackRowItem(
                     Icon(
                         imageVector = Icons.Rounded.MusicNote,
                         contentDescription = null,
-                        tint = accent.copy(alpha = 0.7f),
+                        tint = IvidsColorTokens.SlateMuted,
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -180,7 +180,7 @@ fun TrackRowItem(
                 Text(
                     text = track.title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (isCurrentlyPlaying) accent else IvidsColorTokens.ChalkInk,
+                    color = IvidsColorTokens.ChalkInk,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -206,13 +206,13 @@ fun TrackRowItem(
                     }
                     track.bitrateKbps?.takeIf { isDownloaded && it > 0 }?.let { kbps ->
                         Surface(
-                            color = accent.copy(alpha = 0.14f),
+                            color = IvidsColorTokens.RecessedTrough,
                             shape = RoundedCornerShape(6.dp)
                         ) {
                             Text(
                                 text = "$kbps kbps",
                                 style = IvidsTextStyles.tabularBadge(),
-                                color = accent,
+                                color = IvidsColorTokens.SlateMuted,
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
                             )
                         }
@@ -237,7 +237,7 @@ fun TrackRowItem(
                 Icon(
                     imageVector = if (isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                     contentDescription = strings["like"],
-                    tint = if (isLiked) accent else IvidsColorTokens.SlateMuted,
+                    tint = if (isLiked) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted,
                     modifier = Modifier.size(18.dp)
                 )
             }

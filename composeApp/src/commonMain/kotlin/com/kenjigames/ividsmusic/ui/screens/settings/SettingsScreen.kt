@@ -86,7 +86,7 @@ fun SettingsScreen(
                                 .tvFocusable(shape = RoundedCornerShape(12.dp))
                                 .clickable { viewModel.selectLanguage(lang) },
                             shape = RoundedCornerShape(12.dp),
-                            color = if (selected) accent.copy(alpha = 0.16f) else IvidsColorTokens.RecessedTrough
+                            color = if (selected) IvidsColorTokens.GlassHover else IvidsColorTokens.RecessedTrough
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -95,7 +95,7 @@ fun SettingsScreen(
                             ) {
                                 Text(lang.displayName, style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
                                 if (selected) {
-                                    Icon(Icons.Rounded.Check, null, tint = accent, modifier = Modifier.size(20.dp))
+                                    Icon(Icons.Rounded.Check, null, tint = IvidsColorTokens.ChalkInk, modifier = Modifier.size(20.dp))
                                 }
                             }
                         }
@@ -372,7 +372,7 @@ fun SettingsScreen(
             item(key = "about_card") {
                 SettingsGroupPanel(title = strings["about"]) {
                     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text("IVIDS Music", style = MaterialTheme.typography.titleMedium, color = accent)
+                        Text("IVIDS Music", style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
                         Text("${strings["publisher"]}: KenjiGames", style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
                         Text("${strings["version"]}: ${state.appVersion}", style = IvidsTextStyles.tabularBadge(), color = IvidsColorTokens.SlateMuted)
                         Text("${strings["license"]}: ISC License", style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)

@@ -247,12 +247,12 @@ fun ProfileScreen(
                                             Text(
                                                 text = "${(weight * 100).toInt()}%",
                                                 style = IvidsTextStyles.tabularBadge(),
-                                                color = accent
+                                                color = IvidsColorTokens.SlateMuted
                                             )
                                         }
                                         LinearProgressIndicator(
                                             progress = { weight },
-                                            color = accent,
+                                            color = IvidsColorTokens.ChalkInk,
                                             trackColor = IvidsColorTokens.RecessedTrough,
                                             modifier = Modifier.fillMaxWidth().height(7.dp).clip(CircleShape)
                                         )
