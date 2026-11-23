@@ -1,115 +1,47 @@
 # Master Project Rules for IVIDS Music
 
-Every AI agent and developer working on IVIDS Music MUST strictly follow these unified rules without exception.
+Every AI agent and developer working on IVIDS Music must follow these rules strictly without exception.
 
----
+## 1. Platform Architecture & Build Parity
 
-## 1. Platform Architecture & Responsive Design
+Build across the shared Kotlin Multiplatform modules (`:composeApp`, `:core:domain`, `:core:data`, `:core:player`) targeting three runtimes: Windows Desktop (`IVIDSMusic_PC.exe`), Android Mobile (`IVIDSMusic_Mobile.apk`), and Android TV (`IVIDSMusic_TV.apk`).
 
-### Responsive Design & Width Breakpoints
-- **The 5 Width Breakpoints**: Design strictly within the 5 responsive width breakpoints: `1200px`, `1024px`, `768px`, `700px`, and `600px`. The `--ui-base-scale` variable scales automatically across these points.
-- **Portrait Mode Orientation Shift**: When the device is in portrait mode (or width <= 768px), the layout MUST shift to vertical orientation (sidebar hides, bottom navigation bar appears).
-- **Dynamic Sizing**: Prefer percentage `%` or viewport units (`vw`, `vh`) over fixed `px` values. Use `calc(N * var(--ui-scale))` for scaling UI dimensions and font sizes.
+Switch the adaptive UI cleanly via `ShellMode`: render Mobile chrome (`< 600.dp`) with top header, bottom bar, and swipeable `MiniPlayerBar`, and Desktop/TV chrome (`>= 600.dp`) with `SidebarNavigationRail` (collapsible below `880.dp`), `DesktopTopBar`, `DesktopPlayerDeck`, and `QueueSideSheet`. Keep Desktop reading width constrained inside ergonomic containers (`880.dp` to `1360.dp`).
 
-### 4 Multi-Platform Runtimes
-- **Android Mobile WebView (`IVIDSMusic_Mobile.apk`)**: Mobile WebView loading embedded assets from `app/src/main/assets` with Kotlin `shouldInterceptRequest` hooks.
-- **Android TV WebView (`IVIDSMusic_TV.apk`)**: Android TV WebView loading embedded assets with TV spatial navigation.
-- **PC Desktop Electron (`IVIDSMusic_PC.exe`)**: Electron WebView running embedded assets, IPC handlers via `preload.js` calling `yt-dlp` and custom `saved-media://` protocol.
-- **Static Web / GitHub Pages**: Static assets, resolving URLs via public Invidious API instances, caching audio streams in browser IndexedDB.
-- **Unified Logic Wrappers**: Frontend logic (`api.js`, `player.js`) must query `Config.isElectron`, `Config.isNative`, and `Config.isWeb` dynamically.
+Run `:composeApp:desktopTest`, `:composeApp:createDistributable`, and `:composeApp:assembleMobileDebug` after UI or core changes so Windows Desktop and Android builds stay verified in sync.
 
----
+## 2. Clean Kotlin Architecture & OOP Composition
 
-## 2. CSS Architecture, Styling & Animation Rules
+Maintain strict module boundaries: `:core:domain` contains pure Kotlin models, use cases, and repository/engine ports with zero UI or framework imports; `:core:data` implements SQLDelight, DataStore, Ktor, and stream extraction; `:core:player` encapsulates playback behind `AudioEngine` and `EngineStateMachine`; `:composeApp` holds Compose UI and ViewModels.
 
-- **Modular CSS Architecture**: Styles MUST be organized into modular stylesheets under `gui/css/` (`variables.css`, `base.css`, `components.css`, `pages.css`, `responsive.css`). Master `index.css` or `index.html` links these modules. NEVER create 5,000+ line monolithic CSS files.
-- **Strict `!important` Ban**: Do NOT use `!important` unless overriding third-party injected styles or state utility classes. Use CSS selector specificity.
-- **Mandatory Cleanup on Refactor**: Whenever a UI component, HTML structure, or page layout is refactored, renamed, or deleted, search for and delete all corresponding obsolete CSS class selectors in the exact same turn.
-- **Accent Color Rule**: Always use CSS accent color tokens (`var(--primary-color)`, `var(--accent-color)`). If the user mentions "colored" or "green" elements, ask if they mean the active accent color.
-- **No Translate Animations**: NEVER use `translateX` or `translateY` for hover/focus effects unless explicitly requested.
-- **Hover/Focus Animation Standard**: Standard hover/focus effects are a white thicker border, background color change, or glassmorphic adjustment. Interactive elements MUST NOT scale or move on hover.
-- **CSS Utility Classes & DRY Styling**:
-  - Define single utility classes (e.g. `.container-hover-effect`) in CSS rather than chaining long element selectors.
-  - Overlay utilities must use `border-radius: inherit` and relative positioning.
-  - Always compose with pre-existing base layout classes (`class="page-container foryou-container"`).
+Follow OOP Composition over Duplication in Compose UI. Keep semantic color tokens (`IvidsHoverStyle`, `resolveHoverColor`, `resolveRippleColor`) decoupled from behavior modifiers (`ividsHoverZoom`, `ividsTouchFeedback`, pointer `ividsPressRipple`), combine them once inside shared controls (`IvidsTonalPill`, `IvidsPrimaryButton`, `IvidsPlayCircleButton`, `IvidsIconButton`, `IvidsVinylLoader`, `MusicCard`, `TrackRowItem`), and reuse those components across all screens and player decks.
 
----
+Keep functions and files focused with single responsibility. Split oversized UI files when needed and remove unused parameters, imports, and dead composables in the same change.
 
-## 3. JavaScript OOP, Performance & Domain Modeling
-
-### Object-Oriented Architecture (OOP)
-- **ES6 Classes & Encapsulation**: Use ES6 `class` syntax for controllers, managers, and services. State must be encapsulated in private/instance properties.
-- **Strict Base Class Inheritance**: Page controllers MUST extend `BasePageController`. Overlays and modals MUST extend standard modal base abstractions.
-- **Single Responsibility Principle**: Decompose functions >50 lines into small, focused helper methods.
-
-### Event Delegation & Memory Safety
-- **Container Event Delegation**: NEVER bind individual event listeners in loops or arrays (`items.forEach(item => item.onclick = ...)`). ALWAYS attach a single listener to parent containers using `e.target.closest('.item-selector')`.
-- **AbortController Lifecycle**: Controllers must call `this.resetAbortController()` on render/destroy to prevent memory leaks across page transitions.
-
-### Speed & DOM Optimization
-- **Batch DOM Operations**: Do not interleave DOM reads (`getBoundingClientRect`, `offsetHeight`) with DOM writes in loops. Batch all reads first, then execute single-pass DOM writes.
-- **Template Fragment Rendering**: Construct UI elements using `DocumentFragment` or HTML template literal strings rendered in a single `innerHTML` assignment.
-- **Zero Code Duplication (DRY)**: Abstract repeated functionality into shared utility classes (`Config`, `LanguageManager`, `SettingsManager`).
-
-### Domain Modeling
-- **First-Class Domain Entities**: Core concepts (`Song`, `Album`, `Artist`) must be first-class domain models with typed object relationships.
-- **DTO Mappers**: Use dedicated Data Transfer Object (DTO) mappers for converting raw API responses into domain entities.
-
----
-
-## 4. Translation & Localization Rules
-
-- **No Hardcoded UI Strings**: Never hardcode user-facing text in HTML or JS templates.
-- **16 Supported Languages**: All user-facing strings must be added to all 16 JSON translation files in `app/src/main/assets/gui/lang/` (`en.json`, `nl.json`, `de.json`, `fr.json`, `es.json`, `it.json`, `pt.json`, `ro.json`, `ru.json`, `zh.json`, `hi.json`, `ar.json`, `ja.json`, `ko.json`, `pl.json`, `tr.json`).
-- **Batch Translation Script Mandate**: ALWAYS write and run a script (Node.js or Python) to update all 16 translation JSON files simultaneously in a single automated step.
-
----
-
-## 5. UI Icon Rules
-
-- **NO EMOJIS IN UI**: Never use raw Unicode emojis (🎧, 📂, ⚙️, 🎬, 🎵) in HTML templates, JavaScript strings, or CSS content.
-- **SVG ICONS ONLY**: All UI icons must be SVG files loaded from `gui/svg/` (or inline SVG matching component standards). Every SVG must be its own `.svg` file.
-
----
-
-## 6. Git & GitHub Protocol
-
-- **No Autonomous Commits or Pushes**: NEVER run `git commit` or `git push` on your own initiative. All edits remain in the working tree for user review.
-- **Explicit Permission Required**: Always request explicit permission before using `git push`. Contextual commands like "push changes" authorize pushing the active branch for that turn only.
-- **Obligatory Release Metadata**: Releases must feature a professional release title (e.g. `Release v0.1.6 (Beta)`) and a detailed release description highlighting visual, architectural, and compilation updates.
-- **Release Authorization**: Direct request to create/publish a release authorizes pushing the release tag and publishing the GitHub release within that workflow.
-
----
-
-## 7. Multi-Platform Release Packaging
-
-- **Release Target Isolation**: Every target release build packages ONLY the three compiled binaries at root:
-  - `IVIDSMusic_Mobile.apk`
-  - `IVIDSMusic_TV.apk`
-  - `IVIDSMusic_PC.exe`
-- **Orphan Release Execution**: Coordinated via `.agents/scripts/build-release.js` utility isolating builds in an orphan tag.
-
----
-
-## 8. Implementation Plans, Mockups & Documentation
-
-- **Implementation Plans are Artifacts ONLY**: Implementation plans MUST strictly be generated as an IDE artifact (`implementation_plan.md` in conversation artifact directory).
-- **No Implementation Plan Files in Workspace**: NEVER create `implementation_plan.md` inside `mockup/` or any workspace folder.
-- **Mockup Rules**: Standalone UI prototypes go into a dedicated `mockup/` folder with offline HTML, JS, CSS, and SVG assets.
-- **Documentation Reference**: Consult `app/../documentation/file_list.md` for information about key project files.
-
----
-
-## 9. Compose Multiplatform UI, Colors & OOP Composition
+## 3. Compose Multiplatform UI, Color & Interaction Standards
 
 Use pure `R = G = B` black and neutral charcoal surfaces (`#000000`, `#090909`, `#141414`, `#1C1C1C`) with zero blue-gray undertone. Set Desktop `window.background` and `window.contentPane.background` to `#090909`.
 
-Use signature cyan (`PrimaryCyan` `#4DD0E1`) on active or main controls such as the `"IVIDS"` wordmark, opened navigation destination, active Shuffle and Repeat toggles, and vinyl loader center label.
+Use signature cyan (`PrimaryCyan` `#4DD0E1`) strictly on active or main controls such as the `"IVIDS"` wordmark, opened navigation destination, active Shuffle and Repeat toggles, open Queue toggle, unmuted Volume icon, and vinyl loader center label.
 
-Never draw borders (`BorderStroke` or `.border()`) on cards, pills, switches, segmented chips, or dialogs, except the TV focus ring. Use dark overlays (`IvidsHoverStyle.ON_LIGHT`) for hover and ripple on white primary buttons, and subtle transparent red (`IvidsHoverStyle.DESTRUCTIVE`) on destructive actions.
-
-Keep styling and behavior modular following OOP Composition over Duplication. Separate color tokens (`IvidsHoverStyle`, `resolveHoverColor`, `resolveRippleColor`) from animation modifiers (`ividsHoverZoom`, `ividsTouchFeedback`, pointer `ripple`). Combine them inside single shared components (`IvidsTonalPill`, `IvidsPrimaryButton`, `IvidsPlayCircleButton`, `IvidsIconButton`, `IvidsVinylLoader`) and reuse those everywhere across all screens and player bars.
+Never draw borders (`BorderStroke` or `.border()`) on cards, pills, switches, segmented chips, or dialogs, except TV `tvFocusable` focus rings. Use dark overlays (`IvidsHoverStyle.ON_LIGHT`) for hover and ripple on white primary buttons, and subtle transparent red (`IvidsHoverStyle.DESTRUCTIVE`) on destructive actions.
 
 Render Settings flat on `#090909` without nested cards or a `Layout Mode` row. Push multi-option pickers from the right via `AppRoute.SettingsDetail` instead of modal popups, keep click feedback on full-width rows limited to hover zoom and ripple without shrinking the row, and keep the Desktop search bar centered with Back pinned far left.
 
-Keep Windows (`:composeApp:createDistributable`) and Android (`:composeApp:assembleMobileDebug`) builds and `:composeApp:desktopTest` up to date after UI edits.
+## 4. Localization (16 Languages)
+
+Never hardcode user-facing UI strings in Kotlin composables or ViewModels. Resolve text via `LocalStrings` and add every new key simultaneously across all 16 JSON files in `composeApp/src/commonMain/composeResources/files/lang/` (`en.json`, `nl.json`, `de.json`, `fr.json`, `es.json`, `it.json`, `pt.json`, `ro.json`, `ru.json`, `zh.json`, `hi.json`, `ar.json`, `ja.json`, `ko.json`, `pl.json`, `tr.json`) using a single automated script.
+
+## 5. Icons & Media Rules
+
+Never use raw Unicode emojis inside UI components or strings. Use Material Rounded vector icons (`Icons.Rounded.*`, `Icons.AutoMirrored.Rounded.*`), `composeResources/drawable/` assets, or custom Compose `Canvas` graphics (`IvidsVinylLoader`).
+
+## 6. Git, GitHub & Release Packaging
+
+Never run `git commit` or `git push` autonomously; leave all edits in the working tree unless explicitly instructed to commit, push, or publish a release.
+
+Release workflows (`build.bat`, `.agents/scripts/build-release.js`, `.agents/scripts/publish-release.js`) package only `IVIDSMusic_Mobile.apk`, `IVIDSMusic_TV.apk`, and `IVIDSMusic_PC.exe` at root with descriptive release titles and changelogs.
+
+## 7. Implementation Plans & Documentation
+
+Create implementation plans exclusively as IDE artifacts (`implementation_plan.md` in the conversation artifact directory), never inside workspace folders. Consult [docs/README.md](../docs/README.md) and [docs/file_list.md](../docs/file_list.md) for current project structure and technical specifications.
