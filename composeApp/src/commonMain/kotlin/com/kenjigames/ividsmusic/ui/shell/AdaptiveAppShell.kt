@@ -88,6 +88,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -131,10 +132,12 @@ import com.kenjigames.ividsmusic.resources.ic_ivids_brand
 import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
 import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
 import com.kenjigames.ividsmusic.ui.components.IvidsIconButton
+import com.kenjigames.ividsmusic.ui.components.IvidsPlayCircleButton
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
 import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
 import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
+import com.kenjigames.ividsmusic.ui.components.resolveRippleColor
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.navigation.AppNavigator
 import com.kenjigames.ividsmusic.ui.navigation.AppRoute
@@ -810,7 +813,7 @@ private fun MiniPlayerBar(
                         )
                     }
                     if (playerState.errorMessage != null) {
-                        IconButton(onClick = onRetry, modifier = Modifier.size(44.dp)) {
+                        IvidsIconButton(onClick = onRetry, size = 44.dp, hoverStyle = IvidsHoverStyle.DESTRUCTIVE) {
                             Icon(
                                 imageVector = Icons.Rounded.Refresh,
                                 contentDescription = strings["retry"],
@@ -819,7 +822,7 @@ private fun MiniPlayerBar(
                             )
                         }
                     } else {
-                        IconButton(onClick = onToggleLike, modifier = Modifier.size(44.dp)) {
+                        IvidsIconButton(onClick = onToggleLike, size = 44.dp) {
                             Icon(
                                 imageVector = if (playerState.isCurrentLiked) {
                                     Icons.Rounded.Favorite
@@ -832,32 +835,14 @@ private fun MiniPlayerBar(
                             )
                         }
                     }
-                    Surface(
+                    IvidsPlayCircleButton(
+                        isPlaying = playerState.isPlaying,
+                        isBuffering = playerState.isBuffering,
+                        contentDescription = strings["play"],
                         onClick = onTogglePlayPause,
-                        shape = CircleShape,
-                        color = IvidsColorTokens.ChalkInk,
-                        modifier = Modifier.size(44.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            if (playerState.isBuffering) {
-                                CircularProgressIndicator(
-                                    color = IvidsColorTokens.ObsidianStage,
-                                    strokeWidth = 2.dp,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = if (playerState.isPlaying) {
-                                        Icons.Rounded.Pause
-                                    } else {
-                                        Icons.Rounded.PlayArrow
-                                    },
-                                    contentDescription = strings["play"],
-                                    tint = IvidsColorTokens.ObsidianStage
-                                )
-                            }
-                        }
-                    }
+                        size = 44.dp,
+                        iconSize = 24.dp
+                    )
                 }
                 LinearProgressIndicator(
                     progress = { progress },
@@ -1006,14 +991,21 @@ private fun SidebarNavButton(
         label = "NavButtonText"
     )
 
+    val navHoverStyle = if (selected) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .height(44.dp)
+            .clip(RoundedCornerShape(10.dp))
             .pointerHoverIcon(PointerIcon.Hand)
             .tvFocusable(shape = RoundedCornerShape(10.dp))
             .hoverable(interactionSource)
-            .clickable(onClick = onClick),
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = true, color = resolveRippleColor(navHoverStyle)),
+                onClick = onClick
+            ),
         shape = RoundedCornerShape(10.dp),
         color = bgColor
     ) {
@@ -1023,7 +1015,7 @@ private fun SidebarNavButton(
                 .ividsHoverZoom(
                     hovered = isHovered,
                     shape = RoundedCornerShape(10.dp),
-                    style = if (selected) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+                    style = navHoverStyle
                 )
                 .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -1047,22 +1039,14 @@ private fun SidebarNavButton(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-                if (selected) {
-                    Box(
-                        modifier = Modifier
-                            .size(5.dp)
-                            .clip(CircleShape)
-                            .background(IvidsColorTokens.PrimaryCyan)
-                    )
-                }
             }
         }
     }
 }
 
 /**
- * Frameless Desktop & TV header containing back navigation, a compact 440dp recessed search pill
- * with `Ctrl+K` hint, and a neutral profile shortcut button.
+ * Frameless Desktop & TV header anchoring back navigation on the far left, keeping the 440dp
+ * search pill centered, and placing the profile shortcut on the far right.
  */
 @Composable
 private fun DesktopTopBar(
@@ -1083,37 +1067,36 @@ private fun DesktopTopBar(
         }
     }
 
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(68.dp)
-            .padding(horizontal = 24.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(horizontal = 24.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            modifier = Modifier.weight(1f)
-        ) {
-            if (canNavigateBack) {
-                Surface(
-                    onClick = onBack,
-                    shape = CircleShape,
-                    color = IvidsColorTokens.RecessedTrough,
-                    modifier = Modifier.size(38.dp).tvFocusable(shape = CircleShape)
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
-                            contentDescription = strings["back"],
-                            tint = IvidsColorTokens.ChalkInk,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
+        if (canNavigateBack) {
+            IvidsIconButton(
+                onClick = onBack,
+                size = 38.dp,
+                modifier = Modifier
+                    .align(Alignment.CenterStart)
+                    .background(IvidsColorTokens.RecessedTrough, CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
+                    contentDescription = strings["back"],
+                    tint = IvidsColorTokens.ChalkInk,
+                    modifier = Modifier.size(20.dp)
+                )
             }
+        }
 
+        Box(
+            modifier = Modifier
+                .align(Alignment.Center)
+                .fillMaxWidth()
+                .padding(horizontal = 52.dp),
+            contentAlignment = Alignment.Center
+        ) {
             val pillColor by animateColorAsState(
                 targetValue = if (searchFocused) IvidsColorTokens.GlassSurface else IvidsColorTokens.RecessedTrough,
                 animationSpec = tween(160),
@@ -1205,6 +1188,7 @@ private fun DesktopTopBar(
             shape = CircleShape,
             color = IvidsColorTokens.GlassSurface,
             modifier = Modifier
+                .align(Alignment.CenterEnd)
                 .size(40.dp)
                 .pointerHoverIcon(PointerIcon.Hand)
                 .hoverable(profileHoverSource)
@@ -1228,9 +1212,8 @@ private fun DesktopTopBar(
 }
 
 /**
- * Persistent 84dp hi-fi player deck across Desktop and Android TV featuring a live blurred
- * cover-artwork backdrop ([BlurredArtworkBackdrop]), centered transport controls with signature
- * Play button, custom [IvidsScrubber] seek & volume bars, and queue toggle.
+ * Persistent 88dp hi-fi player deck across Desktop and Android TV featuring blurred cover-artwork
+ * backdrop, unified [IvidsIconButton] / [IvidsPlayCircleButton] controls, and [IvidsScrubber] bars.
  */
 @Composable
 private fun DesktopPlayerDeck(
@@ -1242,27 +1225,27 @@ private fun DesktopPlayerDeck(
     onOpenSongDetail: (String) -> Unit,
     playerViewModel: PlayerViewModel
 ) {
-    val accent = LocalDynamicAccent.current
     val strings = LocalStrings.current
     val track = playerState.currentTrack
     var dragPos by remember(track?.id) { mutableStateOf<Float?>(null) }
     val maxDur = playerState.durationMs.coerceAtLeast(1L).toFloat()
     val sliderPos = dragPos ?: playerState.positionMs.toFloat().coerceIn(0f, maxDur)
+    val hasPlayable = track != null || playerState.queue.isNotEmpty()
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(84.dp)
+            .height(88.dp)
             .clipToBounds()
-            .background(IvidsColorTokens.RecessedTrough)
+            .background(IvidsColorTokens.AbyssRail)
     ) {
         if (track != null) {
             BlurredArtworkBackdrop(
                 artworkUrl = track.coverUrl,
-                tintColor = accent,
-                scrimAlpha = 0.76f,
+                tintColor = null,
+                scrimAlpha = 0.78f,
                 blurRadius = 38.dp,
-                fallbackColor = IvidsColorTokens.RecessedTrough,
+                fallbackColor = IvidsColorTokens.AbyssRail,
                 modifier = Modifier.matchParentSize()
             )
         }
@@ -1270,10 +1253,10 @@ private fun DesktopPlayerDeck(
         Row(
             modifier = Modifier.fillMaxSize().padding(horizontal = 20.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(20.dp)
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Row(
-                modifier = Modifier.weight(0.30f),
+                modifier = Modifier.weight(0.28f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -1282,6 +1265,7 @@ private fun DesktopPlayerDeck(
                         .size(52.dp)
                         .clip(RoundedCornerShape(10.dp))
                         .background(IvidsColorTokens.GlassSurface)
+                        .then(if (track != null) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
                         .tvFocusable(shape = RoundedCornerShape(10.dp))
                         .clickable(enabled = track != null, onClick = onOpenNowPlaying),
                     contentAlignment = Alignment.Center
@@ -1304,14 +1288,16 @@ private fun DesktopPlayerDeck(
                         color = if (track != null) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.clickable(enabled = track != null, onClick = onOpenNowPlaying)
+                        modifier = Modifier
+                            .then(if (track != null) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
+                            .clickable(enabled = track != null, onClick = onOpenNowPlaying)
                     )
                     if (track != null) {
                         val errorText = playerState.errorMessage
                         if (errorText != null) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Text(
                                     text = errorText,
@@ -1321,26 +1307,27 @@ private fun DesktopPlayerDeck(
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.weight(1f, fill = false)
                                 )
-                                IconButton(
+                                IvidsIconButton(
                                     onClick = playerViewModel::retryCurrent,
-                                    modifier = Modifier.size(22.dp)
+                                    size = 26.dp,
+                                    hoverStyle = IvidsHoverStyle.DESTRUCTIVE
                                 ) {
                                     Icon(
                                         imageVector = Icons.Rounded.Refresh,
                                         contentDescription = strings["retry"],
                                         tint = IvidsColorTokens.DangerCoral,
-                                        modifier = Modifier.size(14.dp)
+                                        modifier = Modifier.size(15.dp)
                                     )
                                 }
-                                IconButton(
+                                IvidsIconButton(
                                     onClick = playerViewModel::dismissError,
-                                    modifier = Modifier.size(22.dp)
+                                    size = 26.dp
                                 ) {
                                     Icon(
                                         imageVector = Icons.Rounded.Close,
                                         contentDescription = strings["close"],
                                         tint = IvidsColorTokens.SlateMuted,
-                                        modifier = Modifier.size(14.dp)
+                                        modifier = Modifier.size(15.dp)
                                     )
                                 }
                             }
@@ -1351,16 +1338,15 @@ private fun DesktopPlayerDeck(
                                 color = IvidsColorTokens.SlateMuted,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.clickable { onOpenArtist(track.artistId, track.artist) }
+                                modifier = Modifier
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                                    .clickable { onOpenArtist(track.artistId, track.artist) }
                             )
                         }
                     }
                 }
                 if (track != null) {
-                    IconButton(
-                        onClick = playerViewModel::toggleLikeCurrent,
-                        modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
-                    ) {
+                    IvidsIconButton(onClick = playerViewModel::toggleLikeCurrent, size = 34.dp) {
                         Icon(
                             imageVector = if (playerState.isCurrentLiked) {
                                 Icons.Rounded.Favorite
@@ -1376,7 +1362,7 @@ private fun DesktopPlayerDeck(
             }
 
             Column(
-                modifier = Modifier.weight(0.44f),
+                modifier = Modifier.weight(0.42f),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
@@ -1384,10 +1370,7 @@ private fun DesktopPlayerDeck(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    IconButton(
-                        onClick = playerViewModel::toggleShuffle,
-                        modifier = Modifier.size(32.dp).tvFocusable(shape = CircleShape)
-                    ) {
+                    IvidsIconButton(onClick = playerViewModel::toggleShuffle, size = 34.dp) {
                         Icon(
                             imageVector = Icons.Rounded.Shuffle,
                             contentDescription = strings["shuffle"],
@@ -1395,53 +1378,30 @@ private fun DesktopPlayerDeck(
                             modifier = Modifier.size(18.dp)
                         )
                     }
-                    IconButton(
+                    IvidsIconButton(
                         onClick = playerViewModel::previous,
-                        modifier = Modifier.size(36.dp).tvFocusable(shape = CircleShape)
+                        enabled = hasPlayable,
+                        size = 36.dp
                     ) {
                         Icon(Icons.Rounded.SkipPrevious, strings["previous"], tint = IvidsColorTokens.ChalkInk)
                     }
-                    Surface(
+                    IvidsPlayCircleButton(
+                        isPlaying = playerState.isPlaying,
+                        isBuffering = playerState.isBuffering,
+                        contentDescription = strings["play"],
                         onClick = playerViewModel::togglePlayPause,
-                        shape = CircleShape,
-                        color = IvidsColorTokens.ChalkInk,
-                        shadowElevation = 6.dp,
-                        modifier = Modifier
-                            .size(40.dp)
-                            .pointerHoverIcon(PointerIcon.Hand)
-                            .tvFocusable(shape = CircleShape)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            if (playerState.isBuffering) {
-                                CircularProgressIndicator(
-                                    color = IvidsColorTokens.ObsidianStage,
-                                    strokeWidth = 2.dp,
-                                    modifier = Modifier.size(19.dp)
-                                )
-                            } else {
-                                Icon(
-                                    imageVector = if (playerState.isPlaying) {
-                                        Icons.Rounded.Pause
-                                    } else {
-                                        Icons.Rounded.PlayArrow
-                                    },
-                                    contentDescription = strings["play"],
-                                    tint = IvidsColorTokens.ObsidianStage,
-                                    modifier = Modifier.size(22.dp)
-                                )
-                            }
-                        }
-                    }
-                    IconButton(
+                        enabled = hasPlayable,
+                        size = 40.dp,
+                        iconSize = 22.dp
+                    )
+                    IvidsIconButton(
                         onClick = playerViewModel::next,
-                        modifier = Modifier.size(36.dp).tvFocusable(shape = CircleShape)
+                        enabled = hasPlayable,
+                        size = 36.dp
                     ) {
                         Icon(Icons.Rounded.SkipNext, strings["next"], tint = IvidsColorTokens.ChalkInk)
                     }
-                    IconButton(
-                        onClick = playerViewModel::cycleRepeatMode,
-                        modifier = Modifier.size(32.dp).tvFocusable(shape = CircleShape)
-                    ) {
+                    IvidsIconButton(onClick = playerViewModel::cycleRepeatMode, size = 34.dp) {
                         Icon(
                             imageVector = if (playerState.repeatMode == RepeatMode.ONE) {
                                 Icons.Rounded.RepeatOne
@@ -1484,15 +1444,12 @@ private fun DesktopPlayerDeck(
             }
 
             Row(
-                modifier = Modifier.weight(0.26f),
+                modifier = Modifier.weight(0.30f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.End
             ) {
                 if (track != null) {
-                    IconButton(
-                        onClick = { playerViewModel.downloadCurrent() },
-                        modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
-                    ) {
+                    IvidsIconButton(onClick = { playerViewModel.downloadCurrent() }, size = 34.dp) {
                         Icon(
                             imageVector = if (playerState.isCurrentDownloaded) {
                                 Icons.Rounded.DownloadDone
@@ -1504,10 +1461,7 @@ private fun DesktopPlayerDeck(
                             modifier = Modifier.size(18.dp)
                         )
                     }
-                    IconButton(
-                        onClick = { onOpenSongDetail(track.id) },
-                        modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
-                    ) {
+                    IvidsIconButton(onClick = { onOpenSongDetail(track.id) }, size = 34.dp) {
                         Icon(
                             imageVector = Icons.Rounded.Info,
                             contentDescription = strings["more_info"],
@@ -1516,10 +1470,7 @@ private fun DesktopPlayerDeck(
                         )
                     }
                 }
-                IconButton(
-                    onClick = onToggleQueue,
-                    modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
-                ) {
+                IvidsIconButton(onClick = onToggleQueue, size = 34.dp) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.QueueMusic,
                         contentDescription = strings["queue"],
@@ -1527,10 +1478,7 @@ private fun DesktopPlayerDeck(
                         modifier = Modifier.size(20.dp)
                     )
                 }
-                IconButton(
-                    onClick = playerViewModel::toggleMute,
-                    modifier = Modifier.size(34.dp).tvFocusable(shape = CircleShape)
-                ) {
+                IvidsIconButton(onClick = playerViewModel::toggleMute, size = 34.dp) {
                     Icon(
                         imageVector = if (playerState.isMuted) {
                             Icons.AutoMirrored.Rounded.VolumeOff
@@ -1546,7 +1494,7 @@ private fun DesktopPlayerDeck(
                     value = playerState.volume,
                     onValueChange = playerViewModel::setVolume,
                     valueRange = 0f..1f,
-                    modifier = Modifier.width(98.dp)
+                    modifier = Modifier.widthIn(min = 64.dp, max = 96.dp).fillMaxWidth(0.45f)
                 )
             }
         }

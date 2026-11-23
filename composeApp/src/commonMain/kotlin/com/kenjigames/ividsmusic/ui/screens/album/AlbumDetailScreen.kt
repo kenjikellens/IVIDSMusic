@@ -33,6 +33,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
+import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
 import com.kenjigames.ividsmusic.ui.components.ToastController
@@ -78,7 +79,7 @@ fun AlbumDetailScreen(
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             if (state.isLoading) {
-                item(key = "album_loading") { ShimmerSkeletonRow() }
+                item(key = "album_loading") { IvidsVinylLoadingBox(label = strings["loading"]) }
             } else if (state.errorMessage != null && state.album == null) {
                 item(key = "album_error") {
                     Surface(

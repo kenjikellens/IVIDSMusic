@@ -67,6 +67,7 @@ import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
+import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -327,7 +328,7 @@ fun SearchScreen(
                     }
                 }
             } else if (state.isLoading) {
-                item(key = "search_loading") { ShimmerSkeletonRow() }
+                item(key = "search_loading") { IvidsVinylLoadingBox(label = strings["loading"]) }
             } else {
                 if (state.errorMessage != null) {
                     item(key = "search_error") {

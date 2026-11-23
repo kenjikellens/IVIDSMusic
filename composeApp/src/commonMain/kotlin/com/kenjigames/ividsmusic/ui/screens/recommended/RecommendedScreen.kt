@@ -36,6 +36,7 @@ import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
+import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -120,10 +121,7 @@ fun RecommendedScreen(
 
             if (state.isLoading) {
                 item(key = "rec_loading") {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Text(strings["loading_recommendations"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.SlateMuted)
-                        ShimmerSkeletonRow()
-                    }
+                    IvidsVinylLoadingBox(label = strings["loading_recommendations"])
                 }
             } else if (!state.feed.hasHistory) {
                 item(key = "rec_empty") {

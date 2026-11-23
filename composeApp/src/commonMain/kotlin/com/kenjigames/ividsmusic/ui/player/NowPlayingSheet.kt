@@ -89,8 +89,11 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
+import com.kenjigames.ividsmusic.ui.components.IvidsIconButton
+import com.kenjigames.ividsmusic.ui.components.IvidsPlayCircleButton
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
 import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.PlaylistPickerDialog
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
@@ -216,13 +219,7 @@ fun NowPlayingSheet(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        IconButton(
-                            onClick = onDismiss,
-                            modifier = Modifier
-                                .size(44.dp)
-                                .pointerHoverIcon(PointerIcon.Hand)
-                                .tvFocusable(shape = CircleShape)
-                        ) {
+                        IvidsIconButton(onClick = onDismiss, size = 44.dp) {
                             Icon(
                                 imageVector = Icons.Rounded.KeyboardArrowDown,
                                 contentDescription = strings["close"],
@@ -234,7 +231,7 @@ fun NowPlayingSheet(
                             style = MaterialTheme.typography.titleMedium,
                             color = IvidsColorTokens.ChalkInk
                         )
-                        IconButton(
+                        IvidsIconButton(
                             onClick = {
                                 if (track != null) {
                                     onDismiss()
@@ -242,10 +239,7 @@ fun NowPlayingSheet(
                                 }
                             },
                             enabled = track != null,
-                            modifier = Modifier
-                                .size(44.dp)
-                                .then(if (track != null) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
-                                .tvFocusable(enabled = track != null, shape = CircleShape)
+                            size = 44.dp
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.Info,
@@ -679,20 +673,14 @@ private fun NowPlayingHeroCard(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = playerViewModel::toggleShuffle,
-                modifier = Modifier.tvFocusable(shape = CircleShape)
-            ) {
+            IvidsIconButton(onClick = playerViewModel::toggleShuffle, size = 44.dp) {
                 Icon(
                     imageVector = Icons.Rounded.Shuffle,
                     contentDescription = strings["shuffle"],
                     tint = if (playerState.isShuffleEnabled) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
                 )
             }
-            IconButton(
-                onClick = playerViewModel::previous,
-                modifier = Modifier.size(48.dp).tvFocusable(shape = CircleShape)
-            ) {
+            IvidsIconButton(onClick = playerViewModel::previous, size = 48.dp) {
                 Icon(
                     imageVector = Icons.Rounded.SkipPrevious,
                     contentDescription = strings["previous"],
@@ -700,34 +688,15 @@ private fun NowPlayingHeroCard(
                     modifier = Modifier.size(32.dp)
                 )
             }
-            Surface(
+            IvidsPlayCircleButton(
+                isPlaying = playerState.isPlaying,
+                isBuffering = playerState.isBuffering,
+                contentDescription = strings["play"],
                 onClick = playerViewModel::togglePlayPause,
-                shape = CircleShape,
-                color = IvidsColorTokens.ChalkInk,
-                shadowElevation = 10.dp,
-                modifier = Modifier.size(64.dp).tvFocusable(shape = CircleShape)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    if (playerState.isBuffering) {
-                        CircularProgressIndicator(
-                            color = IvidsColorTokens.ObsidianStage,
-                            strokeWidth = 2.5.dp,
-                            modifier = Modifier.size(28.dp)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = if (playerState.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
-                            contentDescription = strings["play"],
-                            tint = IvidsColorTokens.ObsidianStage,
-                            modifier = Modifier.size(34.dp)
-                        )
-                    }
-                }
-            }
-            IconButton(
-                onClick = playerViewModel::next,
-                modifier = Modifier.size(48.dp).tvFocusable(shape = CircleShape)
-            ) {
+                size = 64.dp,
+                iconSize = 34.dp
+            )
+            IvidsIconButton(onClick = playerViewModel::next, size = 48.dp) {
                 Icon(
                     imageVector = Icons.Rounded.SkipNext,
                     contentDescription = strings["next"],
@@ -735,10 +704,7 @@ private fun NowPlayingHeroCard(
                     modifier = Modifier.size(32.dp)
                 )
             }
-            IconButton(
-                onClick = playerViewModel::cycleRepeatMode,
-                modifier = Modifier.tvFocusable(shape = CircleShape)
-            ) {
+            IvidsIconButton(onClick = playerViewModel::cycleRepeatMode, size = 44.dp) {
                 Icon(
                     imageVector = if (playerState.repeatMode == RepeatMode.ONE) {
                         Icons.Rounded.RepeatOne
@@ -758,10 +724,7 @@ private fun NowPlayingHeroCard(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(
-                onClick = playerViewModel::toggleLikeCurrent,
-                modifier = Modifier.tvFocusable(shape = CircleShape)
-            ) {
+            IvidsIconButton(onClick = playerViewModel::toggleLikeCurrent, size = 44.dp) {
                 Icon(
                     imageVector = if (playerState.isCurrentLiked) {
                         Icons.Rounded.Favorite
@@ -772,20 +735,17 @@ private fun NowPlayingHeroCard(
                     tint = if (playerState.isCurrentLiked) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted
                 )
             }
-            IconButton(
-                onClick = playerViewModel::dislikeCurrent,
-                modifier = Modifier.tvFocusable(shape = CircleShape)
-            ) {
+            IvidsIconButton(onClick = playerViewModel::dislikeCurrent, size = 44.dp) {
                 Icon(
                     imageVector = Icons.Rounded.ThumbDownOffAlt,
                     contentDescription = strings["dislike"],
                     tint = IvidsColorTokens.SlateMuted
                 )
             }
-            IconButton(
+            IvidsIconButton(
                 onClick = onOpenPlaylistPicker,
                 enabled = track != null,
-                modifier = Modifier.tvFocusable(shape = CircleShape)
+                size = 44.dp
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Rounded.PlaylistAdd,
@@ -793,37 +753,30 @@ private fun NowPlayingHeroCard(
                     tint = IvidsColorTokens.ChalkInk
                 )
             }
-            Surface(
+            IvidsTonalPill(
                 onClick = { playerViewModel.downloadCurrent() },
-                shape = CircleShape,
-                color = IvidsColorTokens.GlassSurface.copy(alpha = 0.85f),
-                modifier = Modifier.tvFocusable(shape = CircleShape)
+                baseColor = IvidsColorTokens.GlassSurface.copy(alpha = 0.85f),
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 7.dp)
             ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 7.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        imageVector = if (playerState.isCurrentDownloaded) {
-                            Icons.Rounded.DownloadDone
-                        } else {
-                            Icons.Rounded.Download
-                        },
-                        contentDescription = strings["download_track"],
-                        tint = if (playerState.isCurrentDownloaded) {
-                            IvidsColorTokens.SuccessMint
-                        } else {
-                            IvidsColorTokens.ChalkInk
-                        },
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Text(
-                        text = playerState.activeQuality.label,
-                        style = IvidsTextStyles.tabularBadge(),
-                        color = IvidsColorTokens.ChalkInk
-                    )
-                }
+                Icon(
+                    imageVector = if (playerState.isCurrentDownloaded) {
+                        Icons.Rounded.DownloadDone
+                    } else {
+                        Icons.Rounded.Download
+                    },
+                    contentDescription = strings["download_track"],
+                    tint = if (playerState.isCurrentDownloaded) {
+                        IvidsColorTokens.SuccessMint
+                    } else {
+                        IvidsColorTokens.ChalkInk
+                    },
+                    modifier = Modifier.size(18.dp)
+                )
+                Text(
+                    text = playerState.activeQuality.label,
+                    style = IvidsTextStyles.tabularBadge(),
+                    color = IvidsColorTokens.ChalkInk
+                )
             }
         }
 
@@ -833,12 +786,7 @@ private fun NowPlayingHeroCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                IconButton(
-                    onClick = playerViewModel::toggleMute,
-                    modifier = Modifier
-                        .pointerHoverIcon(PointerIcon.Hand)
-                        .tvFocusable(shape = CircleShape)
-                ) {
+                IvidsIconButton(onClick = playerViewModel::toggleMute, size = 40.dp) {
                     Icon(
                         imageVector = if (playerState.isMuted) {
                             Icons.AutoMirrored.Rounded.VolumeOff

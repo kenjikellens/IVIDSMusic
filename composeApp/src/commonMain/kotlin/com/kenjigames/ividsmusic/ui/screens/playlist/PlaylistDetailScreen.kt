@@ -149,7 +149,7 @@ fun PlaylistDetailScreen(
                             }
                             IvidsTonalPill(
                                 onClick = { viewModel.setDeleteConfirmVisible(true) },
-                                baseColor = IvidsColorTokens.DangerCoral.copy(alpha = 0.14f),
+                                baseColor = IvidsColorTokens.DangerCoral.copy(alpha = 0.08f),
                                 hoverStyle = IvidsHoverStyle.DESTRUCTIVE
                             ) {
                                 Icon(Icons.Rounded.Delete, null, tint = IvidsColorTokens.DangerCoral, modifier = Modifier.size(16.dp))

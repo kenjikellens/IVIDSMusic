@@ -40,6 +40,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -67,6 +68,7 @@ import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
 import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
 import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
+import com.kenjigames.ividsmusic.ui.components.resolveRippleColor
 import com.kenjigames.ividsmusic.ui.i18n.AppStrings
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.i18n.SupportedLanguage
@@ -454,20 +456,26 @@ private fun SettingsListRow(
     val contentTint = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk
     val iconTint = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted
 
+    val hoverStyle = if (isDestructive) IvidsHoverStyle.DESTRUCTIVE else IvidsHoverStyle.NEUTRAL
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 58.dp)
+            .clip(RoundedCornerShape(10.dp))
             .ividsHoverZoom(
                 hovered = isHovered,
                 shape = RoundedCornerShape(10.dp),
-                style = if (isDestructive) IvidsHoverStyle.DESTRUCTIVE else IvidsHoverStyle.NEUTRAL
+                style = hoverStyle
             )
-            .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.99f)
             .pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interactionSource)
             .tvFocusable(shape = RoundedCornerShape(8.dp))
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = true, color = resolveRippleColor(hoverStyle)),
+                onClick = onClick
+            )
             .padding(horizontal = horizontalPadding, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -535,13 +543,17 @@ private fun SettingsRadioRow(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
+            .clip(RoundedCornerShape(10.dp))
             .background(bg)
             .ividsHoverZoom(hovered = isHovered, shape = RoundedCornerShape(10.dp))
-            .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.99f)
             .pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interactionSource)
             .tvFocusable(shape = RoundedCornerShape(8.dp))
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ripple(bounded = true, color = resolveRippleColor(IvidsHoverStyle.NEUTRAL)),
+                onClick = onClick
+            )
             .padding(horizontal = horizontalPadding, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)

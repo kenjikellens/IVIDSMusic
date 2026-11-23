@@ -1,5 +1,6 @@
 package com.kenjigames.ividsmusic
 
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -139,6 +140,11 @@ fun main() {
                 }
             }
         ) {
+            LaunchedEffect(window) {
+                val obsidianAwt = java.awt.Color(9, 9, 9)
+                window.background = obsidianAwt
+                window.contentPane.background = obsidianAwt
+            }
             KoinContext(context = koin) {
                 IvidsApp(searchFocusTrigger = searchFocusTrigger)
             }

@@ -29,6 +29,7 @@ import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
+import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -147,19 +148,11 @@ fun HomeScreen(
             }
 
             if (state.isLoading && state.genreSections.isEmpty()) {
-                items(3, key = { "skeleton_$it" }) { idx ->
-                    Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                        Text(
-                            text = if (idx == 0) strings["top_tracks_header"] else strings["loading"],
-                            style = MaterialTheme.typography.headlineSmall,
-                            color = IvidsColorTokens.ChalkInk,
-                            modifier = Modifier.padding(horizontal = sidePad)
-                        )
-                        ShimmerSkeletonRow(
-                            isCircular = idx == 2,
-                            modifier = Modifier.padding(horizontal = sidePad)
-                        )
-                    }
+                item(key = "home_loading") {
+                    IvidsVinylLoadingBox(
+                        label = strings["loading"],
+                        modifier = Modifier.padding(horizontal = sidePad)
+                    )
                 }
             } else {
                 items(state.genreSections, key = { "genre_${it.id}" }) { section ->
