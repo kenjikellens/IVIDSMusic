@@ -123,35 +123,25 @@ fun MusicCard(
             isHovered -> IvidsColorTokens.HoverBorder
             else -> Color(0x0EFFFFFF)
         },
-        animationSpec = tween(240, easing = FastOutSlowInEasing),
+        animationSpec = tween(200, easing = FastOutSlowInEasing),
         label = "MusicCardBorder"
-    )
-    val cardElevation by animateDpAsState(
-        targetValue = if (isHovered) 18.dp else 2.dp,
-        animationSpec = tween(240, easing = FastOutSlowInEasing),
-        label = "MusicCardElevation"
     )
     val playFabAlpha by animateFloatAsState(
         targetValue = if (isHovered || isTvMode) 1f else 0f,
-        animationSpec = tween(200, easing = FastOutSlowInEasing),
+        animationSpec = tween(180, easing = FastOutSlowInEasing),
         label = "MusicCardPlayAlpha"
     )
 
     Surface(
         modifier = modifier
             .width(width)
-            .shadow(
-                elevation = cardElevation,
-                shape = RoundedCornerShape(16.dp),
-                ambientColor = Color.Black,
-                spotColor = cardTint ?: Color.Black
-            )
             .pointerHoverIcon(PointerIcon.Hand)
             .tvFocusable(shape = RoundedCornerShape(16.dp))
             .hoverable(interactionSource)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
         color = surfaceColor,
+        shadowElevation = 2.dp,
         border = BorderStroke(1.dp, borderColor)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {

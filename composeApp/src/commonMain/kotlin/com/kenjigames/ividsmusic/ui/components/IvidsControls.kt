@@ -248,7 +248,7 @@ fun IvidsSwitch(
                 modifier = Modifier
                     .offset(x = thumbOffset)
                     .size(22.dp)
-                    .shadow(elevation = if (checked || isHovered) 5.dp else 1.dp, shape = CircleShape)
+                    .shadow(elevation = 2.dp, shape = CircleShape)
                     .clip(CircleShape)
                     .background(thumbColor)
             )

@@ -3,6 +3,7 @@ package com.kenjigames.ividsmusic.ui.components
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,30 +14,27 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.FilterQuality
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import coil3.compose.AsyncImage
 import com.kenjigames.ividsmusic.ui.theme.ColorExtractor
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 
 /**
- * Returns true when the current platform supports hardware-accelerated [Modifier.blur] rendering
- * (Desktop Skia and Android 12+ RenderEffect), or false on older Android API 24-30 devices.
+ * Downloads, downsamples, and pre-blurs artwork at [imageUrl] once on a background dispatcher,
+ * returning a small cached [ImageBitmap] that renders at 60+ FPS with zero per-frame blur cost.
  */
-expect fun isNativeRenderBlurSupported(): Boolean
+expect suspend fun loadBlurredArtworkBitmap(imageUrl: String?): ImageBitmap?
 
 /**
- * Renders a strictly clipped, softly blurred album/track artwork backdrop with a 450ms crossfade
- * and dark contrast scrim, falling back to an artwork-sampled radial color wash when [artworkUrl]
- * is absent or on Android < 12.
+ * Renders a strictly clipped, pre-blurred album/track artwork backdrop with a 420ms crossfade
+ * and dark contrast scrim, avoiding live per-frame Gaussian blur passes for smooth 60+ FPS UI.
  */
 @Composable
 fun BlurredArtworkBackdrop(
@@ -47,34 +45,34 @@ fun BlurredArtworkBackdrop(
     blurRadius: Dp = 48.dp,
     fallbackColor: Color = IvidsColorTokens.ObsidianStage
 ) {
+    var blurredBitmap by remember(artworkUrl) { mutableStateOf<ImageBitmap?>(null) }
     var extractedTint by remember(artworkUrl) { mutableStateOf<Color?>(null) }
+
     LaunchedEffect(artworkUrl) {
-        extractedTint = if (!artworkUrl.isNullOrBlank()) {
-            ColorExtractor.extractCardTintColor(artworkUrl)
+        if (artworkUrl.isNullOrBlank()) {
+            blurredBitmap = null
+            extractedTint = null
         } else {
-            null
+            blurredBitmap = loadBlurredArtworkBitmap(artworkUrl)
+            extractedTint = ColorExtractor.extractCardTintColor(artworkUrl)
         }
     }
     val effectiveTint = extractedTint ?: tintColor
-    val canBlur = remember { isNativeRenderBlurSupported() }
 
     Box(modifier = modifier.clipToBounds().background(fallbackColor)) {
         Crossfade(
-            targetState = artworkUrl,
-            animationSpec = tween(durationMillis = 450),
+            targetState = blurredBitmap,
+            animationSpec = tween(durationMillis = 420),
             label = "BlurredArtworkCrossfade"
-        ) { currentUrl ->
+        ) { currentBitmap ->
             Box(modifier = Modifier.fillMaxSize().clipToBounds().background(fallbackColor)) {
-                if (!currentUrl.isNullOrBlank() && canBlur) {
-                    AsyncImage(
-                        model = currentUrl,
+                if (currentBitmap != null) {
+                    Image(
+                        bitmap = currentBitmap,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clipToBounds()
-                            .scale(1.16f)
-                            .blur(blurRadius, edgeTreatment = BlurredEdgeTreatment.Rectangle)
+                        filterQuality = FilterQuality.Medium,
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
 
@@ -83,8 +81,8 @@ fun BlurredArtworkBackdrop(
                         drawRect(
                             brush = Brush.radialGradient(
                                 colors = listOf(
-                                    effectiveTint.copy(alpha = if (canBlur && !currentUrl.isNullOrBlank()) 0.28f else 0.44f),
-                                    effectiveTint.copy(alpha = if (canBlur && !currentUrl.isNullOrBlank()) 0.12f else 0.20f),
+                                    effectiveTint.copy(alpha = if (currentBitmap != null) 0.24f else 0.42f),
+                                    effectiveTint.copy(alpha = if (currentBitmap != null) 0.10f else 0.18f),
                                     Color.Transparent
                                 ),
                                 center = Offset(size.width * 0.25f, size.height * 0.35f),
