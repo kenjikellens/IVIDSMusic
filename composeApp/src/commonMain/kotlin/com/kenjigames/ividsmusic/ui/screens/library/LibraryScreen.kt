@@ -25,8 +25,6 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.LibraryMusic
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Shuffle
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -57,7 +55,6 @@ import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
@@ -84,7 +81,6 @@ fun LibraryScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val playlistModal = rememberTrackPlaylistModalState(state.playlists, libraryRepository, toastController)
 
     if (state.isCreatePlaylistOpen) {
@@ -162,7 +158,6 @@ fun LibraryScreen(
                             enabled = state.filteredLikedTracks.isNotEmpty(),
                             baseColor = IvidsColorTokens.GlassSurface,
                             hoverColor = IvidsColorTokens.GlassHover,
-                            baseBorderColor = IvidsColorTokens.HairlineSubtle,
                             contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp)
                         ) {
                             Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
@@ -333,7 +328,6 @@ private fun LibraryEmptyCard(
     actionLabel: String,
     onAction: () -> Unit
 ) {
-    val accent = LocalDynamicAccent.current
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = IvidsColorTokens.GlassSurface,

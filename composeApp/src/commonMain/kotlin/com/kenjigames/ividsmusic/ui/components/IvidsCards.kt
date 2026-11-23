@@ -2,13 +2,8 @@ package com.kenjigames.ividsmusic.ui.components
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -31,15 +26,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.PlayArrow
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -68,7 +60,6 @@ import coil3.compose.AsyncImage
 import com.kenjigames.ividsmusic.ui.theme.ColorExtractor
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.LocalIsTvMode
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
@@ -247,7 +238,6 @@ fun LivingAlbumHero(
     primaryEnabled: Boolean = true,
     secondaryEnabled: Boolean = true
 ) {
-    val accent = LocalDynamicAccent.current
     val isCompactMobile = LocalLayoutMetrics.current.isCompactMobile
 
     Surface(
@@ -264,7 +254,6 @@ fun LivingAlbumHero(
                 artworkUrl = artworkUrl,
                 tintColor = null,
                 scrimAlpha = 0.68f,
-                blurRadius = 46.dp,
                 fallbackColor = IvidsColorTokens.GlassSurface,
                 modifier = Modifier.matchParentSize()
             )
@@ -345,8 +334,6 @@ fun LivingAlbumHero(
                                 enabled = secondaryEnabled,
                                 baseColor = Color(0x22FFFFFF),
                                 hoverColor = Color(0x3DFFFFFF),
-                                baseBorderColor = IvidsColorTokens.HairlineBorder,
-                                hoverBorderColor = IvidsColorTokens.HoverBorder,
                                 contentPadding = PaddingValues(
                                     horizontal = if (isCompactMobile) 16.dp else 20.dp,
                                     vertical = if (isCompactMobile) 10.dp else 12.dp
@@ -437,70 +424,6 @@ fun LivingAlbumHero(
                         tint = IvidsColorTokens.ChalkInk.copy(alpha = 0.85f)
                     )
                 }
-            }
-        }
-    }
-}
-
-/**
- * Displays an animated horizontal row of borderless skeleton card placeholders while remote
- * discovery data is loading.
- */
-@Composable
-fun ShimmerSkeletonRow(
-    modifier: Modifier = Modifier,
-    itemCount: Int = 6,
-    isCircular: Boolean = false
-) {
-    val transition = rememberInfiniteTransition(label = "SkeletonPulse")
-    val alpha by transition.animateFloat(
-        initialValue = 0.35f,
-        targetValue = 0.72f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 900, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "SkeletonAlpha"
-    )
-
-    val cardWidth = LocalLayoutMetrics.current.cardWidth
-
-    val isCompactMobile = LocalLayoutMetrics.current.isCompactMobile
-
-    LazyRow(
-        modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(horizontal = 2.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        items(itemCount) {
-            Column(
-                modifier = Modifier
-                    .width(cardWidth)
-                    .padding(if (isCompactMobile) 4.dp else 8.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .clip(if (isCircular) CircleShape else RoundedCornerShape(10.dp))
-                        .background(IvidsColorTokens.GlassSurface.copy(alpha = alpha + 0.15f))
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.78f)
-                        .height(14.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(IvidsColorTokens.RecessedTrough.copy(alpha = alpha))
-                )
-                Spacer(modifier = Modifier.height(6.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(0.48f)
-                        .height(12.dp)
-                        .clip(RoundedCornerShape(6.dp))
-                        .background(IvidsColorTokens.RecessedTrough.copy(alpha = alpha * 0.7f))
-                )
             }
         }
     }

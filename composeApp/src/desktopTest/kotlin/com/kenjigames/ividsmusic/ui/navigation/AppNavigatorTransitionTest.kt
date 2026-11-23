@@ -28,4 +28,23 @@ class AppNavigatorTransitionTest {
         assertEquals(NavTransitionType.POP, navigator.transitionType.value)
         assertFalse(navigator.navigateBack())
     }
+
+    /** Verifies push, singleTop deduplication, and back pop transitions for SettingsDetail sub-pages. */
+    @Test
+    fun settingsDetailPushDeduplicationAndPopTransitions() {
+        val navigator = AppNavigator(AppRoute.Settings)
+        val languageRoute = AppRoute.SettingsDetail(SettingsSection.LANGUAGE)
+
+        navigator.navigateTo(languageRoute)
+        assertEquals(NavTransitionType.PUSH, navigator.transitionType.value)
+        assertEquals(2, navigator.backStack.value.size)
+
+        navigator.navigateTo(languageRoute)
+        assertEquals(2, navigator.backStack.value.size)
+
+        assertTrue(navigator.navigateBack())
+        assertEquals(NavTransitionType.POP, navigator.transitionType.value)
+        assertEquals(AppRoute.Settings, navigator.currentRoute)
+        assertFalse(navigator.navigateBack())
+    }
 }

@@ -24,8 +24,6 @@ import androidx.compose.material.icons.rounded.DeleteOutline
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.FolderOpen
 import androidx.compose.material.icons.rounded.Refresh
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -63,7 +61,6 @@ import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
@@ -103,7 +100,6 @@ fun DownloaderScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val playlistModal = rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
 
     FramedScreenContainer(
@@ -173,8 +169,7 @@ fun DownloaderScreen(
                                 IvidsTonalPill(
                                     onClick = viewModel::browseOutputFolder,
                                     baseColor = IvidsColorTokens.RecessedTrough,
-                                    hoverColor = IvidsColorTokens.GlassHover,
-                                    baseBorderColor = IvidsColorTokens.HairlineSubtle
+                                    hoverColor = IvidsColorTokens.GlassHover
                                 ) {
                                     Icon(Icons.Rounded.FolderOpen, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
                                     Text(strings["home_browse"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
@@ -221,7 +216,6 @@ fun DownloaderScreen(
                                 onClick = { if (!state.isLoadingPreview) viewModel.loadPreview() },
                                 baseColor = IvidsColorTokens.RecessedTrough,
                                 hoverColor = IvidsColorTokens.GlassHover,
-                                baseBorderColor = IvidsColorTokens.HairlineSubtle,
                                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
                             ) {
                                 Text(
@@ -319,8 +313,7 @@ fun DownloaderScreen(
                         IvidsTonalPill(
                             onClick = viewModel::rescanSavedDirectory,
                             baseColor = IvidsColorTokens.RecessedTrough,
-                            hoverColor = IvidsColorTokens.GlassHover,
-                            baseBorderColor = IvidsColorTokens.HairlineSubtle
+                            hoverColor = IvidsColorTokens.GlassHover
                         ) {
                             Icon(Icons.Rounded.Refresh, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
                             Text(
@@ -378,7 +371,6 @@ private fun ActiveDownloadRow(
     onCancel: () -> Unit
 ) {
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val (statusLabel, progress, canCancel) = when (val st = item.state) {
         is DownloadState.Idle -> Triple(strings["status_idle"], null, false)
         is DownloadState.Queued -> Triple("${strings["queue"]} (${st.quality.label})", null, true)

@@ -70,7 +70,6 @@ import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
-import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
 import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
@@ -80,7 +79,6 @@ import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
@@ -111,7 +109,6 @@ fun SearchScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val metrics = LocalLayoutMetrics.current
     var showYearPanel by remember { mutableStateOf(false) }
     val playlistModal = rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
@@ -440,7 +437,6 @@ fun SearchScreen(
                                 onClick = { if (!state.isLoadingMore) viewModel.loadMore() },
                                 baseColor = IvidsColorTokens.GlassSurface,
                                 hoverColor = IvidsColorTokens.GlassHover,
-                                baseBorderColor = IvidsColorTokens.HairlineBorder,
                                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                             ) {
                                 Text(

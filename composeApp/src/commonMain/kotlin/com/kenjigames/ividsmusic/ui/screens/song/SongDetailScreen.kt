@@ -44,7 +44,6 @@ import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
-import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
 import com.kenjigames.ividsmusic.ui.components.formatDurationSeconds
@@ -53,7 +52,6 @@ import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
@@ -80,7 +78,6 @@ fun SongDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val playlistModal = rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
 
     FramedScreenContainer(
@@ -139,39 +136,33 @@ fun SongDetailScreen(
                             SongActionPill(
                                 icon = Icons.AutoMirrored.Rounded.QueueMusic,
                                 label = strings["add_to_queue"],
-                                accent = accent,
                                 onClick = { playerViewModel.enqueueLast(track) }
                             )
                             SongActionPill(
                                 icon = Icons.AutoMirrored.Rounded.PlaylistAdd,
                                 label = strings["add_to_playlist"],
-                                accent = accent,
                                 onClick = { playlistModal.openPicker(track) }
                             )
                             SongActionPill(
                                 icon = Icons.Rounded.Download,
                                 label = strings["download_track"],
-                                accent = accent,
                                 onClick = { playerViewModel.downloadTrack(track) }
                             )
                             SongActionPill(
                                 icon = if (isLiked) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                                 label = strings["like"],
-                                accent = accent,
                                 highlighted = isLiked,
                                 onClick = { playerViewModel.toggleTrackLike(track) }
                             )
                             SongActionPill(
                                 icon = Icons.Rounded.Person,
                                 label = strings["view_artist"],
-                                accent = accent,
                                 onClick = { onOpenArtist(track.artistId, track.artist) }
                             )
                             if (track.albumId.isNotBlank()) {
                                 SongActionPill(
                                     icon = Icons.Rounded.Album,
                                     label = track.album.ifBlank { strings["albums"] },
-                                    accent = accent,
                                     onClick = { onOpenAlbum(track.albumId) }
                                 )
                             }
@@ -187,7 +178,6 @@ fun SongDetailScreen(
                                         onClick = { onOpenGenreSearch(genre) },
                                         baseColor = IvidsColorTokens.RecessedTrough,
                                         hoverColor = IvidsColorTokens.GlassHover,
-                                        baseBorderColor = IvidsColorTokens.HairlineSubtle,
                                         contentPadding = PaddingValues(horizontal = 14.dp, vertical = 7.dp)
                                     ) {
                                         Text(
@@ -262,7 +252,6 @@ fun SongDetailScreen(
 private fun SongActionPill(
     icon: ImageVector,
     label: String,
-    accent: Color,
     highlighted: Boolean = false,
     onClick: () -> Unit
 ) {

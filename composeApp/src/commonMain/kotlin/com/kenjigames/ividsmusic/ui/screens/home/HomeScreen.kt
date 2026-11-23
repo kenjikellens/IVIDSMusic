@@ -30,10 +30,8 @@ import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
-import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 
 /**
@@ -52,7 +50,6 @@ fun HomeScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val metrics = LocalLayoutMetrics.current
     val sidePad = metrics.screenHorizontalPadding
 

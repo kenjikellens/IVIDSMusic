@@ -41,7 +41,6 @@ import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
-import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
 import com.kenjigames.ividsmusic.ui.components.rememberTrackPlaylistModalState
@@ -50,7 +49,6 @@ import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
@@ -180,8 +178,7 @@ fun ArtistDetailScreen(
                                     },
                                     enabled = state.topTracks.isNotEmpty(),
                                     baseColor = IvidsColorTokens.GlassSurface,
-                                    hoverColor = IvidsColorTokens.GlassHover,
-                                    baseBorderColor = IvidsColorTokens.HairlineSubtle
+                                    hoverColor = IvidsColorTokens.GlassHover
                                 ) {
                                     Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
                                     Text(

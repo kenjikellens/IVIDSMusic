@@ -50,7 +50,6 @@ import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
@@ -76,7 +75,6 @@ fun PlaylistDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val playlistModal = rememberTrackPlaylistModalState(allPlaylists, libraryRepository, toastController)
 
     LaunchedEffect(state.isDeleted) {
@@ -135,8 +133,7 @@ fun PlaylistDetailScreen(
                             IvidsTonalPill(
                                 onClick = { viewModel.setEditing(!state.isEditing) },
                                 baseColor = IvidsColorTokens.GlassSurface,
-                                hoverColor = IvidsColorTokens.GlassHover,
-                                baseBorderColor = IvidsColorTokens.HairlineSubtle
+                                hoverColor = IvidsColorTokens.GlassHover
                             ) {
                                 Icon(Icons.Rounded.Edit, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
                                 Text(

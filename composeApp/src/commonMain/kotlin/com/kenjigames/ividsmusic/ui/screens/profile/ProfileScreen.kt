@@ -53,7 +53,6 @@ import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
@@ -75,7 +74,6 @@ fun ProfileScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val metrics = LocalLayoutMetrics.current
 
     if (state.isEditModalOpen) {
@@ -151,7 +149,6 @@ fun ProfileScreen(
                         ProfilePillAction(
                             icon = Icons.Rounded.Download,
                             label = strings["nav_downloader"],
-                            accent = accent,
                             onClick = onOpenDownloader
                         )
                     }
@@ -279,14 +276,12 @@ fun ProfileScreen(
 private fun ProfilePillAction(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
-    accent: androidx.compose.ui.graphics.Color,
     onClick: () -> Unit
 ) {
     IvidsTonalPill(
         onClick = onClick,
         baseColor = IvidsColorTokens.GlassSurface,
-        hoverColor = IvidsColorTokens.GlassHover,
-        baseBorderColor = IvidsColorTokens.HairlineSubtle
+        hoverColor = IvidsColorTokens.GlassHover
     ) {
         Icon(icon, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
         Text(

@@ -103,7 +103,6 @@ import com.kenjigames.ividsmusic.ui.shell.resolveHorizontalSwipeAction
 import com.kenjigames.ividsmusic.ui.shell.shouldDismissVerticalSwipe
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 import kotlin.math.roundToInt
@@ -127,7 +126,6 @@ fun NowPlayingSheet(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val accent = LocalDynamicAccent.current
     val strings = LocalStrings.current
     val metrics = LocalLayoutMetrics.current
     val density = LocalDensity.current
@@ -185,7 +183,6 @@ fun NowPlayingSheet(
                 artworkUrl = track?.coverUrl,
                 tintColor = null,
                 scrimAlpha = 0.62f,
-                blurRadius = 64.dp,
                 fallbackColor = IvidsColorTokens.ObsidianStage,
                 modifier = Modifier.matchParentSize()
             )
@@ -270,7 +267,6 @@ fun NowPlayingSheet(
                                 NowPlayingHeroCard(
                                     track = track,
                                     playerState = playerState,
-                                    accent = accent,
                                     onOpenArtist = {
                                         if (track != null) {
                                             onDismiss()
@@ -314,7 +310,6 @@ fun NowPlayingSheet(
                                                     index = index,
                                                     item = item,
                                                     isActive = index == playerState.currentIndex,
-                                                    accent = accent,
                                                     onJump = { playerViewModel.jumpToQueueIndex(index) },
                                                     onRemove = { playerViewModel.removeFromQueue(index) }
                                                 )
@@ -357,7 +352,6 @@ fun NowPlayingSheet(
                                         NowPlayingHeroCard(
                                             track = track,
                                             playerState = playerState,
-                                            accent = accent,
                                             onOpenArtist = {
                                                 if (track != null) {
                                                     onDismiss()
@@ -413,7 +407,6 @@ fun NowPlayingSheet(
                                                             index = index,
                                                             item = item,
                                                             isActive = index == playerState.currentIndex,
-                                                            accent = accent,
                                                             onJump = { playerViewModel.jumpToQueueIndex(index) },
                                                             onRemove = { playerViewModel.removeFromQueue(index) }
                                                         )
@@ -474,7 +467,6 @@ private fun NowPlayingQueueRow(
     index: Int,
     item: Track,
     isActive: Boolean,
-    accent: Color,
     onJump: () -> Unit,
     onRemove: () -> Unit
 ) {
@@ -537,7 +529,6 @@ private fun NowPlayingQueueRow(
 private fun NowPlayingHeroCard(
     track: Track?,
     playerState: PlayerUiState,
-    accent: Color,
     onOpenArtist: () -> Unit,
     onOpenPlaylistPicker: () -> Unit,
     playerViewModel: PlayerViewModel,
