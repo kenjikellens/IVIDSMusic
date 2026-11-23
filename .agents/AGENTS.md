@@ -97,3 +97,19 @@ Every AI agent and developer working on IVIDS Music MUST strictly follow these u
 - **No Implementation Plan Files in Workspace**: NEVER create `implementation_plan.md` inside `mockup/` or any workspace folder.
 - **Mockup Rules**: Standalone UI prototypes go into a dedicated `mockup/` folder with offline HTML, JS, CSS, and SVG assets.
 - **Documentation Reference**: Consult `app/../documentation/file_list.md` for information about key project files.
+
+---
+
+## 9. Compose Multiplatform UI, Colors & OOP Composition
+
+Use pure `R = G = B` black and neutral charcoal surfaces (`#000000`, `#090909`, `#141414`, `#1C1C1C`) with zero blue-gray undertone. Set Desktop `window.background` and `window.contentPane.background` to `#090909`.
+
+Use signature cyan (`PrimaryCyan` `#4DD0E1`) on active or main controls such as the `"IVIDS"` wordmark, opened navigation destination, active Shuffle and Repeat toggles, and vinyl loader center label.
+
+Never draw borders (`BorderStroke` or `.border()`) on cards, pills, switches, segmented chips, or dialogs, except the TV focus ring. Use dark overlays (`IvidsHoverStyle.ON_LIGHT`) for hover and ripple on white primary buttons, and subtle transparent red (`IvidsHoverStyle.DESTRUCTIVE`) on destructive actions.
+
+Keep styling and behavior modular following OOP Composition over Duplication. Separate color tokens (`IvidsHoverStyle`, `resolveHoverColor`, `resolveRippleColor`) from animation modifiers (`ividsHoverZoom`, `ividsTouchFeedback`, pointer `ripple`). Combine them inside single shared components (`IvidsTonalPill`, `IvidsPrimaryButton`, `IvidsPlayCircleButton`, `IvidsIconButton`, `IvidsVinylLoader`) and reuse those everywhere across all screens and player bars.
+
+Render Settings flat on `#090909` without nested cards or a `Layout Mode` row. Push multi-option pickers from the right via `AppRoute.SettingsDetail` instead of modal popups, keep click feedback on full-width rows limited to hover zoom and ripple without shrinking the row, and keep the Desktop search bar centered with Back pinned far left.
+
+Keep Windows (`:composeApp:createDistributable`) and Android (`:composeApp:assembleMobileDebug`) builds and `:composeApp:desktopTest` up to date after UI edits.

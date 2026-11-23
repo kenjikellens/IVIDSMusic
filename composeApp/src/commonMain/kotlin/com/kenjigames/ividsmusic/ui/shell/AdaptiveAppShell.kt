@@ -1370,11 +1370,15 @@ private fun DesktopPlayerDeck(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    IvidsIconButton(onClick = playerViewModel::toggleShuffle, size = 34.dp) {
+                    IvidsIconButton(
+                        onClick = playerViewModel::toggleShuffle,
+                        size = 34.dp,
+                        hoverStyle = if (playerState.isShuffleEnabled) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+                    ) {
                         Icon(
                             imageVector = Icons.Rounded.Shuffle,
                             contentDescription = strings["shuffle"],
-                            tint = if (playerState.isShuffleEnabled) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
+                            tint = if (playerState.isShuffleEnabled) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1401,7 +1405,11 @@ private fun DesktopPlayerDeck(
                     ) {
                         Icon(Icons.Rounded.SkipNext, strings["next"], tint = IvidsColorTokens.ChalkInk)
                     }
-                    IvidsIconButton(onClick = playerViewModel::cycleRepeatMode, size = 34.dp) {
+                    IvidsIconButton(
+                        onClick = playerViewModel::cycleRepeatMode,
+                        size = 34.dp,
+                        hoverStyle = if (playerState.repeatMode != RepeatMode.OFF) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+                    ) {
                         Icon(
                             imageVector = if (playerState.repeatMode == RepeatMode.ONE) {
                                 Icons.Rounded.RepeatOne
@@ -1409,7 +1417,7 @@ private fun DesktopPlayerDeck(
                                 Icons.Rounded.Repeat
                             },
                             contentDescription = "Repeat",
-                            tint = if (playerState.repeatMode != RepeatMode.OFF) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
+                            tint = if (playerState.repeatMode != RepeatMode.OFF) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted,
                             modifier = Modifier.size(18.dp)
                         )
                     }

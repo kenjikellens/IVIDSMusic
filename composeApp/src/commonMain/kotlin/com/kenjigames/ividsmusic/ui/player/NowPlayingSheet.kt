@@ -89,6 +89,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
+import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
 import com.kenjigames.ividsmusic.ui.components.IvidsIconButton
 import com.kenjigames.ividsmusic.ui.components.IvidsPlayCircleButton
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
@@ -673,11 +674,15 @@ private fun NowPlayingHeroCard(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IvidsIconButton(onClick = playerViewModel::toggleShuffle, size = 44.dp) {
+            IvidsIconButton(
+                onClick = playerViewModel::toggleShuffle,
+                size = 44.dp,
+                hoverStyle = if (playerState.isShuffleEnabled) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+            ) {
                 Icon(
                     imageVector = Icons.Rounded.Shuffle,
                     contentDescription = strings["shuffle"],
-                    tint = if (playerState.isShuffleEnabled) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
+                    tint = if (playerState.isShuffleEnabled) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
                 )
             }
             IvidsIconButton(onClick = playerViewModel::previous, size = 48.dp) {
@@ -704,7 +709,11 @@ private fun NowPlayingHeroCard(
                     modifier = Modifier.size(32.dp)
                 )
             }
-            IvidsIconButton(onClick = playerViewModel::cycleRepeatMode, size = 44.dp) {
+            IvidsIconButton(
+                onClick = playerViewModel::cycleRepeatMode,
+                size = 44.dp,
+                hoverStyle = if (playerState.repeatMode != RepeatMode.OFF) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+            ) {
                 Icon(
                     imageVector = if (playerState.repeatMode == RepeatMode.ONE) {
                         Icons.Rounded.RepeatOne
@@ -712,7 +721,7 @@ private fun NowPlayingHeroCard(
                         Icons.Rounded.Repeat
                     },
                     contentDescription = "Repeat",
-                    tint = if (playerState.repeatMode != RepeatMode.OFF) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
+                    tint = if (playerState.repeatMode != RepeatMode.OFF) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
                 )
             }
         }
