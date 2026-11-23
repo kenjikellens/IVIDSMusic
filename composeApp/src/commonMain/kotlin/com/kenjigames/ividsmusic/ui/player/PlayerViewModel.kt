@@ -58,7 +58,7 @@ data class PlayerUiState(
     val isCurrentLiked: Boolean = false,
     val isCurrentDownloaded: Boolean = false,
     val activeQuality: AudioQuality = AudioQuality.Q196,
-    val dynamicAccent: Color = IvidsColorTokens.PrimaryCyan,
+    val dynamicAccent: Color = IvidsColorTokens.ChalkInk,
     val errorMessage: String? = null
 ) {
     /** Returns true when swiping/pressing previous can jump back or restart the active track. */
@@ -734,7 +734,7 @@ class PlayerViewModel(
         accentJob = scope.launch {
             val extracted = ColorExtractor.extractDominantColor(
                 imageUrl = track.coverUrl,
-                fallback = IvidsColorTokens.PrimaryCyan
+                fallback = IvidsColorTokens.ChalkInk
             )
             _uiState.update { it.copy(dynamicAccent = extracted) }
         }

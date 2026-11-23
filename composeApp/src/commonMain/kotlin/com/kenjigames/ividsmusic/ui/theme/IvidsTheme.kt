@@ -58,13 +58,13 @@ fun ividsScreenPadding(top: Dp = 22.dp): PaddingValues {
 @Composable
 fun IvidsTheme(
     uiScale: Float = 1.0f,
-    dynamicAccent: Color = IvidsColorTokens.PrimaryCyan,
+    dynamicAccent: Color = IvidsColorTokens.ChalkInk,
     dynamicTintEnabled: Boolean = true,
     isTvMode: Boolean = false,
     layoutDirection: LayoutDirection = LayoutDirection.Ltr,
     content: @Composable () -> Unit
 ) {
-    val targetAccent = if (dynamicTintEnabled) dynamicAccent else IvidsColorTokens.PrimaryCyan
+    val targetAccent = if (dynamicTintEnabled) dynamicAccent else IvidsColorTokens.ChalkInk
     val animatedAccent by animateColorAsState(
         targetValue = targetAccent,
         animationSpec = tween(durationMillis = 450, easing = FastOutSlowInEasing),
@@ -82,11 +82,11 @@ fun IvidsTheme(
     }
 
     val colorScheme = darkColorScheme(
-        primary = animatedAccent,
-        onPrimary = IvidsColorTokens.OnAccentDark,
-        secondary = IvidsColorTokens.OceanAccent,
+        primary = IvidsColorTokens.ChalkInk,
+        onPrimary = IvidsColorTokens.ObsidianStage,
+        secondary = IvidsColorTokens.GlassHover,
         onSecondary = IvidsColorTokens.ChalkInk,
-        tertiary = IvidsColorTokens.CyanHighlight,
+        tertiary = IvidsColorTokens.SlateMuted,
         background = IvidsColorTokens.ObsidianStage,
         onBackground = IvidsColorTokens.ChalkInk,
         surface = IvidsColorTokens.GlassSurface,
@@ -99,7 +99,7 @@ fun IvidsTheme(
     )
 
     CompositionLocalProvider(
-        LocalIvidsColors provides IvidsExtendedColors(primaryCyan = animatedAccent),
+        LocalIvidsColors provides IvidsExtendedColors(),
         LocalDynamicAccent provides animatedAccent,
         LocalUiScale provides clampedScale,
         LocalIsTvMode provides isTvMode,

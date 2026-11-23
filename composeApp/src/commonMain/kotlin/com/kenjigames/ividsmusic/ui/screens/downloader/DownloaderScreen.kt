@@ -1,6 +1,5 @@
 package com.kenjigames.ividsmusic.ui.screens.downloader
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -143,7 +142,7 @@ fun DownloaderScreen(
                                 colors = OutlinedTextFieldDefaults.colors(
                                     focusedContainerColor = IvidsColorTokens.RecessedTrough,
                                     unfocusedContainerColor = IvidsColorTokens.RecessedTrough,
-                                    focusedBorderColor = accent,
+                                    focusedBorderColor = IvidsColorTokens.HairlineBorder,
                                     unfocusedBorderColor = Color.Transparent,
                                     focusedTextColor = IvidsColorTokens.ChalkInk,
                                     unfocusedTextColor = IvidsColorTokens.ChalkInk
@@ -209,8 +208,8 @@ fun DownloaderScreen(
                                 shape = CircleShape,
                                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = accent,
-                                    contentColor = IvidsColorTokens.OnAccentDark
+                                    containerColor = IvidsColorTokens.ChalkInk,
+                                    contentColor = IvidsColorTokens.ObsidianStage
                                 ),
                                 modifier = Modifier.tvFocusable(shape = CircleShape)
                             ) {
@@ -281,7 +280,10 @@ fun DownloaderScreen(
                             Checkbox(
                                 checked = checked,
                                 onCheckedChange = { viewModel.togglePreviewSelection(track.id) },
-                                colors = CheckboxDefaults.colors(checkedColor = accent)
+                                colors = CheckboxDefaults.colors(
+                                    checkedColor = IvidsColorTokens.ChalkInk,
+                                    checkmarkColor = IvidsColorTokens.ObsidianStage
+                                )
                             )
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(track.title, style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk, maxLines = 1, overflow = TextOverflow.Ellipsis)
@@ -421,13 +423,13 @@ private fun ActiveDownloadRow(
             if (progress != null) {
                 LinearProgressIndicator(
                     progress = { progress },
-                    color = accent,
+                    color = IvidsColorTokens.ChalkInk,
                     trackColor = IvidsColorTokens.RecessedTrough,
                     modifier = Modifier.fillMaxWidth().clip(CircleShape)
                 )
             } else if (canCancel) {
                 LinearProgressIndicator(
-                    color = accent,
+                    color = IvidsColorTokens.ChalkInk,
                     trackColor = IvidsColorTokens.RecessedTrough,
                     modifier = Modifier.fillMaxWidth().clip(CircleShape)
                 )

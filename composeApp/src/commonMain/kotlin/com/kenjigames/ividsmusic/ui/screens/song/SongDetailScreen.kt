@@ -1,6 +1,5 @@
 package com.kenjigames.ividsmusic.ui.screens.song
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -268,16 +267,14 @@ private fun SongActionPill(
 ) {
     IvidsTonalPill(
         onClick = onClick,
-        baseColor = if (highlighted) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
-        hoverColor = if (highlighted) accent.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover,
-        baseBorderColor = if (highlighted) accent else IvidsColorTokens.HairlineSubtle,
-        hoverBorderColor = if (highlighted) accent else IvidsColorTokens.HoverBorder
+        baseColor = if (highlighted) IvidsColorTokens.DangerCoral.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
+        hoverColor = if (highlighted) IvidsColorTokens.DangerCoral.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover
     ) {
-        Icon(icon, null, tint = if (highlighted) accent else IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
+        Icon(icon, null, tint = if (highlighted) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
         Text(
             text = label,
             style = MaterialTheme.typography.labelLarge,
-            color = if (highlighted) accent else IvidsColorTokens.ChalkInk
+            color = if (highlighted) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk
         )
     }
 }

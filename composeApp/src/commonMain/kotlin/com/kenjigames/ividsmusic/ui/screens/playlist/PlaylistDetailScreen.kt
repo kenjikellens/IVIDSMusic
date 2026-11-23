@@ -1,6 +1,5 @@
 package com.kenjigames.ividsmusic.ui.screens.playlist
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -192,8 +191,8 @@ fun PlaylistDetailScreen(
                                             onClick = viewModel::saveMetadata,
                                             shape = CircleShape,
                                             colors = ButtonDefaults.buttonColors(
-                                                containerColor = accent,
-                                                contentColor = IvidsColorTokens.OnAccentDark
+                                                containerColor = IvidsColorTokens.ChalkInk,
+                                                contentColor = IvidsColorTokens.ObsidianStage
                                             )
                                         ) {
                                             Text(strings["profile_save"])

@@ -38,6 +38,7 @@ import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinContext
 import org.koin.core.context.stopKoin
 import java.io.File
+import kotlin.system.exitProcess
 
 /**
  * Configures JVM and Skiko rendering system properties before AWT/Swing initializes so Windows
@@ -84,6 +85,7 @@ fun main() {
                 runCatching { audioEngine.release() }
                 runCatching { stopKoin() }
                 exitApplication()
+                exitProcess(0)
             },
             title = "IVIDS Music",
             state = windowState,

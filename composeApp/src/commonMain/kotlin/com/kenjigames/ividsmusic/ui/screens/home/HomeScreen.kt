@@ -114,8 +114,8 @@ fun HomeScreen(
                                 onClick = viewModel::refresh,
                                 shape = CircleShape,
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = accent,
-                                    contentColor = IvidsColorTokens.OnAccentDark
+                                    containerColor = IvidsColorTokens.ChalkInk,
+                                    contentColor = IvidsColorTokens.ObsidianStage
                                 )
                             ) {
                                 Text(strings["retry"])

@@ -1,6 +1,5 @@
 package com.kenjigames.ividsmusic.ui.screens.album
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,7 +43,6 @@ import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
@@ -68,7 +66,6 @@ fun AlbumDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val playlistModal = rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
 
     FramedScreenContainer(
@@ -140,21 +137,19 @@ fun AlbumDetailScreen(
                                 }
                                 IvidsTonalPill(
                                     onClick = viewModel::toggleSaved,
-                                    baseColor = if (state.isSaved) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
-                                    hoverColor = if (state.isSaved) accent.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover,
-                                    baseBorderColor = if (state.isSaved) accent else IvidsColorTokens.HairlineSubtle,
-                                    hoverBorderColor = if (state.isSaved) accent else IvidsColorTokens.HoverBorder
+                                    baseColor = if (state.isSaved) IvidsColorTokens.ChalkInk else IvidsColorTokens.GlassSurface,
+                                    hoverColor = if (state.isSaved) IvidsColorTokens.ChalkInk.copy(alpha = 0.88f) else IvidsColorTokens.GlassHover
                                 ) {
                                     Icon(
                                         imageVector = if (state.isSaved) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
                                         contentDescription = null,
-                                        tint = if (state.isSaved) accent else IvidsColorTokens.ChalkInk,
+                                        tint = if (state.isSaved) IvidsColorTokens.ObsidianStage else IvidsColorTokens.ChalkInk,
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Text(
                                         text = if (state.isSaved) strings["saved_albums"] else strings["save_album"],
                                         style = IvidsTextStyles.tabularBadge(),
-                                        color = IvidsColorTokens.ChalkInk,
+                                        color = if (state.isSaved) IvidsColorTokens.ObsidianStage else IvidsColorTokens.ChalkInk,
                                         maxLines = 1,
                                         softWrap = false
                                     )

@@ -172,12 +172,14 @@ fun NowPlayingSheet(
         modifier = modifier
             .fillMaxSize()
             .offset { IntOffset(0, animatedDismissOffsetPx.roundToInt()) },
-        color = IvidsColorTokens.ObsidianStage
+        color = IvidsColorTokens.ObsidianStage.copy(
+            alpha = (1f - (animatedDismissOffsetPx / maxDismissOffsetPx) * 0.35f).coerceIn(0.65f, 1f)
+        )
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             BlurredArtworkBackdrop(
                 artworkUrl = track?.coverUrl,
-                tintColor = accent,
+                tintColor = null,
                 scrimAlpha = 0.62f,
                 blurRadius = 64.dp,
                 fallbackColor = IvidsColorTokens.ObsidianStage,
@@ -684,7 +686,7 @@ private fun NowPlayingHeroCard(
                 Icon(
                     imageVector = Icons.Rounded.Shuffle,
                     contentDescription = strings["shuffle"],
-                    tint = if (playerState.isShuffleEnabled) accent else IvidsColorTokens.SlateMuted
+                    tint = if (playerState.isShuffleEnabled) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
                 )
             }
             IconButton(
@@ -701,14 +703,14 @@ private fun NowPlayingHeroCard(
             Surface(
                 onClick = playerViewModel::togglePlayPause,
                 shape = CircleShape,
-                color = accent,
+                color = IvidsColorTokens.ChalkInk,
                 shadowElevation = 10.dp,
                 modifier = Modifier.size(64.dp).tvFocusable(shape = CircleShape)
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     if (playerState.isBuffering) {
                         CircularProgressIndicator(
-                            color = IvidsColorTokens.OnAccentDark,
+                            color = IvidsColorTokens.ObsidianStage,
                             strokeWidth = 2.5.dp,
                             modifier = Modifier.size(28.dp)
                         )
@@ -716,7 +718,7 @@ private fun NowPlayingHeroCard(
                         Icon(
                             imageVector = if (playerState.isPlaying) Icons.Rounded.Pause else Icons.Rounded.PlayArrow,
                             contentDescription = strings["play"],
-                            tint = IvidsColorTokens.OnAccentDark,
+                            tint = IvidsColorTokens.ObsidianStage,
                             modifier = Modifier.size(34.dp)
                         )
                     }
@@ -744,7 +746,7 @@ private fun NowPlayingHeroCard(
                         Icons.Rounded.Repeat
                     },
                     contentDescription = "Repeat",
-                    tint = if (playerState.repeatMode != RepeatMode.OFF) accent else IvidsColorTokens.SlateMuted
+                    tint = if (playerState.repeatMode != RepeatMode.OFF) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
                 )
             }
         }

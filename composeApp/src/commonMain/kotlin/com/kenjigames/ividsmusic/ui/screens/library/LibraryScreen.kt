@@ -1,6 +1,5 @@
 package com.kenjigames.ividsmusic.ui.screens.library
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -347,7 +346,7 @@ private fun LibraryEmptyCard(
             Icon(
                 imageVector = Icons.Rounded.LibraryMusic,
                 contentDescription = null,
-                tint = accent,
+                tint = IvidsColorTokens.ChalkInk,
                 modifier = Modifier.size(46.dp)
             )
             Text(title, style = MaterialTheme.typography.titleLarge, color = IvidsColorTokens.ChalkInk)
@@ -357,8 +356,8 @@ private fun LibraryEmptyCard(
                 onClick = onAction,
                 shape = CircleShape,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = accent,
-                    contentColor = IvidsColorTokens.OnAccentDark
+                    containerColor = IvidsColorTokens.ChalkInk,
+                    contentColor = IvidsColorTokens.ObsidianStage
                 )
             ) {
                 Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp))

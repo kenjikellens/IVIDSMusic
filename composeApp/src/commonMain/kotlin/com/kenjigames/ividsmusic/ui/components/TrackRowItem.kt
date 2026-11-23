@@ -4,7 +4,6 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -115,9 +114,9 @@ fun TrackRowItem(
 
     val rowBg by animateColorAsState(
         targetValue = when {
-            isHovered && isCurrentlyPlaying -> Color(0xFF2F2F3B)
-            isHovered -> Color(0xFF24242E)
-            isCurrentlyPlaying -> Color(0xFF1A1A20)
+            isHovered && isCurrentlyPlaying -> Color(0xFF262626)
+            isHovered -> Color(0xFF1C1C1C)
+            isCurrentlyPlaying -> Color(0xFF161616)
             else -> Color.Transparent
         },
         animationSpec = tween(140, easing = FastOutSlowInEasing),
@@ -132,12 +131,13 @@ fun TrackRowItem(
     val iconButtonSize = if (metrics.isCompactMobile) 42.dp else 36.dp
 
     Surface(
+        onClick = onPlay,
+        interactionSource = interactionSource,
         modifier = modifier
             .fillMaxWidth()
+            .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.985f)
             .pointerHoverIcon(PointerIcon.Hand)
-            .tvFocusable(shape = RoundedCornerShape(12.dp))
-            .hoverable(interactionSource)
-            .clickable(onClick = onPlay),
+            .tvFocusable(shape = RoundedCornerShape(12.dp)),
         shape = RoundedCornerShape(12.dp),
         color = rowBg
     ) {

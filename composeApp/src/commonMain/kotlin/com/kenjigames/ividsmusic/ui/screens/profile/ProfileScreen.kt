@@ -1,6 +1,5 @@
 package com.kenjigames.ividsmusic.ui.screens.profile
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -109,8 +108,8 @@ fun ProfileScreen(
                     onClick = viewModel::saveProfile,
                     shape = CircleShape,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = accent,
-                        contentColor = IvidsColorTokens.OnAccentDark
+                        containerColor = IvidsColorTokens.ChalkInk,
+                        contentColor = IvidsColorTokens.ObsidianStage
                     )
                 ) {
                     Text(strings["profile_save"])

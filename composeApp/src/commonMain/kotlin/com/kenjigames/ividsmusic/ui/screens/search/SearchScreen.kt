@@ -72,6 +72,7 @@ import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
+import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
 import com.kenjigames.ividsmusic.ui.components.rememberTrackPlaylistModalState
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerUiState
@@ -158,7 +159,7 @@ fun SearchScreen(
                                     Icon(
                                         imageVector = Icons.Rounded.CalendarMonth,
                                         contentDescription = strings["year_filter"],
-                                        tint = if (state.yearFilterEnabled || showYearPanel) accent else IvidsColorTokens.SlateMuted
+                                        tint = if (state.yearFilterEnabled || showYearPanel) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
                                     )
                                 }
                                 if (state.query.isNotEmpty()) {
@@ -232,7 +233,7 @@ fun SearchScreen(
                                     valueRange = 1950f..2026f,
                                     colors = SliderDefaults.colors(
                                         thumbColor = IvidsColorTokens.ChalkInk,
-                                        activeTrackColor = accent,
+                                        activeTrackColor = IvidsColorTokens.ChalkInk,
                                         inactiveTrackColor = IvidsColorTokens.RecessedTrough
                                     )
                                 )
@@ -258,18 +259,13 @@ fun SearchScreen(
                     fun GenreCategoryCard(cat: BrowseCategoryTile, cardModifier: Modifier) {
                         val tileHoverSource = remember { MutableInteractionSource() }
                         val tileHovered by tileHoverSource.collectIsHoveredAsState()
-                        val borderColor by animateColorAsState(
-                            targetValue = if (tileHovered) IvidsColorTokens.HoverBorder else IvidsColorTokens.HairlineSubtle,
-                            animationSpec = tween(140, easing = FastOutSlowInEasing),
-                            label = "BrowseTileBorder"
-                        )
                         Surface(
                             onClick = { viewModel.submitQuery(cat.query) },
                             interactionSource = tileHoverSource,
                             shape = RoundedCornerShape(18.dp),
                             color = IvidsColorTokens.GlassSurface,
-                            border = BorderStroke(1.dp, borderColor),
                             modifier = cardModifier
+                                .ividsTouchFeedback(interactionSource = tileHoverSource, pressedScale = 0.965f)
                                 .pointerHoverIcon(PointerIcon.Hand)
                                 .tvFocusable(shape = RoundedCornerShape(18.dp))
                         ) {

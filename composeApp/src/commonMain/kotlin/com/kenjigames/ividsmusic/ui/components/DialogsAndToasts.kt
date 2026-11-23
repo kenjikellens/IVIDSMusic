@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -117,11 +116,7 @@ fun ToastHost(
             toast?.let { msg ->
                 Surface(
                     shape = RoundedCornerShape(14.dp),
-                    color = IvidsColorTokens.GrooveElevated,
-                    border = BorderStroke(
-                        1.dp,
-                        if (msg.isError) IvidsColorTokens.DangerCoral else accent
-                    ),
+                    color = if (msg.isError) IvidsColorTokens.DangerCoral.copy(alpha = 0.24f) else IvidsColorTokens.GrooveElevated,
                     shadowElevation = 10.dp
                 ) {
                     Text(
@@ -148,7 +143,6 @@ fun CreatePlaylistDialog(
     onCreate: (title: String, description: String) -> Unit
 ) {
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
 
@@ -166,7 +160,7 @@ fun CreatePlaylistDialog(
                     label = { Text(strings["playlist_name"]) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = accent,
+                        focusedBorderColor = IvidsColorTokens.ChalkInk,
                         unfocusedBorderColor = IvidsColorTokens.HairlineBorder,
                         focusedTextColor = IvidsColorTokens.ChalkInk,
                         unfocusedTextColor = IvidsColorTokens.ChalkInk
@@ -179,7 +173,7 @@ fun CreatePlaylistDialog(
                     label = { Text(strings["playlist_desc"]) },
                     maxLines = 3,
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = accent,
+                        focusedBorderColor = IvidsColorTokens.ChalkInk,
                         unfocusedBorderColor = IvidsColorTokens.HairlineBorder,
                         focusedTextColor = IvidsColorTokens.ChalkInk,
                         unfocusedTextColor = IvidsColorTokens.ChalkInk
@@ -197,8 +191,8 @@ fun CreatePlaylistDialog(
                 },
                 enabled = name.isNotBlank(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = accent,
-                    contentColor = IvidsColorTokens.OnAccentDark
+                    containerColor = IvidsColorTokens.ChalkInk,
+                    contentColor = IvidsColorTokens.ObsidianStage
                 ),
                 modifier = Modifier.then(if (name.isNotBlank()) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
             ) {
@@ -228,7 +222,6 @@ fun PlaylistPickerDialog(
     onDismiss: () -> Unit
 ) {
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -260,19 +253,20 @@ fun PlaylistPickerDialog(
                                 Text(
                                     text = "${playlist.tracks.size}",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = accent
+                                    color = IvidsColorTokens.SlateMuted
                                 )
                             }
                         }
                     }
                 }
                 Spacer(modifier = Modifier.height(12.dp))
-                OutlinedButton(
+                IvidsTonalPill(
                     onClick = onCreateNew,
-                    border = BorderStroke(1.dp, accent),
-                    modifier = Modifier.fillMaxWidth().pointerHoverIcon(PointerIcon.Hand)
+                    baseColor = IvidsColorTokens.RecessedTrough,
+                    hoverColor = IvidsColorTokens.GlassHover,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text(strings["create_playlist"], color = accent)
+                    Text(strings["create_playlist"], color = IvidsColorTokens.ChalkInk)
                 }
             }
         },
@@ -300,7 +294,6 @@ fun ConfirmationDialog(
     onDismiss: () -> Unit
 ) {
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -311,8 +304,8 @@ fun ConfirmationDialog(
             Button(
                 onClick = onConfirm,
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isDestructive) IvidsColorTokens.DangerCoral else accent,
-                    contentColor = if (isDestructive) IvidsColorTokens.ChalkInk else IvidsColorTokens.OnAccentDark
+                    containerColor = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk,
+                    contentColor = if (isDestructive) IvidsColorTokens.ChalkInk else IvidsColorTokens.ObsidianStage
                 ),
                 modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
             ) {

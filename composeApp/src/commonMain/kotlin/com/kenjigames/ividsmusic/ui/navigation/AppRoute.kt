@@ -44,45 +44,66 @@ enum class RootDestination {
 }
 
 /**
- * Manages the immutable navigation back-stack for IVIDS Music screens without platform-coupled
- * Fragment/NavHost overhead.
+ * Enumerates navigation transition directions so Mobile mode can animate forward pushes from the
+ * right, back pops to the right, and root tab switches with a clean crossfade.
+ */
+enum class NavTransitionType {
+    NONE, PUSH, POP, TAB
+}
+
+/**
+ * Manages the immutable navigation back-stack and [NavTransitionType] for IVIDS Music screens
+ * without platform-coupled Fragment/NavHost overhead.
  */
 @Stable
 class AppNavigator(initialRoute: AppRoute = AppRoute.Home) {
 
     private val _backStack = MutableStateFlow(listOf(initialRoute))
+    private val _transitionType = MutableStateFlow(NavTransitionType.NONE)
 
     /** Observable stack of active routes where the last element is the visible screen. */
     val backStack: StateFlow<List<AppRoute>> = _backStack.asStateFlow()
+
+    /** Observable direction of the most recent navigation event for mobile transitions. */
+    val transitionType: StateFlow<NavTransitionType> = _transitionType.asStateFlow()
 
     /** Returns the currently active top route on the back-stack. */
     val currentRoute: AppRoute
         get() = _backStack.value.lastOrNull() ?: AppRoute.Home
 
     /**
-     * Pushes [route] onto the back-stack, deduplicating consecutive identical routes when [singleTop]
-     * is true so rapid clicks do not create duplicate history frames.
+     * Pushes [route] onto the back-stack as a [NavTransitionType.PUSH], deduplicating consecutive
+     * identical routes when [singleTop] is true.
      */
     fun navigateTo(route: AppRoute, singleTop: Boolean = true) {
+        var pushed = false
         _backStack.update { stack ->
             val current = stack.lastOrNull()
             if (singleTop && current == route) {
                 stack
             } else {
+                pushed = true
                 (stack + route).takeLast(32)
             }
+        }
+        if (pushed) {
+            _transitionType.value = NavTransitionType.PUSH
         }
     }
 
     /**
-     * Switches directly to a primary root tab, collapsing any nested detail stack underneath it.
+     * Switches directly to a primary root tab with [NavTransitionType.TAB], collapsing any nested
+     * detail stack underneath it.
      */
     fun switchRootTab(route: AppRoute) {
+        if (_backStack.value.size == 1 && _backStack.value.firstOrNull() == route) return
+        _transitionType.value = NavTransitionType.TAB
         _backStack.value = listOf(route)
     }
 
     /**
-     * Pops the top route from the back-stack if more than one entry exists; returns true when handled.
+     * Pops the top route from the back-stack with [NavTransitionType.POP] if more than one entry
+     * exists; returns true when handled.
      */
     fun navigateBack(): Boolean {
         var popped = false
@@ -93,6 +114,9 @@ class AppNavigator(initialRoute: AppRoute = AppRoute.Home) {
             } else {
                 stack
             }
+        }
+        if (popped) {
+            _transitionType.value = NavTransitionType.POP
         }
         return popped
     }

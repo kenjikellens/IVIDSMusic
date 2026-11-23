@@ -1,6 +1,5 @@
 package com.kenjigames.ividsmusic.ui.screens.recommended
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -137,7 +136,7 @@ fun RecommendedScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Icon(Icons.Rounded.AutoAwesome, null, tint = accent, modifier = Modifier.size(46.dp))
+                            Icon(Icons.Rounded.AutoAwesome, null, tint = IvidsColorTokens.ChalkInk, modifier = Modifier.size(46.dp))
                             Text(strings["foryou_empty_title"], style = MaterialTheme.typography.titleLarge, color = IvidsColorTokens.ChalkInk)
                             Text(strings["foryou_empty_desc"], style = MaterialTheme.typography.bodyMedium, color = IvidsColorTokens.SlateMuted)
                             Spacer(modifier = Modifier.height(4.dp))
@@ -145,8 +144,8 @@ fun RecommendedScreen(
                                 onClick = onExploreMusic,
                                 shape = CircleShape,
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = accent,
-                                    contentColor = IvidsColorTokens.OnAccentDark
+                                    containerColor = IvidsColorTokens.ChalkInk,
+                                    contentColor = IvidsColorTokens.ObsidianStage
                                 )
                             ) {
                                 Text(strings["explore_music"])

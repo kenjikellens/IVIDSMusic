@@ -1,6 +1,5 @@
 package com.kenjigames.ividsmusic.ui.screens.artist
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -76,7 +75,6 @@ fun ArtistDetailScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
-    val accent = LocalDynamicAccent.current
     val playlistModal = rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
 
     FramedScreenContainer(
@@ -156,21 +154,19 @@ fun ArtistDetailScreen(
                                 }
                                 IvidsTonalPill(
                                     onClick = viewModel::likeArtist,
-                                    baseColor = if (state.isLikedArtist) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
-                                    hoverColor = if (state.isLikedArtist) accent.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover,
-                                    baseBorderColor = if (state.isLikedArtist) accent else IvidsColorTokens.HairlineSubtle,
-                                    hoverBorderColor = if (state.isLikedArtist) accent else IvidsColorTokens.HoverBorder
+                                    baseColor = if (state.isLikedArtist) IvidsColorTokens.DangerCoral.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
+                                    hoverColor = if (state.isLikedArtist) IvidsColorTokens.DangerCoral.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover
                                 ) {
                                     Icon(
                                         imageVector = if (state.isLikedArtist) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
                                         contentDescription = null,
-                                        tint = if (state.isLikedArtist) accent else IvidsColorTokens.ChalkInk,
+                                        tint = if (state.isLikedArtist) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk,
                                         modifier = Modifier.size(16.dp)
                                     )
                                     Text(
                                         text = strings["like"],
                                         style = MaterialTheme.typography.labelLarge,
-                                        color = if (state.isLikedArtist) accent else IvidsColorTokens.ChalkInk,
+                                        color = if (state.isLikedArtist) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk,
                                         maxLines = 1,
                                         softWrap = false
                                     )

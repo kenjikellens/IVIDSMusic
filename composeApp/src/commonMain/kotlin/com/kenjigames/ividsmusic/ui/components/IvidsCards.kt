@@ -11,7 +11,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -75,8 +74,8 @@ import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Renders a tonal artwork card for tracks, albums, or circular artist portraits using
- * [LocalLayoutMetrics] width, hover border/surface illumination, and touch/hover Play FAB visibility.
+ * Renders a flat YouTube/Spotify artwork tile directly on the dark stage with optional hover lift
+ * on Desktop and responsive circular/rounded cover framing plus a Play FAB.
  */
 @Composable
 fun MusicCard(
@@ -90,40 +89,15 @@ fun MusicCard(
     onPlayClick: (() -> Unit)? = null,
     width: Dp = LocalLayoutMetrics.current.cardWidth
 ) {
-    val accent = LocalDynamicAccent.current
     val isTvMode = LocalIsTvMode.current
     val metrics = LocalLayoutMetrics.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    var cardTint by remember(artworkUrl) { mutableStateOf<Color?>(null) }
-    LaunchedEffect(artworkUrl) {
-        cardTint = if (!artworkUrl.isNullOrBlank()) {
-            ColorExtractor.extractCardTintColor(artworkUrl)
-        } else {
-            null
-        }
-    }
-
-    val targetCardSurface = remember(cardTint, isHovered) {
-        val base = if (isHovered) IvidsColorTokens.GlassHover else IvidsColorTokens.GlassSurface
-        val tint = cardTint
-        if (tint != null) {
-            lerp(base, tint, if (isHovered) 0.30f else 0.16f)
-        } else {
-            base
-        }
-    }
-
     val surfaceColor by animateColorAsState(
-        targetValue = targetCardSurface,
+        targetValue = if (isHovered && !metrics.isCompactMobile) Color(0xFF181818) else Color.Transparent,
         animationSpec = tween(160, easing = FastOutSlowInEasing),
         label = "MusicCardSurface"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = if (isHovered) IvidsColorTokens.HoverBorder else Color.Transparent,
-        animationSpec = tween(160, easing = FastOutSlowInEasing),
-        label = "MusicCardBorder"
     )
     val playFabAlpha by animateFloatAsState(
         targetValue = when {
@@ -136,23 +110,23 @@ fun MusicCard(
     )
 
     Surface(
+        onClick = onClick,
+        interactionSource = interactionSource,
         modifier = modifier
             .width(width)
+            .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.965f)
             .pointerHoverIcon(PointerIcon.Hand)
-            .tvFocusable(shape = RoundedCornerShape(16.dp))
-            .hoverable(interactionSource)
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        color = surfaceColor,
-        border = if (borderColor != Color.Transparent) BorderStroke(1.dp, borderColor) else null
+            .tvFocusable(shape = RoundedCornerShape(14.dp)),
+        shape = RoundedCornerShape(14.dp),
+        color = surfaceColor
     ) {
-        Column(modifier = Modifier.padding(12.dp)) {
+        Column(modifier = Modifier.padding(if (metrics.isCompactMobile) 4.dp else 8.dp)) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .aspectRatio(1f)
-                    .clip(if (isCircular) CircleShape else RoundedCornerShape(12.dp))
-                    .background(IvidsColorTokens.RecessedTrough),
+                    .clip(if (isCircular) CircleShape else RoundedCornerShape(10.dp))
+                    .background(IvidsColorTokens.GlassSurface),
                 contentAlignment = Alignment.Center
             ) {
                 if (!artworkUrl.isNullOrBlank()) {
@@ -192,7 +166,7 @@ fun MusicCard(
                     Surface(
                         onClick = onPlayClick,
                         shape = CircleShape,
-                        color = accent,
+                        color = IvidsColorTokens.ChalkInk,
                         shadowElevation = 8.dp,
                         modifier = Modifier
                             .align(Alignment.BottomEnd)
@@ -205,7 +179,7 @@ fun MusicCard(
                             Icon(
                                 imageVector = Icons.Rounded.PlayArrow,
                                 contentDescription = "Play $title",
-                                tint = IvidsColorTokens.OnAccentDark,
+                                tint = IvidsColorTokens.ObsidianStage,
                                 modifier = Modifier.size(24.dp)
                             )
                         }
@@ -339,10 +313,10 @@ fun LivingAlbumHero(
                                 vertical = if (isCompactMobile) 10.dp else 12.dp
                             ),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = accent,
-                                contentColor = IvidsColorTokens.OnAccentDark,
-                                disabledContainerColor = accent.copy(alpha = 0.32f),
-                                disabledContentColor = IvidsColorTokens.OnAccentDark.copy(alpha = 0.6f)
+                                containerColor = IvidsColorTokens.ChalkInk,
+                                contentColor = IvidsColorTokens.ObsidianStage,
+                                disabledContainerColor = IvidsColorTokens.ChalkInk.copy(alpha = 0.28f),
+                                disabledContentColor = IvidsColorTokens.ObsidianStage.copy(alpha = 0.6f)
                             ),
                             modifier = Modifier
                                 .then(if (primaryEnabled) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
@@ -491,42 +465,42 @@ fun ShimmerSkeletonRow(
 
     val cardWidth = LocalLayoutMetrics.current.cardWidth
 
+    val isCompactMobile = LocalLayoutMetrics.current.isCompactMobile
+
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 2.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(itemCount) {
-            Surface(
-                modifier = Modifier.width(cardWidth),
-                shape = RoundedCornerShape(16.dp),
-                color = IvidsColorTokens.GlassSurface.copy(alpha = alpha)
+            Column(
+                modifier = Modifier
+                    .width(cardWidth)
+                    .padding(if (isCompactMobile) 4.dp else 8.dp)
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                            .clip(if (isCircular) CircleShape else RoundedCornerShape(12.dp))
-                            .background(IvidsColorTokens.RecessedTrough.copy(alpha = alpha + 0.15f))
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.78f)
-                            .height(15.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(IvidsColorTokens.GlassHover.copy(alpha = alpha))
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth(0.48f)
-                            .height(12.dp)
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(IvidsColorTokens.GlassHover.copy(alpha = alpha * 0.7f))
-                    )
-                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f)
+                        .clip(if (isCircular) CircleShape else RoundedCornerShape(10.dp))
+                        .background(IvidsColorTokens.GlassSurface.copy(alpha = alpha + 0.15f))
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.78f)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(IvidsColorTokens.RecessedTrough.copy(alpha = alpha))
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.48f)
+                        .height(12.dp)
+                        .clip(RoundedCornerShape(6.dp))
+                        .background(IvidsColorTokens.RecessedTrough.copy(alpha = alpha * 0.7f))
+                )
             }
         }
     }

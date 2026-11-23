@@ -15,7 +15,7 @@ expect object ColorExtractor {
      */
     suspend fun extractDominantColor(
         imageUrl: String?,
-        fallback: Color = IvidsColorTokens.PrimaryCyan
+        fallback: Color = IvidsColorTokens.ChalkInk
     ): Color
 
     /**

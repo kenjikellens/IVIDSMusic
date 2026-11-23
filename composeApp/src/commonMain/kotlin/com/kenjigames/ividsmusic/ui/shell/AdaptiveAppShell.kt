@@ -1,6 +1,8 @@
 package com.kenjigames.ividsmusic.ui.shell
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
@@ -13,7 +15,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -129,9 +131,11 @@ import com.kenjigames.ividsmusic.resources.ic_ivids_brand
 import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
+import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.navigation.AppNavigator
 import com.kenjigames.ividsmusic.ui.navigation.AppRoute
+import com.kenjigames.ividsmusic.ui.navigation.NavTransitionType
 import com.kenjigames.ividsmusic.ui.player.NowPlayingSheet
 import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
@@ -248,6 +252,7 @@ fun AdaptiveAppShell(
     }
     var desktopQueueOpen by remember { mutableStateOf(false) }
     val layoutMetrics = remember(shellMode) { resolveLayoutMetrics(shellMode) }
+    val transitionType by navigator.transitionType.collectAsState()
 
     CompositionLocalProvider(LocalLayoutMetrics provides layoutMetrics) {
         Box(modifier = modifier.fillMaxSize().background(IvidsColorTokens.ObsidianStage)) {
@@ -262,8 +267,35 @@ fun AdaptiveAppShell(
                             onOpenDownloader = { navigator.navigateTo(AppRoute.Downloader) },
                             onOpenSettings = { navigator.navigateTo(AppRoute.Settings) }
                         )
-                        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                            content(currentRoute, shellMode)
+                        Box(modifier = Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
+                            AnimatedContent(
+                                targetState = currentRoute,
+                                contentKey = { it },
+                                transitionSpec = {
+                                    when (transitionType) {
+                                        NavTransitionType.PUSH -> (
+                                            slideInHorizontally(tween(260, easing = FastOutSlowInEasing)) { it } +
+                                                fadeIn(tween(220))
+                                            ) togetherWith (
+                                            slideOutHorizontally(tween(260, easing = FastOutSlowInEasing)) { -it / 4 } +
+                                                fadeOut(tween(180))
+                                            )
+                                        NavTransitionType.POP -> (
+                                            slideInHorizontally(tween(240, easing = FastOutSlowInEasing)) { -it / 4 } +
+                                                fadeIn(tween(200))
+                                            ) togetherWith (
+                                            slideOutHorizontally(tween(240, easing = FastOutSlowInEasing)) { it } +
+                                                fadeOut(tween(180))
+                                            )
+                                        NavTransitionType.TAB, NavTransitionType.NONE ->
+                                            fadeIn(tween(160)) togetherWith fadeOut(tween(120))
+                                    }.using(SizeTransform(clip = false))
+                                },
+                                label = "MobileRouteTransition",
+                                modifier = Modifier.fillMaxSize()
+                            ) { animatedRoute ->
+                                content(animatedRoute, shellMode)
+                            }
                             MiniPlayerHost(
                                 playerViewModel = playerViewModel,
                                 onExpand = { setNowPlayingExpanded(true) },
@@ -517,7 +549,7 @@ private fun MobileTopHeader(
                         Icon(
                             imageVector = Icons.Rounded.Download,
                             contentDescription = strings["nav_downloader"],
-                            tint = if (currentRoute is AppRoute.Downloader) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
+                            tint = if (currentRoute is AppRoute.Downloader) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
                         )
                     }
                     if (activeDownloadCount > 0) {
@@ -526,14 +558,14 @@ private fun MobileTopHeader(
                                 .padding(top = 6.dp, end = 6.dp)
                                 .size(16.dp)
                                 .clip(CircleShape)
-                                .background(IvidsColorTokens.PrimaryCyan),
+                                .background(IvidsColorTokens.ChalkInk),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = activeDownloadCount.coerceAtMost(9).toString(),
                                 fontSize = 9.sp,
                                 fontWeight = FontWeight.Bold,
-                                color = IvidsColorTokens.OnAccentDark
+                                color = IvidsColorTokens.ObsidianStage
                             )
                         }
                     }
@@ -542,7 +574,7 @@ private fun MobileTopHeader(
                     Icon(
                         imageVector = Icons.Rounded.Settings,
                         contentDescription = strings["settings"],
-                        tint = if (currentRoute is AppRoute.Settings) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
+                        tint = if (currentRoute is AppRoute.Settings) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
                     )
                 }
             }
@@ -588,19 +620,23 @@ private fun MobileBottomBar(
                 items.forEach { entry ->
                     val selected = entry.matcher(currentRoute)
                     val indicatorColor by animateColorAsState(
-                        targetValue = if (selected) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f) else Color.Transparent,
+                        targetValue = if (selected) Color(0x1EFFFFFF) else Color.Transparent,
                         animationSpec = tween(150, easing = FastOutSlowInEasing),
                         label = "BottomNavIndicator"
                     )
-                    val iconTint = if (selected) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
+                    val tabInteraction = remember { MutableInteractionSource() }
+                    val iconTint = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
                     val labelColor = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
 
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
+                            .ividsTouchFeedback(interactionSource = tabInteraction, pressedScale = 0.92f)
                             .clip(RoundedCornerShape(14.dp))
-                            .clickable { onSelectRoute(entry.route) }
+                            .clickable(interactionSource = tabInteraction, indication = null) {
+                                onSelectRoute(entry.route)
+                            }
                             .padding(horizontal = 2.dp, vertical = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
@@ -723,7 +759,7 @@ private fun MiniPlayerBar(
         Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))) {
             BlurredArtworkBackdrop(
                 artworkUrl = track.coverUrl,
-                tintColor = accent,
+                tintColor = null,
                 scrimAlpha = 0.74f,
                 blurRadius = 32.dp,
                 fallbackColor = IvidsColorTokens.GlassSurface,
@@ -788,7 +824,7 @@ private fun MiniPlayerBar(
                                     Icons.Rounded.FavoriteBorder
                                 },
                                 contentDescription = strings["like"],
-                                tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted,
+                                tint = if (playerState.isCurrentLiked) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted,
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -796,13 +832,13 @@ private fun MiniPlayerBar(
                     Surface(
                         onClick = onTogglePlayPause,
                         shape = CircleShape,
-                        color = accent,
+                        color = IvidsColorTokens.ChalkInk,
                         modifier = Modifier.size(44.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             if (playerState.isBuffering) {
                                 CircularProgressIndicator(
-                                    color = IvidsColorTokens.OnAccentDark,
+                                    color = IvidsColorTokens.ObsidianStage,
                                     strokeWidth = 2.dp,
                                     modifier = Modifier.size(18.dp)
                                 )
@@ -814,7 +850,7 @@ private fun MiniPlayerBar(
                                         Icons.Rounded.PlayArrow
                                     },
                                     contentDescription = strings["play"],
-                                    tint = IvidsColorTokens.OnAccentDark
+                                    tint = IvidsColorTokens.ObsidianStage
                                 )
                             }
                         }
@@ -822,7 +858,7 @@ private fun MiniPlayerBar(
                 }
                 LinearProgressIndicator(
                     progress = { progress },
-                    color = accent,
+                    color = IvidsColorTokens.ChalkInk,
                     trackColor = IvidsColorTokens.RecessedTrough.copy(alpha = 0.6f),
                     modifier = Modifier.fillMaxWidth().height(2.5.dp)
                 )
@@ -946,8 +982,8 @@ private fun SidebarNavButton(
 
     val bgColor by animateColorAsState(
         targetValue = when {
-            selected -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.14f)
-            isHovered -> Color(0xFF1F1F26)
+            selected -> Color(0x1EFFFFFF)
+            isHovered -> Color(0xFF1E1E1E)
             else -> Color.Transparent
         },
         animationSpec = tween(150, easing = FastOutSlowInEasing),
@@ -955,7 +991,7 @@ private fun SidebarNavButton(
     )
     val iconColor by animateColorAsState(
         targetValue = when {
-            selected -> IvidsColorTokens.PrimaryCyan
+            selected -> IvidsColorTokens.ChalkInk
             isHovered -> IvidsColorTokens.ChalkInk
             else -> IvidsColorTokens.SlateMuted
         },
@@ -1010,7 +1046,7 @@ private fun SidebarNavButton(
                         modifier = Modifier
                             .size(5.dp)
                             .clip(CircleShape)
-                            .background(IvidsColorTokens.PrimaryCyan)
+                            .background(IvidsColorTokens.ChalkInk)
                     )
                 }
             }
@@ -1116,7 +1152,7 @@ private fun DesktopTopBar(
                             onValueChange = { query = it },
                             singleLine = true,
                             textStyle = MaterialTheme.typography.bodyMedium.copy(color = IvidsColorTokens.ChalkInk),
-                            cursorBrush = SolidColor(IvidsColorTokens.PrimaryCyan),
+                            cursorBrush = SolidColor(IvidsColorTokens.ChalkInk),
                             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                             keyboardActions = KeyboardActions(onSearch = {
                                 if (query.isNotBlank()) onSearchSubmit(query.trim())
@@ -1349,7 +1385,7 @@ private fun DesktopPlayerDeck(
                         Icon(
                             imageVector = Icons.Rounded.Shuffle,
                             contentDescription = strings["shuffle"],
-                            tint = if (playerState.isShuffleEnabled) accent else IvidsColorTokens.SlateMuted,
+                            tint = if (playerState.isShuffleEnabled) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1362,7 +1398,7 @@ private fun DesktopPlayerDeck(
                     Surface(
                         onClick = playerViewModel::togglePlayPause,
                         shape = CircleShape,
-                        color = accent,
+                        color = IvidsColorTokens.ChalkInk,
                         shadowElevation = 6.dp,
                         modifier = Modifier
                             .size(40.dp)
@@ -1372,7 +1408,7 @@ private fun DesktopPlayerDeck(
                         Box(contentAlignment = Alignment.Center) {
                             if (playerState.isBuffering) {
                                 CircularProgressIndicator(
-                                    color = IvidsColorTokens.OnAccentDark,
+                                    color = IvidsColorTokens.ObsidianStage,
                                     strokeWidth = 2.dp,
                                     modifier = Modifier.size(19.dp)
                                 )
@@ -1384,7 +1420,7 @@ private fun DesktopPlayerDeck(
                                         Icons.Rounded.PlayArrow
                                     },
                                     contentDescription = strings["play"],
-                                    tint = IvidsColorTokens.OnAccentDark,
+                                    tint = IvidsColorTokens.ObsidianStage,
                                     modifier = Modifier.size(22.dp)
                                 )
                             }
@@ -1407,7 +1443,7 @@ private fun DesktopPlayerDeck(
                                 Icons.Rounded.Repeat
                             },
                             contentDescription = "Repeat",
-                            tint = if (playerState.repeatMode != RepeatMode.OFF) accent else IvidsColorTokens.SlateMuted,
+                            tint = if (playerState.repeatMode != RepeatMode.OFF) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                             modifier = Modifier.size(18.dp)
                         )
                     }
@@ -1481,7 +1517,7 @@ private fun DesktopPlayerDeck(
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.QueueMusic,
                         contentDescription = strings["queue"],
-                        tint = if (queueOpen) accent else IvidsColorTokens.SlateMuted,
+                        tint = if (queueOpen) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                         modifier = Modifier.size(20.dp)
                     )
                 }

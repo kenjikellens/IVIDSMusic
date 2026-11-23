@@ -88,12 +88,7 @@ fun IvidsApp(
     val playerViewModel = remember { koin.get<PlayerViewModel>() }
 
     val homeViewModel = remember { koin.get<HomeViewModel>() }
-    val searchViewModel = remember { koin.get<SearchViewModel>() }
-    val libraryViewModel = remember { koin.get<LibraryViewModel>() }
-    val downloaderViewModel = remember { koin.get<DownloaderViewModel>() }
-    val profileViewModel = remember { koin.get<ProfileViewModel>() }
-    val recommendedViewModel = remember { koin.get<RecommendedViewModel>() }
-    val settingsViewModel = remember { koin.get<SettingsViewModel>() }
+    val searchViewModel by remember { lazy { koin.get<SearchViewModel>() } }
 
     val preferences by preferencesRepository.preferences.collectAsState(initial = UserPreferences())
     val strings by localizationManager.strings.collectAsState()
@@ -101,12 +96,14 @@ fun IvidsApp(
     val playlists by libraryRepository.observePlaylists().collectAsState(initial = emptyList())
     val likedTracks by libraryRepository.observeLikedTracks().collectAsState(initial = emptyList())
     val downloadedTracks by libraryRepository.observeDownloadedTracks().collectAsState(initial = emptyList())
-    val activeDownloadCount by remember(downloaderViewModel) {
-        downloaderViewModel.uiState.map { it.activeDownloads.size }.distinctUntilChanged()
+    val activeDownloadCount by remember(offlineDownloadManager) {
+        offlineDownloadManager.downloads.map { list ->
+            list.count { it.state is com.kenjigames.ividsmusic.domain.model.DownloadState.Downloading || it.state is com.kenjigames.ividsmusic.domain.model.DownloadState.Queued }
+        }.distinctUntilChanged()
     }.collectAsState(initial = 0)
     val dynamicAccent by remember(playerViewModel) {
         playerViewModel.uiState.map { it.dynamicAccent }.distinctUntilChanged()
-    }.collectAsState(initial = IvidsColorTokens.PrimaryCyan)
+    }.collectAsState(initial = IvidsColorTokens.ChalkInk)
     // Isolate screen-relevant track flags from 250ms positionMs updates to prevent root recomposition storms.
     val playerState by remember(playerViewModel) {
         playerViewModel.uiState.map {
@@ -296,7 +293,7 @@ fun IvidsApp(
                             }
 
                             is AppRoute.Library -> LibraryScreen(
-                                viewModel = libraryViewModel,
+                                viewModel = remember { koin.get<LibraryViewModel>() },
                                 playerState = playerState,
                                 playerViewModel = playerViewModel,
                                 likedIds = likedIds,
@@ -331,7 +328,7 @@ fun IvidsApp(
                             }
 
                             is AppRoute.Downloader -> DownloaderScreen(
-                                viewModel = downloaderViewModel,
+                                viewModel = remember { koin.get<DownloaderViewModel>() },
                                 playerState = playerState,
                                 playerViewModel = playerViewModel,
                                 playlists = playlists,
@@ -344,7 +341,7 @@ fun IvidsApp(
                             )
 
                             is AppRoute.Profile -> ProfileScreen(
-                                viewModel = profileViewModel,
+                                viewModel = remember { koin.get<ProfileViewModel>() },
                                 playerViewModel = playerViewModel,
                                 onOpenSongDetail = { id -> navigator.navigateTo(AppRoute.SongDetail(id)) },
                                 onOpenSettings = { navigator.navigateTo(AppRoute.Settings) },
@@ -356,7 +353,7 @@ fun IvidsApp(
                             )
 
                             is AppRoute.Recommended -> RecommendedScreen(
-                                viewModel = recommendedViewModel,
+                                viewModel = remember { koin.get<RecommendedViewModel>() },
                                 playerViewModel = playerViewModel,
                                 onOpenSongDetail = { id -> navigator.navigateTo(AppRoute.SongDetail(id)) },
                                 onOpenArtist = { id, name -> navigator.navigateTo(AppRoute.ArtistDetail(id, name)) },
@@ -367,7 +364,7 @@ fun IvidsApp(
                                 onExploreMusic = { navigator.switchRootTab(AppRoute.Home) }
                             )
 
-                            is AppRoute.Settings -> SettingsScreen(viewModel = settingsViewModel)
+                            is AppRoute.Settings -> SettingsScreen(viewModel = remember { koin.get<SettingsViewModel>() })
                         }
                     }
 
