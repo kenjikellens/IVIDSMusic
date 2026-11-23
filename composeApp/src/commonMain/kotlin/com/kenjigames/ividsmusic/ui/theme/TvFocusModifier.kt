@@ -32,19 +32,16 @@ fun Modifier.tvFocusable(
     onFocused: (() -> Unit)? = null
 ): Modifier = composed {
     val isTv = LocalIsTvMode.current
-    val accent = LocalDynamicAccent.current
+    if (!isTv || !enabled) return@composed this
+
     var isFocused by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
-        targetValue = if (isFocused && isTv) scaleOnFocus else 1f,
+        targetValue = if (isFocused) scaleOnFocus else 1f,
         animationSpec = tween(durationMillis = 150),
         label = "TvFocusScale"
     )
-    val borderColor = when {
-        isFocused && isTv -> IvidsColorTokens.PrimaryCyan
-        isFocused -> accent.copy(alpha = 0.85f)
-        else -> Color.Transparent
-    }
+    val borderColor = if (isFocused) IvidsColorTokens.PrimaryCyan else Color.Transparent
 
     this
         .graphicsLayer {
@@ -52,7 +49,7 @@ fun Modifier.tvFocusable(
             scaleY = scale
         }
         .then(
-            if (isFocused && isTv) {
+            if (isFocused) {
                 Modifier.shadow(
                     elevation = 14.dp,
                     shape = shape,
@@ -70,5 +67,5 @@ fun Modifier.tvFocusable(
                 onFocused?.invoke()
             }
         }
-        .focusable(enabled = enabled)
+        .focusable(enabled = true)
 }

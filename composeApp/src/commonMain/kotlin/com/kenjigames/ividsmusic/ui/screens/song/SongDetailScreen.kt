@@ -180,8 +180,7 @@ fun SongDetailScreen(
                                 track.genres.forEach { genre ->
                                     Surface(
                                         shape = CircleShape,
-                                        color = IvidsColorTokens.GlassSurface,
-                                        border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle)
+                                        color = IvidsColorTokens.GlassSurface
                                     ) {
                                         Text(
                                             text = genre,
