@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -78,14 +79,16 @@ import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /** Visual tile descriptor for a browse genre card shown when the Search query is empty. */
 private data class BrowseCategoryTile(val label: String, val query: String, val tint: Color)
 
 /**
- * Renders the Search & Discovery screen featuring instant browse genre tiles, recessed category
- * segmented controls (All/Songs/Artists/Albums), release-year filter, and paginated results.
+ * Renders the Search & Discovery screen featuring an adaptive 2-column mobile / wrapped desktop
+ * browse genre grid, clear hover borders, segmented filters, release-year range, and results.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -107,6 +110,7 @@ fun SearchScreen(
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
+    val metrics = LocalLayoutMetrics.current
     var showYearPanel by remember { mutableStateOf(false) }
     val playlistModal = rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
 
@@ -135,8 +139,8 @@ fun SearchScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
-            verticalArrangement = Arrangement.spacedBy(22.dp)
+            contentPadding = ividsScreenPadding(top = 22.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item(key = "search_bar") {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -147,15 +151,21 @@ fun SearchScreen(
                         leadingIcon = { Icon(Icons.Rounded.Search, null, tint = IvidsColorTokens.SlateMuted) },
                         trailingIcon = {
                             Row {
-                                IconButton(onClick = { showYearPanel = !showYearPanel }) {
+                                IconButton(
+                                    onClick = { showYearPanel = !showYearPanel },
+                                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                ) {
                                     Icon(
                                         imageVector = Icons.Rounded.CalendarMonth,
                                         contentDescription = strings["year_filter"],
-                                        tint = if (state.yearFilterEnabled) accent else IvidsColorTokens.SlateMuted
+                                        tint = if (state.yearFilterEnabled || showYearPanel) accent else IvidsColorTokens.SlateMuted
                                     )
                                 }
                                 if (state.query.isNotEmpty()) {
-                                    IconButton(onClick = { viewModel.onQueryChanged("") }) {
+                                    IconButton(
+                                        onClick = { viewModel.onQueryChanged("") },
+                                        modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                                    ) {
                                         Icon(Icons.Rounded.Close, strings["close"], tint = IvidsColorTokens.SlateMuted)
                                     }
                                 }
@@ -244,45 +254,78 @@ fun SearchScreen(
                     )
                 }
                 item(key = "browse_categories") {
-                    FlowRow(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(14.dp),
-                        verticalArrangement = Arrangement.spacedBy(14.dp)
-                    ) {
-                        browseCategories.forEach { cat ->
-                            val tileHoverSource = remember { MutableInteractionSource() }
-                            val tileHovered by tileHoverSource.collectIsHoveredAsState()
-                            Surface(
+                    @Composable
+                    fun GenreCategoryCard(cat: BrowseCategoryTile, cardModifier: Modifier) {
+                        val tileHoverSource = remember { MutableInteractionSource() }
+                        val tileHovered by tileHoverSource.collectIsHoveredAsState()
+                        val borderColor by animateColorAsState(
+                            targetValue = if (tileHovered) IvidsColorTokens.HoverBorder else IvidsColorTokens.HairlineSubtle,
+                            animationSpec = tween(140, easing = FastOutSlowInEasing),
+                            label = "BrowseTileBorder"
+                        )
+                        Surface(
+                            onClick = { viewModel.submitQuery(cat.query) },
+                            interactionSource = tileHoverSource,
+                            shape = RoundedCornerShape(18.dp),
+                            color = IvidsColorTokens.GlassSurface,
+                            border = BorderStroke(1.dp, borderColor),
+                            modifier = cardModifier
+                                .pointerHoverIcon(PointerIcon.Hand)
+                                .tvFocusable(shape = RoundedCornerShape(18.dp))
+                        ) {
+                            Box(
                                 modifier = Modifier
-                                    .width(184.dp)
-                                    .height(98.dp)
-                                    .pointerHoverIcon(PointerIcon.Hand)
-                                    .hoverable(tileHoverSource)
-                                    .tvFocusable(shape = RoundedCornerShape(18.dp))
-                                    .clickable { viewModel.submitQuery(cat.query) },
-                                shape = RoundedCornerShape(18.dp),
-                                color = IvidsColorTokens.GlassSurface
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .background(
-                                            Brush.linearGradient(
-                                                listOf(
-                                                    cat.tint.copy(alpha = if (tileHovered) 0.92f else 0.74f),
-                                                    IvidsColorTokens.GlassSurface
-                                                )
+                                    .fillMaxSize()
+                                    .background(
+                                        Brush.linearGradient(
+                                            listOf(
+                                                cat.tint.copy(alpha = if (tileHovered) 0.96f else 0.76f),
+                                                IvidsColorTokens.GlassSurface
                                             )
                                         )
-                                        .padding(18.dp),
-                                    contentAlignment = Alignment.BottomStart
-                                ) {
-                                    Text(
-                                        text = cat.label,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        color = IvidsColorTokens.ChalkInk
                                     )
+                                    .padding(if (metrics.isCompactMobile) 14.dp else 18.dp),
+                                contentAlignment = Alignment.BottomStart
+                            ) {
+                                Text(
+                                    text = cat.label,
+                                    style = if (metrics.isCompactMobile) MaterialTheme.typography.titleMedium else MaterialTheme.typography.titleLarge,
+                                    color = IvidsColorTokens.ChalkInk
+                                )
+                            }
+                        }
+                    }
+
+                    if (metrics.isCompactMobile) {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            browseCategories.chunked(2).forEach { pair ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    pair.forEach { cat ->
+                                        GenreCategoryCard(
+                                            cat = cat,
+                                            cardModifier = Modifier.weight(1f).height(88.dp)
+                                        )
+                                    }
+                                    if (pair.size == 1) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
                                 }
+                            }
+                        }
+                    } else {
+                        FlowRow(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(14.dp)
+                        ) {
+                            browseCategories.forEach { cat ->
+                                GenreCategoryCard(
+                                    cat = cat,
+                                    cardModifier = Modifier.width(184.dp).height(98.dp)
+                                )
                             }
                         }
                     }

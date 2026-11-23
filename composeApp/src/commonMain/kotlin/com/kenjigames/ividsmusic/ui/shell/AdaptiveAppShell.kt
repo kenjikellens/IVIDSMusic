@@ -3,6 +3,9 @@ package com.kenjigames.ividsmusic.ui.shell
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -14,6 +17,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
@@ -28,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -81,6 +87,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -100,13 +107,19 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import kotlin.math.roundToInt
 import com.kenjigames.ividsmusic.domain.model.LayoutMode
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.model.RepeatMode
@@ -122,10 +135,54 @@ import com.kenjigames.ividsmusic.ui.player.NowPlayingSheet
 import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
+import com.kenjigames.ividsmusic.ui.theme.IvidsLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 import org.jetbrains.compose.resources.painterResource
+
+/** Outcome of evaluating a horizontal drag gesture on MiniPlayerBar or cover artwork. */
+internal enum class HorizontalSwipeAction { NONE, SKIP_NEXT, SKIP_PREVIOUS }
+
+/**
+ * Resolves the responsive [IvidsLayoutMetrics] for [shellMode], preserving Desktop/TV geometry
+ * while tightening paddings, card widths, and touch affordances on compact phones.
+ */
+internal fun resolveLayoutMetrics(shellMode: ShellMode): IvidsLayoutMetrics =
+    if (shellMode == ShellMode.MOBILE) {
+        IvidsLayoutMetrics(
+            isCompactMobile = true,
+            screenHorizontalPadding = 16.dp,
+            contentBottomClearance = 136.dp,
+            cardWidth = 148.dp,
+            showTouchPlayFab = true
+        )
+    } else {
+        IvidsLayoutMetrics()
+    }
+
+/**
+ * Evaluates whether a horizontal drag distance [offsetDp] exceeds [thresholdDp] toward an available
+ * next or previous track target.
+ */
+internal fun resolveHorizontalSwipeAction(
+    offsetDp: Float,
+    thresholdDp: Float,
+    canSkipPrevious: Boolean,
+    canSkipNext: Boolean
+): HorizontalSwipeAction = when {
+    offsetDp <= -thresholdDp && canSkipNext -> HorizontalSwipeAction.SKIP_NEXT
+    offsetDp >= thresholdDp && canSkipPrevious -> HorizontalSwipeAction.SKIP_PREVIOUS
+    else -> HorizontalSwipeAction.NONE
+}
+
+/**
+ * Returns true when a downward vertical swipe distance [offsetDp] meets the [thresholdDp] to
+ * dismiss the expanded Now Playing sheet.
+ */
+internal fun shouldDismissVerticalSwipe(offsetDp: Float, thresholdDp: Float = 110f): Boolean =
+    offsetDp >= thresholdDp
 
 /**
  * Adaptive form-factor shell modes governing navigation chrome, player dock, and D-pad rings.
@@ -161,8 +218,8 @@ private data class NavEntry(
 )
 
 /**
- * Adaptive root layout container rendering the pure neutral dark IVIDS Desktop AbyssRail +
- * compact Search Pill + artwork-blurred PlayerDeck, Mobile BottomBar + floating MiniPlayerBar, or TV drawer.
+ * Adaptive root layout container providing [LocalLayoutMetrics] and rendering Desktop AbyssRail +
+ * PlayerDeck, Mobile BottomBar + swipeable MiniPlayerBar, or TV navigation drawer.
  */
 @Composable
 fun AdaptiveAppShell(
@@ -177,144 +234,159 @@ fun AdaptiveAppShell(
     onHeaderSearchSubmit: (String) -> Unit,
     onCreatePlaylist: () -> Unit,
     modifier: Modifier = Modifier,
+    activeDownloadCount: Int = 0,
+    nowPlayingExpanded: Boolean? = null,
+    onNowPlayingExpandedChange: ((Boolean) -> Unit)? = null,
     content: @Composable (AppRoute, ShellMode) -> Unit
 ) {
-    var nowPlayingExpanded by remember { mutableStateOf(false) }
+    var internalNowPlayingExpanded by remember { mutableStateOf(false) }
+    val isNowPlayingExpanded = nowPlayingExpanded ?: internalNowPlayingExpanded
+    val setNowPlayingExpanded: (Boolean) -> Unit = { expanded ->
+        internalNowPlayingExpanded = expanded
+        onNowPlayingExpandedChange?.invoke(expanded)
+    }
     var desktopQueueOpen by remember { mutableStateOf(false) }
+    val layoutMetrics = remember(shellMode) { resolveLayoutMetrics(shellMode) }
 
-    Box(modifier = modifier.fillMaxSize().background(IvidsColorTokens.ObsidianStage)) {
-        when (shellMode) {
-            ShellMode.MOBILE -> {
-                Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-                    MobileTopHeader(
-                        currentRoute = currentRoute,
-                        canNavigateBack = canNavigateBack,
-                        onBack = { navigator.navigateBack() },
-                        onOpenDownloader = { navigator.navigateTo(AppRoute.Downloader) },
-                        onOpenSettings = { navigator.navigateTo(AppRoute.Settings) }
-                    )
-                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                        content(currentRoute, shellMode)
-                        if (playerState.currentTrack != null) {
-                            MiniPlayerBar(
-                                playerState = playerState,
-                                onExpand = { nowPlayingExpanded = true },
-                                onTogglePlayPause = playerViewModel::togglePlayPause,
-                                onToggleLike = playerViewModel::toggleLikeCurrent,
-                                onRetry = playerViewModel::retryCurrent,
-                                modifier = Modifier
-                                    .align(Alignment.BottomCenter)
-                                    .padding(horizontal = 12.dp, vertical = 10.dp)
-                            )
+    CompositionLocalProvider(LocalLayoutMetrics provides layoutMetrics) {
+        Box(modifier = modifier.fillMaxSize().background(IvidsColorTokens.ObsidianStage)) {
+            when (shellMode) {
+                ShellMode.MOBILE -> {
+                    Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+                        MobileTopHeader(
+                            currentRoute = currentRoute,
+                            canNavigateBack = canNavigateBack,
+                            activeDownloadCount = activeDownloadCount,
+                            onBack = { navigator.navigateBack() },
+                            onOpenDownloader = { navigator.navigateTo(AppRoute.Downloader) },
+                            onOpenSettings = { navigator.navigateTo(AppRoute.Settings) }
+                        )
+                        Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                            content(currentRoute, shellMode)
+                            if (playerState.currentTrack != null) {
+                                MiniPlayerBar(
+                                    playerState = playerState,
+                                    onExpand = { setNowPlayingExpanded(true) },
+                                    onTogglePlayPause = playerViewModel::togglePlayPause,
+                                    onToggleLike = playerViewModel::toggleLikeCurrent,
+                                    onRetry = playerViewModel::retryCurrent,
+                                    onSkipPrevious = playerViewModel::previous,
+                                    onSkipNext = playerViewModel::next,
+                                    modifier = Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .padding(horizontal = 12.dp, vertical = 10.dp)
+                                )
+                            }
                         }
+                        MobileBottomBar(
+                            currentRoute = currentRoute,
+                            onSelectRoute = { navigator.switchRootTab(it) }
+                        )
                     }
-                    MobileBottomBar(
-                        currentRoute = currentRoute,
-                        onSelectRoute = { navigator.switchRootTab(it) }
-                    )
                 }
-            }
 
-            ShellMode.DESKTOP, ShellMode.TV -> {
-                BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
-                    val isExpandedRail = shellMode == ShellMode.TV || maxWidth >= 880.dp
-                    Column(modifier = Modifier.fillMaxSize()) {
-                        Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                            SidebarNavigationRail(
-                                currentRoute = currentRoute,
-                                expanded = isExpandedRail,
-                                isTv = shellMode == ShellMode.TV,
-                                onSelectRoute = { navigator.switchRootTab(it) }
-                            )
-                            VerticalDivider(
-                                thickness = 1.dp,
-                                color = IvidsColorTokens.HairlineSubtle
-                            )
+                ShellMode.DESKTOP, ShellMode.TV -> {
+                    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+                        val isExpandedRail = shellMode == ShellMode.TV || maxWidth >= 880.dp
+                        Column(modifier = Modifier.fillMaxSize()) {
+                            Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                                SidebarNavigationRail(
+                                    currentRoute = currentRoute,
+                                    expanded = isExpandedRail,
+                                    isTv = shellMode == ShellMode.TV,
+                                    onSelectRoute = { navigator.switchRootTab(it) }
+                                )
+                                VerticalDivider(
+                                    thickness = 1.dp,
+                                    color = IvidsColorTokens.HairlineSubtle
+                                )
 
-                            Box(modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
-                                Column(modifier = Modifier.fillMaxSize()) {
-                                    DesktopTopBar(
-                                        canNavigateBack = canNavigateBack,
-                                        searchFocusTrigger = searchFocusTrigger,
-                                        onBack = { navigator.navigateBack() },
-                                        onSearchSubmit = onHeaderSearchSubmit,
-                                        onOpenProfile = { navigator.switchRootTab(AppRoute.Profile) }
-                                    )
-                                    Box(modifier = Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
-                                        content(currentRoute, shellMode)
+                                Box(modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
+                                    Column(modifier = Modifier.fillMaxSize()) {
+                                        DesktopTopBar(
+                                            canNavigateBack = canNavigateBack,
+                                            searchFocusTrigger = searchFocusTrigger,
+                                            onBack = { navigator.navigateBack() },
+                                            onSearchSubmit = onHeaderSearchSubmit,
+                                            onOpenProfile = { navigator.switchRootTab(AppRoute.Profile) }
+                                        )
+                                        Box(modifier = Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
+                                            content(currentRoute, shellMode)
+                                        }
+                                    }
+                                }
+
+                                AnimatedVisibility(
+                                    visible = desktopQueueOpen,
+                                    enter = slideInHorizontally { it } + fadeIn(),
+                                    exit = slideOutHorizontally { it } + fadeOut()
+                                ) {
+                                    Row {
+                                        VerticalDivider(
+                                            thickness = 1.dp,
+                                            color = IvidsColorTokens.HairlineSubtle
+                                        )
+                                        QueueSideSheet(
+                                            playerState = playerState,
+                                            onJumpTo = playerViewModel::jumpToQueueIndex,
+                                            onRemove = playerViewModel::removeFromQueue,
+                                            onClear = playerViewModel::clearQueue,
+                                            onClose = { desktopQueueOpen = false }
+                                        )
                                     }
                                 }
                             }
 
-                            AnimatedVisibility(
-                                visible = desktopQueueOpen,
-                                enter = slideInHorizontally { it } + fadeIn(),
-                                exit = slideOutHorizontally { it } + fadeOut()
-                            ) {
-                                Row {
-                                    VerticalDivider(
-                                        thickness = 1.dp,
-                                        color = IvidsColorTokens.HairlineSubtle
-                                    )
-                                    QueueSideSheet(
-                                        playerState = playerState,
-                                        onJumpTo = playerViewModel::jumpToQueueIndex,
-                                        onRemove = playerViewModel::removeFromQueue,
-                                        onClear = playerViewModel::clearQueue,
-                                        onClose = { desktopQueueOpen = false }
-                                    )
-                                }
-                            }
+                            HorizontalDivider(
+                                thickness = 1.dp,
+                                color = IvidsColorTokens.HairlineSubtle
+                            )
+                            DesktopPlayerDeck(
+                                playerState = playerState,
+                                queueOpen = desktopQueueOpen,
+                                onToggleQueue = { desktopQueueOpen = !desktopQueueOpen },
+                                onOpenNowPlaying = { setNowPlayingExpanded(true) },
+                                onOpenArtist = { id, name ->
+                                    navigator.navigateTo(AppRoute.ArtistDetail(id, name))
+                                },
+                                onOpenSongDetail = { id ->
+                                    navigator.navigateTo(AppRoute.SongDetail(id))
+                                },
+                                playerViewModel = playerViewModel
+                            )
                         }
-
-                        HorizontalDivider(
-                            thickness = 1.dp,
-                            color = IvidsColorTokens.HairlineSubtle
-                        )
-                        DesktopPlayerDeck(
-                            playerState = playerState,
-                            queueOpen = desktopQueueOpen,
-                            onToggleQueue = { desktopQueueOpen = !desktopQueueOpen },
-                            onOpenNowPlaying = { nowPlayingExpanded = true },
-                            onOpenArtist = { id, name ->
-                                navigator.navigateTo(AppRoute.ArtistDetail(id, name))
-                            },
-                            onOpenSongDetail = { id ->
-                                navigator.navigateTo(AppRoute.SongDetail(id))
-                            },
-                            playerViewModel = playerViewModel
-                        )
                     }
                 }
             }
-        }
 
-        AnimatedVisibility(
-            visible = nowPlayingExpanded,
-            enter = slideInVertically { it } + fadeIn(),
-            exit = slideOutVertically { it } + fadeOut()
-        ) {
-            NowPlayingSheet(
-                playerState = playerState,
-                playlists = playlists,
-                playerViewModel = playerViewModel,
-                onCreatePlaylist = onCreatePlaylist,
-                onOpenArtist = { id, name -> navigator.navigateTo(AppRoute.ArtistDetail(id, name)) },
-                onOpenSongDetail = { id -> navigator.navigateTo(AppRoute.SongDetail(id)) },
-                onDismiss = { nowPlayingExpanded = false }
-            )
+            AnimatedVisibility(
+                visible = isNowPlayingExpanded,
+                enter = slideInVertically { it } + fadeIn(),
+                exit = slideOutVertically { it } + fadeOut()
+            ) {
+                NowPlayingSheet(
+                    playerState = playerState,
+                    playlists = playlists,
+                    playerViewModel = playerViewModel,
+                    onCreatePlaylist = onCreatePlaylist,
+                    onOpenArtist = { id, name -> navigator.navigateTo(AppRoute.ArtistDetail(id, name)) },
+                    onOpenSongDetail = { id -> navigator.navigateTo(AppRoute.SongDetail(id)) },
+                    onDismiss = { setNowPlayingExpanded(false) }
+                )
+            }
         }
     }
 }
 
 /**
- * Renders the borderless top navigation header on Mobile screens with back navigation and quick
- * Downloader and Settings shortcuts.
+ * Renders the aligned top navigation header on Mobile screens with back navigation, active download
+ * count badge, and quick Downloader/Settings shortcuts.
  */
 @Composable
 private fun MobileTopHeader(
     currentRoute: AppRoute,
     canNavigateBack: Boolean,
+    activeDownloadCount: Int,
     onBack: () -> Unit,
     onOpenDownloader: () -> Unit,
     onOpenSettings: () -> Unit
@@ -323,7 +395,7 @@ private fun MobileTopHeader(
 
     Column(modifier = Modifier.fillMaxWidth().background(IvidsColorTokens.ObsidianStage)) {
         Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -332,7 +404,7 @@ private fun MobileTopHeader(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (canNavigateBack) {
-                    IconButton(onClick = onBack, modifier = Modifier.size(36.dp)) {
+                    IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = strings["back"],
@@ -359,12 +431,31 @@ private fun MobileTopHeader(
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                IconButton(onClick = onOpenDownloader) {
-                    Icon(
-                        imageVector = Icons.Rounded.Download,
-                        contentDescription = strings["nav_downloader"],
-                        tint = if (currentRoute is AppRoute.Downloader) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
-                    )
+                Box(contentAlignment = Alignment.TopEnd) {
+                    IconButton(onClick = onOpenDownloader) {
+                        Icon(
+                            imageVector = Icons.Rounded.Download,
+                            contentDescription = strings["nav_downloader"],
+                            tint = if (currentRoute is AppRoute.Downloader) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
+                        )
+                    }
+                    if (activeDownloadCount > 0) {
+                        Box(
+                            modifier = Modifier
+                                .padding(top = 6.dp, end = 6.dp)
+                                .size(16.dp)
+                                .clip(CircleShape)
+                                .background(IvidsColorTokens.PrimaryCyan),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = activeDownloadCount.coerceAtMost(9).toString(),
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = IvidsColorTokens.OnAccentDark
+                            )
+                        }
+                    }
                 }
                 IconButton(onClick = onOpenSettings) {
                     Icon(
@@ -380,7 +471,8 @@ private fun MobileTopHeader(
 }
 
 /**
- * Renders the 5-destination bottom navigation dock for compact Mobile viewports (`< 600dp`).
+ * Renders the 5-destination compact bottom navigation dock for Mobile viewports (`< 600dp`) using
+ * full-width tab cells and single-line `10.sp` labels so `"Your Library"` never truncates.
  */
 @Composable
 private fun MobileBottomBar(
@@ -398,47 +490,76 @@ private fun MobileBottomBar(
         )
     }
 
-    Column(modifier = Modifier.fillMaxWidth().background(IvidsColorTokens.AbyssRail)) {
-        HorizontalDivider(thickness = 1.dp, color = IvidsColorTokens.HairlineSubtle)
-        NavigationBar(
-            containerColor = IvidsColorTokens.AbyssRail,
-            contentColor = IvidsColorTokens.ChalkInk,
-            modifier = Modifier.navigationBarsPadding()
-        ) {
-            items.forEach { entry ->
-                val selected = entry.matcher(currentRoute)
-                NavigationBarItem(
-                    selected = selected,
-                    onClick = { onSelectRoute(entry.route) },
-                    icon = {
-                        Icon(
-                            imageVector = entry.icon,
-                            contentDescription = strings[entry.labelKey]
-                        )
-                    },
-                    label = {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        color = IvidsColorTokens.AbyssRail
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            HorizontalDivider(thickness = 1.dp, color = IvidsColorTokens.HairlineSubtle)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .navigationBarsPadding()
+                    .height(64.dp)
+                    .padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                items.forEach { entry ->
+                    val selected = entry.matcher(currentRoute)
+                    val indicatorColor by animateColorAsState(
+                        targetValue = if (selected) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f) else Color.Transparent,
+                        animationSpec = tween(150, easing = FastOutSlowInEasing),
+                        label = "BottomNavIndicator"
+                    )
+                    val iconTint = if (selected) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
+                    val labelColor = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
+
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .clip(RoundedCornerShape(14.dp))
+                            .clickable { onSelectRoute(entry.route) }
+                            .padding(horizontal = 2.dp, vertical = 6.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(width = 48.dp, height = 28.dp)
+                                .clip(CircleShape)
+                                .background(indicatorColor),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = entry.icon,
+                                contentDescription = strings[entry.labelKey],
+                                tint = iconTint,
+                                modifier = Modifier.size(21.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(3.dp))
                         Text(
                             text = strings[entry.labelKey],
+                            fontSize = 10.sp,
+                            lineHeight = 12.sp,
+                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                            color = labelColor,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            softWrap = false,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center
                         )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = IvidsColorTokens.PrimaryCyan,
-                        selectedTextColor = IvidsColorTokens.ChalkInk,
-                        indicatorColor = IvidsColorTokens.PrimaryCyan.copy(alpha = 0.14f),
-                        unselectedIconColor = IvidsColorTokens.SlateMuted,
-                        unselectedTextColor = IvidsColorTokens.SlateMuted
-                    )
-                )
+                    }
+                }
             }
         }
     }
 }
 
 /**
- * Floating borderless mini-player bar anchored above MobileBottomBar with blurred track artwork
- * backdrop, progress bar, like toggle, and play/pause action; tapping opens [NowPlayingSheet].
+ * Floating mini-player bar anchored above [MobileBottomBar] supporting swipe-up to open
+ * [NowPlayingSheet], horizontal swipe skip, retry on error, and `44.dp` touch action targets.
  */
 @Composable
 private fun MiniPlayerBar(
@@ -447,11 +568,22 @@ private fun MiniPlayerBar(
     onTogglePlayPause: () -> Unit,
     onToggleLike: () -> Unit,
     onRetry: () -> Unit,
+    onSkipPrevious: () -> Unit = {},
+    onSkipNext: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val track = playerState.currentTrack ?: return
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
+    val density = LocalDensity.current
+    var dragOffsetXPx by remember(track.id) { mutableStateOf(0f) }
+    var dragOffsetYPx by remember(track.id) { mutableStateOf(0f) }
+    val animatedOffsetXPx by animateFloatAsState(
+        targetValue = dragOffsetXPx,
+        animationSpec = spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMedium),
+        label = "MiniPlayerSwipeX"
+    )
+    val maxHorizontalPx = with(density) { 88.dp.toPx() }
     val progress = if (playerState.durationMs > 0L) {
         (playerState.positionMs.toFloat() / playerState.durationMs.toFloat()).coerceIn(0f, 1f)
     } else {
@@ -461,6 +593,47 @@ private fun MiniPlayerBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .offset { IntOffset(animatedOffsetXPx.roundToInt(), 0) }
+            .pointerInput(track.id, playerState.canSkipPrevious, playerState.canSkipNext) {
+                detectHorizontalDragGestures(
+                    onHorizontalDrag = { change, dragAmount ->
+                        change.consume()
+                        dragOffsetXPx = (dragOffsetXPx + dragAmount).coerceIn(-maxHorizontalPx, maxHorizontalPx)
+                    },
+                    onDragEnd = {
+                        val draggedDp = with(density) { dragOffsetXPx.toDp().value }
+                        dragOffsetXPx = 0f
+                        when (
+                            resolveHorizontalSwipeAction(
+                                offsetDp = draggedDp,
+                                thresholdDp = 56f,
+                                canSkipPrevious = playerState.canSkipPrevious,
+                                canSkipNext = playerState.canSkipNext
+                            )
+                        ) {
+                            HorizontalSwipeAction.SKIP_NEXT -> onSkipNext()
+                            HorizontalSwipeAction.SKIP_PREVIOUS -> onSkipPrevious()
+                            HorizontalSwipeAction.NONE -> Unit
+                        }
+                    },
+                    onDragCancel = { dragOffsetXPx = 0f }
+                )
+            }
+            .pointerInput(track.id) {
+                detectVerticalDragGestures(
+                    onVerticalDrag = { _, dragAmount ->
+                        dragOffsetYPx += dragAmount
+                    },
+                    onDragEnd = {
+                        val draggedDp = with(density) { dragOffsetYPx.toDp().value }
+                        dragOffsetYPx = 0f
+                        if (draggedDp <= -48f) {
+                            onExpand()
+                        }
+                    },
+                    onDragCancel = { dragOffsetYPx = 0f }
+                )
+            }
             .shadow(14.dp, RoundedCornerShape(18.dp), ambientColor = Color.Black, spotColor = Color.Black)
             .clickable(onClick = onExpand),
         shape = RoundedCornerShape(18.dp),
@@ -479,7 +652,7 @@ private fun MiniPlayerBar(
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 9.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Box(
                         modifier = Modifier
@@ -517,32 +690,33 @@ private fun MiniPlayerBar(
                         )
                     }
                     if (playerState.errorMessage != null) {
-                        IconButton(onClick = onRetry, modifier = Modifier.size(36.dp)) {
+                        IconButton(onClick = onRetry, modifier = Modifier.size(44.dp)) {
                             Icon(
                                 imageVector = Icons.Rounded.Refresh,
                                 contentDescription = strings["retry"],
                                 tint = IvidsColorTokens.DangerCoral,
-                                modifier = Modifier.size(19.dp)
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     } else {
-                        IconButton(onClick = onToggleLike, modifier = Modifier.size(36.dp)) {
-                        Icon(
-                            imageVector = if (playerState.isCurrentLiked) {
-                                Icons.Rounded.Favorite
-                            } else {
-                                Icons.Rounded.FavoriteBorder
-                            },
-                            contentDescription = null,
-                            tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted
-                        )
+                        IconButton(onClick = onToggleLike, modifier = Modifier.size(44.dp)) {
+                            Icon(
+                                imageVector = if (playerState.isCurrentLiked) {
+                                    Icons.Rounded.Favorite
+                                } else {
+                                    Icons.Rounded.FavoriteBorder
+                                },
+                                contentDescription = strings["like"],
+                                tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted,
+                                modifier = Modifier.size(20.dp)
+                            )
                         }
                     }
                     Surface(
                         onClick = onTogglePlayPause,
                         shape = CircleShape,
                         color = accent,
-                        modifier = Modifier.size(38.dp)
+                        modifier = Modifier.size(44.dp)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             if (playerState.isBuffering) {
@@ -558,7 +732,7 @@ private fun MiniPlayerBar(
                                     } else {
                                         Icons.Rounded.PlayArrow
                                     },
-                                    contentDescription = null,
+                                    contentDescription = strings["play"],
                                     tint = IvidsColorTokens.OnAccentDark
                                 )
                             }

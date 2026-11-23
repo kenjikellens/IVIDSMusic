@@ -12,6 +12,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -20,6 +21,8 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -69,12 +72,12 @@ import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.LocalIsTvMode
+import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Renders a tonal artwork card for tracks, albums, or circular artist portraits that softly
- * blends its own cover artwork's dominant color and responds smoothly to hover with surface
- * brightening, lifted shadow, illuminated border, hand cursor, and an animated Play FAB.
+ * Renders a tonal artwork card for tracks, albums, or circular artist portraits using
+ * [LocalLayoutMetrics] width, hover border/surface illumination, and touch/hover Play FAB visibility.
  */
 @Composable
 fun MusicCard(
@@ -86,10 +89,11 @@ fun MusicCard(
     isCircular: Boolean = false,
     badgeText: String? = null,
     onPlayClick: (() -> Unit)? = null,
-    width: Dp = 176.dp
+    width: Dp = LocalLayoutMetrics.current.cardWidth
 ) {
     val accent = LocalDynamicAccent.current
     val isTvMode = LocalIsTvMode.current
+    val metrics = LocalLayoutMetrics.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
@@ -117,8 +121,17 @@ fun MusicCard(
         animationSpec = tween(160, easing = FastOutSlowInEasing),
         label = "MusicCardSurface"
     )
+    val borderColor by animateColorAsState(
+        targetValue = if (isHovered) IvidsColorTokens.HoverBorder else Color.Transparent,
+        animationSpec = tween(160, easing = FastOutSlowInEasing),
+        label = "MusicCardBorder"
+    )
     val playFabAlpha by animateFloatAsState(
-        targetValue = if (isHovered || isTvMode) 1f else 0f,
+        targetValue = when {
+            isHovered || isTvMode -> 1f
+            metrics.showTouchPlayFab -> 0.92f
+            else -> 0f
+        },
         animationSpec = tween(150, easing = FastOutSlowInEasing),
         label = "MusicCardPlayAlpha"
     )
@@ -131,7 +144,8 @@ fun MusicCard(
             .hoverable(interactionSource)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        color = surfaceColor
+        color = surfaceColor,
+        border = if (borderColor != Color.Transparent) BorderStroke(1.dp, borderColor) else null
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Box(
@@ -228,6 +242,11 @@ fun MusicCard(
  * Renders the signature Living Album Hero banner using a true blurred cover-art backdrop
  * ([BlurredArtworkBackdrop]), crisp cover framing, and smooth hoverable action pills.
  */
+/**
+ * Renders the adaptive Living Album Hero banner using [BlurredArtworkBackdrop], stacking content
+ * cleanly on compact mobile viewports so titles and [FlowRow] CTAs never clip or misalign with `×`.
+ */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun LivingAlbumHero(
     eyebrow: String,
@@ -239,16 +258,23 @@ fun LivingAlbumHero(
     modifier: Modifier = Modifier,
     secondaryActionLabel: String? = null,
     onSecondaryAction: (() -> Unit)? = null,
-    onDismiss: (() -> Unit)? = null
+    onDismiss: (() -> Unit)? = null,
+    primaryEnabled: Boolean = true,
+    secondaryEnabled: Boolean = true
 ) {
     val accent = LocalDynamicAccent.current
+    val isCompactMobile = LocalLayoutMetrics.current.isCompactMobile
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = RoundedCornerShape(if (isCompactMobile) 20.dp else 24.dp),
         color = IvidsColorTokens.GlassSurface
     ) {
-        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(if (isCompactMobile) 20.dp else 24.dp))
+        ) {
             BlurredArtworkBackdrop(
                 artworkUrl = artworkUrl,
                 tintColor = null,
@@ -258,61 +284,36 @@ fun LivingAlbumHero(
                 modifier = Modifier.matchParentSize()
             )
 
-            if (onDismiss != null) {
-                IconButton(
-                    onClick = onDismiss,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(12.dp)
-                        .pointerHoverIcon(PointerIcon.Hand)
-                        .tvFocusable(shape = CircleShape)
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        contentDescription = "Dismiss",
-                        tint = IvidsColorTokens.SlateMuted
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 28.dp, vertical = 26.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(24.dp)
-            ) {
-                if (!artworkUrl.isNullOrBlank()) {
-                    AsyncImage(
-                        model = artworkUrl,
-                        contentDescription = title,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .size(144.dp)
-                            .shadow(
-                                elevation = 18.dp,
-                                shape = RoundedCornerShape(18.dp),
-                                ambientColor = Color.Black,
-                                spotColor = Color.Black
-                            )
-                            .clip(RoundedCornerShape(18.dp))
-                            .background(IvidsColorTokens.RecessedTrough)
-                    )
-                }
-
-                Column(modifier = Modifier.weight(1f)) {
+            @Composable
+            fun HeroBodyContent(bodyModifier: Modifier = Modifier) {
+                Column(modifier = bodyModifier) {
                     Text(
                         text = title,
-                        style = MaterialTheme.typography.displaySmall,
+                        style = if (isCompactMobile) {
+                            MaterialTheme.typography.headlineSmall
+                        } else {
+                            MaterialTheme.typography.displaySmall
+                        },
                         color = IvidsColorTokens.ChalkInk,
                         maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = if (onDismiss != null && (isCompactMobile || artworkUrl.isNullOrBlank())) {
+                            Modifier.padding(end = 36.dp)
+                        } else if (onDismiss != null) {
+                            Modifier.padding(end = 32.dp)
+                        } else {
+                            Modifier
+                        }
                     )
                     if (subtitle.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(if (isCompactMobile) 6.dp else 8.dp))
                         Text(
                             text = subtitle,
-                            style = MaterialTheme.typography.bodyLarge,
+                            style = if (isCompactMobile) {
+                                MaterialTheme.typography.bodyMedium
+                            } else {
+                                MaterialTheme.typography.bodyLarge
+                            },
                             color = IvidsColorTokens.SlateMuted,
                             maxLines = 2,
                             overflow = TextOverflow.Ellipsis
@@ -325,47 +326,143 @@ fun LivingAlbumHero(
                             color = IvidsColorTokens.SlateMuted
                         )
                     }
-                    Spacer(modifier = Modifier.height(18.dp))
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Spacer(modifier = Modifier.height(if (isCompactMobile) 14.dp else 18.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Button(
                             onClick = onPrimaryAction,
+                            enabled = primaryEnabled,
                             shape = CircleShape,
-                            contentPadding = PaddingValues(horizontal = 22.dp, vertical = 12.dp),
+                            contentPadding = PaddingValues(
+                                horizontal = if (isCompactMobile) 18.dp else 22.dp,
+                                vertical = if (isCompactMobile) 10.dp else 12.dp
+                            ),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = accent,
-                                contentColor = IvidsColorTokens.OnAccentDark
+                                contentColor = IvidsColorTokens.OnAccentDark,
+                                disabledContainerColor = accent.copy(alpha = 0.32f),
+                                disabledContentColor = IvidsColorTokens.OnAccentDark.copy(alpha = 0.6f)
                             ),
                             modifier = Modifier
-                                .pointerHoverIcon(PointerIcon.Hand)
-                                .tvFocusable(shape = CircleShape)
+                                .then(if (primaryEnabled) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
+                                .tvFocusable(enabled = primaryEnabled, shape = CircleShape)
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.PlayArrow,
                                 contentDescription = null,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(18.dp)
                             )
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text(primaryActionLabel, style = MaterialTheme.typography.labelLarge)
+                            Text(
+                                text = primaryActionLabel,
+                                style = MaterialTheme.typography.labelLarge,
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
 
                         if (!secondaryActionLabel.isNullOrBlank() && onSecondaryAction != null) {
                             IvidsTonalPill(
                                 onClick = onSecondaryAction,
-                                baseColor = Color(0x18FFFFFF),
-                                hoverColor = Color(0x32FFFFFF),
-                                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
+                                enabled = secondaryEnabled,
+                                baseColor = Color(0x22FFFFFF),
+                                hoverColor = Color(0x3DFFFFFF),
+                                baseBorderColor = IvidsColorTokens.HairlineBorder,
+                                hoverBorderColor = IvidsColorTokens.HoverBorder,
+                                contentPadding = PaddingValues(
+                                    horizontal = if (isCompactMobile) 16.dp else 20.dp,
+                                    vertical = if (isCompactMobile) 10.dp else 12.dp
+                                )
                             ) {
                                 Text(
                                     text = secondaryActionLabel,
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = IvidsColorTokens.ChalkInk
+                                    color = IvidsColorTokens.ChalkInk,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }
                     }
+                }
+            }
+
+            if (isCompactMobile) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(18.dp),
+                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    if (!artworkUrl.isNullOrBlank()) {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            AsyncImage(
+                                model = artworkUrl,
+                                contentDescription = title,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .size(118.dp)
+                                    .align(Alignment.CenterStart)
+                                    .shadow(
+                                        elevation = 16.dp,
+                                        shape = RoundedCornerShape(16.dp),
+                                        ambientColor = Color.Black,
+                                        spotColor = Color.Black
+                                    )
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(IvidsColorTokens.RecessedTrough)
+                            )
+                        }
+                    }
+                    HeroBodyContent(bodyModifier = Modifier.fillMaxWidth())
+                }
+            } else {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 28.dp, vertical = 26.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                ) {
+                    if (!artworkUrl.isNullOrBlank()) {
+                        AsyncImage(
+                            model = artworkUrl,
+                            contentDescription = title,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(144.dp)
+                                .shadow(
+                                    elevation = 18.dp,
+                                    shape = RoundedCornerShape(18.dp),
+                                    ambientColor = Color.Black,
+                                    spotColor = Color.Black
+                                )
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(IvidsColorTokens.RecessedTrough)
+                        )
+                    }
+                    HeroBodyContent(bodyModifier = Modifier.weight(1f))
+                }
+            }
+
+            // Place dismiss button last so it always stays above foreground layout in z-order.
+            if (onDismiss != null) {
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(40.dp)
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .tvFocusable(shape = CircleShape)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = "Dismiss",
+                        tint = IvidsColorTokens.ChalkInk.copy(alpha = 0.8f)
+                    )
                 }
             }
         }
@@ -393,6 +490,8 @@ fun ShimmerSkeletonRow(
         label = "SkeletonAlpha"
     )
 
+    val cardWidth = LocalLayoutMetrics.current.cardWidth
+
     LazyRow(
         modifier = modifier.fillMaxWidth(),
         contentPadding = PaddingValues(horizontal = 2.dp),
@@ -400,7 +499,7 @@ fun ShimmerSkeletonRow(
     ) {
         items(itemCount) {
             Surface(
-                modifier = Modifier.width(176.dp),
+                modifier = Modifier.width(cardWidth),
                 shape = RoundedCornerShape(16.dp),
                 color = IvidsColorTokens.GlassSurface.copy(alpha = alpha)
             ) {

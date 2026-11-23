@@ -1,12 +1,21 @@
 package com.kenjigames.ividsmusic.ui.player
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -14,6 +23,8 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -21,8 +32,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.automirrored.rounded.VolumeOff
@@ -62,8 +75,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kenjigames.ividsmusic.domain.model.Playlist
@@ -71,17 +90,27 @@ import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
+import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
 import com.kenjigames.ividsmusic.ui.components.PlaylistPickerDialog
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
+import com.kenjigames.ividsmusic.ui.shell.HorizontalSwipeAction
+import com.kenjigames.ividsmusic.ui.shell.resolveHorizontalSwipeAction
+import com.kenjigames.ividsmusic.ui.shell.shouldDismissVerticalSwipe
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
+import kotlin.math.roundToInt
+
+/** Portrait sub-tabs shown inside [NowPlayingSheet] on compact screens to separate player and queue. */
+private enum class MobileSheetTab { PLAYER, QUEUE }
 
 /**
- * Full-screen expandable Now Playing sheet featuring a full-bleed blurred album-artwork backdrop
- * ([BlurredArtworkBackdrop]), split-pane Desktop layout, and custom [IvidsScrubber] controls.
+ * Full-screen expandable Now Playing sheet featuring [BlurredArtworkBackdrop], split-pane Desktop
+ * layout, portrait Player/Queue tabs with vertical swipe-to-dismiss, cover swipe track skip, and
+ * adaptive system navigation bar insets.
  */
 @Composable
 fun NowPlayingSheet(
@@ -96,8 +125,33 @@ fun NowPlayingSheet(
 ) {
     val accent = LocalDynamicAccent.current
     val strings = LocalStrings.current
+    val metrics = LocalLayoutMetrics.current
+    val density = LocalDensity.current
     val track = playerState.currentTrack
     var showPlaylistPicker by remember { mutableStateOf(false) }
+    var activeMobileTab by remember { mutableStateOf(MobileSheetTab.PLAYER) }
+    var dismissOffsetPx by remember { mutableStateOf(0f) }
+    val animatedDismissOffsetPx by animateFloatAsState(
+        targetValue = dismissOffsetPx,
+        animationSpec = spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow),
+        label = "SheetDismissOffset"
+    )
+    val maxDismissOffsetPx = with(density) { 260.dp.toPx() }
+    val swipeDismissModifier = Modifier.pointerInput(onDismiss) {
+        detectVerticalDragGestures(
+            onVerticalDrag = { _, dragAmount ->
+                dismissOffsetPx = (dismissOffsetPx + dragAmount).coerceIn(0f, maxDismissOffsetPx)
+            },
+            onDragEnd = {
+                val draggedDp = with(density) { dismissOffsetPx.toDp().value }
+                dismissOffsetPx = 0f
+                if (shouldDismissVerticalSwipe(draggedDp)) {
+                    onDismiss()
+                }
+            },
+            onDragCancel = { dismissOffsetPx = 0f }
+        )
+    }
 
     if (showPlaylistPicker && track != null) {
         PlaylistPickerDialog(
@@ -115,7 +169,9 @@ fun NowPlayingSheet(
     }
 
     Surface(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier
+            .fillMaxSize()
+            .offset { IntOffset(0, animatedDismissOffsetPx.roundToInt()) },
         color = IvidsColorTokens.ObsidianStage
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
@@ -132,44 +188,69 @@ fun NowPlayingSheet(
                 modifier = Modifier
                     .fillMaxSize()
                     .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                    .navigationBarsPadding()
+                    .padding(horizontal = if (metrics.isCompactMobile) 16.dp else 24.dp, vertical = 12.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().widthIn(max = 1140.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                // Visual drag pill + top bar gesture handle
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = 1140.dp)
+                        .then(swipeDismissModifier),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    IconButton(
-                        onClick = onDismiss,
-                        modifier = Modifier.tvFocusable(shape = CircleShape)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.KeyboardArrowDown,
-                            contentDescription = strings["close"],
-                            tint = IvidsColorTokens.ChalkInk
+                    if (metrics.isCompactMobile) {
+                        Box(
+                            modifier = Modifier
+                                .padding(bottom = 8.dp)
+                                .size(width = 40.dp, height = 4.dp)
+                                .clip(CircleShape)
+                                .background(IvidsColorTokens.ChalkInk.copy(alpha = 0.28f))
                         )
                     }
-                    Text(
-                        text = strings["now_playing"],
-                        style = MaterialTheme.typography.titleMedium,
-                        color = IvidsColorTokens.ChalkInk
-                    )
-                    IconButton(
-                        onClick = {
-                            if (track != null) {
-                                onDismiss()
-                                onOpenSongDetail(track.id)
-                            }
-                        },
-                        enabled = track != null,
-                        modifier = Modifier.tvFocusable(shape = CircleShape)
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Info,
-                            contentDescription = strings["more_info"],
-                            tint = IvidsColorTokens.ChalkInk
+                        IconButton(
+                            onClick = onDismiss,
+                            modifier = Modifier
+                                .size(44.dp)
+                                .pointerHoverIcon(PointerIcon.Hand)
+                                .tvFocusable(shape = CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowDown,
+                                contentDescription = strings["close"],
+                                tint = IvidsColorTokens.ChalkInk
+                            )
+                        }
+                        Text(
+                            text = strings["now_playing"],
+                            style = MaterialTheme.typography.titleMedium,
+                            color = IvidsColorTokens.ChalkInk
                         )
+                        IconButton(
+                            onClick = {
+                                if (track != null) {
+                                    onDismiss()
+                                    onOpenSongDetail(track.id)
+                                }
+                            },
+                            enabled = track != null,
+                            modifier = Modifier
+                                .size(44.dp)
+                                .then(if (track != null) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
+                                .tvFocusable(enabled = track != null, shape = CircleShape)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Info,
+                                contentDescription = strings["more_info"],
+                                tint = IvidsColorTokens.ChalkInk
+                            )
+                        }
                     }
                 }
 
@@ -177,6 +258,7 @@ fun NowPlayingSheet(
                     modifier = Modifier.weight(1f).widthIn(max = 1140.dp).fillMaxWidth()
                 ) {
                     val isWideSplit = maxWidth >= 860.dp
+                    val portraitCoverLimit = if (maxHeight < 680.dp) 188.dp else 276.dp
 
                     if (isWideSplit) {
                         Row(
@@ -246,57 +328,103 @@ fun NowPlayingSheet(
                             }
                         }
                     } else {
-                        LazyColumn(
+                        Column(
                             modifier = Modifier.fillMaxSize().widthIn(max = 760.dp),
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(18.dp)
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            item {
-                                Spacer(modifier = Modifier.height(6.dp))
-                                NowPlayingHeroCard(
-                                    track = track,
-                                    playerState = playerState,
-                                    accent = accent,
-                                    onOpenArtist = {
-                                        if (track != null) {
-                                            onDismiss()
-                                            onOpenArtist(track.artistId, track.artist)
-                                        }
-                                    },
-                                    onOpenPlaylistPicker = { showPlaylistPicker = true },
-                                    playerViewModel = playerViewModel
-                                )
-                            }
+                            IvidsSegmentedBar(
+                                items = listOf(MobileSheetTab.PLAYER, MobileSheetTab.QUEUE),
+                                selected = activeMobileTab,
+                                labelProvider = { tab ->
+                                    when (tab) {
+                                        MobileSheetTab.PLAYER -> strings["tab_player"]
+                                        MobileSheetTab.QUEUE -> "${strings["tab_queue"]} (${playerState.queue.size})"
+                                    }
+                                },
+                                onSelect = { activeMobileTab = it }
+                            )
 
-                            item {
-                                NowPlayingQueueHeader(
-                                    hasItems = playerState.queue.isNotEmpty(),
-                                    onClear = playerViewModel::clearQueue
-                                )
-                            }
-
-                            if (playerState.queue.isEmpty()) {
-                                item {
-                                    Text(
-                                        text = strings["queue_empty"],
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = IvidsColorTokens.SlateMuted,
-                                        modifier = Modifier.padding(vertical = 24.dp)
-                                    )
+                            when (activeMobileTab) {
+                                MobileSheetTab.PLAYER -> {
+                                    Column(
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .fillMaxWidth()
+                                            .then(swipeDismissModifier)
+                                            .verticalScroll(rememberScrollState())
+                                            .padding(vertical = 8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        verticalArrangement = Arrangement.Center
+                                    ) {
+                                        NowPlayingHeroCard(
+                                            track = track,
+                                            playerState = playerState,
+                                            accent = accent,
+                                            onOpenArtist = {
+                                                if (track != null) {
+                                                    onDismiss()
+                                                    onOpenArtist(track.artistId, track.artist)
+                                                }
+                                            },
+                                            onOpenPlaylistPicker = { showPlaylistPicker = true },
+                                            playerViewModel = playerViewModel,
+                                            showVolumeControls = !metrics.isCompactMobile,
+                                            maxArtworkSize = portraitCoverLimit,
+                                            onSwipePrevious = playerViewModel::previous,
+                                            onSwipeNext = playerViewModel::next
+                                        )
+                                    }
                                 }
-                            } else {
-                                itemsIndexed(
-                                    items = playerState.queue,
-                                    key = { idx, item -> "${idx}_${item.id}" }
-                                ) { index, item ->
-                                    NowPlayingQueueRow(
-                                        index = index,
-                                        item = item,
-                                        isActive = index == playerState.currentIndex,
-                                        accent = accent,
-                                        onJump = { playerViewModel.jumpToQueueIndex(index) },
-                                        onRemove = { playerViewModel.removeFromQueue(index) }
-                                    )
+
+                                MobileSheetTab.QUEUE -> {
+                                    Surface(
+                                        modifier = Modifier.weight(1f).fillMaxWidth(),
+                                        shape = RoundedCornerShape(20.dp),
+                                        color = IvidsColorTokens.GlassSurface.copy(alpha = 0.78f)
+                                    ) {
+                                        Column(modifier = Modifier.fillMaxSize().padding(14.dp)) {
+                                            NowPlayingQueueHeader(
+                                                hasItems = playerState.queue.isNotEmpty(),
+                                                onClear = playerViewModel::clearQueue
+                                            )
+                                            HorizontalDivider(
+                                                color = IvidsColorTokens.HairlineSubtle,
+                                                modifier = Modifier.padding(vertical = 8.dp)
+                                            )
+                                            if (playerState.queue.isEmpty()) {
+                                                Box(
+                                                    modifier = Modifier.fillMaxSize(),
+                                                    contentAlignment = Alignment.Center
+                                                ) {
+                                                    Text(
+                                                        text = strings["queue_empty"],
+                                                        style = MaterialTheme.typography.bodyMedium,
+                                                        color = IvidsColorTokens.SlateMuted
+                                                    )
+                                                }
+                                            } else {
+                                                LazyColumn(
+                                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                                    contentPadding = PaddingValues(bottom = 12.dp)
+                                                ) {
+                                                    itemsIndexed(
+                                                        items = playerState.queue,
+                                                        key = { idx, item -> "${idx}_${item.id}" }
+                                                    ) { index, item ->
+                                                        NowPlayingQueueRow(
+                                                            index = index,
+                                                            item = item,
+                                                            isActive = index == playerState.currentIndex,
+                                                            accent = accent,
+                                                            onJump = { playerViewModel.jumpToQueueIndex(index) },
+                                                            onRemove = { playerViewModel.removeFromQueue(index) }
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -405,8 +533,8 @@ private fun NowPlayingQueueRow(
 }
 
 /**
- * Renders the central artwork, [IvidsScrubber] seek bar, transport controls, volume [IvidsScrubber],
- * and quick track actions inside [NowPlayingSheet].
+ * Renders the central artwork (supporting horizontal swipe skip), [IvidsScrubber] seek bar,
+ * transport controls, quick actions, and optional software volume controls inside [NowPlayingSheet].
  */
 @Composable
 private fun NowPlayingHeroCard(
@@ -415,10 +543,22 @@ private fun NowPlayingHeroCard(
     accent: Color,
     onOpenArtist: () -> Unit,
     onOpenPlaylistPicker: () -> Unit,
-    playerViewModel: PlayerViewModel
+    playerViewModel: PlayerViewModel,
+    showVolumeControls: Boolean = true,
+    maxArtworkSize: Dp = 310.dp,
+    onSwipePrevious: (() -> Unit)? = null,
+    onSwipeNext: (() -> Unit)? = null
 ) {
     val strings = LocalStrings.current
+    val density = LocalDensity.current
     var dragPositionMs by remember(track?.id) { mutableStateOf<Float?>(null) }
+    var coverSwipePx by remember(track?.id) { mutableStateOf(0f) }
+    val animatedCoverSwipePx by animateFloatAsState(
+        targetValue = coverSwipePx,
+        animationSpec = spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMedium),
+        label = "CoverSwipeOffset"
+    )
+    val maxSwipePx = with(density) { 96.dp.toPx() }
     val durationMs = playerState.durationMs.coerceAtLeast(1L)
     val effectivePos = dragPositionMs ?: playerState.positionMs.toFloat().coerceIn(0f, durationMs.toFloat())
 
@@ -428,9 +568,36 @@ private fun NowPlayingHeroCard(
     ) {
         Box(
             modifier = Modifier
-                .widthIn(max = 310.dp)
+                .widthIn(max = maxArtworkSize)
                 .fillMaxWidth(0.76f)
                 .aspectRatio(1f)
+                .offset { IntOffset(animatedCoverSwipePx.roundToInt(), 0) }
+                .pointerInput(track?.id, playerState.canSkipPrevious, playerState.canSkipNext) {
+                    if (onSwipeNext == null && onSwipePrevious == null) return@pointerInput
+                    detectHorizontalDragGestures(
+                        onHorizontalDrag = { change, dragAmount ->
+                            change.consume()
+                            coverSwipePx = (coverSwipePx + dragAmount).coerceIn(-maxSwipePx, maxSwipePx)
+                        },
+                        onDragEnd = {
+                            val swipeDp = with(density) { coverSwipePx.toDp().value }
+                            coverSwipePx = 0f
+                            when (
+                                resolveHorizontalSwipeAction(
+                                    offsetDp = swipeDp,
+                                    thresholdDp = 72f,
+                                    canSkipPrevious = playerState.canSkipPrevious,
+                                    canSkipNext = playerState.canSkipNext
+                                )
+                            ) {
+                                HorizontalSwipeAction.SKIP_NEXT -> onSwipeNext?.invoke()
+                                HorizontalSwipeAction.SKIP_PREVIOUS -> onSwipePrevious?.invoke()
+                                HorizontalSwipeAction.NONE -> Unit
+                            }
+                        },
+                        onDragCancel = { coverSwipePx = 0f }
+                    )
+                }
                 .shadow(28.dp, RoundedCornerShape(24.dp), ambientColor = Color.Black, spotColor = Color.Black)
                 .clip(RoundedCornerShape(24.dp))
                 .background(IvidsColorTokens.GlassSurface),
@@ -658,32 +825,36 @@ private fun NowPlayingHeroCard(
             }
         }
 
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            IconButton(
-                onClick = playerViewModel::toggleMute,
-                modifier = Modifier.tvFocusable(shape = CircleShape)
+        if (showVolumeControls) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Icon(
-                    imageVector = if (playerState.isMuted) {
-                        Icons.AutoMirrored.Rounded.VolumeOff
-                    } else {
-                        Icons.AutoMirrored.Rounded.VolumeUp
-                    },
-                    contentDescription = strings["volume"],
-                    tint = IvidsColorTokens.SlateMuted
+                IconButton(
+                    onClick = playerViewModel::toggleMute,
+                    modifier = Modifier
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .tvFocusable(shape = CircleShape)
+                ) {
+                    Icon(
+                        imageVector = if (playerState.isMuted) {
+                            Icons.AutoMirrored.Rounded.VolumeOff
+                        } else {
+                            Icons.AutoMirrored.Rounded.VolumeUp
+                        },
+                        contentDescription = strings["volume"],
+                        tint = IvidsColorTokens.SlateMuted
+                    )
+                }
+                IvidsScrubber(
+                    value = playerState.volume,
+                    onValueChange = playerViewModel::setVolume,
+                    valueRange = 0f..1f,
+                    alwaysShowThumb = true,
+                    modifier = Modifier.weight(1f)
                 )
             }
-            IvidsScrubber(
-                value = playerState.volume,
-                onValueChange = playerViewModel::setVolume,
-                valueRange = 0f..1f,
-                alwaysShowThumb = true,
-                modifier = Modifier.weight(1f)
-            )
         }
     }
 }

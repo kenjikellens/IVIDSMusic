@@ -64,12 +64,14 @@ import org.koin.core.parameter.parametersOf
 
 /**
  * Root Compose Multiplatform entrypoint wiring [IvidsTheme], [LocalizationManager],
- * [AdaptiveAppShell], all 11 screens, and transient toast overlays across Desktop, Mobile, and TV.
+ * [AdaptiveAppShell], optional hoisted Now Playing sheet visibility, and all 11 screens.
  */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun IvidsApp(
-    searchFocusTrigger: Int = 0
+    searchFocusTrigger: Int = 0,
+    nowPlayingExpanded: Boolean? = null,
+    onNowPlayingExpandedChange: ((Boolean) -> Unit)? = null
 ) {
     val koin = getKoin()
     val preferencesRepository = remember { koin.get<PreferencesRepository>() }
@@ -96,6 +98,7 @@ fun IvidsApp(
     val playlists by libraryRepository.observePlaylists().collectAsState(initial = emptyList())
     val likedTracks by libraryRepository.observeLikedTracks().collectAsState(initial = emptyList())
     val downloadedTracks by libraryRepository.observeDownloadedTracks().collectAsState(initial = emptyList())
+    val downloaderState by downloaderViewModel.uiState.collectAsState()
 
     val likedIds = remember(likedTracks) { likedTracks.map { it.id }.toSet() }
     val downloadedIds = remember(downloadedTracks) { downloadedTracks.map { it.id }.toSet() }
@@ -170,6 +173,9 @@ fun IvidsApp(
                         playerViewModel = playerViewModel,
                         playlists = playlists,
                         searchFocusTrigger = searchFocusTrigger,
+                        activeDownloadCount = downloaderState.activeDownloads.size,
+                        nowPlayingExpanded = nowPlayingExpanded,
+                        onNowPlayingExpandedChange = onNowPlayingExpandedChange,
                         onHeaderSearchSubmit = { q ->
                             searchViewModel.submitQuery(q)
                             navigator.navigateTo(AppRoute.Search(q))
@@ -261,7 +267,11 @@ fun IvidsApp(
                                     toastController = toastController,
                                     onOpenArtist = { id, name -> navigator.navigateTo(AppRoute.ArtistDetail(id, name)) },
                                     onOpenAlbum = { id -> navigator.navigateTo(AppRoute.AlbumDetail(id)) },
-                                    onOpenSongDetail = { id -> navigator.navigateTo(AppRoute.SongDetail(id)) }
+                                    onOpenSongDetail = { id -> navigator.navigateTo(AppRoute.SongDetail(id)) },
+                                    onOpenGenreSearch = { genre ->
+                                        searchViewModel.submitQuery(genre)
+                                        navigator.navigateTo(AppRoute.Search(genre))
+                                    }
                                 )
                             }
 

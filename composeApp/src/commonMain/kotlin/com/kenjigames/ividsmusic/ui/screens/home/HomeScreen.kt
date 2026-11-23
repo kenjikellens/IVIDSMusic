@@ -34,10 +34,11 @@ import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 
 /**
- * Renders the Home discovery feed inside a framed viewport (max 1360dp) featuring the Living
- * Album Hero, Continue Listening shelf, Top Artists, Top Albums, and curated genre chart rows.
+ * Renders the Home discovery feed inside a framed viewport (max 1360dp) using adaptive edge-to-edge
+ * carousels and [LocalLayoutMetrics] gutters for seamless mobile and desktop scrolling.
  */
 @Composable
 fun HomeScreen(
@@ -52,6 +53,8 @@ fun HomeScreen(
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
+    val metrics = LocalLayoutMetrics.current
+    val sidePad = metrics.screenHorizontalPadding
 
     FramedScreenContainer(
         maxWidth = 1360.dp,
@@ -59,8 +62,11 @@ fun HomeScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
-            verticalArrangement = Arrangement.spacedBy(28.dp)
+            contentPadding = PaddingValues(
+                top = if (metrics.isCompactMobile) 16.dp else 22.dp,
+                bottom = metrics.contentBottomClearance
+            ),
+            verticalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 22.dp else 28.dp)
         ) {
             if (!state.isHeroDismissed) {
                 item(key = "hero") {
@@ -80,7 +86,8 @@ fun HomeScreen(
                         },
                         secondaryActionLabel = strings["explore_trends"],
                         onSecondaryAction = onExploreTrends,
-                        onDismiss = viewModel::dismissHero
+                        onDismiss = viewModel::dismissHero,
+                        modifier = Modifier.padding(horizontal = sidePad)
                     )
                 }
             }
@@ -90,7 +97,7 @@ fun HomeScreen(
                     Surface(
                         shape = RoundedCornerShape(18.dp),
                         color = IvidsColorTokens.DangerCoral.copy(alpha = 0.12f),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = sidePad)
                     ) {
                         Row(
                             modifier = Modifier.padding(18.dp),
@@ -124,9 +131,13 @@ fun HomeScreen(
                         Text(
                             text = strings["recently_listened"],
                             style = MaterialTheme.typography.headlineSmall,
-                            color = IvidsColorTokens.ChalkInk
+                            color = IvidsColorTokens.ChalkInk,
+                            modifier = Modifier.padding(horizontal = sidePad)
                         )
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = sidePad),
+                            horizontalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 12.dp else 16.dp)
+                        ) {
                             items(state.continueListening, key = { "recent_${it.id}" }) { track ->
                                 MusicCard(
                                     title = track.title,
@@ -147,16 +158,20 @@ fun HomeScreen(
                         Text(
                             text = if (idx == 0) strings["top_tracks_header"] else strings["loading"],
                             style = MaterialTheme.typography.headlineSmall,
-                            color = IvidsColorTokens.ChalkInk
+                            color = IvidsColorTokens.ChalkInk,
+                            modifier = Modifier.padding(horizontal = sidePad)
                         )
-                        ShimmerSkeletonRow(isCircular = idx == 2)
+                        ShimmerSkeletonRow(
+                            isCircular = idx == 2,
+                            modifier = Modifier.padding(horizontal = sidePad)
+                        )
                     }
                 }
             } else {
                 items(state.genreSections, key = { "genre_${it.id}" }) { section ->
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = sidePad),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -169,7 +184,10 @@ fun HomeScreen(
                                 Text(strings["play_all"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.SlateMuted)
                             }
                         }
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = sidePad),
+                            horizontalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 12.dp else 16.dp)
+                        ) {
                             items(section.tracks, key = { "${section.id}_${it.id}" }) { track ->
                                 MusicCard(
                                     title = track.title,
@@ -190,9 +208,13 @@ fun HomeScreen(
                         Text(
                             text = strings["top_artists_header"],
                             style = MaterialTheme.typography.headlineSmall,
-                            color = IvidsColorTokens.ChalkInk
+                            color = IvidsColorTokens.ChalkInk,
+                            modifier = Modifier.padding(horizontal = sidePad)
                         )
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = sidePad),
+                            horizontalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 12.dp else 16.dp)
+                        ) {
                             items(state.topArtists, key = { "artist_${it.id}" }) { artist ->
                                 MusicCard(
                                     title = artist.name,
@@ -213,9 +235,13 @@ fun HomeScreen(
                         Text(
                             text = strings["top_albums_header"],
                             style = MaterialTheme.typography.headlineSmall,
-                            color = IvidsColorTokens.ChalkInk
+                            color = IvidsColorTokens.ChalkInk,
+                            modifier = Modifier.padding(horizontal = sidePad)
                         )
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        LazyRow(
+                            contentPadding = PaddingValues(horizontal = sidePad),
+                            horizontalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 12.dp else 16.dp)
+                        ) {
                             items(state.topAlbums, key = { "album_${it.id}" }) { album ->
                                 MusicCard(
                                     title = album.title,

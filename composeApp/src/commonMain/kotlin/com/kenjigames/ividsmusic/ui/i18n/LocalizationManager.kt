@@ -114,7 +114,10 @@ data class AppStrings(
             "up_to_date" to "You are on the latest version.",
             "cache_cleared" to "Audio cache cleared.",
             "scores_cleared" to "Recommendation scores reset.",
-            "defaults_restored" to "Default preferences restored."
+            "defaults_restored" to "Default preferences restored.",
+            "tab_player" to "Player",
+            "tab_queue" to "Queue",
+            "save_album" to "Save Album"
         )
     }
 }

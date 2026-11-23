@@ -3,9 +3,13 @@ package com.kenjigames.ividsmusic.ui.screens.profile
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -37,6 +41,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
@@ -48,12 +55,15 @@ import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Displays the framed listener profile card (max 900dp), stat counters (Liked Songs, Playlists,
- * Minutes Played), last 20 recently played tracks, and top listened genre weights.
+ * Displays the framed listener profile card (max 900dp) with adaptive mobile stat tiles of equal
+ * height, deduplicated [FlowRow] action pills, listening history, and top genre weights.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
@@ -67,6 +77,7 @@ fun ProfileScreen(
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
+    val metrics = LocalLayoutMetrics.current
 
     if (state.isEditModalOpen) {
         AlertDialog(
@@ -119,11 +130,11 @@ fun ProfileScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 104.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            contentPadding = ividsScreenPadding(top = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 18.dp else 24.dp)
         ) {
             item(key = "profile_hero") {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     LivingAlbumHero(
                         eyebrow = strings["you"],
                         title = state.profile.displayName.ifBlank { strings["listener"] },
@@ -134,24 +145,15 @@ fun ProfileScreen(
                         secondaryActionLabel = strings["settings"],
                         onSecondaryAction = onOpenSettings
                     )
-                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        ProfilePillAction(
-                            icon = Icons.Rounded.Edit,
-                            label = strings["edit_profile"],
-                            accent = accent,
-                            onClick = { viewModel.setEditModalOpen(true) }
-                        )
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
                         ProfilePillAction(
                             icon = Icons.Rounded.Download,
                             label = strings["nav_downloader"],
                             accent = accent,
                             onClick = onOpenDownloader
-                        )
-                        ProfilePillAction(
-                            icon = Icons.Rounded.Settings,
-                            label = strings["settings"],
-                            accent = accent,
-                            onClick = onOpenSettings
                         )
                     }
                 }
@@ -159,23 +161,26 @@ fun ProfileScreen(
 
             item(key = "profile_stats") {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 10.dp else 14.dp)
                 ) {
                     ProfileStatCard(
                         value = state.likedCount.toString(),
                         label = strings["liked_songs"],
-                        modifier = Modifier.weight(1f)
+                        isCompact = metrics.isCompactMobile,
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                     ProfileStatCard(
                         value = state.playlistCount.toString(),
                         label = strings["playlists"],
-                        modifier = Modifier.weight(1f)
+                        isCompact = metrics.isCompactMobile,
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                     ProfileStatCard(
                         value = state.minutesPlayed.toString(),
                         label = strings["minutes_played"],
-                        modifier = Modifier.weight(1f)
+                        isCompact = metrics.isCompactMobile,
+                        modifier = Modifier.weight(1f).fillMaxHeight()
                     )
                 }
             }
@@ -269,7 +274,7 @@ fun ProfileScreen(
 }
 
 /**
- * Renders a sleek tonal pill shortcut button inside [ProfileScreen].
+ * Renders a sleek tonal pill shortcut button inside [ProfileScreen] with single-line non-wrapping text.
  */
 @Composable
 private fun ProfilePillAction(
@@ -285,17 +290,25 @@ private fun ProfilePillAction(
         baseBorderColor = IvidsColorTokens.HairlineSubtle
     ) {
         Icon(icon, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-        Text(label, style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = IvidsColorTokens.ChalkInk,
+            maxLines = 1,
+            softWrap = false
+        )
     }
 }
 
 /**
- * Renders a borderless tabular numeric metric tile inside [ProfileScreen]'s stats grid.
+ * Renders a borderless tabular numeric metric tile inside [ProfileScreen]'s stats grid with
+ * centered labels and uniform row height.
  */
 @Composable
 private fun ProfileStatCard(
     value: String,
     label: String,
+    isCompact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Surface(
@@ -304,9 +317,9 @@ private fun ProfileStatCard(
         color = IvidsColorTokens.GlassSurface
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
+            modifier = Modifier.fillMaxSize().padding(if (isCompact) 14.dp else 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
         ) {
             Text(
                 text = value,
@@ -316,7 +329,8 @@ private fun ProfileStatCard(
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
-                color = IvidsColorTokens.SlateMuted
+                color = IvidsColorTokens.SlateMuted,
+                textAlign = TextAlign.Center
             )
         }
     }

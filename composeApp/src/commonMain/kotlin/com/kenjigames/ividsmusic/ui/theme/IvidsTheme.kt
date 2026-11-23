@@ -3,17 +3,53 @@ package com.kenjigames.ividsmusic.ui.theme
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.dp
 import kotlin.math.abs
+
+/**
+ * Holds responsive viewport spacing and card sizing metrics derived from the active [ShellMode],
+ * keeping desktop/TV proportions intact while compacting margins and enabling touch affordances on phones.
+ */
+@Immutable
+data class IvidsLayoutMetrics(
+    val isCompactMobile: Boolean = false,
+    val screenHorizontalPadding: Dp = 24.dp,
+    val contentBottomClearance: Dp = 104.dp,
+    val cardWidth: Dp = 176.dp,
+    val showTouchPlayFab: Boolean = false
+)
+
+val LocalLayoutMetrics = staticCompositionLocalOf { IvidsLayoutMetrics() }
+
+/**
+ * Returns screen scroll content padding adapted to the current [LocalLayoutMetrics] so compact
+ * mobile viewports gain tighter side gutters and sufficient clearance above MiniPlayerBar and nav bars.
+ */
+@Composable
+fun ividsScreenPadding(top: Dp = 22.dp): PaddingValues {
+    val metrics = LocalLayoutMetrics.current
+    val resolvedTop = if (metrics.isCompactMobile && top > 16.dp) 16.dp else top
+    return PaddingValues(
+        start = metrics.screenHorizontalPadding,
+        end = metrics.screenHorizontalPadding,
+        top = resolvedTop,
+        bottom = metrics.contentBottomClearance
+    )
+}
 
 /**
  * Applies IVIDS Lumina's layered dark theme, 450ms animated album-art accent color, RTL/LTR layout

@@ -55,6 +55,7 @@ import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
+import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
@@ -83,8 +84,8 @@ fun formatDurationMillis(durationMs: Long): String {
 }
 
 /**
- * Displays a sleek neutral interactive track row with smooth high-contrast hover illumination,
- * thumbnail play overlay, active equalizer indicator, tabular duration/bitrate badges, and menu.
+ * Displays a responsive interactive track row adapting padding, touch target sizes, and metadata
+ * density via [LocalLayoutMetrics] with crisp hover illumination and quick action menu.
  */
 @Composable
 fun TrackRowItem(
@@ -105,14 +106,17 @@ fun TrackRowItem(
     trailingContent: (@Composable () -> Unit)? = null
 ) {
     val strings = LocalStrings.current
+    val metrics = LocalLayoutMetrics.current
     var menuExpanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val artistHoverSource = remember { MutableInteractionSource() }
+    val isArtistHovered by artistHoverSource.collectIsHoveredAsState()
 
     val rowBg by animateColorAsState(
         targetValue = when {
-            isHovered && isCurrentlyPlaying -> Color(0xFF2B2B34)
-            isHovered -> Color(0xFF202027)
+            isHovered && isCurrentlyPlaying -> Color(0xFF2F2F3B)
+            isHovered -> Color(0xFF24242E)
             isCurrentlyPlaying -> Color(0xFF1A1A20)
             else -> Color.Transparent
         },
@@ -124,6 +128,8 @@ fun TrackRowItem(
         animationSpec = tween(140, easing = FastOutSlowInEasing),
         label = "TrackRowPlayOverlay"
     )
+    val thumbSize = if (metrics.isCompactMobile) 42.dp else 46.dp
+    val iconButtonSize = if (metrics.isCompactMobile) 42.dp else 36.dp
 
     Surface(
         modifier = modifier
@@ -138,13 +144,16 @@ fun TrackRowItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 9.dp),
+                .padding(
+                    horizontal = if (metrics.isCompactMobile) 8.dp else 12.dp,
+                    vertical = if (metrics.isCompactMobile) 8.dp else 9.dp
+                ),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(14.dp)
+            horizontalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 10.dp else 14.dp)
         ) {
             if (index != null) {
                 Box(
-                    modifier = Modifier.width(26.dp),
+                    modifier = Modifier.width(if (metrics.isCompactMobile) 22.dp else 26.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     when {
@@ -177,7 +186,7 @@ fun TrackRowItem(
 
             Box(
                 modifier = Modifier
-                    .size(46.dp)
+                    .size(thumbSize)
                     .clip(RoundedCornerShape(10.dp))
                     .background(IvidsColorTokens.GlassSurface),
                 contentAlignment = Alignment.Center
@@ -187,7 +196,7 @@ fun TrackRowItem(
                         model = track.coverUrl,
                         contentDescription = track.title,
                         contentScale = ContentScale.Crop,
-                        modifier = Modifier.size(46.dp)
+                        modifier = Modifier.size(thumbSize)
                     )
                 } else {
                     Icon(
@@ -200,7 +209,7 @@ fun TrackRowItem(
                 if (playOverlayAlpha > 0.02f) {
                     Box(
                         modifier = Modifier
-                            .size(46.dp)
+                            .size(thumbSize)
                             .graphicsLayer { alpha = playOverlayAlpha }
                             .background(Color(0x99000000)),
                         contentAlignment = Alignment.Center
@@ -230,10 +239,14 @@ fun TrackRowItem(
                     Text(
                         text = track.artist,
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (isHovered) IvidsColorTokens.ChalkInk.copy(alpha = 0.78f) else IvidsColorTokens.SlateMuted,
+                        color = if (isArtistHovered || isHovered) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.clickable(onClick = onOpenArtist)
+                        modifier = Modifier
+                            .weight(1f, fill = false)
+                            .pointerHoverIcon(PointerIcon.Hand)
+                            .hoverable(artistHoverSource)
+                            .clickable(onClick = onOpenArtist)
                     )
                     if (isDownloaded) {
                         Icon(
@@ -243,17 +256,19 @@ fun TrackRowItem(
                             modifier = Modifier.size(14.dp)
                         )
                     }
-                    track.bitrateKbps?.takeIf { isDownloaded && it > 0 }?.let { kbps ->
-                        Surface(
-                            color = IvidsColorTokens.RecessedTrough,
-                            shape = RoundedCornerShape(6.dp)
-                        ) {
-                            Text(
-                                text = "$kbps kbps",
-                                style = IvidsTextStyles.tabularBadge(),
-                                color = IvidsColorTokens.SlateMuted,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
-                            )
+                    if (!metrics.isCompactMobile) {
+                        track.bitrateKbps?.takeIf { isDownloaded && it > 0 }?.let { kbps ->
+                            Surface(
+                                color = IvidsColorTokens.RecessedTrough,
+                                shape = RoundedCornerShape(6.dp)
+                            ) {
+                                Text(
+                                    text = "$kbps kbps",
+                                    style = IvidsTextStyles.tabularBadge(),
+                                    color = IvidsColorTokens.SlateMuted,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -270,7 +285,7 @@ fun TrackRowItem(
             IconButton(
                 onClick = onToggleLike,
                 modifier = Modifier
-                    .size(36.dp)
+                    .size(iconButtonSize)
                     .pointerHoverIcon(PointerIcon.Hand)
                     .tvFocusable(shape = CircleShape)
             ) {
@@ -290,7 +305,7 @@ fun TrackRowItem(
                 IconButton(
                     onClick = { menuExpanded = true },
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(iconButtonSize)
                         .pointerHoverIcon(PointerIcon.Hand)
                         .tvFocusable(shape = CircleShape)
                 ) {

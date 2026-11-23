@@ -38,6 +38,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
@@ -135,6 +137,9 @@ fun ToastHost(
 /**
  * Modal dialog allowing the user to create a new custom playlist with a title and optional description.
  */
+/**
+ * Modal dialog allowing users to create a new playlist with title and optional description.
+ */
 @Composable
 fun CreatePlaylistDialog(
     onDismiss: () -> Unit,
@@ -192,13 +197,17 @@ fun CreatePlaylistDialog(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = accent,
                     contentColor = IvidsColorTokens.OnAccentDark
-                )
+                ),
+                modifier = Modifier.then(if (name.isNotBlank()) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
             ) {
                 Text(strings["profile_save"])
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            ) {
                 Text(strings["close"], color = IvidsColorTokens.SlateMuted)
             }
         }
@@ -206,7 +215,8 @@ fun CreatePlaylistDialog(
 }
 
 /**
- * Modal dialog allowing the user to append a track to an existing playlist or create a new one.
+ * Modal dialog allowing the user to append a track to an existing playlist using hover-highlighted
+ * [IvidsSelectableDialogItem] rows or create a new playlist.
  */
 @Composable
 fun PlaylistPickerDialog(
@@ -236,31 +246,20 @@ fun PlaylistPickerDialog(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         items(playlists, key = { it.id }) { playlist ->
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .tvFocusable(shape = RoundedCornerShape(10.dp))
-                                    .clickable { onSelectPlaylist(playlist) },
-                                shape = RoundedCornerShape(10.dp),
-                                color = IvidsColorTokens.GrooveElevated,
-                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder)
+                            IvidsSelectableDialogItem(
+                                selected = false,
+                                onClick = { onSelectPlaylist(playlist) }
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = playlist.title,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = IvidsColorTokens.ChalkInk
-                                    )
-                                    Text(
-                                        text = "${playlist.tracks.size}",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = accent
-                                    )
-                                }
+                                Text(
+                                    text = playlist.title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = IvidsColorTokens.ChalkInk
+                                )
+                                Text(
+                                    text = "${playlist.tracks.size}",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = accent
+                                )
                             }
                         }
                     }
@@ -269,14 +268,17 @@ fun PlaylistPickerDialog(
                 OutlinedButton(
                     onClick = onCreateNew,
                     border = BorderStroke(1.dp, accent),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().pointerHoverIcon(PointerIcon.Hand)
                 ) {
                     Text(strings["create_playlist"], color = accent)
                 }
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            ) {
                 Text(strings["close"], color = IvidsColorTokens.SlateMuted)
             }
         }
@@ -309,13 +311,17 @@ fun ConfirmationDialog(
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isDestructive) IvidsColorTokens.DangerCoral else accent,
                     contentColor = if (isDestructive) IvidsColorTokens.ChalkInk else IvidsColorTokens.OnAccentDark
-                )
+                ),
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
             ) {
                 Text(confirmLabel)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+            ) {
                 Text(strings["cancel"], color = IvidsColorTokens.SlateMuted)
             }
         }

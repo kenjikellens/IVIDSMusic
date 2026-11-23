@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +40,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.LayoutMode
 import com.kenjigames.ividsmusic.domain.model.UpdateMode
@@ -46,6 +50,7 @@ import com.kenjigames.ividsmusic.ui.components.BitrateSelector
 import com.kenjigames.ividsmusic.ui.components.ConfirmationDialog
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
+import com.kenjigames.ividsmusic.ui.components.IvidsSelectableDialogItem
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
@@ -53,13 +58,16 @@ import com.kenjigames.ividsmusic.ui.i18n.SupportedLanguage
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 import kotlin.math.roundToInt
 
 /**
- * Renders the centered Settings screen (max 860dp) featuring borderless tonal panels, recessed
- * segmented selectors, custom [IvidsSwitch] toggles, 16-language picker, and 4–320 kbps selector.
+ * Renders the centered Settings screen (max 860dp) featuring hover-reactive language picker
+ * options, adaptive mobile row wrapping, UI scale steppers, language/quality/update controls, and resets.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
@@ -68,6 +76,7 @@ fun SettingsScreen(
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
+    val metrics = LocalLayoutMetrics.current
 
     if (state.isLanguageModalOpen) {
         AlertDialog(
@@ -77,34 +86,31 @@ fun SettingsScreen(
             text = {
                 LazyColumn(
                     modifier = Modifier.fillMaxWidth().heightIn(max = 380.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(SupportedLanguage.entries, key = { it.code }) { lang ->
                         val selected = lang == state.language
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .tvFocusable(shape = RoundedCornerShape(12.dp))
-                                .clickable { viewModel.selectLanguage(lang) },
-                            shape = RoundedCornerShape(12.dp),
-                            color = if (selected) IvidsColorTokens.GlassHover else IvidsColorTokens.RecessedTrough
+                        IvidsSelectableDialogItem(
+                            selected = selected,
+                            onClick = { viewModel.selectLanguage(lang) }
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(lang.displayName, style = MaterialTheme.typography.titleSmall, color = IvidsColorTokens.ChalkInk)
-                                if (selected) {
-                                    Icon(Icons.Rounded.Check, null, tint = IvidsColorTokens.ChalkInk, modifier = Modifier.size(20.dp))
-                                }
+                            Text(
+                                text = lang.displayName,
+                                style = MaterialTheme.typography.titleSmall,
+                                color = if (selected) accent else IvidsColorTokens.ChalkInk
+                            )
+                            if (selected) {
+                                Icon(Icons.Rounded.Check, null, tint = accent, modifier = Modifier.size(20.dp))
                             }
                         }
                     }
                 }
             },
             confirmButton = {
-                TextButton(onClick = { viewModel.setLanguageModalOpen(false) }) {
+                TextButton(
+                    onClick = { viewModel.setLanguageModalOpen(false) },
+                    modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                ) {
                     Text(strings["close"], color = IvidsColorTokens.SlateMuted)
                 }
             }
@@ -139,8 +145,8 @@ fun SettingsScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 104.dp),
-            verticalArrangement = Arrangement.spacedBy(22.dp)
+            contentPadding = ividsScreenPadding(top = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             item(key = "settings_title") {
                 Text(
@@ -174,7 +180,8 @@ fun SettingsScreen(
                                     TextButton(
                                         onClick = { viewModel.setUiScale(state.uiScale - 0.10f) },
                                         enabled = state.uiScale > 0.76f,
-                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                        modifier = Modifier.then(if (state.uiScale > 0.76f) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
                                     ) { Text("-", color = IvidsColorTokens.ChalkInk) }
                                     Text(
                                         text = "${(state.uiScale * 100).roundToInt()}%",
@@ -184,7 +191,8 @@ fun SettingsScreen(
                                     TextButton(
                                         onClick = { viewModel.setUiScale(state.uiScale + 0.10f) },
                                         enabled = state.uiScale < 1.49f,
-                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp)
+                                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                        modifier = Modifier.then(if (state.uiScale < 1.49f) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
                                     ) { Text("+", color = IvidsColorTokens.ChalkInk) }
                                 }
                             }
