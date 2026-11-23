@@ -21,8 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.FilterQuality
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.ui.theme.ColorExtractor
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 
@@ -42,7 +40,6 @@ fun BlurredArtworkBackdrop(
     modifier: Modifier = Modifier,
     tintColor: Color? = null,
     scrimAlpha: Float = 0.72f,
-    blurRadius: Dp = 48.dp,
     fallbackColor: Color = IvidsColorTokens.ObsidianStage
 ) {
     var blurredBitmap by remember(artworkUrl) { mutableStateOf<ImageBitmap?>(null) }

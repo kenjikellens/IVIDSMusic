@@ -1,49 +1,35 @@
 package com.kenjigames.ividsmusic.ui.components
 
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.IndicationNodeFactory
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.hoverable
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -57,7 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -65,32 +50,13 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.addOutline
-import androidx.compose.ui.graphics.drawOutline
-import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.graphics.drawscope.clipRect
-import androidx.compose.ui.graphics.drawscope.rotate
-import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.node.DelegatableNode
-import androidx.compose.ui.node.DrawModifierNode
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.math.hypot
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
@@ -99,13 +65,14 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * Custom antialiased hi-fi scrubber and volume bar replacing default Material 3 Sliders with a
- * sleek artwork-tinted track that thickens smoothly and reveals a crisp circular thumb on hover/drag.
+ * sleek track that thickens smoothly and reveals a crisp circular thumb on hover/drag.
  */
 @Composable
 fun IvidsScrubber(
@@ -118,7 +85,6 @@ fun IvidsScrubber(
     alwaysShowThumb: Boolean = false,
     enabled: Boolean = true
 ) {
-    val accent = LocalDynamicAccent.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     var isDragging by remember { mutableStateOf(false) }
@@ -229,7 +195,7 @@ fun IvidsScrubber(
 }
 
 /**
- * Borderless hi-fi pill toggle with crisp white thumb, signature IVIDS cyan active track,
+ * Borderless hi-fi pill toggle with crisp white checked track, neutral dark off-track,
  * and clean tonal hover brightening without outline noise.
  */
 @Composable
@@ -384,198 +350,6 @@ fun <T> IvidsSegmentedBar(
 }
 
 /**
- * Semantic hover fill styles kept separate from [ividsHoverZoom]'s 0%-to-100% animation engine.
- */
-enum class IvidsHoverStyle {
-    NEUTRAL,
-    ON_LIGHT,
-    PRIMARY_ACCENT,
-    DESTRUCTIVE
-}
-
-/**
- * Resolves a semantic [IvidsHoverStyle] to its translucent overlay tint color.
- */
-fun resolveHoverColor(style: IvidsHoverStyle): Color = when (style) {
-    IvidsHoverStyle.NEUTRAL -> IvidsColorTokens.HoverOverlay
-    IvidsHoverStyle.ON_LIGHT -> Color(0x38000000)
-    IvidsHoverStyle.PRIMARY_ACCENT -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.20f)
-    IvidsHoverStyle.DESTRUCTIVE -> IvidsColorTokens.DangerCoral.copy(alpha = 0.11f)
-}
-
-/**
- * Resolves the pointer-originated press ripple color matching a semantic [IvidsHoverStyle].
- */
-fun resolveRippleColor(style: IvidsHoverStyle): Color = when (style) {
-    IvidsHoverStyle.NEUTRAL -> Color(0x40FFFFFF)
-    IvidsHoverStyle.ON_LIGHT -> Color(0x40000000)
-    IvidsHoverStyle.PRIMARY_ACCENT -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.30f)
-    IvidsHoverStyle.DESTRUCTIVE -> IvidsColorTokens.DangerCoral.copy(alpha = 0.20f)
-}
-
-/**
- * Returns an [IvidsPressRippleIndication] configured for semantic [style] that renders only
- * pointer-originated press ripples while ignoring hover and focus state overlays.
- */
-fun ividsPressRipple(style: IvidsHoverStyle = IvidsHoverStyle.NEUTRAL): IndicationNodeFactory =
-    IvidsPressRippleIndication(resolveRippleColor(style))
-
-/**
- * Custom press-only [IndicationNodeFactory] that renders radial click ripples from pointer
- * coordinates without Material 3's built-in non-zooming hover tint overlay.
- */
-class IvidsPressRippleIndication(private val color: Color) : IndicationNodeFactory {
-    /** Creates the [PressRippleNode] observing [interactionSource] press events. */
-    override fun create(interactionSource: InteractionSource): DelegatableNode =
-        PressRippleNode(interactionSource, color)
-
-    override fun hashCode(): Int = color.hashCode()
-
-    override fun equals(other: Any?): Boolean =
-        other is IvidsPressRippleIndication && other.color == color
-}
-
-private data class ActiveRippleWave(
-    val press: PressInteraction.Press,
-    val radius: Animatable<Float, AnimationVector1D>,
-    val alpha: Animatable<Float, AnimationVector1D>
-)
-
-private class PressRippleNode(
-    private val interactionSource: InteractionSource,
-    private val color: Color
-) : Modifier.Node(), DrawModifierNode {
-    private val activeWaves = mutableStateListOf<ActiveRippleWave>()
-
-    /** Subscribes to press events and launches expanding radial ripple animations on tap/click. */
-    override fun onAttach() {
-        coroutineScope.launch {
-            interactionSource.interactions.collect { interaction ->
-                when (interaction) {
-                    is PressInteraction.Press -> {
-                        val wave = ActiveRippleWave(
-                            press = interaction,
-                            radius = Animatable(0f),
-                            alpha = Animatable(1f)
-                        )
-                        activeWaves.add(wave)
-                        launch {
-                            wave.radius.animateTo(
-                                targetValue = 1f,
-                                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
-                            )
-                        }
-                    }
-                    is PressInteraction.Release, is PressInteraction.Cancel -> {
-                        val press = when (interaction) {
-                            is PressInteraction.Release -> interaction.press
-                            is PressInteraction.Cancel -> interaction.press
-                            else -> null
-                        }
-                        val wave = activeWaves.lastOrNull { it.press == press }
-                        if (wave != null) {
-                            launch {
-                                if (wave.radius.value < 0.85f) {
-                                    wave.radius.animateTo(
-                                        targetValue = 1f,
-                                        animationSpec = tween(durationMillis = 150, easing = FastOutSlowInEasing)
-                                    )
-                                }
-                                wave.alpha.animateTo(0f, tween(durationMillis = 160))
-                                activeWaves.remove(wave)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /** Clears active waves on node detach to avoid stale frame draws. */
-    override fun onDetach() {
-        activeWaves.clear()
-    }
-
-    /** Draws child content followed by clipped radial press waves expanding from click origin. */
-    override fun ContentDrawScope.draw() {
-        drawContent()
-        if (activeWaves.isEmpty()) return
-        clipRect {
-            activeWaves.forEach { wave ->
-                val maxR = maxOf(
-                    hypot(wave.press.pressPosition.x, wave.press.pressPosition.y),
-                    hypot(size.width - wave.press.pressPosition.x, wave.press.pressPosition.y),
-                    hypot(wave.press.pressPosition.x, size.height - wave.press.pressPosition.y),
-                    hypot(size.width - wave.press.pressPosition.x, size.height - wave.press.pressPosition.y)
-                ).coerceAtLeast(1f)
-                val alpha = wave.alpha.value.coerceIn(0f, 1f)
-                if (alpha > 0.005f) {
-                    drawCircle(
-                        color = color.copy(alpha = color.alpha * alpha),
-                        radius = maxR * wave.radius.value,
-                        center = wave.press.pressPosition
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Draws a hover fill resolved from [style] (or optional [hoverColor] override) that zooms smoothly
- * outward from `0%` at the container's center to `100%` of [shape] without re-layouting children.
- */
-fun Modifier.ividsHoverZoom(
-    hovered: Boolean,
-    shape: Shape = RoundedCornerShape(12.dp),
-    style: IvidsHoverStyle = IvidsHoverStyle.NEUTRAL,
-    hoverColor: Color? = null,
-    enabled: Boolean = true
-): Modifier = composed {
-    val resolvedColor = hoverColor ?: resolveHoverColor(style)
-    val progress by animateFloatAsState(
-        targetValue = if (enabled && hovered) 1f else 0f,
-        animationSpec = tween(durationMillis = 185, easing = FastOutSlowInEasing),
-        label = "IvidsHoverZoom"
-    )
-    if (progress <= 0.005f) return@composed this
-    val p = progress.coerceIn(0f, 1f)
-    this.drawBehind {
-        val outline = shape.createOutline(size, layoutDirection, this)
-        val boundsPath = Path().apply { addOutline(outline) }
-        clipPath(boundsPath) {
-            scale(scaleX = p, scaleY = p, pivot = Offset(size.width / 2f, size.height / 2f)) {
-                drawOutline(
-                    outline = outline,
-                    color = resolvedColor.copy(alpha = resolvedColor.alpha * p)
-                )
-            }
-        }
-    }
-}
-
-/**
- * Applies a tactile spring press-scale animation driven by [interactionSource] so touch taps on
- * cards, track rows, and buttons compress smoothly without intercepting gestures.
- */
-fun Modifier.ividsTouchFeedback(
-    interactionSource: MutableInteractionSource,
-    enabled: Boolean = true,
-    pressedScale: Float = 0.965f
-): Modifier = composed {
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (enabled && isPressed) pressedScale else 1f,
-        animationSpec = spring(dampingRatio = 0.7f, stiffness = 900f),
-        label = "IvidsTouchScale"
-    )
-    this.graphicsLayer {
-        scaleX = scale
-        scaleY = scale
-    }
-}
-
-/**
  * Tonal pill button pairing a base fill with semantic [hoverStyle] (or explicit [hoverColor]) and
  * the shared `0% -> 100%` [ividsHoverZoom] animation plus hand cursor and TV focus handling.
  */
@@ -587,8 +361,6 @@ fun IvidsTonalPill(
     baseColor: Color = Color(0xFF1D1D1D),
     hoverColor: Color = IvidsColorTokens.GlassHover,
     hoverStyle: IvidsHoverStyle = IvidsHoverStyle.NEUTRAL,
-    baseBorderColor: Color = IvidsColorTokens.HairlineSubtle,
-    hoverBorderColor: Color = IvidsColorTokens.HoverBorder,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
     content: @Composable RowScope.() -> Unit
 ) {
@@ -845,100 +617,5 @@ fun FramedScreenContainer(
             modifier = Modifier.widthIn(max = maxWidth).fillMaxWidth(),
             content = content
         )
-    }
-}
-
-/**
- * Unified spinning vinyl record loader rendered on Canvas across buffering play controls and
- * screen loading states with concentric grooves, rotating specular sheen, and signature center label.
- */
-@Composable
-fun IvidsVinylLoader(
-    modifier: Modifier = Modifier,
-    size: Dp = 44.dp,
-    centerLabelColor: Color = IvidsColorTokens.PrimaryCyan,
-    discColor: Color = Color(0xFF161616),
-    grooveColor: Color = Color(0x30FFFFFF)
-) {
-    val transition = rememberInfiniteTransition(label = "VinylLoaderSpin")
-    val angle by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1150, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "VinylRotation"
-    )
-
-    Canvas(modifier = modifier.size(size)) {
-        val radius = this.size.minDimension / 2f
-        val center = Offset(this.size.width / 2f, this.size.height / 2f)
-        val grooveStroke = (radius * 0.055f).coerceAtLeast(1f)
-
-        rotate(degrees = angle, pivot = center) {
-            drawCircle(color = discColor, radius = radius, center = center)
-            drawCircle(
-                color = grooveColor,
-                radius = radius - grooveStroke * 0.5f,
-                center = center,
-                style = Stroke(width = grooveStroke)
-            )
-            listOf(0.80f, 0.64f, 0.48f).forEach { factor ->
-                drawCircle(
-                    color = grooveColor.copy(alpha = 0.22f),
-                    radius = radius * factor,
-                    center = center,
-                    style = Stroke(width = grooveStroke * 0.8f)
-                )
-            }
-            val arcRadius = radius * 0.72f
-            val arcTopLeft = Offset(center.x - arcRadius, center.y - arcRadius)
-            val arcSize = Size(arcRadius * 2f, arcRadius * 2f)
-            drawArc(
-                color = IvidsColorTokens.ChalkInk.copy(alpha = 0.35f),
-                startAngle = 15f,
-                sweepAngle = 42f,
-                useCenter = false,
-                topLeft = arcTopLeft,
-                size = arcSize,
-                style = Stroke(width = grooveStroke * 1.4f, cap = StrokeCap.Round)
-            )
-            drawArc(
-                color = IvidsColorTokens.ChalkInk.copy(alpha = 0.35f),
-                startAngle = 195f,
-                sweepAngle = 42f,
-                useCenter = false,
-                topLeft = arcTopLeft,
-                size = arcSize,
-                style = Stroke(width = grooveStroke * 1.4f, cap = StrokeCap.Round)
-            )
-            drawCircle(color = centerLabelColor, radius = radius * 0.33f, center = center)
-            drawCircle(color = discColor, radius = (radius * 0.11f).coerceAtLeast(1.5f), center = center)
-        }
-    }
-}
-
-/**
- * Centered full-width loading state displaying [IvidsVinylLoader] with an optional localized label.
- */
-@Composable
-fun IvidsVinylLoadingBox(
-    label: String? = null,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxWidth().padding(vertical = 48.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(14.dp)
-    ) {
-        IvidsVinylLoader(size = 54.dp)
-        if (!label.isNullOrBlank()) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyMedium,
-                color = IvidsColorTokens.SlateMuted
-            )
-        }
     }
 }

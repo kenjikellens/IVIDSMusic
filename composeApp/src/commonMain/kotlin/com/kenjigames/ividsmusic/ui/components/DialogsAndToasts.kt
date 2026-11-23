@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -95,7 +94,6 @@ fun ToastHost(
     modifier: Modifier = Modifier
 ) {
     val toast by controller.current.collectAsState()
-    val accent = LocalDynamicAccent.current
 
     LaunchedEffect(toast?.id) {
         if (toast != null) {

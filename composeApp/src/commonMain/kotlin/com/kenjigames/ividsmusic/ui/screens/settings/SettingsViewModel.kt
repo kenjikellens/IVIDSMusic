@@ -42,7 +42,6 @@ data class SettingsUiState(
     val updateMode: UpdateMode = UpdateMode.AUTO,
     val appVersion: String = "0.2.5",
     val updateState: AppUpdateState = AppUpdateState.Idle,
-    val isLanguageModalOpen: Boolean = false,
     val showResetScoresConfirm: Boolean = false,
     val showResetDefaultsConfirm: Boolean = false
 )
@@ -84,17 +83,9 @@ class SettingsViewModel(
     }
 
     /**
-     * Opens or dismisses the 16-language selection modal dialog.
-     */
-    fun setLanguageModalOpen(open: Boolean) {
-        _uiState.update { it.copy(isLanguageModalOpen = open) }
-    }
-
-    /**
      * Switches the active language across all 16 JSON bundles immediately and saves the preference.
      */
     fun selectLanguage(language: SupportedLanguage) {
-        _uiState.update { it.copy(isLanguageModalOpen = false) }
         scope.launch {
             localizationManager.setLanguage(language.code)
             preferencesRepository.setLanguageCode(language.code)
