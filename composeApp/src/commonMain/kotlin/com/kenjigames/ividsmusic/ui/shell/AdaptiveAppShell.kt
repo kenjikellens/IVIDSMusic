@@ -2,6 +2,9 @@ package com.kenjigames.ividsmusic.ui.shell
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -9,6 +12,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -92,7 +96,10 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -652,7 +659,8 @@ private fun SidebarNavigationRail(
 
 /**
  * Single borderless navigation pill inside [SidebarNavigationRail]: ONLY the opened ([selected])
- * item receives the signature IVIDS cyan accent, while hovered inactive items use a neutral grey hover.
+ * item receives the signature IVIDS cyan accent, while hovered inactive items animate smoothly
+ * to a clearly legible neutral graphite elevation with an illuminated rim and hand cursor.
  */
 @Composable
 private fun SidebarNavButton(
@@ -667,12 +675,21 @@ private fun SidebarNavButton(
 
     val bgColor by animateColorAsState(
         targetValue = when {
-            selected -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.12f)
+            selected -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.14f)
             isHovered -> IvidsColorTokens.GlassHover
             else -> Color.Transparent
         },
-        animationSpec = tween(150),
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "NavButtonBg"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = when {
+            selected -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.34f)
+            isHovered -> IvidsColorTokens.HoverBorder
+            else -> Color.Transparent
+        },
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        label = "NavButtonBorder"
     )
     val iconColor by animateColorAsState(
         targetValue = when {
@@ -680,7 +697,7 @@ private fun SidebarNavButton(
             isHovered -> IvidsColorTokens.ChalkInk
             else -> IvidsColorTokens.SlateMuted
         },
-        animationSpec = tween(150),
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "NavButtonIcon"
     )
     val textColor by animateColorAsState(
@@ -688,19 +705,30 @@ private fun SidebarNavButton(
             selected || isHovered -> IvidsColorTokens.ChalkInk
             else -> IvidsColorTokens.SlateMuted
         },
-        animationSpec = tween(150),
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "NavButtonText"
+    )
+    val itemScale by animateFloatAsState(
+        targetValue = if (isHovered && !selected) 1.018f else 1f,
+        animationSpec = spring(dampingRatio = 0.80f, stiffness = 420f),
+        label = "NavButtonScale"
     )
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .height(44.dp)
+            .graphicsLayer {
+                scaleX = itemScale
+                scaleY = itemScale
+            }
+            .pointerHoverIcon(PointerIcon.Hand)
             .tvFocusable(shape = RoundedCornerShape(10.dp))
             .hoverable(interactionSource)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = bgColor
+        color = bgColor,
+        border = BorderStroke(1.dp, borderColor)
     ) {
         Row(
             modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
@@ -876,11 +904,23 @@ private fun DesktopTopBar(
             }
         }
 
+        val profileHoverSource = remember { MutableInteractionSource() }
+        val profileHovered by profileHoverSource.collectIsHoveredAsState()
+        val profileBg by animateColorAsState(
+            targetValue = if (profileHovered) IvidsColorTokens.GlassHover else IvidsColorTokens.GlassSurface,
+            animationSpec = tween(200, easing = FastOutSlowInEasing),
+            label = "TopBarProfileBg"
+        )
         Surface(
             onClick = onOpenProfile,
             shape = CircleShape,
-            color = IvidsColorTokens.GlassSurface,
-            modifier = Modifier.size(40.dp).tvFocusable(shape = CircleShape)
+            color = profileBg,
+            border = BorderStroke(1.dp, if (profileHovered) IvidsColorTokens.HoverBorder else IvidsColorTokens.HairlineSubtle),
+            modifier = Modifier
+                .size(40.dp)
+                .pointerHoverIcon(PointerIcon.Hand)
+                .hoverable(profileHoverSource)
+                .tvFocusable(shape = CircleShape)
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
@@ -1033,7 +1073,10 @@ private fun DesktopPlayerDeck(
                         shape = CircleShape,
                         color = accent,
                         shadowElevation = 6.dp,
-                        modifier = Modifier.size(40.dp).tvFocusable(shape = CircleShape)
+                        modifier = Modifier
+                            .size(40.dp)
+                            .pointerHoverIcon(PointerIcon.Hand)
+                            .tvFocusable(shape = CircleShape)
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             if (playerState.isBuffering) {
@@ -1232,13 +1275,26 @@ private fun QueueSideSheet(
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     itemsIndexed(playerState.queue, key = { idx, t -> "${idx}_${t.id}" }) { idx, item ->
                         val active = idx == playerState.currentIndex
+                        val queueItemSource = remember { MutableInteractionSource() }
+                        val queueHovered by queueItemSource.collectIsHoveredAsState()
+                        val queueItemBg by animateColorAsState(
+                            targetValue = when {
+                                queueHovered -> IvidsColorTokens.GlassHover
+                                active -> Color(0x1CFFFFFF)
+                                else -> IvidsColorTokens.GlassSurface
+                            },
+                            animationSpec = tween(200, easing = FastOutSlowInEasing),
+                            label = "QueueRowBg"
+                        )
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .pointerHoverIcon(PointerIcon.Hand)
+                                .hoverable(queueItemSource)
                                 .tvFocusable(shape = RoundedCornerShape(10.dp))
                                 .clickable { onJumpTo(idx) },
                             shape = RoundedCornerShape(10.dp),
-                            color = if (active) Color(0x1CFFFFFF) else IvidsColorTokens.GlassSurface
+                            color = queueItemBg
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),

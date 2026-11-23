@@ -47,6 +47,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.DetailHeaderArtworkWash
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -270,24 +271,18 @@ private fun SongActionPill(
     highlighted: Boolean = false,
     onClick: () -> Unit
 ) {
-    Surface(
+    IvidsTonalPill(
         onClick = onClick,
-        shape = CircleShape,
-        color = if (highlighted) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
-        border = BorderStroke(1.dp, if (highlighted) accent else IvidsColorTokens.HairlineSubtle),
-        modifier = Modifier.tvFocusable(shape = CircleShape)
+        baseColor = if (highlighted) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
+        hoverColor = if (highlighted) accent.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover,
+        baseBorderColor = if (highlighted) accent else IvidsColorTokens.HairlineSubtle,
+        hoverBorderColor = if (highlighted) accent else IvidsColorTokens.HoverBorder
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(icon, null, tint = if (highlighted) accent else IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelLarge,
-                color = if (highlighted) accent else IvidsColorTokens.ChalkInk
-            )
-        }
+        Icon(icon, null, tint = if (highlighted) accent else IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelLarge,
+            color = if (highlighted) accent else IvidsColorTokens.ChalkInk
+        )
     }
 }

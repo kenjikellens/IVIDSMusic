@@ -1,8 +1,10 @@
 package com.kenjigames.ividsmusic.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -20,6 +22,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -46,6 +51,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
@@ -57,7 +65,7 @@ import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
  * Custom antialiased hi-fi scrubber and volume bar replacing default Material 3 Sliders with a
- * sleek artwork-tinted track that thickens slightly and reveals a crisp circular thumb on hover/drag.
+ * sleek artwork-tinted track that thickens smoothly and reveals a crisp circular thumb on hover/drag.
  */
 @Composable
 fun IvidsScrubber(
@@ -85,13 +93,13 @@ fun IvidsScrubber(
     val activeInteraction = enabled && (isHovered || isDragging || alwaysShowThumb)
 
     val animatedTrackHeight by animateDpAsState(
-        targetValue = if (enabled && (isHovered || isDragging)) trackHeight + 2.dp else trackHeight,
-        animationSpec = tween(140),
+        targetValue = if (enabled && (isHovered || isDragging)) trackHeight + 2.5.dp else trackHeight,
+        animationSpec = tween(180, easing = FastOutSlowInEasing),
         label = "ScrubberTrackHeight"
     )
     val animatedThumbRadius by animateDpAsState(
-        targetValue = if (activeInteraction) 6.dp else 0.dp,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        targetValue = if (activeInteraction) 6.5.dp else 0.dp,
+        animationSpec = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
         label = "ScrubberThumbRadius"
     )
 
@@ -106,6 +114,7 @@ fun IvidsScrubber(
     Box(
         modifier = modifier
             .height(24.dp)
+            .then(if (enabled) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
             .hoverable(interactionSource, enabled = enabled)
             .onSizeChanged { size -> widthPx = size.width.toFloat().coerceAtLeast(1f) }
             .pointerInput(enabled) {
@@ -146,7 +155,7 @@ fun IvidsScrubber(
             val fillWidth = (size.width * fraction).coerceIn(0f, size.width)
 
             drawRoundRect(
-                color = Color(0x26FFFFFF),
+                color = Color(0x28FFFFFF),
                 topLeft = Offset(0f, barTop),
                 size = Size(size.width, barH),
                 cornerRadius = corner
@@ -168,7 +177,7 @@ fun IvidsScrubber(
                 val centerY = size.height / 2f
                 drawCircle(
                     color = accent.copy(alpha = 0.28f),
-                    radius = thumbPx * 1.55f,
+                    radius = thumbPx * 1.6f,
                     center = Offset(thumbX, centerY)
                 )
                 drawCircle(
@@ -182,7 +191,8 @@ fun IvidsScrubber(
 }
 
 /**
- * Custom smooth hi-fi pill toggle with crisp white elevated thumb and signature IVIDS cyan active track.
+ * Custom smooth hi-fi pill toggle with crisp white elevated thumb, signature IVIDS cyan active
+ * track, and soft hover rim illumination.
  */
 @Composable
 fun IvidsSwitch(
@@ -191,14 +201,21 @@ fun IvidsSwitch(
     modifier: Modifier = Modifier,
     enabled: Boolean = true
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
     val trackColor by animateColorAsState(
-        targetValue = if (checked) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.RecessedTrough,
-        animationSpec = tween(200),
+        targetValue = when {
+            checked -> IvidsColorTokens.PrimaryCyan
+            isHovered -> IvidsColorTokens.GlassHover
+            else -> IvidsColorTokens.RecessedTrough
+        },
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "SwitchTrack"
     )
     val thumbColor by animateColorAsState(
-        targetValue = if (checked) Color.White else IvidsColorTokens.SlateMuted,
-        animationSpec = tween(200),
+        targetValue = if (checked || isHovered) Color.White else IvidsColorTokens.SlateMuted,
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "SwitchThumb"
     )
     val thumbOffset by animateDpAsState(
@@ -210,12 +227,18 @@ fun IvidsSwitch(
     Surface(
         modifier = modifier
             .size(width = 48.dp, height = 28.dp)
+            .pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interactionSource, enabled = enabled)
             .tvFocusable(shape = CircleShape)
             .clip(CircleShape)
             .clickable(enabled = enabled) { onCheckedChange(!checked) },
         shape = CircleShape,
         color = trackColor,
-        border = if (checked) null else BorderStroke(1.dp, IvidsColorTokens.HairlineBorder)
+        border = when {
+            checked -> null
+            isHovered -> BorderStroke(1.dp, IvidsColorTokens.HoverBorder)
+            else -> BorderStroke(1.dp, IvidsColorTokens.HairlineBorder)
+        }
     ) {
         Box(
             modifier = Modifier.padding(3.dp),
@@ -225,7 +248,7 @@ fun IvidsSwitch(
                 modifier = Modifier
                     .offset(x = thumbOffset)
                     .size(22.dp)
-                    .shadow(elevation = if (checked) 4.dp else 1.dp, shape = CircleShape)
+                    .shadow(elevation = if (checked || isHovered) 5.dp else 1.dp, shape = CircleShape)
                     .clip(CircleShape)
                     .background(thumbColor)
             )
@@ -234,8 +257,8 @@ fun IvidsSwitch(
 }
 
 /**
- * Recessed pill trough container hosting selectable option pills using a refined neutral graphite
- * active pill with crisp white text so Settings and filter bars are not flooded with cyan buttons.
+ * Recessed pill trough container hosting selectable option pills with high-contrast neutral hover
+ * lighting, smooth FastOutSlowIn easing, and crisp active state without cyan clutter.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -259,19 +282,34 @@ fun <T> IvidsSegmentedBar(
         ) {
             items.forEach { item ->
                 val isSelected = item == selected
+                val interactionSource = remember { MutableInteractionSource() }
+                val isHovered by interactionSource.collectIsHoveredAsState()
+
                 val bg by animateColorAsState(
-                    targetValue = if (isSelected) Color(0xFF28282E) else Color.Transparent,
-                    animationSpec = tween(180),
+                    targetValue = when {
+                        isSelected && isHovered -> Color(0xFF393944)
+                        isSelected -> Color(0xFF2D2D35)
+                        isHovered -> IvidsColorTokens.GlassHover
+                        else -> Color.Transparent
+                    },
+                    animationSpec = tween(220, easing = FastOutSlowInEasing),
                     label = "SegmentBg"
                 )
                 val fg by animateColorAsState(
-                    targetValue = if (isSelected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
-                    animationSpec = tween(180),
+                    targetValue = when {
+                        isSelected || isHovered -> IvidsColorTokens.ChalkInk
+                        else -> IvidsColorTokens.SlateMuted
+                    },
+                    animationSpec = tween(220, easing = FastOutSlowInEasing),
                     label = "SegmentFg"
                 )
                 val borderColor by animateColorAsState(
-                    targetValue = if (isSelected) Color(0x2EFFFFFF) else Color.Transparent,
-                    animationSpec = tween(180),
+                    targetValue = when {
+                        isSelected -> Color(0x42FFFFFF)
+                        isHovered -> Color(0x2EFFFFFF)
+                        else -> Color.Transparent
+                    },
+                    animationSpec = tween(220, easing = FastOutSlowInEasing),
                     label = "SegmentBorder"
                 )
 
@@ -280,6 +318,8 @@ fun <T> IvidsSegmentedBar(
                         .clip(RoundedCornerShape(10.dp))
                         .background(bg)
                         .border(1.dp, borderColor, RoundedCornerShape(10.dp))
+                        .pointerHoverIcon(PointerIcon.Hand)
+                        .hoverable(interactionSource)
                         .tvFocusable(shape = RoundedCornerShape(10.dp))
                         .clickable { onSelect(item) }
                         .padding(horizontal = 13.dp, vertical = 8.dp),
@@ -297,6 +337,65 @@ fun <T> IvidsSegmentedBar(
                 }
             }
         }
+    }
+}
+
+/**
+ * Tactile tonal pill button with smooth spring lift, high-contrast neutral hover elevation,
+ * illuminated border rim, and desktop hand cursor feedback.
+ */
+@Composable
+fun IvidsTonalPill(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    baseColor: Color = IvidsColorTokens.GlassSurface,
+    hoverColor: Color = Color(0xFF32323B),
+    baseBorderColor: Color = IvidsColorTokens.HairlineBorder,
+    hoverBorderColor: Color = IvidsColorTokens.HoverBorder,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+    content: @Composable RowScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    val bg by animateColorAsState(
+        targetValue = if (enabled && isHovered) hoverColor else baseColor,
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        label = "TonalPillBg"
+    )
+    val border by animateColorAsState(
+        targetValue = if (enabled && isHovered) hoverBorderColor else baseBorderColor,
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        label = "TonalPillBorder"
+    )
+    val scale by animateFloatAsState(
+        targetValue = if (enabled && isHovered) 1.025f else 1f,
+        animationSpec = spring(dampingRatio = 0.78f, stiffness = 420f),
+        label = "TonalPillScale"
+    )
+
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = CircleShape,
+        color = bg,
+        border = BorderStroke(1.dp, border),
+        modifier = modifier
+            .graphicsLayer {
+                scaleX = scale
+                scaleY = scale
+            }
+            .then(if (enabled) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
+            .hoverable(interactionSource, enabled = enabled)
+            .tvFocusable(shape = CircleShape)
+    ) {
+        Row(
+            modifier = Modifier.padding(contentPadding),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            content = content
+        )
     }
 }
 

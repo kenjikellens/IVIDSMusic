@@ -33,6 +33,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.DetailHeaderArtworkWash
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
 import com.kenjigames.ividsmusic.ui.components.ToastController
@@ -131,30 +132,24 @@ fun AlbumDetailScreen(
                                 TextButton(onClick = { onOpenArtist(album.artistId, album.artist) }) {
                                     Text("${strings["view_artist"]}: ${album.artist}", color = IvidsColorTokens.ChalkInk)
                                 }
-                                Surface(
+                                IvidsTonalPill(
                                     onClick = viewModel::toggleSaved,
-                                    shape = CircleShape,
-                                    color = if (state.isSaved) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
-                                    border = BorderStroke(1.dp, if (state.isSaved) accent else IvidsColorTokens.HairlineSubtle),
-                                    modifier = Modifier.tvFocusable(shape = CircleShape)
+                                    baseColor = if (state.isSaved) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
+                                    hoverColor = if (state.isSaved) accent.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover,
+                                    baseBorderColor = if (state.isSaved) accent else IvidsColorTokens.HairlineSubtle,
+                                    hoverBorderColor = if (state.isSaved) accent else IvidsColorTokens.HoverBorder
                                 ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (state.isSaved) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
-                                            contentDescription = null,
-                                            tint = if (state.isSaved) accent else IvidsColorTokens.ChalkInk,
-                                            modifier = Modifier.size(18.dp)
-                                        )
-                                        Text(
-                                            text = if (state.isSaved) strings["saved_albums"] else strings["download_track"],
-                                            style = IvidsTextStyles.tabularBadge(),
-                                            color = IvidsColorTokens.ChalkInk
-                                        )
-                                    }
+                                    Icon(
+                                        imageVector = if (state.isSaved) Icons.Rounded.Bookmark else Icons.Rounded.BookmarkBorder,
+                                        contentDescription = null,
+                                        tint = if (state.isSaved) accent else IvidsColorTokens.ChalkInk,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Text(
+                                        text = if (state.isSaved) strings["saved_albums"] else strings["download_track"],
+                                        style = IvidsTextStyles.tabularBadge(),
+                                        color = IvidsColorTokens.ChalkInk
+                                    )
                                 }
                             }
                         }

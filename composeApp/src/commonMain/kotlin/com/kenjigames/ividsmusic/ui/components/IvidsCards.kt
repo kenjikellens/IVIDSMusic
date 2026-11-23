@@ -1,12 +1,15 @@
 package com.kenjigames.ividsmusic.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -54,6 +57,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
@@ -67,9 +72,9 @@ import com.kenjigames.ividsmusic.ui.theme.LocalIsTvMode
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Renders a borderless tonal artwork card for tracks, albums, or circular artist portraits that
- * softly blends its own cover artwork's dominant color into the card surface and reveals a
- * signature IVIDS-cyan play button on hover.
+ * Renders a tonal artwork card for tracks, albums, or circular artist portraits that softly
+ * blends its own cover artwork's dominant color and responds smoothly to hover with spring scale,
+ * lifted shadow, illuminated border, hand cursor, and an animated Play FAB.
  */
 @Composable
 fun MusicCard(
@@ -101,7 +106,7 @@ fun MusicCard(
         val base = if (isHovered) IvidsColorTokens.GlassHover else IvidsColorTokens.GlassSurface
         val tint = cardTint
         if (tint != null) {
-            lerp(base, tint, if (isHovered) 0.28f else 0.18f)
+            lerp(base, tint, if (isHovered) 0.36f else 0.18f)
         } else {
             base
         }
@@ -109,34 +114,59 @@ fun MusicCard(
 
     val surfaceColor by animateColorAsState(
         targetValue = targetCardSurface,
-        animationSpec = tween(220),
+        animationSpec = tween(260, easing = FastOutSlowInEasing),
         label = "MusicCardSurface"
+    )
+    val borderColor by animateColorAsState(
+        targetValue = when {
+            isHovered && cardTint != null -> cardTint!!.copy(alpha = 0.52f)
+            isHovered -> IvidsColorTokens.HoverBorder
+            else -> Color(0x0EFFFFFF)
+        },
+        animationSpec = tween(240, easing = FastOutSlowInEasing),
+        label = "MusicCardBorder"
+    )
+    val cardScale by animateFloatAsState(
+        targetValue = if (isHovered) 1.028f else 1f,
+        animationSpec = spring(dampingRatio = 0.78f, stiffness = 420f),
+        label = "MusicCardScale"
+    )
+    val cardElevation by animateDpAsState(
+        targetValue = if (isHovered) 18.dp else 2.dp,
+        animationSpec = tween(240, easing = FastOutSlowInEasing),
+        label = "MusicCardElevation"
     )
     val playFabAlpha by animateFloatAsState(
         targetValue = if (isHovered || isTvMode) 1f else 0f,
-        animationSpec = tween(180),
+        animationSpec = tween(200, easing = FastOutSlowInEasing),
         label = "MusicCardPlayAlpha"
     )
     val playFabScale by animateFloatAsState(
-        targetValue = if (isHovered || isTvMode) 1f else 0.8f,
-        animationSpec = tween(180),
+        targetValue = if (isHovered || isTvMode) 1f else 0.72f,
+        animationSpec = spring(dampingRatio = 0.68f, stiffness = 450f),
         label = "MusicCardPlayScale"
     )
 
     Surface(
         modifier = modifier
             .width(width)
+            .graphicsLayer {
+                scaleX = cardScale
+                scaleY = cardScale
+            }
             .shadow(
-                elevation = if (isHovered) 14.dp else 2.dp,
+                elevation = cardElevation,
                 shape = RoundedCornerShape(16.dp),
                 ambientColor = Color.Black,
-                spotColor = Color.Black
+                spotColor = cardTint ?: Color.Black
             )
+            .pointerHoverIcon(PointerIcon.Hand)
             .tvFocusable(shape = RoundedCornerShape(16.dp))
             .hoverable(interactionSource)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        color = surfaceColor
+        color = surfaceColor,
+        border = BorderStroke(1.dp, borderColor)
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Box(
@@ -190,6 +220,7 @@ fun MusicCard(
                             .align(Alignment.BottomEnd)
                             .padding(10.dp)
                             .size(42.dp)
+                            .pointerHoverIcon(PointerIcon.Hand)
                             .graphicsLayer {
                                 alpha = playFabAlpha
                                 scaleX = playFabScale
@@ -234,7 +265,7 @@ fun MusicCard(
 
 /**
  * Renders the signature Living Album Hero banner using a true blurred cover-art backdrop
- * ([BlurredArtworkBackdrop]), crisp cover framing, and a signature IVIDS primary Play button.
+ * ([BlurredArtworkBackdrop]), crisp cover framing, and smooth hoverable action pills.
  */
 @Composable
 fun LivingAlbumHero(
@@ -272,6 +303,7 @@ fun LivingAlbumHero(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(12.dp)
+                        .pointerHoverIcon(PointerIcon.Hand)
                         .tvFocusable(shape = CircleShape)
                 ) {
                     Icon(
@@ -345,7 +377,9 @@ fun LivingAlbumHero(
                                 containerColor = accent,
                                 contentColor = IvidsColorTokens.OnAccentDark
                             ),
-                            modifier = Modifier.tvFocusable(shape = CircleShape)
+                            modifier = Modifier
+                                .pointerHoverIcon(PointerIcon.Hand)
+                                .tvFocusable(shape = CircleShape)
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.PlayArrow,
@@ -357,18 +391,16 @@ fun LivingAlbumHero(
                         }
 
                         if (!secondaryActionLabel.isNullOrBlank() && onSecondaryAction != null) {
-                            Surface(
+                            IvidsTonalPill(
                                 onClick = onSecondaryAction,
-                                shape = CircleShape,
-                                color = Color(0x18FFFFFF),
-                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-                                modifier = Modifier.tvFocusable(shape = CircleShape)
+                                baseColor = Color(0x18FFFFFF),
+                                hoverColor = Color(0x32FFFFFF),
+                                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
                             ) {
                                 Text(
                                     text = secondaryActionLabel,
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = IvidsColorTokens.ChalkInk,
-                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                                    color = IvidsColorTokens.ChalkInk
                                 )
                             }
                         }

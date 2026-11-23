@@ -39,6 +39,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.DetailHeaderArtworkWash
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -149,50 +150,37 @@ fun ArtistDetailScreen(
                                     color = IvidsColorTokens.SlateMuted,
                                     modifier = Modifier.weight(1f)
                                 )
-                                Surface(
+                                IvidsTonalPill(
                                     onClick = viewModel::likeArtist,
-                                    shape = CircleShape,
-                                    color = if (state.isLikedArtist) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
-                                    border = BorderStroke(1.dp, if (state.isLikedArtist) accent else IvidsColorTokens.HairlineSubtle),
-                                    modifier = Modifier.tvFocusable(shape = CircleShape)
+                                    baseColor = if (state.isLikedArtist) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
+                                    hoverColor = if (state.isLikedArtist) accent.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover,
+                                    baseBorderColor = if (state.isLikedArtist) accent else IvidsColorTokens.HairlineSubtle,
+                                    hoverBorderColor = if (state.isLikedArtist) accent else IvidsColorTokens.HoverBorder
                                 ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = if (state.isLikedArtist) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
-                                            contentDescription = null,
-                                            tint = if (state.isLikedArtist) accent else IvidsColorTokens.ChalkInk,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Text(
-                                            text = strings["like"],
-                                            style = MaterialTheme.typography.labelLarge,
-                                            color = if (state.isLikedArtist) accent else IvidsColorTokens.ChalkInk
-                                        )
-                                    }
+                                    Icon(
+                                        imageVector = if (state.isLikedArtist) Icons.Rounded.Favorite else Icons.Rounded.FavoriteBorder,
+                                        contentDescription = null,
+                                        tint = if (state.isLikedArtist) accent else IvidsColorTokens.ChalkInk,
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Text(
+                                        text = strings["like"],
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = if (state.isLikedArtist) accent else IvidsColorTokens.ChalkInk
+                                    )
                                 }
-                                Surface(
+                                IvidsTonalPill(
                                     onClick = {
                                         if (state.topTracks.isNotEmpty()) {
                                             playerViewModel.playQueue(state.topTracks, shuffled = true)
                                         }
                                     },
-                                    shape = CircleShape,
-                                    color = IvidsColorTokens.GlassSurface,
-                                    border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-                                    modifier = Modifier.tvFocusable(shape = CircleShape)
+                                    baseColor = IvidsColorTokens.GlassSurface,
+                                    hoverColor = IvidsColorTokens.GlassHover,
+                                    baseBorderColor = IvidsColorTokens.HairlineSubtle
                                 ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                                    ) {
-                                        Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-                                        Text(strings["shuffle"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
-                                    }
+                                    Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
+                                    Text(strings["shuffle"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                                 }
                             }
                         }

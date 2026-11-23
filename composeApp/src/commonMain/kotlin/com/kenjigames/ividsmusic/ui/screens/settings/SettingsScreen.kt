@@ -47,6 +47,7 @@ import com.kenjigames.ividsmusic.ui.components.ConfirmationDialog
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.i18n.SupportedLanguage
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
@@ -211,21 +212,14 @@ fun SettingsScreen(
                             Text(strings["language"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
                             Text(strings["language_desc"], style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
                         }
-                        Surface(
+                        IvidsTonalPill(
                             onClick = { viewModel.setLanguageModalOpen(true) },
-                            shape = CircleShape,
-                            color = IvidsColorTokens.RecessedTrough,
-                            border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-                            modifier = Modifier.tvFocusable(shape = CircleShape)
+                            baseColor = IvidsColorTokens.RecessedTrough,
+                            hoverColor = IvidsColorTokens.GlassHover,
+                            baseBorderColor = IvidsColorTokens.HairlineSubtle
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(Icons.Rounded.Language, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
-                                Text(state.language.displayName, style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
-                            }
+                            Icon(Icons.Rounded.Language, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
+                            Text(state.language.displayName, style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                         }
                     }
 
@@ -320,21 +314,14 @@ fun SettingsScreen(
                                 Text(strings["update_now"], style = MaterialTheme.typography.labelLarge)
                             }
                         } else {
-                            Surface(
+                            IvidsTonalPill(
                                 onClick = viewModel::checkForUpdates,
-                                shape = CircleShape,
-                                color = IvidsColorTokens.RecessedTrough,
-                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-                                modifier = Modifier.tvFocusable(shape = CircleShape)
+                                baseColor = IvidsColorTokens.RecessedTrough,
+                                hoverColor = IvidsColorTokens.GlassHover,
+                                baseBorderColor = IvidsColorTokens.HairlineSubtle
                             ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    Icon(Icons.Rounded.SystemUpdate, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
-                                    Text(strings["check_updates"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
-                                }
+                                Icon(Icons.Rounded.SystemUpdate, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
+                                Text(strings["check_updates"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                             }
                         }
                     }
@@ -403,17 +390,18 @@ private fun SettingsActionRow(
             Text(title, style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
             Text(subtitle, style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
         }
-        Surface(
+        IvidsTonalPill(
             onClick = onClick,
-            shape = CircleShape,
-            color = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.14f) else IvidsColorTokens.RecessedTrough,
-            modifier = Modifier.tvFocusable(shape = CircleShape)
+            baseColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.14f) else IvidsColorTokens.RecessedTrough,
+            hoverColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.26f) else IvidsColorTokens.GlassHover,
+            baseBorderColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.28f) else IvidsColorTokens.HairlineSubtle,
+            hoverBorderColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.6f) else IvidsColorTokens.HoverBorder,
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 9.dp)
         ) {
             Text(
                 text = actionLabel,
                 style = MaterialTheme.typography.labelLarge,
-                color = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp)
+                color = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk
             )
         }
     }

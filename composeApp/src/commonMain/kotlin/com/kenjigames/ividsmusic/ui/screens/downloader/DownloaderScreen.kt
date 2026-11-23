@@ -52,6 +52,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.BitrateSelector
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
 import com.kenjigames.ividsmusic.ui.components.rememberTrackPlaylistModalState
@@ -165,21 +166,14 @@ fun DownloaderScreen(
                                 )
                             }
                             if (isDesktopPlatform) {
-                                Surface(
+                                IvidsTonalPill(
                                     onClick = viewModel::browseOutputFolder,
-                                    shape = CircleShape,
-                                    color = IvidsColorTokens.RecessedTrough,
-                                    border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-                                    modifier = Modifier.tvFocusable(shape = CircleShape)
+                                    baseColor = IvidsColorTokens.RecessedTrough,
+                                    hoverColor = IvidsColorTokens.GlassHover,
+                                    baseBorderColor = IvidsColorTokens.HairlineSubtle
                                 ) {
-                                    Row(
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        Icon(Icons.Rounded.FolderOpen, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-                                        Text(strings["home_browse"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
-                                    }
+                                    Icon(Icons.Rounded.FolderOpen, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
+                                    Text(strings["home_browse"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                                 }
                             }
                         }
@@ -217,18 +211,17 @@ fun DownloaderScreen(
                                 Spacer(modifier = Modifier.width(6.dp))
                                 Text("${strings["home_start"]} (${state.selectedQuality.label})", style = MaterialTheme.typography.labelLarge)
                             }
-                            Surface(
+                            IvidsTonalPill(
                                 onClick = { if (!state.isLoadingPreview) viewModel.loadPreview() },
-                                shape = CircleShape,
-                                color = IvidsColorTokens.RecessedTrough,
-                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-                                modifier = Modifier.tvFocusable(shape = CircleShape)
+                                baseColor = IvidsColorTokens.RecessedTrough,
+                                hoverColor = IvidsColorTokens.GlassHover,
+                                baseBorderColor = IvidsColorTokens.HairlineSubtle,
+                                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
                             ) {
                                 Text(
                                     text = if (state.isLoadingPreview) strings["loading"] else strings["preview_load"],
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = IvidsColorTokens.ChalkInk,
-                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
+                                    color = IvidsColorTokens.ChalkInk
                                 )
                             }
                         }
@@ -312,21 +305,14 @@ fun DownloaderScreen(
                                 color = IvidsColorTokens.SlateMuted
                             )
                         }
-                        Surface(
+                        IvidsTonalPill(
                             onClick = viewModel::rescanSavedDirectory,
-                            shape = CircleShape,
-                            color = IvidsColorTokens.RecessedTrough,
-                            border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-                            modifier = Modifier.tvFocusable(shape = CircleShape)
+                            baseColor = IvidsColorTokens.RecessedTrough,
+                            hoverColor = IvidsColorTokens.GlassHover,
+                            baseBorderColor = IvidsColorTokens.HairlineSubtle
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(6.dp)
-                            ) {
-                                Icon(Icons.Rounded.Refresh, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-                                Text(strings["rescan_saved"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
-                            }
+                            Icon(Icons.Rounded.Refresh, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
+                            Text(strings["rescan_saved"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                         }
                     }
                 }

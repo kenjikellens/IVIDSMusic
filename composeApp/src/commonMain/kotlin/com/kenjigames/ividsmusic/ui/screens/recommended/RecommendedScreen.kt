@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.ScoreEntityType
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -90,7 +91,7 @@ fun RecommendedScreen(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         state.topInterests.forEach { score ->
-                            Surface(
+                            IvidsTonalPill(
                                 onClick = {
                                     if (score.entityType == ScoreEntityType.ARTIST) {
                                         onOpenArtist(score.entityId, score.displayName)
@@ -98,16 +99,15 @@ fun RecommendedScreen(
                                         onSearchTopic(score.displayName)
                                     }
                                 },
-                                shape = CircleShape,
-                                color = IvidsColorTokens.GlassSurface,
-                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-                                modifier = Modifier.tvFocusable(shape = CircleShape)
+                                baseColor = IvidsColorTokens.GlassSurface,
+                                hoverColor = IvidsColorTokens.GlassHover,
+                                baseBorderColor = IvidsColorTokens.HairlineSubtle,
+                                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 9.dp)
                             ) {
                                 Text(
                                     text = "${score.displayName} (${score.score})",
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = IvidsColorTokens.ChalkInk,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 9.dp)
+                                    color = IvidsColorTokens.ChalkInk
                                 )
                             }
                         }

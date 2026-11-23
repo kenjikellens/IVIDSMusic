@@ -40,6 +40,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
@@ -277,21 +278,14 @@ private fun ProfilePillAction(
     accent: androidx.compose.ui.graphics.Color,
     onClick: () -> Unit
 ) {
-    Surface(
+    IvidsTonalPill(
         onClick = onClick,
-        shape = CircleShape,
-        color = IvidsColorTokens.GlassSurface,
-        border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-        modifier = Modifier.tvFocusable(shape = CircleShape)
+        baseColor = IvidsColorTokens.GlassSurface,
+        hoverColor = IvidsColorTokens.GlassHover,
+        baseBorderColor = IvidsColorTokens.HairlineSubtle
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Icon(icon, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-            Text(label, style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
-        }
+        Icon(icon, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
+        Text(label, style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
     }
 }
 

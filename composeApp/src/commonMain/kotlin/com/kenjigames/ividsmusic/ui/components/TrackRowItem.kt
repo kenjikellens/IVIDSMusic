@@ -1,7 +1,10 @@
 package com.kenjigames.ividsmusic.ui.components
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.hoverable
@@ -24,6 +27,7 @@ import androidx.compose.material.icons.rounded.FavoriteBorder
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material.icons.rounded.MusicNote
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -40,6 +44,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -48,7 +55,6 @@ import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
-import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
@@ -77,8 +83,8 @@ fun formatDurationMillis(durationMs: Long): String {
 }
 
 /**
- * Displays a sleek borderless interactive track row with hover elevation, active equalizer tint,
- * tabular duration/bitrate badges, like toggle, and overflow actions menu.
+ * Displays a sleek neutral interactive track row with smooth high-contrast hover illumination,
+ * thumbnail play overlay, active equalizer indicator, tabular duration/bitrate badges, and menu.
  */
 @Composable
 fun TrackRowItem(
@@ -98,7 +104,6 @@ fun TrackRowItem(
     isDownloaded: Boolean = track.isDownloaded,
     trailingContent: (@Composable () -> Unit)? = null
 ) {
-    val accent = LocalDynamicAccent.current
     val strings = LocalStrings.current
     var menuExpanded by remember { mutableStateOf(false) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -106,22 +111,35 @@ fun TrackRowItem(
 
     val rowBg by animateColorAsState(
         targetValue = when {
-            isCurrentlyPlaying -> Color(0x1CFFFFFF)
+            isHovered && isCurrentlyPlaying -> Color(0xFF31313A)
             isHovered -> IvidsColorTokens.GlassHover
+            isCurrentlyPlaying -> Color(0x1CFFFFFF)
             else -> Color.Transparent
         },
-        animationSpec = tween(150),
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "TrackRowBg"
+    )
+    val rowBorder by animateColorAsState(
+        targetValue = if (isHovered) Color(0x2EFFFFFF) else Color.Transparent,
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        label = "TrackRowBorder"
+    )
+    val playOverlayAlpha by animateFloatAsState(
+        targetValue = if (isHovered && !isCurrentlyPlaying) 1f else 0f,
+        animationSpec = tween(180, easing = FastOutSlowInEasing),
+        label = "TrackRowPlayOverlay"
     )
 
     Surface(
         modifier = modifier
             .fillMaxWidth()
+            .pointerHoverIcon(PointerIcon.Hand)
             .tvFocusable(shape = RoundedCornerShape(12.dp))
             .hoverable(interactionSource)
             .clickable(onClick = onPlay),
         shape = RoundedCornerShape(12.dp),
-        color = rowBg
+        color = rowBg,
+        border = BorderStroke(1.dp, rowBorder)
     ) {
         Row(
             modifier = Modifier
@@ -135,19 +153,30 @@ fun TrackRowItem(
                     modifier = Modifier.width(26.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    if (isCurrentlyPlaying) {
-                        Icon(
-                            imageVector = Icons.Rounded.GraphicEq,
-                            contentDescription = null,
-                            tint = IvidsColorTokens.ChalkInk,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    } else {
-                        Text(
-                            text = index.toString(),
-                            style = IvidsTextStyles.tabularBadge(),
-                            color = IvidsColorTokens.SlateMuted
-                        )
+                    when {
+                        isCurrentlyPlaying -> {
+                            Icon(
+                                imageVector = Icons.Rounded.GraphicEq,
+                                contentDescription = null,
+                                tint = IvidsColorTokens.ChalkInk,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        isHovered -> {
+                            Icon(
+                                imageVector = Icons.Rounded.PlayArrow,
+                                contentDescription = strings["play"],
+                                tint = IvidsColorTokens.ChalkInk,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                        else -> {
+                            Text(
+                                text = index.toString(),
+                                style = IvidsTextStyles.tabularBadge(),
+                                color = IvidsColorTokens.SlateMuted
+                            )
+                        }
                     }
                 }
             }
@@ -174,6 +203,22 @@ fun TrackRowItem(
                         modifier = Modifier.size(22.dp)
                     )
                 }
+                if (playOverlayAlpha > 0.02f) {
+                    Box(
+                        modifier = Modifier
+                            .size(46.dp)
+                            .graphicsLayer { alpha = playOverlayAlpha }
+                            .background(Color(0x99000000)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.PlayArrow,
+                            contentDescription = null,
+                            tint = IvidsColorTokens.ChalkInk,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
             }
 
             Column(modifier = Modifier.weight(1f)) {
@@ -191,7 +236,7 @@ fun TrackRowItem(
                     Text(
                         text = track.artist,
                         style = MaterialTheme.typography.bodySmall,
-                        color = IvidsColorTokens.SlateMuted,
+                        color = if (isHovered) IvidsColorTokens.ChalkInk.copy(alpha = 0.78f) else IvidsColorTokens.SlateMuted,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.clickable(onClick = onOpenArtist)
@@ -224,7 +269,7 @@ fun TrackRowItem(
                 Text(
                     text = formatDurationSeconds(track.durationSeconds),
                     style = IvidsTextStyles.tabularTime(),
-                    color = IvidsColorTokens.SlateMuted
+                    color = if (isHovered) IvidsColorTokens.ChalkInk.copy(alpha = 0.85f) else IvidsColorTokens.SlateMuted
                 )
             }
 
@@ -232,6 +277,7 @@ fun TrackRowItem(
                 onClick = onToggleLike,
                 modifier = Modifier
                     .size(36.dp)
+                    .pointerHoverIcon(PointerIcon.Hand)
                     .tvFocusable(shape = CircleShape)
             ) {
                 Icon(
@@ -251,12 +297,13 @@ fun TrackRowItem(
                     onClick = { menuExpanded = true },
                     modifier = Modifier
                         .size(36.dp)
+                        .pointerHoverIcon(PointerIcon.Hand)
                         .tvFocusable(shape = CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.MoreVert,
                         contentDescription = strings["more_info"],
-                        tint = IvidsColorTokens.SlateMuted,
+                        tint = if (isHovered) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
                         modifier = Modifier.size(18.dp)
                     )
                 }
@@ -264,7 +311,7 @@ fun TrackRowItem(
                 DropdownMenu(
                     expanded = menuExpanded,
                     onDismissRequest = { menuExpanded = false },
-                    containerColor = IvidsColorTokens.GlassHover
+                    containerColor = IvidsColorTokens.GlassSurface
                 ) {
                     DropdownMenuItem(
                         text = { Text(strings["play_next"], color = IvidsColorTokens.ChalkInk) },

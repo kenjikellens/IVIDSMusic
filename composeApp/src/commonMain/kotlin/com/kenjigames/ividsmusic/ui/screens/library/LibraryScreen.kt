@@ -47,6 +47,7 @@ import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.CreatePlaylistDialog
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ToastController
@@ -152,25 +153,19 @@ fun LibraryScreen(
                             ),
                             modifier = Modifier.weight(1f).tvFocusable(shape = RoundedCornerShape(16.dp))
                         )
-                        Surface(
+                        IvidsTonalPill(
                             onClick = {
                                 val tracks = state.filteredLikedTracks
                                 if (tracks.isNotEmpty()) playerViewModel.playQueue(tracks, shuffled = true)
                             },
                             enabled = state.filteredLikedTracks.isNotEmpty(),
-                            shape = CircleShape,
-                            color = IvidsColorTokens.GlassSurface,
-                            border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
-                            modifier = Modifier.tvFocusable(shape = CircleShape)
+                            baseColor = IvidsColorTokens.GlassSurface,
+                            hoverColor = IvidsColorTokens.GlassHover,
+                            baseBorderColor = IvidsColorTokens.HairlineSubtle,
+                            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 18.dp, vertical = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
-                                Text(strings["shuffle"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
-                            }
+                            Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
+                            Text(strings["shuffle"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
                         }
                     }
 

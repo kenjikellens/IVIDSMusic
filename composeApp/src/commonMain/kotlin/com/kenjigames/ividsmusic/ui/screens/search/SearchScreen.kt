@@ -1,9 +1,20 @@
 package com.kenjigames.ividsmusic.ui.screens.search
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +67,7 @@ import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -240,21 +252,43 @@ fun SearchScreen(
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
                         browseCategories.forEach { cat ->
+                            val tileHoverSource = remember { MutableInteractionSource() }
+                            val tileHovered by tileHoverSource.collectIsHoveredAsState()
+                            val tileScale by animateFloatAsState(
+                                targetValue = if (tileHovered) 1.03f else 1f,
+                                animationSpec = spring(dampingRatio = 0.78f, stiffness = 420f),
+                                label = "CategoryTileScale"
+                            )
+                            val tileBorder by animateColorAsState(
+                                targetValue = if (tileHovered) cat.tint.copy(alpha = 0.75f) else Color(0x14FFFFFF),
+                                animationSpec = tween(220, easing = FastOutSlowInEasing),
+                                label = "CategoryTileBorder"
+                            )
                             Surface(
                                 modifier = Modifier
                                     .width(184.dp)
                                     .height(98.dp)
+                                    .graphicsLayer {
+                                        scaleX = tileScale
+                                        scaleY = tileScale
+                                    }
+                                    .pointerHoverIcon(PointerIcon.Hand)
+                                    .hoverable(tileHoverSource)
                                     .tvFocusable(shape = RoundedCornerShape(18.dp))
                                     .clickable { viewModel.submitQuery(cat.query) },
                                 shape = RoundedCornerShape(18.dp),
-                                color = IvidsColorTokens.GlassSurface
+                                color = IvidsColorTokens.GlassSurface,
+                                border = BorderStroke(1.dp, tileBorder)
                             ) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
                                         .background(
                                             Brush.linearGradient(
-                                                listOf(cat.tint.copy(alpha = 0.78f), IvidsColorTokens.GlassSurface)
+                                                listOf(
+                                                    cat.tint.copy(alpha = if (tileHovered) 0.92f else 0.74f),
+                                                    IvidsColorTokens.GlassSurface
+                                                )
                                             )
                                         )
                                         .padding(18.dp),
@@ -379,18 +413,17 @@ fun SearchScreen(
                 if (state.canLoadMore) {
                     item(key = "load_more") {
                         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-                            Surface(
+                            IvidsTonalPill(
                                 onClick = { if (!state.isLoadingMore) viewModel.loadMore() },
-                                shape = CircleShape,
-                                color = IvidsColorTokens.GlassSurface,
-                                border = BorderStroke(1.dp, IvidsColorTokens.HairlineBorder),
-                                modifier = Modifier.tvFocusable(shape = CircleShape)
+                                baseColor = IvidsColorTokens.GlassSurface,
+                                hoverColor = IvidsColorTokens.GlassHover,
+                                baseBorderColor = IvidsColorTokens.HairlineBorder,
+                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                             ) {
                                 Text(
                                     text = if (state.isLoadingMore) strings["loading"] else strings["load_more"],
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = IvidsColorTokens.ChalkInk,
-                                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
+                                    color = IvidsColorTokens.ChalkInk
                                 )
                             }
                         }
