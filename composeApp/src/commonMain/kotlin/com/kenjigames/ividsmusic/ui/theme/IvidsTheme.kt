@@ -3,6 +3,7 @@ package com.kenjigames.ividsmusic.ui.theme
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -10,7 +11,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
+import com.kenjigames.ividsmusic.ui.components.ividsPressRipple
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -101,6 +105,7 @@ fun IvidsTheme(
     CompositionLocalProvider(
         LocalIvidsColors provides IvidsExtendedColors(),
         LocalDynamicAccent provides animatedAccent,
+        LocalIndication provides remember { ividsPressRipple(IvidsHoverStyle.NEUTRAL) },
         LocalUiScale provides clampedScale,
         LocalIsTvMode provides isTvMode,
         LocalLayoutDirection provides layoutDirection,

@@ -795,7 +795,12 @@ private fun NowPlayingHeroCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                IvidsIconButton(onClick = playerViewModel::toggleMute, size = 40.dp) {
+                val soundActive = !playerState.isMuted
+                IvidsIconButton(
+                    onClick = playerViewModel::toggleMute,
+                    size = 40.dp,
+                    hoverStyle = if (soundActive) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+                ) {
                     Icon(
                         imageVector = if (playerState.isMuted) {
                             Icons.AutoMirrored.Rounded.VolumeOff
@@ -803,7 +808,7 @@ private fun NowPlayingHeroCard(
                             Icons.AutoMirrored.Rounded.VolumeUp
                         },
                         contentDescription = strings["volume"],
-                        tint = IvidsColorTokens.SlateMuted
+                        tint = if (soundActive) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
                     )
                 }
                 IvidsScrubber(

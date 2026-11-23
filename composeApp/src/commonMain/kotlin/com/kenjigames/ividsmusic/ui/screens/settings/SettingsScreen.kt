@@ -40,7 +40,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -67,8 +66,7 @@ import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
 import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
 import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
-import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
-import com.kenjigames.ividsmusic.ui.components.resolveRippleColor
+import com.kenjigames.ividsmusic.ui.components.ividsPressRipple
 import com.kenjigames.ividsmusic.ui.i18n.AppStrings
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.i18n.SupportedLanguage
@@ -473,7 +471,7 @@ private fun SettingsListRow(
             .tvFocusable(shape = RoundedCornerShape(8.dp))
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = resolveRippleColor(hoverStyle)),
+                indication = ividsPressRipple(hoverStyle),
                 onClick = onClick
             )
             .padding(horizontal = horizontalPadding, vertical = 12.dp),
@@ -551,7 +549,7 @@ private fun SettingsRadioRow(
             .tvFocusable(shape = RoundedCornerShape(8.dp))
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = resolveRippleColor(IvidsHoverStyle.NEUTRAL)),
+                indication = ividsPressRipple(IvidsHoverStyle.NEUTRAL),
                 onClick = onClick
             )
             .padding(horizontal = horizontalPadding, vertical = 14.dp),

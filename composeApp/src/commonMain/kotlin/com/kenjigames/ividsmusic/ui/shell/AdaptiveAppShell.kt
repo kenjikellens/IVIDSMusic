@@ -88,7 +88,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.ripple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -136,8 +135,8 @@ import com.kenjigames.ividsmusic.ui.components.IvidsPlayCircleButton
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
 import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
+import com.kenjigames.ividsmusic.ui.components.ividsPressRipple
 import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
-import com.kenjigames.ividsmusic.ui.components.resolveRippleColor
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.navigation.AppNavigator
 import com.kenjigames.ividsmusic.ui.navigation.AppRoute
@@ -1003,7 +1002,7 @@ private fun SidebarNavButton(
             .hoverable(interactionSource)
             .clickable(
                 interactionSource = interactionSource,
-                indication = ripple(bounded = true, color = resolveRippleColor(navHoverStyle)),
+                indication = ividsPressRipple(navHoverStyle),
                 onClick = onClick
             ),
         shape = RoundedCornerShape(10.dp),
@@ -1478,15 +1477,24 @@ private fun DesktopPlayerDeck(
                         )
                     }
                 }
-                IvidsIconButton(onClick = onToggleQueue, size = 34.dp) {
+                IvidsIconButton(
+                    onClick = onToggleQueue,
+                    size = 34.dp,
+                    hoverStyle = if (queueOpen) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Rounded.QueueMusic,
                         contentDescription = strings["queue"],
-                        tint = if (queueOpen) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
+                        tint = if (queueOpen) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted,
                         modifier = Modifier.size(20.dp)
                     )
                 }
-                IvidsIconButton(onClick = playerViewModel::toggleMute, size = 34.dp) {
+                val soundActive = !playerState.isMuted
+                IvidsIconButton(
+                    onClick = playerViewModel::toggleMute,
+                    size = 34.dp,
+                    hoverStyle = if (soundActive) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+                ) {
                     Icon(
                         imageVector = if (playerState.isMuted) {
                             Icons.AutoMirrored.Rounded.VolumeOff
@@ -1494,7 +1502,7 @@ private fun DesktopPlayerDeck(
                             Icons.AutoMirrored.Rounded.VolumeUp
                         },
                         contentDescription = strings["volume"],
-                        tint = IvidsColorTokens.SlateMuted,
+                        tint = if (soundActive) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted,
                         modifier = Modifier.size(19.dp)
                     )
                 }
