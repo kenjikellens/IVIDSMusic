@@ -101,8 +101,8 @@ internal data class MediaHandleCallbacks(
 internal class JavaFxMediaBackend : DesktopMediaBackend {
 
     /**
-     * Initializes the JavaFX toolkit, optionally opens a [LocalHeaderProxy], and starts a JavaFX `MediaPlayer`.
-     * Immediately disposes created native resources if the calling coroutine is cancelled mid-startup.
+     * Initializes the JavaFX toolkit, prepares a cached `.mp3` URI via [DesktopAudioCacheTranscoder] (falling back
+     * to [LocalHeaderProxy] or raw URI), and starts `MediaPlayer`. Disposes native resources cleanly on cancellation.
      */
     override suspend fun createAndStart(
         mediaUri: String,
@@ -114,9 +114,13 @@ internal class JavaFxMediaBackend : DesktopMediaBackend {
             return Result.failure(failure)
         }
 
+        val preparedLocalMp3Uri = DesktopAudioCacheTranscoder.prepareJavaFxCompatibleUri(
+            mediaUri = mediaUri,
+            headers = headers,
+        )
         val isRemoteHttp = mediaUri.startsWith("http://", ignoreCase = true) ||
             mediaUri.startsWith("https://", ignoreCase = true)
-        val proxy = if (isRemoteHttp || headers.isNotEmpty()) {
+        val proxy = if (preparedLocalMp3Uri == null && (isRemoteHttp || headers.isNotEmpty())) {
             try {
                 LocalHeaderProxy(targetUrl = mediaUri, headers = headers)
             } catch (throwable: Throwable) {
@@ -125,7 +129,7 @@ internal class JavaFxMediaBackend : DesktopMediaBackend {
         } else {
             null
         }
-        val effectiveUri = proxy?.localUrl ?: mediaUri
+        val effectiveUri = preparedLocalMp3Uri ?: proxy?.localUrl ?: mediaUri
 
         return suspendCancellableCoroutine { continuation ->
             continuation.invokeOnCancellation {

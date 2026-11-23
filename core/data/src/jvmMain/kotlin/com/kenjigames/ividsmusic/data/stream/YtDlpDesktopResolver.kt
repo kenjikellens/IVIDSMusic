@@ -98,6 +98,10 @@ class YtDlpDesktopResolver(
         }
     }
 
+    /**
+     * Executes `yt-dlp.exe` to extract a direct audio stream URL for [target] and resolves its metadata.
+     * Enforces [timeoutSeconds] and prioritizes compact M4A audio streams before progressive MP4 fallbacks.
+     */
     private suspend fun executeYtDlpUrlLookup(
         target: String,
         videoId: String?,
@@ -111,7 +115,7 @@ class YtDlpDesktopResolver(
             "--no-playlist",
             "--no-warnings",
             "-f",
-            "18/b[ext=mp4]/best[ext=mp4]/bestaudio[ext=m4a]/best",
+            "bestaudio[ext=m4a]/140/bestaudio/18/best",
             "-g",
             target
         )
