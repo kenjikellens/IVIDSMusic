@@ -628,7 +628,6 @@ private fun NowPlayingHeroCard(
                 onClick = { playerViewModel.downloadCurrent() },
                 shape = CircleShape,
                 color = IvidsColorTokens.GlassSurface.copy(alpha = 0.85f),
-                border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle),
                 modifier = Modifier.tvFocusable(shape = CircleShape)
             ) {
                 Row(

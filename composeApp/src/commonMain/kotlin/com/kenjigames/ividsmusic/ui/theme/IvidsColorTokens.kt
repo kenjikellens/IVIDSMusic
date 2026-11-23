@@ -10,18 +10,18 @@ import androidx.compose.ui.graphics.Color
  * accents for primary playback actions and active navigation indicators.
  */
 object IvidsColorTokens {
-    val AbyssRail: Color = Color(0xFF080809)
-    val ObsidianStage: Color = Color(0xFF0C0C0E)
-    val GlassSurface: Color = Color(0xFF151517)
-    val GlassHover: Color = Color(0xFF2B2B32)
-    val RecessedTrough: Color = Color(0xFF101012)
-    val HairlineSubtle: Color = Color(0x14FFFFFF)
-    val HoverBorder: Color = Color(0x38FFFFFF)
-    val HoverOverlay: Color = Color(0x22FFFFFF)
+    val AbyssRail: Color = Color(0xFF09090B)
+    val ObsidianStage: Color = Color(0xFF0D0D10)
+    val GlassSurface: Color = Color(0xFF17171B)
+    val GlassHover: Color = Color(0xFF282830)
+    val RecessedTrough: Color = Color(0xFF111114)
+    val HairlineSubtle: Color = Color(0x12FFFFFF)
+    val HoverBorder: Color = Color.Transparent
+    val HoverOverlay: Color = Color(0x18FFFFFF)
 
     val VinylSurface: Color = GlassSurface
     val GrooveElevated: Color = GlassHover
-    val HairlineBorder: Color = Color(0x22FFFFFF)
+    val HairlineBorder: Color = Color(0x18FFFFFF)
 
     val ChalkInk: Color = Color(0xFFF5F5F7)
     val SlateMuted: Color = Color(0xFFA1A1AA)

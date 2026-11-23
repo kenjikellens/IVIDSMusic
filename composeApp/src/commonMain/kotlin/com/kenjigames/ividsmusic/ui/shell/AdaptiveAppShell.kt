@@ -457,11 +457,10 @@ private fun MiniPlayerBar(
     Surface(
         modifier = modifier
             .fillMaxWidth()
-            .shadow(16.dp, RoundedCornerShape(18.dp), ambientColor = Color.Black, spotColor = Color.Black)
+            .shadow(14.dp, RoundedCornerShape(18.dp), ambientColor = Color.Black, spotColor = Color.Black)
             .clickable(onClick = onExpand),
         shape = RoundedCornerShape(18.dp),
-        color = IvidsColorTokens.GlassSurface,
-        border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle)
+        color = IvidsColorTokens.GlassSurface
     ) {
         Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))) {
             BlurredArtworkBackdrop(
@@ -661,7 +660,7 @@ private fun SidebarNavigationRail(
 /**
  * Single borderless navigation pill inside [SidebarNavigationRail]: ONLY the opened ([selected])
  * item receives the signature IVIDS cyan accent, while hovered inactive items animate smoothly
- * to a clearly legible neutral graphite elevation with an illuminated rim and hand cursor.
+ * to a clean neutral tonal fill with crisp white text and hand cursor (no borders).
  */
 @Composable
 private fun SidebarNavButton(
@@ -677,20 +676,11 @@ private fun SidebarNavButton(
     val bgColor by animateColorAsState(
         targetValue = when {
             selected -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.14f)
-            isHovered -> IvidsColorTokens.GlassHover
+            isHovered -> Color(0xFF1F1F26)
             else -> Color.Transparent
         },
-        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        animationSpec = tween(150, easing = FastOutSlowInEasing),
         label = "NavButtonBg"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            selected -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.34f)
-            isHovered -> IvidsColorTokens.HoverBorder
-            else -> Color.Transparent
-        },
-        animationSpec = tween(220, easing = FastOutSlowInEasing),
-        label = "NavButtonBorder"
     )
     val iconColor by animateColorAsState(
         targetValue = when {
@@ -698,7 +688,7 @@ private fun SidebarNavButton(
             isHovered -> IvidsColorTokens.ChalkInk
             else -> IvidsColorTokens.SlateMuted
         },
-        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        animationSpec = tween(150, easing = FastOutSlowInEasing),
         label = "NavButtonIcon"
     )
     val textColor by animateColorAsState(
@@ -706,7 +696,7 @@ private fun SidebarNavButton(
             selected || isHovered -> IvidsColorTokens.ChalkInk
             else -> IvidsColorTokens.SlateMuted
         },
-        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        animationSpec = tween(150, easing = FastOutSlowInEasing),
         label = "NavButtonText"
     )
 
@@ -719,8 +709,7 @@ private fun SidebarNavButton(
             .hoverable(interactionSource)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(10.dp),
-        color = bgColor,
-        border = BorderStroke(1.dp, borderColor)
+        color = bgColor
     ) {
         Row(
             modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
@@ -907,7 +896,6 @@ private fun DesktopTopBar(
             onClick = onOpenProfile,
             shape = CircleShape,
             color = profileBg,
-            border = BorderStroke(1.dp, if (profileHovered) IvidsColorTokens.HoverBorder else IvidsColorTokens.HairlineSubtle),
             modifier = Modifier
                 .size(40.dp)
                 .pointerHoverIcon(PointerIcon.Hand)

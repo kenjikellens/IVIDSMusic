@@ -252,11 +252,6 @@ fun SearchScreen(
                         browseCategories.forEach { cat ->
                             val tileHoverSource = remember { MutableInteractionSource() }
                             val tileHovered by tileHoverSource.collectIsHoveredAsState()
-                            val tileBorder by animateColorAsState(
-                                targetValue = if (tileHovered) cat.tint.copy(alpha = 0.75f) else Color(0x14FFFFFF),
-                                animationSpec = tween(220, easing = FastOutSlowInEasing),
-                                label = "CategoryTileBorder"
-                            )
                             Surface(
                                 modifier = Modifier
                                     .width(184.dp)
@@ -266,8 +261,7 @@ fun SearchScreen(
                                     .tvFocusable(shape = RoundedCornerShape(18.dp))
                                     .clickable { viewModel.submitQuery(cat.query) },
                                 shape = RoundedCornerShape(18.dp),
-                                color = IvidsColorTokens.GlassSurface,
-                                border = BorderStroke(1.dp, tileBorder)
+                                color = IvidsColorTokens.GlassSurface
                             ) {
                                 Box(
                                     modifier = Modifier

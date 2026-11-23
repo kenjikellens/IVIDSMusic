@@ -106,7 +106,7 @@ fun MusicCard(
         val base = if (isHovered) IvidsColorTokens.GlassHover else IvidsColorTokens.GlassSurface
         val tint = cardTint
         if (tint != null) {
-            lerp(base, tint, if (isHovered) 0.36f else 0.18f)
+            lerp(base, tint, if (isHovered) 0.30f else 0.16f)
         } else {
             base
         }
@@ -114,21 +114,12 @@ fun MusicCard(
 
     val surfaceColor by animateColorAsState(
         targetValue = targetCardSurface,
-        animationSpec = tween(260, easing = FastOutSlowInEasing),
+        animationSpec = tween(160, easing = FastOutSlowInEasing),
         label = "MusicCardSurface"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = when {
-            isHovered && cardTint != null -> cardTint!!.copy(alpha = 0.52f)
-            isHovered -> IvidsColorTokens.HoverBorder
-            else -> Color(0x0EFFFFFF)
-        },
-        animationSpec = tween(200, easing = FastOutSlowInEasing),
-        label = "MusicCardBorder"
     )
     val playFabAlpha by animateFloatAsState(
         targetValue = if (isHovered || isTvMode) 1f else 0f,
-        animationSpec = tween(180, easing = FastOutSlowInEasing),
+        animationSpec = tween(150, easing = FastOutSlowInEasing),
         label = "MusicCardPlayAlpha"
     )
 
@@ -140,9 +131,7 @@ fun MusicCard(
             .hoverable(interactionSource)
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(16.dp),
-        color = surfaceColor,
-        shadowElevation = 2.dp,
-        border = BorderStroke(1.dp, borderColor)
+        color = surfaceColor
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Box(
@@ -257,8 +246,7 @@ fun LivingAlbumHero(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        color = IvidsColorTokens.GlassSurface,
-        border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle)
+        color = IvidsColorTokens.GlassSurface
     ) {
         Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))) {
             BlurredArtworkBackdrop(

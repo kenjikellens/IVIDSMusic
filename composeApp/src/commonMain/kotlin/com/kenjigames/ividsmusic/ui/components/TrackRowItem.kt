@@ -111,22 +111,17 @@ fun TrackRowItem(
 
     val rowBg by animateColorAsState(
         targetValue = when {
-            isHovered && isCurrentlyPlaying -> Color(0xFF31313A)
-            isHovered -> IvidsColorTokens.GlassHover
-            isCurrentlyPlaying -> Color(0x1CFFFFFF)
+            isHovered && isCurrentlyPlaying -> Color(0xFF2B2B34)
+            isHovered -> Color(0xFF202027)
+            isCurrentlyPlaying -> Color(0xFF1A1A20)
             else -> Color.Transparent
         },
-        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        animationSpec = tween(140, easing = FastOutSlowInEasing),
         label = "TrackRowBg"
-    )
-    val rowBorder by animateColorAsState(
-        targetValue = if (isHovered) Color(0x2EFFFFFF) else Color.Transparent,
-        animationSpec = tween(220, easing = FastOutSlowInEasing),
-        label = "TrackRowBorder"
     )
     val playOverlayAlpha by animateFloatAsState(
         targetValue = if (isHovered && !isCurrentlyPlaying) 1f else 0f,
-        animationSpec = tween(180, easing = FastOutSlowInEasing),
+        animationSpec = tween(140, easing = FastOutSlowInEasing),
         label = "TrackRowPlayOverlay"
     )
 
@@ -138,8 +133,7 @@ fun TrackRowItem(
             .hoverable(interactionSource)
             .clickable(onClick = onPlay),
         shape = RoundedCornerShape(12.dp),
-        color = rowBg,
-        border = BorderStroke(1.dp, rowBorder)
+        color = rowBg
     ) {
         Row(
             modifier = Modifier
