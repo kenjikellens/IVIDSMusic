@@ -3,6 +3,8 @@ package com.kenjigames.ividsmusic.ui.screens.playlist
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,12 +51,14 @@ import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Displays a framed custom playlist page (max 1360dp) with inline metadata editing, track
- * reordering, track removal, batch Play/Shuffle controls, and playlist deletion.
+ * Displays a framed custom playlist page (max 1360dp) with adaptive mobile padding, [FlowRow]
+ * management pills, empty-playlist Play/Shuffle disabled guards, reordering, and track removal.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PlaylistDetailScreen(
     viewModel: PlaylistDetailViewModel,
@@ -96,7 +100,7 @@ fun PlaylistDetailScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
+            contentPadding = ividsScreenPadding(top = 22.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             val playlist = state.playlist
@@ -113,16 +117,21 @@ fun PlaylistDetailScreen(
                             subtitle = "${playlist.description.ifBlank { strings["library_desc"] }} • ${playlist.tracks.size} ${strings["songs"]}",
                             artworkUrl = playlist.tracks.firstOrNull()?.coverUrl,
                             primaryActionLabel = strings["play_all"],
+                            primaryEnabled = playlist.tracks.isNotEmpty(),
                             onPrimaryAction = {
                                 if (playlist.tracks.isNotEmpty()) playerViewModel.playQueue(playlist.tracks)
                             },
                             secondaryActionLabel = strings["shuffle"],
+                            secondaryEnabled = playlist.tracks.isNotEmpty(),
                             onSecondaryAction = {
                                 if (playlist.tracks.isNotEmpty()) playerViewModel.playQueue(playlist.tracks, shuffled = true)
                             }
                         )
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
                             IvidsTonalPill(
                                 onClick = { viewModel.setEditing(!state.isEditing) },
                                 baseColor = IvidsColorTokens.GlassSurface,
@@ -130,17 +139,29 @@ fun PlaylistDetailScreen(
                                 baseBorderColor = IvidsColorTokens.HairlineSubtle
                             ) {
                                 Icon(Icons.Rounded.Edit, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-                                Text(strings["rename"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
+                                Text(
+                                    text = strings["rename"],
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = IvidsColorTokens.ChalkInk,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
                             }
                             IvidsTonalPill(
                                 onClick = { viewModel.setDeleteConfirmVisible(true) },
                                 baseColor = IvidsColorTokens.DangerCoral.copy(alpha = 0.14f),
                                 hoverColor = IvidsColorTokens.DangerCoral.copy(alpha = 0.28f),
                                 baseBorderColor = IvidsColorTokens.DangerCoral.copy(alpha = 0.28f),
-                                hoverBorderColor = IvidsColorTokens.DangerCoral.copy(alpha = 0.6f)
+                                hoverBorderColor = IvidsColorTokens.DangerCoral
                             ) {
                                 Icon(Icons.Rounded.Delete, null, tint = IvidsColorTokens.DangerCoral, modifier = Modifier.size(16.dp))
-                                Text(strings["delete_playlist"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.DangerCoral)
+                                Text(
+                                    text = strings["delete_playlist"],
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = IvidsColorTokens.DangerCoral,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
                             }
                         }
 

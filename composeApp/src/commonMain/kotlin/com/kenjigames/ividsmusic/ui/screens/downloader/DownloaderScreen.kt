@@ -4,6 +4,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -62,6 +64,7 @@ import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
@@ -80,9 +83,10 @@ internal fun formatBytes(bytes: Long): String {
 }
 
 /**
- * Renders the centered Downloader & Saved Offline Media screen (max 900dp) with borderless tonal
- * URL/quality panels (`4..320` kbps), live download progress, and offline `saved/` file playback.
+ * Renders the centered Downloader & Saved Offline Media screen (max 900dp) using adaptive
+ * mobile gutters, [FlowRow] action wrapping, bitrate selector, and offline file playback.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun DownloaderScreen(
     viewModel: DownloaderViewModel,
@@ -108,7 +112,7 @@ fun DownloaderScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 24.dp, bottom = 104.dp),
+            contentPadding = ividsScreenPadding(top = 24.dp),
             verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
             item(key = "dl_header") {
@@ -196,7 +200,10 @@ fun DownloaderScreen(
                             )
                         }
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                        FlowRow(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
                             Button(
                                 onClick = viewModel::startDownload,
                                 shape = CircleShape,
@@ -209,7 +216,12 @@ fun DownloaderScreen(
                             ) {
                                 Icon(Icons.Rounded.Download, null, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("${strings["home_start"]} (${state.selectedQuality.label})", style = MaterialTheme.typography.labelLarge)
+                                Text(
+                                    text = "${strings["home_start"]} (${state.selectedQuality.label})",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    maxLines = 1,
+                                    softWrap = false
+                                )
                             }
                             IvidsTonalPill(
                                 onClick = { if (!state.isLoadingPreview) viewModel.loadPreview() },
@@ -221,7 +233,9 @@ fun DownloaderScreen(
                                 Text(
                                     text = if (state.isLoadingPreview) strings["loading"] else strings["preview_load"],
                                     style = MaterialTheme.typography.labelLarge,
-                                    color = IvidsColorTokens.ChalkInk
+                                    color = IvidsColorTokens.ChalkInk,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }
@@ -297,7 +311,7 @@ fun DownloaderScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column {
+                        Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                             Text(strings["storage_used"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
                             Text(
                                 text = "${formatBytes(state.storageUsedBytes)} • ${state.savedTracks.size} ${strings["saved_tracks"]}",
@@ -312,7 +326,13 @@ fun DownloaderScreen(
                             baseBorderColor = IvidsColorTokens.HairlineSubtle
                         ) {
                             Icon(Icons.Rounded.Refresh, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-                            Text(strings["rescan_saved"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
+                            Text(
+                                text = strings["rescan_saved"],
+                                style = MaterialTheme.typography.labelLarge,
+                                color = IvidsColorTokens.ChalkInk,
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                     }
                 }

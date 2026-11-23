@@ -58,11 +58,12 @@ import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Renders the user's local Library inside a framed viewport (max 1360dp) with recessed tab
- * selectors for Liked Songs, Saved Albums, and Custom Playlists, real-time filtering, and batch actions.
+ * Renders the user's local Library inside a framed viewport (max 1360dp) with adaptive mobile
+ * paddings, recessed tab selectors, real-time filtering, and disabled-aware batch actions.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -99,7 +100,7 @@ fun LibraryScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
+            contentPadding = ividsScreenPadding(top = 22.dp),
             verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
             item(key = "library_hero") {
@@ -165,7 +166,13 @@ fun LibraryScreen(
                             contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp)
                         ) {
                             Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
-                            Text(strings["shuffle"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
+                            Text(
+                                text = strings["shuffle"],
+                                style = MaterialTheme.typography.labelLarge,
+                                color = IvidsColorTokens.ChalkInk,
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
                     }
 

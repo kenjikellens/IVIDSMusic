@@ -59,7 +59,15 @@ data class PlayerUiState(
     val activeQuality: AudioQuality = AudioQuality.Q196,
     val dynamicAccent: Color = IvidsColorTokens.PrimaryCyan,
     val errorMessage: String? = null
-)
+) {
+    /** Returns true when swiping/pressing previous can jump back or restart the active track. */
+    val canSkipPrevious: Boolean
+        get() = currentTrack != null && (currentIndex > 0 || repeatMode == RepeatMode.ALL || positionMs > 3_000L)
+
+    /** Returns true when skipping forward to a queued track is currently available. */
+    val canSkipNext: Boolean
+        get() = queue.isNotEmpty() && (currentIndex < queue.lastIndex || repeatMode == RepeatMode.ALL || isShuffleEnabled)
+}
 
 /**
  * Application-wide playback coordinator connecting Compose UI controls to [AudioEngine],

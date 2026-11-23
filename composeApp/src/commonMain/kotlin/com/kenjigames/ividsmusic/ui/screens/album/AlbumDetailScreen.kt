@@ -26,6 +26,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
@@ -42,11 +45,12 @@ import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Displays the framed Album detail page (max 1360dp) with cover hero, artist link, release year,
- * batch Play/Shuffle/Save pills, and borderless tracklist rows.
+ * Displays the framed Album detail page (max 1360dp) with adaptive mobile padding, disabled
+ * empty-list batch guards, responsive artist header row, and save bookmark pill.
  */
 @Composable
 fun AlbumDetailScreen(
@@ -73,7 +77,7 @@ fun AlbumDetailScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
+            contentPadding = ividsScreenPadding(top = 22.dp),
             verticalArrangement = Arrangement.spacedBy(18.dp)
         ) {
             if (state.isLoading) {
@@ -104,12 +108,14 @@ fun AlbumDetailScreen(
                                 subtitle = "${album.artist} • ${album.releaseYear ?: "—"} • ${state.tracks.size} ${strings["songs"]}",
                                 artworkUrl = album.coverUrl,
                                 primaryActionLabel = strings["play_album"],
+                                primaryEnabled = state.tracks.isNotEmpty(),
                                 onPrimaryAction = {
                                     state.tracks.firstOrNull()?.let {
                                         playerViewModel.playTrack(it, state.tracks)
                                     }
                                 },
                                 secondaryActionLabel = strings["shuffle"],
+                                secondaryEnabled = state.tracks.isNotEmpty(),
                                 onSecondaryAction = {
                                     if (state.tracks.isNotEmpty()) {
                                         playerViewModel.playQueue(state.tracks, shuffled = true)
@@ -121,8 +127,16 @@ fun AlbumDetailScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                TextButton(onClick = { onOpenArtist(album.artistId, album.artist) }) {
-                                    Text("${strings["view_artist"]}: ${album.artist}", color = IvidsColorTokens.ChalkInk)
+                                TextButton(
+                                    onClick = { onOpenArtist(album.artistId, album.artist) },
+                                    modifier = Modifier.weight(1f).pointerHoverIcon(PointerIcon.Hand)
+                                ) {
+                                    Text(
+                                        text = "${strings["view_artist"]}: ${album.artist}",
+                                        color = IvidsColorTokens.ChalkInk,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
                                 }
                                 IvidsTonalPill(
                                     onClick = viewModel::toggleSaved,
@@ -138,9 +152,11 @@ fun AlbumDetailScreen(
                                         modifier = Modifier.size(18.dp)
                                     )
                                     Text(
-                                        text = if (state.isSaved) strings["saved_albums"] else strings["download_track"],
+                                        text = if (state.isSaved) strings["saved_albums"] else strings["save_album"],
                                         style = IvidsTextStyles.tabularBadge(),
-                                        color = IvidsColorTokens.ChalkInk
+                                        color = IvidsColorTokens.ChalkInk,
+                                        maxLines = 1,
+                                        softWrap = false
                                     )
                                 }
                             }

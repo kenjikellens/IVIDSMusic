@@ -43,11 +43,13 @@ import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Displays the personalized For You feed inside a framed viewport (max 1360dp) with borderless
- * interest pills, Discovery Mix, Genre Fusion, and Taste Match shelves.
+ * Displays the personalized For You feed inside a framed viewport (max 1360dp) using adaptive
+ * mobile gutters, clickable interest pills, Discovery Mix, Genre Fusion, and Taste Match shelves.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -63,6 +65,7 @@ fun RecommendedScreen(
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
+    val metrics = LocalLayoutMetrics.current
 
     FramedScreenContainer(
         maxWidth = 1360.dp,
@@ -70,7 +73,7 @@ fun RecommendedScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
+            contentPadding = ividsScreenPadding(top = 22.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item(key = "rec_hero") {
@@ -174,7 +177,7 @@ fun RecommendedScreen(
                         ) {
                             Text(title, style = MaterialTheme.typography.headlineSmall, color = IvidsColorTokens.ChalkInk)
                         }
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        LazyRow(horizontalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 12.dp else 16.dp)) {
                             items(tracks, key = { "rt_${title}_${it.id}" }) { track ->
                                 MusicCard(
                                     title = track.title,

@@ -54,11 +54,12 @@ import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
  * Displays detailed metadata for a track inside a framed viewport (max 1360dp) alongside
- * tonal pill actions, genre chips, artist albums, and similar tracks.
+ * adaptive paddings, clickable genre search chips, artist albums, and similar tracks.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -74,6 +75,7 @@ fun SongDetailScreen(
     onOpenArtist: (String, String) -> Unit,
     onOpenAlbum: (String) -> Unit,
     onOpenSongDetail: (String) -> Unit,
+    onOpenGenreSearch: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
@@ -87,7 +89,7 @@ fun SongDetailScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
+            contentPadding = ividsScreenPadding(top = 22.dp),
             verticalArrangement = Arrangement.spacedBy(22.dp)
         ) {
             if (state.isLoading) {
@@ -176,17 +178,22 @@ fun SongDetailScreen(
                         }
 
                         if (track.genres.isNotEmpty()) {
-                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
                                 track.genres.forEach { genre ->
-                                    Surface(
-                                        shape = CircleShape,
-                                        color = IvidsColorTokens.GlassSurface
+                                    IvidsTonalPill(
+                                        onClick = { onOpenGenreSearch(genre) },
+                                        baseColor = IvidsColorTokens.RecessedTrough,
+                                        hoverColor = IvidsColorTokens.GlassHover,
+                                        baseBorderColor = IvidsColorTokens.HairlineSubtle,
+                                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 7.dp)
                                     ) {
                                         Text(
                                             text = genre,
                                             style = MaterialTheme.typography.labelLarge,
-                                            color = IvidsColorTokens.SlateMuted,
-                                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                                            color = IvidsColorTokens.SlateMuted
                                         )
                                     }
                                 }

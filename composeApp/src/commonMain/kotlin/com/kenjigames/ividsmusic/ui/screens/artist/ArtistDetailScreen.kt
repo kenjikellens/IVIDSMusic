@@ -3,6 +3,8 @@ package com.kenjigames.ividsmusic.ui.screens.artist
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -49,12 +51,14 @@ import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalDynamicAccent
+import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Displays the framed Artist detail page (max 1360dp) with hero header, fan/album counts,
- * Play Top Track / Shuffle / Like Artist pills, discography albums, and popular songs.
+ * Displays the framed Artist detail page (max 1360dp) with adaptive mobile padding, [FlowRow]
+ * action pills, disabled guards for empty top tracks, discography albums, and popular songs.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ArtistDetailScreen(
     viewModel: ArtistViewModel,
@@ -81,7 +85,7 @@ fun ArtistDetailScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
+            contentPadding = ividsScreenPadding(top = 22.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             if (state.isLoading) {
@@ -112,36 +116,44 @@ fun ArtistDetailScreen(
                                 subtitle = "${artist.fanCount} fans • ${state.albums.size} ${strings["albums"]}",
                                 artworkUrl = artist.coverUrl,
                                 primaryActionLabel = strings["play_top_track"],
+                                primaryEnabled = state.topTracks.isNotEmpty(),
                                 onPrimaryAction = {
                                     state.topTracks.firstOrNull()?.let {
                                         playerViewModel.playTrack(it, state.topTracks)
                                     }
                                 },
                                 secondaryActionLabel = strings["shuffle"],
+                                secondaryEnabled = state.topTracks.isNotEmpty(),
                                 onSecondaryAction = {
                                     if (state.topTracks.isNotEmpty()) {
                                         playerViewModel.playQueue(state.topTracks, shuffled = true)
                                     }
                                 }
                             )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            FlowRow(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                verticalArrangement = Arrangement.spacedBy(10.dp)
                             ) {
-                                if (artist.coverUrl.isNotBlank()) {
-                                    AsyncImage(
-                                        model = artist.coverUrl,
-                                        contentDescription = artist.name,
-                                        contentScale = ContentScale.Crop,
-                                        modifier = Modifier.size(40.dp).clip(CircleShape)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                                    modifier = Modifier.padding(end = 6.dp)
+                                ) {
+                                    if (artist.coverUrl.isNotBlank()) {
+                                        AsyncImage(
+                                            model = artist.coverUrl,
+                                            contentDescription = artist.name,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.size(36.dp).clip(CircleShape)
+                                        )
+                                    }
+                                    Text(
+                                        text = "${artist.fanCount} • ${state.topTracks.size} ${strings["songs"]}",
+                                        style = IvidsTextStyles.tabularBadge(),
+                                        color = IvidsColorTokens.SlateMuted
                                     )
                                 }
-                                Text(
-                                    text = "${artist.fanCount} • ${state.topTracks.size} ${strings["songs"]}",
-                                    style = IvidsTextStyles.tabularBadge(),
-                                    color = IvidsColorTokens.SlateMuted,
-                                    modifier = Modifier.weight(1f)
-                                )
                                 IvidsTonalPill(
                                     onClick = viewModel::likeArtist,
                                     baseColor = if (state.isLikedArtist) accent.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
@@ -158,7 +170,9 @@ fun ArtistDetailScreen(
                                     Text(
                                         text = strings["like"],
                                         style = MaterialTheme.typography.labelLarge,
-                                        color = if (state.isLikedArtist) accent else IvidsColorTokens.ChalkInk
+                                        color = if (state.isLikedArtist) accent else IvidsColorTokens.ChalkInk,
+                                        maxLines = 1,
+                                        softWrap = false
                                     )
                                 }
                                 IvidsTonalPill(
@@ -167,12 +181,19 @@ fun ArtistDetailScreen(
                                             playerViewModel.playQueue(state.topTracks, shuffled = true)
                                         }
                                     },
+                                    enabled = state.topTracks.isNotEmpty(),
                                     baseColor = IvidsColorTokens.GlassSurface,
                                     hoverColor = IvidsColorTokens.GlassHover,
                                     baseBorderColor = IvidsColorTokens.HairlineSubtle
                                 ) {
                                     Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-                                    Text(strings["shuffle"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
+                                    Text(
+                                        text = strings["shuffle"],
+                                        style = MaterialTheme.typography.labelLarge,
+                                        color = IvidsColorTokens.ChalkInk,
+                                        maxLines = 1,
+                                        softWrap = false
+                                    )
                                 }
                             }
                         }
