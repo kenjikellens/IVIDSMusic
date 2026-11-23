@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
@@ -24,17 +23,16 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
-import androidx.compose.material.icons.automirrored.rounded.ViewQuilt
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.RadioButtonUnchecked
 import androidx.compose.material.icons.rounded.RestartAlt
 import androidx.compose.material.icons.rounded.SystemUpdate
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material.icons.rounded.ZoomOutMap
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -42,12 +40,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,126 +58,39 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.AudioQuality
-import com.kenjigames.ividsmusic.domain.model.LayoutMode
 import com.kenjigames.ividsmusic.domain.model.UpdateMode
 import com.kenjigames.ividsmusic.platform.AppUpdateState
 import com.kenjigames.ividsmusic.ui.components.ConfirmationDialog
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
-import com.kenjigames.ividsmusic.ui.components.IvidsSelectableDialogItem
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
 import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
 import com.kenjigames.ividsmusic.ui.i18n.AppStrings
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.i18n.SupportedLanguage
+import com.kenjigames.ividsmusic.ui.navigation.SettingsSection
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.roundToInt
-
-private enum class SettingsPickerKind {
-    SCALE,
-    LANGUAGE,
-    LAYOUT,
-    QUALITY,
-    UPDATE_MODE
-}
 
 private val UI_SCALE_PRESETS = listOf(0.75f, 0.90f, 1.00f, 1.10f, 1.25f, 1.50f)
 
 /**
- * Renders the flat, borderless YouTube/Spotify-style Settings list inside [FramedScreenContainer]
- * with single-tap modal pickers (`Interface Scale`, `Language`, `Layout Mode`, `Audio Quality`,
- * `Update Mode`), switches, and minimal dividers directly on the black canvas.
+ * Renders the flat, borderless YouTube-style Settings list directly on the dark stage, navigating
+ * via [onOpenSection] to right-sliding push sub-pages without popup dialogs.
  */
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel,
+    onOpenSection: (SettingsSection) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
     val metrics = LocalLayoutMetrics.current
-    var activePicker by remember { mutableStateOf<SettingsPickerKind?>(null) }
-
-    val resolvedPicker = if (state.isLanguageModalOpen) SettingsPickerKind.LANGUAGE else activePicker
-    when (resolvedPicker) {
-        SettingsPickerKind.LANGUAGE -> {
-            SettingsPickerDialog(
-                title = strings["language"],
-                items = SupportedLanguage.entries,
-                selected = state.language,
-                labelProvider = { it.displayName },
-                keyProvider = { it.code },
-                onSelect = {
-                    activePicker = null
-                    viewModel.selectLanguage(it)
-                },
-                onDismiss = {
-                    activePicker = null
-                    viewModel.setLanguageModalOpen(false)
-                }
-            )
-        }
-        SettingsPickerKind.SCALE -> {
-            val closestScale = UI_SCALE_PRESETS.minByOrNull { abs(it - state.uiScale) } ?: 1.0f
-            SettingsPickerDialog(
-                title = strings["interface_scale"],
-                items = UI_SCALE_PRESETS,
-                selected = closestScale,
-                labelProvider = { "${(it * 100).roundToInt()}%" },
-                keyProvider = { it },
-                onSelect = {
-                    activePicker = null
-                    viewModel.setUiScale(it)
-                },
-                onDismiss = { activePicker = null }
-            )
-        }
-        SettingsPickerKind.LAYOUT -> {
-            SettingsPickerDialog(
-                title = strings["layout_mode"],
-                items = LayoutMode.entries,
-                selected = state.layoutMode,
-                labelProvider = { formatLayoutModeLabel(it, strings) },
-                keyProvider = { it.name },
-                onSelect = {
-                    activePicker = null
-                    viewModel.setLayoutMode(it)
-                },
-                onDismiss = { activePicker = null }
-            )
-        }
-        SettingsPickerKind.QUALITY -> {
-            SettingsPickerDialog(
-                title = strings["default_quality"],
-                items = AudioQuality.entries,
-                selected = state.defaultQuality,
-                labelProvider = { it.label },
-                keyProvider = { it.name },
-                onSelect = {
-                    activePicker = null
-                    viewModel.setDefaultDownloadQuality(it)
-                },
-                onDismiss = { activePicker = null }
-            )
-        }
-        SettingsPickerKind.UPDATE_MODE -> {
-            SettingsPickerDialog(
-                title = strings["update_mode"],
-                items = UpdateMode.entries,
-                selected = state.updateMode,
-                labelProvider = { formatUpdateModeLabel(it, strings) },
-                keyProvider = { it.name },
-                onSelect = {
-                    activePicker = null
-                    viewModel.setUpdateMode(it)
-                },
-                onDismiss = { activePicker = null }
-            )
-        }
-        null -> Unit
-    }
 
     if (state.showResetScoresConfirm) {
         ConfirmationDialog(
@@ -234,7 +145,7 @@ fun SettingsScreen(
                     title = strings["language"],
                     subtitle = state.language.displayName,
                     horizontalPadding = rowHPad,
-                    onClick = { viewModel.setLanguageModalOpen(true) }
+                    onClick = { onOpenSection(SettingsSection.LANGUAGE) }
                 )
             }
             item(key = "row_scale") {
@@ -243,16 +154,7 @@ fun SettingsScreen(
                     title = strings["interface_scale"],
                     subtitle = "${(state.uiScale * 100).roundToInt()}%",
                     horizontalPadding = rowHPad,
-                    onClick = { activePicker = SettingsPickerKind.SCALE }
-                )
-            }
-            item(key = "row_layout") {
-                SettingsListRow(
-                    icon = Icons.AutoMirrored.Rounded.ViewQuilt,
-                    title = strings["layout_mode"],
-                    subtitle = formatLayoutModeLabel(state.layoutMode, strings),
-                    horizontalPadding = rowHPad,
-                    onClick = { activePicker = SettingsPickerKind.LAYOUT }
+                    onClick = { onOpenSection(SettingsSection.INTERFACE_SCALE) }
                 )
             }
             item(key = "row_tint") {
@@ -282,7 +184,7 @@ fun SettingsScreen(
                     title = strings["default_quality"],
                     subtitle = state.defaultQuality.label,
                     horizontalPadding = rowHPad,
-                    onClick = { activePicker = SettingsPickerKind.QUALITY }
+                    onClick = { onOpenSection(SettingsSection.AUDIO_QUALITY) }
                 )
             }
 
@@ -298,7 +200,7 @@ fun SettingsScreen(
                     title = strings["update_mode"],
                     subtitle = formatUpdateModeLabel(state.updateMode, strings),
                     horizontalPadding = rowHPad,
-                    onClick = { activePicker = SettingsPickerKind.UPDATE_MODE }
+                    onClick = { onOpenSection(SettingsSection.UPDATE_MODE) }
                 )
             }
             item(key = "row_check_updates") {
@@ -413,6 +315,109 @@ fun SettingsScreen(
 }
 
 /**
+ * Renders a flat, native YouTube-style push sub-page for [section] directly on [ObsidianStage]
+ * with animated back-navigation via [onNavigateBack] instead of a rounded modal popup.
+ */
+@Composable
+fun SettingsDetailScreen(
+    section: SettingsSection,
+    viewModel: SettingsViewModel,
+    onNavigateBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val state by viewModel.uiState.collectAsState()
+    val strings = LocalStrings.current
+    val metrics = LocalLayoutMetrics.current
+    val rowHPad = if (metrics.isCompactMobile) 16.dp else 20.dp
+    val scope = rememberCoroutineScope()
+    var pendingCommit by remember(section) { mutableStateOf(false) }
+
+    val pageTitle = when (section) {
+        SettingsSection.LANGUAGE -> strings["language"]
+        SettingsSection.INTERFACE_SCALE -> strings["interface_scale"]
+        SettingsSection.AUDIO_QUALITY -> strings["default_quality"]
+        SettingsSection.UPDATE_MODE -> strings["update_mode"]
+    }
+
+    /** Commits [applySelection] immediately and slides back cleanly after 90ms visual feedback. */
+    fun commitAndPop(applySelection: () -> Unit) {
+        if (pendingCommit) return
+        pendingCommit = true
+        applySelection()
+        scope.launch {
+            delay(90L)
+            onNavigateBack()
+        }
+    }
+
+    FramedScreenContainer(
+        maxWidth = 760.dp,
+        modifier = modifier.fillMaxSize()
+    ) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(
+                top = if (metrics.isCompactMobile) 14.dp else 24.dp,
+                bottom = metrics.contentBottomClearance
+            )
+        ) {
+            item(key = "detail_title") {
+                Text(
+                    text = pageTitle,
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = IvidsColorTokens.ChalkInk,
+                    modifier = Modifier.padding(horizontal = rowHPad, vertical = 10.dp)
+                )
+            }
+
+            when (section) {
+                SettingsSection.LANGUAGE -> {
+                    items(SupportedLanguage.entries, key = { it.code }) { lang ->
+                        SettingsRadioRow(
+                            label = lang.displayName,
+                            selected = lang == state.language,
+                            horizontalPadding = rowHPad,
+                            onClick = { commitAndPop { viewModel.selectLanguage(lang) } }
+                        )
+                    }
+                }
+                SettingsSection.INTERFACE_SCALE -> {
+                    val closestScale = UI_SCALE_PRESETS.minByOrNull { abs(it - state.uiScale) } ?: 1.0f
+                    items(UI_SCALE_PRESETS, key = { it }) { preset ->
+                        SettingsRadioRow(
+                            label = "${(preset * 100).roundToInt()}%",
+                            selected = preset == closestScale,
+                            horizontalPadding = rowHPad,
+                            onClick = { commitAndPop { viewModel.setUiScale(preset) } }
+                        )
+                    }
+                }
+                SettingsSection.AUDIO_QUALITY -> {
+                    items(AudioQuality.entries, key = { it.name }) { quality ->
+                        SettingsRadioRow(
+                            label = quality.label,
+                            selected = quality == state.defaultQuality,
+                            horizontalPadding = rowHPad,
+                            onClick = { commitAndPop { viewModel.setDefaultDownloadQuality(quality) } }
+                        )
+                    }
+                }
+                SettingsSection.UPDATE_MODE -> {
+                    items(UpdateMode.entries, key = { it.name }) { mode ->
+                        SettingsRadioRow(
+                            label = formatUpdateModeLabel(mode, strings),
+                            selected = mode == state.updateMode,
+                            horizontalPadding = rowHPad,
+                            onClick = { commitAndPop { viewModel.setUpdateMode(mode) } }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
  * Renders a compact YouTube-style section header label aligned to the list row gutter.
  */
 @Composable
@@ -511,71 +516,55 @@ private fun SettingsListRow(
 }
 
 /**
- * Displays a flat borderless single-selection dialog list backing [SettingsScreen] pickers without
- * nested cards or duplicate buttons.
+ * Renders a full-width, borderless option row inside [SettingsDetailScreen] with crisp white
+ * check indicator and zero rounded card wrappers.
  */
 @Composable
-private fun <T> SettingsPickerDialog(
-    title: String,
-    items: List<T>,
-    selected: T,
-    labelProvider: (T) -> String,
-    keyProvider: (T) -> Any,
-    onSelect: (T) -> Unit,
-    onDismiss: () -> Unit
+private fun SettingsRadioRow(
+    label: String,
+    selected: Boolean,
+    horizontalPadding: Dp,
+    onClick: () -> Unit
 ) {
-    val strings = LocalStrings.current
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        containerColor = IvidsColorTokens.GlassSurface,
-        title = {
-            Text(title, style = MaterialTheme.typography.titleLarge, color = IvidsColorTokens.ChalkInk)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val bg by animateColorAsState(
+        targetValue = when {
+            isHovered -> Color(0xFF1A1A1A)
+            selected -> Color(0xFF141414)
+            else -> Color.Transparent
         },
-        text = {
-            LazyColumn(
-                modifier = Modifier.fillMaxWidth().heightIn(max = 380.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                items(items, key = keyProvider) { item ->
-                    val isSelected = item == selected
-                    IvidsSelectableDialogItem(
-                        selected = isSelected,
-                        onClick = { onSelect(item) }
-                    ) {
-                        Text(
-                            text = labelProvider(item),
-                            style = MaterialTheme.typography.titleSmall,
-                            color = IvidsColorTokens.ChalkInk
-                        )
-                        if (isSelected) {
-                            Icon(
-                                imageVector = Icons.Rounded.Check,
-                                contentDescription = null,
-                                tint = IvidsColorTokens.ChalkInk,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = onDismiss,
-                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
-            ) {
-                Text(strings["close"], color = IvidsColorTokens.SlateMuted)
-            }
-        }
+        animationSpec = tween(120, easing = FastOutSlowInEasing),
+        label = "SettingsRadioBg"
     )
-}
 
-/** Maps a [LayoutMode] enum value to its localized label in [AppStrings]. */
-private fun formatLayoutModeLabel(mode: LayoutMode, strings: AppStrings): String = when (mode) {
-    LayoutMode.AUTO -> strings["layout_auto"]
-    LayoutMode.MOBILE -> strings["layout_mobile"]
-    LayoutMode.DESKTOP -> strings["layout_desktop"]
-    LayoutMode.TV -> strings["layout_tv"]
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp)
+            .background(bg)
+            .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.99f)
+            .pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interactionSource)
+            .tvFocusable(shape = RoundedCornerShape(8.dp))
+            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
+            .padding(horizontal = horizontalPadding, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Icon(
+            imageVector = if (selected) Icons.Rounded.Check else Icons.Rounded.RadioButtonUnchecked,
+            contentDescription = null,
+            tint = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateSubtle,
+            modifier = Modifier.size(22.dp)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.titleMedium,
+            color = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
+            modifier = Modifier.weight(1f)
+        )
+    }
 }
 
 /** Maps an [UpdateMode] enum value to its localized label in [AppStrings]. */

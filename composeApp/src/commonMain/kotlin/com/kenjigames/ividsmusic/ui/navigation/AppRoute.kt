@@ -26,6 +26,8 @@ sealed interface AppRoute {
     data object Downloader : AppRoute
     /** Appearance, 16-language picker, default download quality, update checker, and storage settings. */
     data object Settings : AppRoute
+    /** Pushed sub-page inside Settings rendering flat YouTube-style selection options for [section]. */
+    data class SettingsDetail(val section: SettingsSection) : AppRoute
     /** Artist profile, popular tracks, discography, and related artists screen. */
     data class ArtistDetail(val artistId: String, val artistName: String = "") : AppRoute
     /** Album cover, metadata, batch actions, and ordered tracklist screen. */
@@ -34,6 +36,13 @@ sealed interface AppRoute {
     data class SongDetail(val trackId: String) : AppRoute
     /** Custom user playlist detail supporting inline rename, reordering, removal, and deletion. */
     data class PlaylistDetail(val playlistId: Long) : AppRoute
+}
+
+/**
+ * Enumerates push sub-pages reachable from [AppRoute.Settings] without modal popups.
+ */
+enum class SettingsSection {
+    LANGUAGE, INTERFACE_SCALE, AUDIO_QUALITY, UPDATE_MODE
 }
 
 /**

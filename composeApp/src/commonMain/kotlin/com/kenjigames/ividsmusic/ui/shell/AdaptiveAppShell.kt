@@ -574,7 +574,7 @@ private fun MobileTopHeader(
                     Icon(
                         imageVector = Icons.Rounded.Settings,
                         contentDescription = strings["settings"],
-                        tint = if (currentRoute is AppRoute.Settings) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
+                        tint = if (currentRoute is AppRoute.Settings || currentRoute is AppRoute.SettingsDetail) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
                     )
                 }
             }
@@ -890,7 +890,7 @@ private fun SidebarNavigationRail(
     val utilityEntries = remember {
         listOf(
             NavEntry(AppRoute.Downloader, "nav_downloader", Icons.Rounded.Download) { it is AppRoute.Downloader },
-            NavEntry(AppRoute.Settings, "settings", Icons.Rounded.Settings) { it is AppRoute.Settings }
+            NavEntry(AppRoute.Settings, "settings", Icons.Rounded.Settings) { it is AppRoute.Settings || it is AppRoute.SettingsDetail }
         )
     }
 

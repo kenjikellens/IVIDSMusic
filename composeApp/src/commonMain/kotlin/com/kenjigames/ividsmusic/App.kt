@@ -54,6 +54,7 @@ import com.kenjigames.ividsmusic.ui.screens.recommended.RecommendedScreen
 import com.kenjigames.ividsmusic.ui.screens.recommended.RecommendedViewModel
 import com.kenjigames.ividsmusic.ui.screens.search.SearchScreen
 import com.kenjigames.ividsmusic.ui.screens.search.SearchViewModel
+import com.kenjigames.ividsmusic.ui.screens.settings.SettingsDetailScreen
 import com.kenjigames.ividsmusic.ui.screens.settings.SettingsScreen
 import com.kenjigames.ividsmusic.ui.screens.settings.SettingsViewModel
 import com.kenjigames.ividsmusic.ui.screens.song.SongDetailScreen
@@ -364,7 +365,16 @@ fun IvidsApp(
                                 onExploreMusic = { navigator.switchRootTab(AppRoute.Home) }
                             )
 
-                            is AppRoute.Settings -> SettingsScreen(viewModel = remember { koin.get<SettingsViewModel>() })
+                            is AppRoute.Settings -> SettingsScreen(
+                                viewModel = remember { koin.get<SettingsViewModel>() },
+                                onOpenSection = { section -> navigator.navigateTo(AppRoute.SettingsDetail(section)) }
+                            )
+
+                            is AppRoute.SettingsDetail -> SettingsDetailScreen(
+                                section = activeRoute.section,
+                                viewModel = remember { koin.get<SettingsViewModel>() },
+                                onNavigateBack = { navigator.navigateBack() }
+                            )
                         }
                     }
 
