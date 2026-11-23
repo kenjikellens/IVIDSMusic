@@ -4,18 +4,18 @@ Overzicht van ontbrekende basisfeatures en uitbreidingen, strikt gesorteerd van 
 
 ---
 
-## P0 — Essentiële Basisfeatures (Must-Have)
+## P0 — Essentiële Basisfeatures (Must-Have) *(Geïmplementeerd)*
 
-Dingen die gebruikers direct verwachten van elke dagelijkse muziekspeler en die nu nog ontbreken.
+Dingen die gebruikers direct verwachten van elke dagelijkse muziekspeler.
 
-| # | Feature | Waarom nodig | Huidige situatie |
+| # | Feature | Status | Huidige situatie |
 | :-: | :--- | :--- | :--- |
-| 1 | **Volume & mute opslaan tussen sessies** | Niemand wil dat de app bij elke start op 100% volume schiet. | `PlayerViewModel` start altijd op `volume = 1.0f`. |
-| 2 | **Laatste wachtrij & nummer onthouden (Session Restore)** | Direct verder kunnen luisteren na herstarten van de app. | Playerbalk is bij elke start leeg (`Nothing is playing`). |
-| 3 | **Next-Track Prefetching** | Voorkomt 3–5 seconden stilte tussen twee nummers in een playlist/album. | Volgende track wordt pas geresolved en getranscodeerd nadat de vorige klaar is. |
-| 4 | **Duidelijke foutstatus + *Opnieuw proberen*-knop in playerbalk** | Als een stream faalt, moet je direct met 1 klik kunnen herstarten. | Fout verschijnt alleen kort als toast. |
-| 5 | **Keyboard-shortcut guard in invoervelden (Desktop)** | `Space`, `M`, `←`/`→` mogen playback niet triggeren terwijl je typt. | Globale `onKeyEvent` in `Main.kt` heeft nog geen focus-guard voor tekstvelden. |
-| 6 | **Portable `ffmpeg.exe` + automatische `yt-dlp.exe` update-check** | Zorgt dat afspelen werkt op elke Windows-PC en niet breekt na YouTube-updates. | `ffmpeg.exe` leunt op WinGet/PATH; `yt-dlp.exe` moet handmatig worden vernieuwd. |
+| 1 | **Volume & mute opslaan tussen sessies** | Gereed | Opgeslagen in DataStore + hersteld naar `AudioEngine` bij opstart. |
+| 2 | **Laatste wachtrij & nummer onthouden (Session Restore)** | Gereed | Opgeslagen in `session_state.json`, hervat gepauzeerd bij opstart zonder ongevraagd autoplay. |
+| 3 | **Next-Track Prefetching** | Gereed | Volgende track wordt na 2,5s afspelen op de achtergrond geresolved (+ MP3-cache op Desktop). |
+| 4 | **Duidelijke foutstatus + *Opnieuw proberen*-knop in playerbalk** | Gereed | Foutstatus in `DangerCoral` + directe Retry- en Sluitknop in `DesktopPlayerDeck` en `MiniPlayerBar`. |
+| 5 | **Keyboard-shortcut guard in invoervelden (Desktop)** | Gereed | `TextInputShortcutGuard` via `InterceptPlatformTextInput` blokkeert `Space`, `M`, `←`/`→` tijdens typen. |
+| 6 | **Portable `ffmpeg.exe` + automatische `yt-dlp.exe` update-check** | Gereed | `DesktopNativeToolsManager` beheert portable `ffmpeg` + wekelijkse `yt-dlp`-check in `tools/`. |
 
 ---
 

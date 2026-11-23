@@ -37,16 +37,17 @@ import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.input.TextInputShortcutGuard
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.emptyFlow
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -65,12 +66,6 @@ class PlayerViewModelP0Test {
     private val trackOne = Track(id = "t1", title = "First Song", artist = "Artist A", durationSeconds = 180)
     private val trackTwo = Track(id = "t2", title = "Second Song", artist = "Artist B", durationSeconds = 200)
 
-    /** Configures an unconfined main dispatcher before each ViewModel test. */
-    @BeforeTest
-    fun setup() {
-        Dispatchers.setMain(UnconfinedTestDispatcher())
-    }
-
     /** Resets main dispatcher and shortcut guard state after each test. */
     @AfterTest
     fun tearDown() {
@@ -82,7 +77,8 @@ class PlayerViewModelP0Test {
 
     /** Verifies persisted volume, paused session restore on startup, retry invalidation, and shortcut focus guard. */
     @Test
-    fun restoresVolumeAndSessionPausedSupportsRetryAndShortcutGuard() = runBlocking {
+    fun restoresVolumeAndSessionPausedSupportsRetryAndShortcutGuard() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
         val engine = FakeAudioEngine()
         val prefs = FakePreferencesRepository(UserPreferences(volume = 0.35f, isMuted = false))
         val resolver = FakeStreamResolver()
@@ -107,7 +103,11 @@ class PlayerViewModelP0Test {
             queueController = PlaybackQueueController(),
             resolveStream = ResolveTrackStreamUseCase(FakeLibraryRepository(), resolver),
             libraryRepository = FakeLibraryRepository(),
-            recommendationEngine = RecommendationEngine(FakeScoreRepository(), FakeDiscoveryRepository()),
+            recommendationEngine = RecommendationEngine(
+                FakeScoreRepository(),
+                FakeDiscoveryRepository(),
+                clockMs = { 1_000L }
+            ),
             preferencesRepository = prefs,
             offlineDownloadManager = FakeDownloadManager(),
             toastController = ToastController(),
@@ -115,19 +115,19 @@ class PlayerViewModelP0Test {
             streamPrefetcher = prefetcher
         )
 
-        delay(80L)
+        runCurrent()
         assertEquals(0.35f, vm.uiState.value.volume, 0.01f)
         assertEquals(0, engine.playCalls)
         assertEquals("t1", vm.uiState.value.currentTrack?.id)
         assertEquals(42_000L, vm.uiState.value.positionMs)
 
         vm.togglePlayPause()
-        delay(80L)
+        runCurrent()
         assertEquals(1, engine.playCalls)
         assertEquals(42_000L, engine.lastSeekMs)
 
         vm.retryCurrent()
-        delay(80L)
+        runCurrent()
         assertTrue(resolver.invalidatedIds.contains("t1"))
         assertEquals(2, engine.playCalls)
 
@@ -142,7 +142,8 @@ class PlayerViewModelP0Test {
 
     /** Confirms next-track prefetch fires after 2.5 seconds of active playback for the queued neighbor. */
     @Test
-    fun prefetchesUpcomingTrackAfterPlaybackStabilizes() = runBlocking {
+    fun prefetchesUpcomingTrackAfterPlaybackStabilizes() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
         val engine = FakeAudioEngine()
         val prefetchedIds = mutableListOf<String>()
         val prefetcher = object : StreamPrefetcher {
@@ -156,7 +157,11 @@ class PlayerViewModelP0Test {
             queueController = PlaybackQueueController(),
             resolveStream = ResolveTrackStreamUseCase(FakeLibraryRepository(), FakeStreamResolver()),
             libraryRepository = FakeLibraryRepository(),
-            recommendationEngine = RecommendationEngine(FakeScoreRepository(), FakeDiscoveryRepository()),
+            recommendationEngine = RecommendationEngine(
+                FakeScoreRepository(),
+                FakeDiscoveryRepository(),
+                clockMs = { 1_000L }
+            ),
             preferencesRepository = FakePreferencesRepository(UserPreferences()),
             offlineDownloadManager = FakeDownloadManager(),
             toastController = ToastController(),
@@ -165,7 +170,9 @@ class PlayerViewModelP0Test {
         )
 
         vm.playTrack(trackOne, listOf(trackOne, trackTwo))
-        delay(2_700L)
+        runCurrent()
+        advanceTimeBy(2_700L)
+        runCurrent()
         assertEquals(listOf("t2"), prefetchedIds)
         vm.dispose()
     }
@@ -297,7 +304,7 @@ class PlayerViewModelP0Test {
         override suspend fun searchAlbums(query: String, limit: Int, offset: Int, yearRange: IntRange?) =
             AppResult.Success(emptyList<Album>())
         override suspend fun searchOverview(query: String, limitPerSection: Int, yearRange: IntRange?) =
-            AppResult.Success(SearchOverview())
+            AppResult.Success(SearchOverview(artists = emptyList(), songs = emptyList(), albums = emptyList()))
         override suspend fun getGenreCharts(genres: List<String>) = AppResult.Success(emptyList<CategoryRow>())
         override suspend fun getChartTracks(limit: Int) = AppResult.Success(emptyList<Track>())
         override suspend fun getTrackDetails(trackId: String) = AppResult.Failure(DomainError.StreamNotFound("unused"))

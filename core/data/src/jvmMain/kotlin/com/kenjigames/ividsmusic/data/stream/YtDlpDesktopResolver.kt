@@ -210,7 +210,7 @@ class YtDlpDesktopResolver(
     }
 
     /** Resolves `yt-dlp.exe` prioritizing managed user tools, then bundled resources, working dirs, and PATH. */
-    internal fun findYtDlpExecutable(): String? {
+    fun findYtDlpExecutable(): String? {
         val candidates = buildList {
             System.getenv("LOCALAPPDATA")?.takeIf { it.isNotBlank() }?.let { localAppData ->
                 add(File(localAppData, "IVIDSMusic/tools/yt-dlp.exe"))

@@ -38,7 +38,7 @@ class FilePlaybackSessionRepository(
      */
     override suspend fun load(): PlaybackSessionSnapshot? = fileMutex.withLock {
         withContext(ioDispatcher) {
-            if (!sessionFile.exists() || !sessionFile.isFile || sessionFile.length() <= 0L) {
+            if (!sessionFile.exists() || !sessionFile.isFile || sessionFile.length() !in 1L..MAX_SESSION_FILE_BYTES) {
                 return@withContext null
             }
             val raw = runCatching { sessionFile.readText(Charsets.UTF_8) }.getOrNull()
@@ -201,5 +201,6 @@ class FilePlaybackSessionRepository(
 
     private companion object {
         const val MAX_PERSISTED_QUEUE = 100
+        const val MAX_SESSION_FILE_BYTES = 2L * 1024L * 1024L
     }
 }

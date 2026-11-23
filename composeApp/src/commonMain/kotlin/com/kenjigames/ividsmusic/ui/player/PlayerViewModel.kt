@@ -271,6 +271,7 @@ class PlayerViewModel(
      */
     fun toggleShuffle() {
         queueController.toggleShuffle()
+        scope.launch { saveSessionNow() }
     }
 
     /**
@@ -278,6 +279,7 @@ class PlayerViewModel(
      */
     fun cycleRepeatMode() {
         queueController.cycleRepeatMode()
+        scope.launch { saveSessionNow() }
     }
 
     /**
@@ -297,9 +299,14 @@ class PlayerViewModel(
         queueController.removeAt(index)
         val nextCurrent = queueController.state.value.currentTrack
         if (nextCurrent == null) {
-            scope.launch { audioEngine.stop() }
+            scope.launch {
+                audioEngine.stop()
+                sessionRepository?.clear()
+            }
         } else if (wasCurrent) {
             launchTrackPlayback(nextCurrent)
+        } else {
+            scope.launch { saveSessionNow() }
         }
     }
 
