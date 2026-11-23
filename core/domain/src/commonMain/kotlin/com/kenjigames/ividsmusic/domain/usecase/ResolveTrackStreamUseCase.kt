@@ -35,4 +35,11 @@ class ResolveTrackStreamUseCase(
         }
         return streamResolver.resolve(hydratedTrack, preferredQuality)
     }
+
+    /**
+     * Evicts cached stream URLs for [trackId] inside [StreamResolver] so retries fetch fresh endpoints.
+     */
+    fun invalidate(trackId: String) {
+        streamResolver.invalidate(trackId)
+    }
 }

@@ -40,10 +40,13 @@ class DesktopAudioCacheTranscoderTest {
         val keyA = DesktopAudioCacheTranscoder.buildCacheKey(urlA)
         val keyB = DesktopAudioCacheTranscoder.buildCacheKey(urlB)
         val keyOther = DesktopAudioCacheTranscoder.buildCacheKey(otherTrack)
+        val hintedA = DesktopAudioCacheTranscoder.buildCacheKey(urlA, cacheKeyHint = "xy3AcmW0lrQ")
+        val hintedB = DesktopAudioCacheTranscoder.buildCacheKey(otherTrack, cacheKeyHint = "xy3AcmW0lrQ")
 
         assertEquals(24, keyA.length)
         assertEquals(keyA, keyB)
         assertNotEquals(keyA, keyOther)
+        assertEquals(hintedA, hintedB)
     }
 
     /**

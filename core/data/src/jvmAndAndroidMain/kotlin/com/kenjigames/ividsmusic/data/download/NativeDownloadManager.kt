@@ -258,14 +258,17 @@ class NativeDownloadManager(
     }
 
     /**
-     * Validates that [path] is writable, persists it as the custom save folder, updates [downloadDirectoryPath], and rescans.
+     * Validates that [path] is canonical, non-system, and writable, persists it as save folder, and rescans.
      */
     override suspend fun setCustomSaveDirectory(path: String): AppResult<Unit> = withContext(ioDispatcher) {
         val trimmed = path.trim()
         if (trimmed.isEmpty()) {
             return@withContext AppResult.Failure(DomainError.Validation("Save directory path cannot be empty"))
         }
-        val targetDir = File(trimmed)
+        val targetDir = runCatching { File(trimmed).canonicalFile }.getOrElse { File(trimmed).absoluteFile }
+        if (targetDir.parentFile == null || isProtectedSystemDirectory(targetDir)) {
+            return@withContext AppResult.Failure(DomainError.Validation("Cannot use a root or system directory: $trimmed"))
+        }
         if (!targetDir.exists() && !targetDir.mkdirs()) {
             return@withContext AppResult.Failure(DomainError.Storage("Cannot create save directory: $trimmed"))
         }
@@ -640,6 +643,18 @@ class NativeDownloadManager(
     private fun sha256Short(input: String): String {
         val digest = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
         return digest.take(8).joinToString("") { byte -> "%02x".format(byte) }
+    }
+
+    /**
+     * Checks whether [dir] points to a protected Windows or Unix OS directory.
+     */
+    private fun isProtectedSystemDirectory(dir: File): Boolean {
+        val normalized = dir.absolutePath.trimEnd('\\', '/').lowercase()
+        val winDir = System.getenv("WINDIR")?.trimEnd('\\', '/')?.lowercase()
+        return normalized == "/" ||
+            normalized == "/system" ||
+            normalized == "/etc" ||
+            (winDir != null && (normalized == winDir || normalized.startsWith("$winDir\\")))
     }
 
     private fun deleteRecursivelySafe(target: File) {

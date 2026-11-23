@@ -116,6 +116,7 @@ class DesktopAudioEngine internal constructor(
                     headers = headers,
                     initialVolume = currentVolume,
                     callbacks = callbacks,
+                    cacheKeyHint = track.videoId?.takeIf { it.isNotBlank() } ?: track.id,
                 )
             } catch (cancelled: CancellationException) {
                 throw cancelled

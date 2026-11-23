@@ -317,8 +317,7 @@ fun SettingsScreen(
                             IvidsTonalPill(
                                 onClick = viewModel::checkForUpdates,
                                 baseColor = IvidsColorTokens.RecessedTrough,
-                                hoverColor = IvidsColorTokens.GlassHover,
-                                baseBorderColor = IvidsColorTokens.HairlineSubtle
+                                hoverColor = IvidsColorTokens.GlassHover
                             ) {
                                 Icon(Icons.Rounded.SystemUpdate, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
                                 Text(strings["check_updates"], style = MaterialTheme.typography.labelLarge, color = IvidsColorTokens.ChalkInk)
@@ -394,8 +393,6 @@ private fun SettingsActionRow(
             onClick = onClick,
             baseColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.14f) else IvidsColorTokens.RecessedTrough,
             hoverColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.26f) else IvidsColorTokens.GlassHover,
-            baseBorderColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.28f) else IvidsColorTokens.HairlineSubtle,
-            hoverBorderColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.6f) else IvidsColorTokens.HoverBorder,
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 9.dp)
         ) {
             Text(

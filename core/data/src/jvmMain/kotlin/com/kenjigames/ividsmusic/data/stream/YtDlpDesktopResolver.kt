@@ -56,8 +56,13 @@ class YtDlpDesktopResolver(
 
     /**
      * Queries flat JSON metadata lines via `yt-dlp.exe --flat-playlist --dump-json` as a preview fallback on Desktop.
+     * Validates that [youtubeUrl] is an HTTP(S) URL and passes `--` before the target to block option injection.
      */
     suspend fun previewPlaylistOrVideo(youtubeUrl: String): AppResult<List<Track>> = withContext(ioDispatcher) {
+        val trimmedUrl = youtubeUrl.trim()
+        if (NetworkSecurityGuard.validateHttpUri(trimmedUrl, allowPrivateHosts = false) == null) {
+            return@withContext AppResult.Failure(DomainError.Validation("Invalid YouTube URL: $youtubeUrl"))
+        }
         val executable = findYtDlpExecutable()
             ?: return@withContext AppResult.Failure(DomainError.ProcessFailure("yt-dlp.exe not found on Desktop"))
 
@@ -66,7 +71,8 @@ class YtDlpDesktopResolver(
             "--flat-playlist",
             "--dump-json",
             "--no-warnings",
-            youtubeUrl.trim()
+            "--",
+            trimmedUrl
         )
         when (val result = runProcess(command, timeoutSeconds)) {
             is ProcessOutcome.Success -> {
@@ -100,13 +106,20 @@ class YtDlpDesktopResolver(
 
     /**
      * Executes `yt-dlp.exe` to extract a direct audio stream URL for [target] and resolves its metadata.
-     * Enforces [timeoutSeconds] and prioritizes compact M4A audio streams before progressive MP4 fallbacks.
+     * Enforces [timeoutSeconds], `--` option termination, and compact M4A preference before MP4 fallbacks.
      */
     private suspend fun executeYtDlpUrlLookup(
         target: String,
         videoId: String?,
         preferredQuality: AudioQuality
     ): AppResult<StreamSource.RemoteUrl> = withContext(ioDispatcher) {
+        val cleanTarget = target.trim()
+        if (cleanTarget.startsWith("-") ||
+            (!cleanTarget.startsWith("ytsearch1:") &&
+                NetworkSecurityGuard.validateHttpUri(cleanTarget, allowPrivateHosts = false) == null)
+        ) {
+            return@withContext AppResult.Failure(DomainError.Validation("Invalid stream target: $target"))
+        }
         val executable = findYtDlpExecutable()
             ?: return@withContext AppResult.Failure(DomainError.ProcessFailure("yt-dlp.exe not found"))
 
@@ -117,7 +130,8 @@ class YtDlpDesktopResolver(
             "-f",
             "bestaudio[ext=m4a]/140/bestaudio/18/best",
             "-g",
-            target
+            "--",
+            cleanTarget
         )
         when (val outcome = runProcess(command, timeoutSeconds)) {
             is ProcessOutcome.Success -> {

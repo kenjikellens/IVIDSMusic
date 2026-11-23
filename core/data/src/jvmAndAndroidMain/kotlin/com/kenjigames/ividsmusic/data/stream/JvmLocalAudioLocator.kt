@@ -40,10 +40,24 @@ class JvmLocalAudioLocator : LocalAudioLocator {
 
     companion object {
         private val SUPPORTED_EXTENSIONS = listOf("m4a", "mp3")
-        private val INVALID_FILENAME_CHARS = Regex("[/\\\\?%*:|\"<>]")
+        private val INVALID_FILENAME_CHARS = Regex("[/\\\\?%*:|\"<>\\u0000-\\u001F]")
+        private val WINDOWS_RESERVED_NAMES = setOf(
+            "CON", "PRN", "AUX", "NUL",
+            "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9",
+            "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"
+        )
 
-        /** Strips filesystem-illegal characters from artist or track title segments deterministically. */
-        internal fun sanitizeFilenamePart(raw: String): String =
-            raw.trim().replace(INVALID_FILENAME_CHARS, "").ifEmpty { "Unknown" }
+        /**
+         * Strips illegal, control, and trailing dot/space characters and guards Windows reserved device names.
+         * Returns a safe single path segment defaulting to `"Unknown"` when empty.
+         */
+        internal fun sanitizeFilenamePart(raw: String): String {
+            val cleaned = raw.trim()
+                .replace(INVALID_FILENAME_CHARS, "")
+                .trimEnd('.', ' ')
+                .ifEmpty { "Unknown" }
+            val stem = cleaned.substringBefore('.').uppercase()
+            return if (stem in WINDOWS_RESERVED_NAMES) "_$cleaned" else cleaned
+        }
     }
 }

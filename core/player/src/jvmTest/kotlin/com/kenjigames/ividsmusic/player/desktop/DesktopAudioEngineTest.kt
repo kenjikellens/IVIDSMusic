@@ -268,6 +268,7 @@ class DesktopAudioEngineTest {
             headers: Map<String, String>,
             initialVolume: Float,
             callbacks: MediaHandleCallbacks,
+            cacheKeyHint: String?,
         ): Result<DesktopMediaHandle> {
             createFailure?.let { return Result.failure(it) }
             val index = handles.size

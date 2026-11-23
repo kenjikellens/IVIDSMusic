@@ -399,7 +399,7 @@ internal class LocalHeaderProxy(
     }
 
     /**
-     * Follows up to [MAX_REDIRECTS] HTTP/HTTPS redirects manually so cross-scheme redirects retain custom headers.
+     * Follows up to [MAX_REDIRECTS] HTTP/HTTPS redirects safely via [DesktopNetworkGuard] while retaining custom headers.
      */
     private fun followRedirects(rangeHeader: String?, ifRangeHeader: String?): HttpURLConnection? {
         var currentUrl = targetUrl
@@ -410,7 +410,8 @@ internal class LocalHeaderProxy(
                 val location = conn.getHeaderField("Location")
                 conn.disconnect()
                 if (location.isNullOrBlank()) return null
-                currentUrl = URI(currentUrl).resolve(location).toString()
+                val nextUri = DesktopNetworkGuard.validateRedirectTarget(currentUrl, location) ?: return null
+                currentUrl = nextUri.toString()
                 return@repeat
             }
             return conn
@@ -419,7 +420,7 @@ internal class LocalHeaderProxy(
     }
 
     /**
-     * Creates and configures a `GET` [HttpURLConnection] to [urlString] with custom [headers] and bounded [rangeHeader].
+     * Creates and configures a `GET` [HttpURLConnection] to [urlString] with sanitized [headers] and bounded [rangeHeader].
      */
     private fun openConfiguredConnection(
         urlString: String,
@@ -433,13 +434,16 @@ internal class LocalHeaderProxy(
             readTimeout = READ_TIMEOUT_MS
             setRequestProperty("User-Agent", DEFAULT_USER_AGENT)
             for ((name, value) in headers) {
-                setRequestProperty(name, value)
+                val cleanName = DesktopNetworkGuard.sanitizeHeaderValue(name)
+                if (cleanName.isNotEmpty()) {
+                    setRequestProperty(cleanName, DesktopNetworkGuard.sanitizeHeaderValue(value))
+                }
             }
             if (!rangeHeader.isNullOrBlank()) {
-                setRequestProperty("Range", rangeHeader)
+                setRequestProperty("Range", DesktopNetworkGuard.sanitizeHeaderValue(rangeHeader))
             }
             if (!ifRangeHeader.isNullOrBlank()) {
-                setRequestProperty("If-Range", ifRangeHeader)
+                setRequestProperty("If-Range", DesktopNetworkGuard.sanitizeHeaderValue(ifRangeHeader))
             }
         }
         return conn

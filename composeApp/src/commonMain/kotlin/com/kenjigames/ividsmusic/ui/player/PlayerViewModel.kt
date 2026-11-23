@@ -360,8 +360,8 @@ class PlayerViewModel(
     }
 
     /**
-     * Resolves [track]'s audio stream, invokes [AudioEngine.play], records listening history/clicks,
-     * and launches asynchronous dynamic album-art color extraction.
+     * Resolves [track]'s audio stream, invokes [AudioEngine.play] (with one cache-invalidated retry on failure),
+     * records listening history/clicks, and launches asynchronous dynamic album-art color extraction.
      */
     private fun launchTrackPlayback(track: Track) {
         activePlaybackJob?.cancel()
@@ -369,6 +369,7 @@ class PlayerViewModel(
         _uiState.update {
             it.copy(
                 currentTrack = track,
+                isPlaying = false,
                 isResolving = true,
                 isBuffering = true,
                 positionMs = 0L,
@@ -381,42 +382,48 @@ class PlayerViewModel(
         activePlaybackJob = scope.launch {
             try {
                 val quality = _uiState.value.activeQuality
-                val resolved = resolveStream(track, quality)
+                var resolved = resolveStream(track, quality)
                 if (sessionId != playbackSessionSeq) return@launch
 
-                when (resolved) {
-                    is AppResult.Failure -> {
-                        _uiState.update {
-                            it.copy(
-                                isResolving = false,
-                                isBuffering = false,
-                                isPlaying = false,
-                                errorMessage = resolved.error.message
-                            )
-                        }
-                        toastController.show(resolved.error.message, isError = true)
-                    }
-                    is AppResult.Success -> {
-                        val playResult = audioEngine.play(resolved.data, track)
+                if (resolved is AppResult.Success) {
+                    var playResult = audioEngine.play(resolved.data, track)
+                    if (sessionId != playbackSessionSeq) return@launch
+                    if (playResult is AppResult.Failure) {
+                        resolveStream.invalidate(track.id)
+                        resolved = resolveStream(track, quality)
                         if (sessionId != playbackSessionSeq) return@launch
-                        when (playResult) {
-                            is AppResult.Failure -> {
-                                _uiState.update {
-                                    it.copy(
-                                        isResolving = false,
-                                        isBuffering = false,
-                                        errorMessage = playResult.error.message
-                                    )
-                                }
-                                toastController.show(playResult.error.message, isError = true)
-                            }
-                            is AppResult.Success -> {
-                                _uiState.update { it.copy(isResolving = false, errorMessage = null) }
-                                libraryRepository.recordHistory(track, System.currentTimeMillis())
-                                recommendationEngine.recordTrackClick(track)
-                            }
+                        if (resolved is AppResult.Success) {
+                            playResult = audioEngine.play(resolved.data, track)
+                            if (sessionId != playbackSessionSeq) return@launch
                         }
                     }
+                    when (playResult) {
+                        is AppResult.Failure -> {
+                            _uiState.update {
+                                it.copy(
+                                    isResolving = false,
+                                    isBuffering = false,
+                                    errorMessage = playResult.error.message
+                                )
+                            }
+                            toastController.show(playResult.error.message, isError = true)
+                        }
+                        is AppResult.Success -> {
+                            _uiState.update { it.copy(isResolving = false, errorMessage = null) }
+                            libraryRepository.recordHistory(track, System.currentTimeMillis())
+                            recommendationEngine.recordTrackClick(track)
+                        }
+                    }
+                } else if (resolved is AppResult.Failure) {
+                    _uiState.update {
+                        it.copy(
+                            isResolving = false,
+                            isBuffering = false,
+                            isPlaying = false,
+                            errorMessage = resolved.error.message
+                        )
+                    }
+                    toastController.show(resolved.error.message, isError = true)
                 }
             } catch (cancel: CancellationException) {
                 throw cancel

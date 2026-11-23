@@ -15,7 +15,7 @@ import kotlin.coroutines.resume
 internal interface DesktopMediaBackend {
 
     /**
-     * Creates a native playback handle for [mediaUri] with optional HTTP [headers] and [initialVolume].
+     * Creates a native playback handle for [mediaUri] with optional HTTP [headers], [initialVolume], and [cacheKeyHint].
      * Binds lifecycle [callbacks] and begins playback, returning [Result.failure] on initialization errors.
      */
     suspend fun createAndStart(
@@ -23,6 +23,7 @@ internal interface DesktopMediaBackend {
         headers: Map<String, String>,
         initialVolume: Float,
         callbacks: MediaHandleCallbacks,
+        cacheKeyHint: String? = null,
     ): Result<DesktopMediaHandle>
 }
 
@@ -102,24 +103,29 @@ internal class JavaFxMediaBackend : DesktopMediaBackend {
 
     /**
      * Initializes the JavaFX toolkit, prepares a cached `.mp3` URI via [DesktopAudioCacheTranscoder] (falling back
-     * to [LocalHeaderProxy] or raw URI), and starts `MediaPlayer`. Disposes native resources cleanly on cancellation.
+     * to [LocalHeaderProxy] when `ffmpeg` is absent), and starts `MediaPlayer`. Fails fast if remote transcode fails.
      */
     override suspend fun createAndStart(
         mediaUri: String,
         headers: Map<String, String>,
         initialVolume: Float,
         callbacks: MediaHandleCallbacks,
+        cacheKeyHint: String?,
     ): Result<DesktopMediaHandle> {
         JavaFxRuntime.ensureStarted().getOrElse { failure ->
             return Result.failure(failure)
         }
 
+        val isRemoteHttp = mediaUri.startsWith("http://", ignoreCase = true) ||
+            mediaUri.startsWith("https://", ignoreCase = true)
         val preparedLocalMp3Uri = DesktopAudioCacheTranscoder.prepareJavaFxCompatibleUri(
             mediaUri = mediaUri,
             headers = headers,
+            cacheKeyHint = cacheKeyHint,
         )
-        val isRemoteHttp = mediaUri.startsWith("http://", ignoreCase = true) ||
-            mediaUri.startsWith("https://", ignoreCase = true)
+        if (preparedLocalMp3Uri == null && isRemoteHttp && DesktopAudioCacheTranscoder.findFfmpegExecutable() != null) {
+            return Result.failure(java.io.IOException("Failed to stream and prepare desktop audio for playback"))
+        }
         val proxy = if (preparedLocalMp3Uri == null && (isRemoteHttp || headers.isNotEmpty())) {
             try {
                 LocalHeaderProxy(targetUrl = mediaUri, headers = headers)
