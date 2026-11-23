@@ -34,10 +34,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,12 +52,19 @@ import androidx.compose.ui.composed
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.addOutline
+import androidx.compose.ui.graphics.drawOutline
+import androidx.compose.ui.graphics.drawscope.clipPath
+import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -211,7 +220,7 @@ fun IvidsSwitch(
     val trackColor by animateColorAsState(
         targetValue = when {
             checked -> IvidsColorTokens.ChalkInk
-            isHovered -> Color(0xFF3A3A3A)
+            isHovered -> Color(0xFF424242)
             else -> Color(0xFF2B2B2B)
         },
         animationSpec = tween(150, easing = FastOutSlowInEasing),
@@ -282,15 +291,10 @@ fun <T> IvidsSegmentedBar(
         val interactionSource = remember { MutableInteractionSource() }
         val isHovered by interactionSource.collectIsHoveredAsState()
 
-        val bg by animateColorAsState(
-            targetValue = when {
-                isSelected -> IvidsColorTokens.ChalkInk
-                isHovered -> Color(0xFF2E2E2E)
-                else -> Color(0xFF1D1D1D)
-            },
-            animationSpec = tween(140, easing = FastOutSlowInEasing),
-            label = "SegmentBg"
-        )
+        val baseBg = when {
+            isSelected -> IvidsColorTokens.ChalkInk
+            else -> Color(0xFF1D1D1D)
+        }
         val fg by animateColorAsState(
             targetValue = when {
                 isSelected -> IvidsColorTokens.ObsidianStage
@@ -302,7 +306,12 @@ fun <T> IvidsSegmentedBar(
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
-                .background(bg)
+                .background(baseBg)
+                .ividsHoverZoom(
+                    hovered = !isSelected && isHovered,
+                    shape = RoundedCornerShape(8.dp),
+                    hoverColor = Color(0x28FFFFFF)
+                )
                 .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.95f)
                 .pointerHoverIcon(PointerIcon.Hand)
                 .hoverable(interactionSource)
@@ -347,6 +356,59 @@ fun <T> IvidsSegmentedBar(
 }
 
 /**
+ * Semantic hover fill styles kept separate from [ividsHoverZoom]'s 0%-to-100% animation engine.
+ */
+enum class IvidsHoverStyle {
+    NEUTRAL,
+    ON_LIGHT,
+    PRIMARY_ACCENT,
+    DESTRUCTIVE
+}
+
+/**
+ * Resolves a semantic [IvidsHoverStyle] to its translucent overlay tint color.
+ */
+fun resolveHoverColor(style: IvidsHoverStyle): Color = when (style) {
+    IvidsHoverStyle.NEUTRAL -> IvidsColorTokens.HoverOverlay
+    IvidsHoverStyle.ON_LIGHT -> Color(0x38000000)
+    IvidsHoverStyle.PRIMARY_ACCENT -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.20f)
+    IvidsHoverStyle.DESTRUCTIVE -> IvidsColorTokens.DangerCoral.copy(alpha = 0.24f)
+}
+
+/**
+ * Draws a hover fill resolved from [style] (or optional [hoverColor] override) that zooms smoothly
+ * outward from `0%` at the container's center to `100%` of [shape] without re-layouting children.
+ */
+fun Modifier.ividsHoverZoom(
+    hovered: Boolean,
+    shape: Shape = RoundedCornerShape(12.dp),
+    style: IvidsHoverStyle = IvidsHoverStyle.NEUTRAL,
+    hoverColor: Color? = null,
+    enabled: Boolean = true
+): Modifier = composed {
+    val resolvedColor = hoverColor ?: resolveHoverColor(style)
+    val progress by animateFloatAsState(
+        targetValue = if (enabled && hovered) 1f else 0f,
+        animationSpec = tween(durationMillis = 185, easing = FastOutSlowInEasing),
+        label = "IvidsHoverZoom"
+    )
+    if (progress <= 0.005f) return@composed this
+    val p = progress.coerceIn(0f, 1f)
+    this.drawBehind {
+        val outline = shape.createOutline(size, layoutDirection, this)
+        val boundsPath = Path().apply { addOutline(outline) }
+        clipPath(boundsPath) {
+            scale(scaleX = p, scaleY = p, pivot = Offset(size.width / 2f, size.height / 2f)) {
+                drawOutline(
+                    outline = outline,
+                    color = resolvedColor.copy(alpha = resolvedColor.alpha * p)
+                )
+            }
+        }
+    }
+}
+
+/**
  * Applies a tactile spring press-scale animation driven by [interactionSource] so touch taps on
  * cards, track rows, and buttons compress smoothly without intercepting gestures.
  */
@@ -368,8 +430,8 @@ fun Modifier.ividsTouchFeedback(
 }
 
 /**
- * Tonal pill button communicating interactivity through surface luminance lift, border highlight,
- * hand cursor, and disabled alpha dimming while unifying [MutableInteractionSource] for hover/click.
+ * Tonal pill button pairing a base fill with semantic [hoverStyle] (or explicit [hoverColor]) and
+ * the shared `0% -> 100%` [ividsHoverZoom] animation plus hand cursor and TV focus handling.
  */
 @Composable
 fun IvidsTonalPill(
@@ -378,6 +440,7 @@ fun IvidsTonalPill(
     enabled: Boolean = true,
     baseColor: Color = Color(0xFF1D1D1D),
     hoverColor: Color = IvidsColorTokens.GlassHover,
+    hoverStyle: IvidsHoverStyle = IvidsHoverStyle.NEUTRAL,
     baseBorderColor: Color = IvidsColorTokens.HairlineSubtle,
     hoverBorderColor: Color = IvidsColorTokens.HoverBorder,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
@@ -391,19 +454,16 @@ fun IvidsTonalPill(
     } else {
         baseColor
     }
-    val resolvedHover = hoverColor
+    val customOverlay = hoverColor.takeUnless {
+        it == IvidsColorTokens.GlassHover || it == Color(0xFF282830)
+    }
 
-    val bg by animateColorAsState(
-        targetValue = if (enabled && isHovered) resolvedHover else resolvedBase,
-        animationSpec = tween(150, easing = FastOutSlowInEasing),
-        label = "TonalPillBg"
-    )
     Surface(
         onClick = onClick,
         enabled = enabled,
         interactionSource = interactionSource,
         shape = CircleShape,
-        color = bg,
+        color = resolvedBase,
         modifier = modifier
             .ividsTouchFeedback(interactionSource = interactionSource, enabled = enabled)
             .graphicsLayer { alpha = if (enabled) 1f else 0.42f }
@@ -411,12 +471,81 @@ fun IvidsTonalPill(
             .tvFocusable(enabled = enabled, shape = CircleShape)
     ) {
         Row(
-            modifier = Modifier.padding(contentPadding),
+            modifier = Modifier
+                .ividsHoverZoom(
+                    hovered = isHovered,
+                    shape = CircleShape,
+                    style = hoverStyle,
+                    hoverColor = customOverlay,
+                    enabled = enabled
+                )
+                .padding(contentPadding),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             content = content
         )
     }
+}
+
+/**
+ * High-contrast primary pill button (e.g. Start Listening) delegating directly to [IvidsTonalPill]
+ * with darker [IvidsHoverStyle.ON_LIGHT] hover zoom on white surfaces.
+ */
+@Composable
+fun IvidsPrimaryButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    isDestructive: Boolean = false,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp, vertical = 11.dp),
+    content: @Composable RowScope.() -> Unit
+) {
+    val bg = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk
+    val fg = if (isDestructive) IvidsColorTokens.ChalkInk else IvidsColorTokens.ObsidianStage
+    IvidsTonalPill(
+        onClick = onClick,
+        modifier = modifier,
+        enabled = enabled,
+        baseColor = bg,
+        hoverStyle = IvidsHoverStyle.ON_LIGHT,
+        contentPadding = contentPadding
+    ) {
+        CompositionLocalProvider(LocalContentColor provides fg) {
+            content()
+        }
+    }
+}
+
+/**
+ * Circular borderless icon button reusing [ividsHoverZoom] and [ividsTouchFeedback] with
+ * configurable [hoverStyle] for dismiss (`X`) and toolbar icon controls.
+ */
+@Composable
+fun IvidsIconButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    size: Dp = 40.dp,
+    enabled: Boolean = true,
+    hoverStyle: IvidsHoverStyle = IvidsHoverStyle.NEUTRAL,
+    content: @Composable BoxScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    Box(
+        modifier = modifier
+            .size(size)
+            .clip(CircleShape)
+            .ividsHoverZoom(hovered = isHovered, shape = CircleShape, style = hoverStyle, enabled = enabled)
+            .ividsTouchFeedback(interactionSource = interactionSource, enabled = enabled, pressedScale = 0.92f)
+            .graphicsLayer { alpha = if (enabled) 1f else 0.42f }
+            .then(if (enabled) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
+            .hoverable(interactionSource, enabled = enabled)
+            .tvFocusable(enabled = enabled, shape = CircleShape)
+            .clickable(enabled = enabled, interactionSource = interactionSource, indication = null, onClick = onClick),
+        contentAlignment = Alignment.Center,
+        content = content
+    )
 }
 
 /**
@@ -438,12 +567,7 @@ fun IvidsSelectableDialogItem(
     val visualSelected = selected || pendingSelection
 
     val bg by animateColorAsState(
-        targetValue = when {
-            visualSelected && isHovered -> Color(0xFF333333)
-            visualSelected -> Color(0xFF262626)
-            isHovered -> Color(0xFF1F1F1F)
-            else -> Color.Transparent
-        },
+        targetValue = if (visualSelected) Color(0xFF262626) else Color.Transparent,
         animationSpec = tween(120, easing = FastOutSlowInEasing),
         label = "DialogOptionBg"
     )
@@ -472,7 +596,10 @@ fun IvidsSelectableDialogItem(
             .tvFocusable(shape = RoundedCornerShape(12.dp))
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .ividsHoverZoom(hovered = isHovered, shape = RoundedCornerShape(12.dp))
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
             content = content

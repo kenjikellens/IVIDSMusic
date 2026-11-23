@@ -113,12 +113,7 @@ fun TrackRowItem(
     val isArtistHovered by artistHoverSource.collectIsHoveredAsState()
 
     val rowBg by animateColorAsState(
-        targetValue = when {
-            isHovered && isCurrentlyPlaying -> Color(0xFF262626)
-            isHovered -> Color(0xFF1C1C1C)
-            isCurrentlyPlaying -> Color(0xFF161616)
-            else -> Color.Transparent
-        },
+        targetValue = if (isCurrentlyPlaying) Color(0xFF161616) else Color.Transparent,
         animationSpec = tween(140, easing = FastOutSlowInEasing),
         label = "TrackRowBg"
     )
@@ -144,6 +139,11 @@ fun TrackRowItem(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .ividsHoverZoom(
+                    hovered = isHovered,
+                    shape = RoundedCornerShape(12.dp),
+                    hoverColor = if (isCurrentlyPlaying) Color(0x28FFFFFF) else IvidsColorTokens.HoverOverlay
+                )
                 .padding(
                     horizontal = if (metrics.isCompactMobile) 8.dp else 12.dp,
                     vertical = if (metrics.isCompactMobile) 8.dp else 9.dp

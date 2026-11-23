@@ -129,8 +129,11 @@ import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.resources.Res
 import com.kenjigames.ividsmusic.resources.ic_ivids_brand
 import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
+import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
+import com.kenjigames.ividsmusic.ui.components.IvidsIconButton
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
+import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
 import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.navigation.AppNavigator
@@ -620,12 +623,12 @@ private fun MobileBottomBar(
                 items.forEach { entry ->
                     val selected = entry.matcher(currentRoute)
                     val indicatorColor by animateColorAsState(
-                        targetValue = if (selected) Color(0x1EFFFFFF) else Color.Transparent,
+                        targetValue = if (selected) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f) else Color.Transparent,
                         animationSpec = tween(150, easing = FastOutSlowInEasing),
                         label = "BottomNavIndicator"
                     )
                     val tabInteraction = remember { MutableInteractionSource() }
-                    val iconTint = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
+                    val iconTint = if (selected) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
                     val labelColor = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
 
                     Column(
@@ -981,17 +984,13 @@ private fun SidebarNavButton(
     val isHovered by interactionSource.collectIsHoveredAsState()
 
     val bgColor by animateColorAsState(
-        targetValue = when {
-            selected -> Color(0x1EFFFFFF)
-            isHovered -> Color(0xFF1E1E1E)
-            else -> Color.Transparent
-        },
+        targetValue = if (selected) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f) else Color.Transparent,
         animationSpec = tween(150, easing = FastOutSlowInEasing),
         label = "NavButtonBg"
     )
     val iconColor by animateColorAsState(
         targetValue = when {
-            selected -> IvidsColorTokens.ChalkInk
+            selected -> IvidsColorTokens.PrimaryCyan
             isHovered -> IvidsColorTokens.ChalkInk
             else -> IvidsColorTokens.SlateMuted
         },
@@ -1019,7 +1018,14 @@ private fun SidebarNavButton(
         color = bgColor
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .ividsHoverZoom(
+                    hovered = isHovered,
+                    shape = RoundedCornerShape(10.dp),
+                    style = if (selected) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+                )
+                .padding(horizontal = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = if (expanded) Arrangement.Start else Arrangement.Center
         ) {
@@ -1046,7 +1052,7 @@ private fun SidebarNavButton(
                         modifier = Modifier
                             .size(5.dp)
                             .clip(CircleShape)
-                            .background(IvidsColorTokens.ChalkInk)
+                            .background(IvidsColorTokens.PrimaryCyan)
                     )
                 }
             }
@@ -1194,22 +1200,22 @@ private fun DesktopTopBar(
 
         val profileHoverSource = remember { MutableInteractionSource() }
         val profileHovered by profileHoverSource.collectIsHoveredAsState()
-        val profileBg by animateColorAsState(
-            targetValue = if (profileHovered) IvidsColorTokens.GlassHover else IvidsColorTokens.GlassSurface,
-            animationSpec = tween(200, easing = FastOutSlowInEasing),
-            label = "TopBarProfileBg"
-        )
         Surface(
             onClick = onOpenProfile,
             shape = CircleShape,
-            color = profileBg,
+            color = IvidsColorTokens.GlassSurface,
             modifier = Modifier
                 .size(40.dp)
                 .pointerHoverIcon(PointerIcon.Hand)
                 .hoverable(profileHoverSource)
                 .tvFocusable(shape = CircleShape)
         ) {
-            Box(contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .ividsHoverZoom(hovered = profileHovered, shape = CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
                 Icon(
                     imageVector = Icons.Rounded.Person,
                     contentDescription = strings["you"],
@@ -1586,7 +1592,7 @@ private fun QueueSideSheet(
                             Text(strings["clear_queue"], color = IvidsColorTokens.SlateMuted)
                         }
                     }
-                    IconButton(onClick = onClose, modifier = Modifier.size(32.dp)) {
+                    IvidsIconButton(onClick = onClose, size = 34.dp) {
                         Icon(Icons.Rounded.Close, strings["close"], tint = IvidsColorTokens.SlateMuted)
                     }
                 }
@@ -1605,11 +1611,7 @@ private fun QueueSideSheet(
                         val queueItemSource = remember { MutableInteractionSource() }
                         val queueHovered by queueItemSource.collectIsHoveredAsState()
                         val queueItemBg by animateColorAsState(
-                            targetValue = when {
-                                queueHovered -> IvidsColorTokens.GlassHover
-                                active -> Color(0x1CFFFFFF)
-                                else -> IvidsColorTokens.GlassSurface
-                            },
+                            targetValue = if (active) Color(0x1CFFFFFF) else IvidsColorTokens.GlassSurface,
                             animationSpec = tween(200, easing = FastOutSlowInEasing),
                             label = "QueueRowBg"
                         )
@@ -1624,7 +1626,10 @@ private fun QueueSideSheet(
                             color = queueItemBg
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .ividsHoverZoom(hovered = queueHovered, shape = RoundedCornerShape(10.dp))
+                                    .padding(horizontal = 12.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(10.dp)
                             ) {

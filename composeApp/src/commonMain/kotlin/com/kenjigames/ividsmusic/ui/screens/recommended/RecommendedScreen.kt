@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.ScoreEntityType
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
@@ -140,15 +141,8 @@ fun RecommendedScreen(
                             Text(strings["foryou_empty_title"], style = MaterialTheme.typography.titleLarge, color = IvidsColorTokens.ChalkInk)
                             Text(strings["foryou_empty_desc"], style = MaterialTheme.typography.bodyMedium, color = IvidsColorTokens.SlateMuted)
                             Spacer(modifier = Modifier.height(4.dp))
-                            Button(
-                                onClick = onExploreMusic,
-                                shape = CircleShape,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = IvidsColorTokens.ChalkInk,
-                                    contentColor = IvidsColorTokens.ObsidianStage
-                                )
-                            ) {
-                                Text(strings["explore_music"])
+                            IvidsPrimaryButton(onClick = onExploreMusic) {
+                                Text(strings["explore_music"], color = IvidsColorTokens.ObsidianStage)
                             }
                         }
                     }

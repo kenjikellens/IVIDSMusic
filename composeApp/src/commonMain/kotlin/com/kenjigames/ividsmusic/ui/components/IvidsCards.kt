@@ -94,11 +94,6 @@ fun MusicCard(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
 
-    val surfaceColor by animateColorAsState(
-        targetValue = if (isHovered && !metrics.isCompactMobile) Color(0xFF181818) else Color.Transparent,
-        animationSpec = tween(160, easing = FastOutSlowInEasing),
-        label = "MusicCardSurface"
-    )
     val playFabAlpha by animateFloatAsState(
         targetValue = when {
             isHovered || isTvMode -> 1f
@@ -118,9 +113,17 @@ fun MusicCard(
             .pointerHoverIcon(PointerIcon.Hand)
             .tvFocusable(shape = RoundedCornerShape(14.dp)),
         shape = RoundedCornerShape(14.dp),
-        color = surfaceColor
+        color = Color.Transparent
     ) {
-        Column(modifier = Modifier.padding(if (metrics.isCompactMobile) 4.dp else 8.dp)) {
+        Column(
+            modifier = Modifier
+                .ividsHoverZoom(
+                    hovered = isHovered && !metrics.isCompactMobile,
+                    shape = RoundedCornerShape(14.dp),
+                    hoverColor = Color(0x1EFFFFFF)
+                )
+                .padding(if (metrics.isCompactMobile) 4.dp else 8.dp)
+        ) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -163,8 +166,11 @@ fun MusicCard(
                 }
 
                 if (onPlayClick != null && playFabAlpha > 0.02f) {
+                    val fabHover = remember { MutableInteractionSource() }
+                    val isFabHovered by fabHover.collectIsHoveredAsState()
                     Surface(
                         onClick = onPlayClick,
+                        interactionSource = fabHover,
                         shape = CircleShape,
                         color = IvidsColorTokens.ChalkInk,
                         shadowElevation = 8.dp,
@@ -172,10 +178,16 @@ fun MusicCard(
                             .align(Alignment.BottomEnd)
                             .padding(10.dp)
                             .size(42.dp)
+                            .ividsTouchFeedback(interactionSource = fabHover, pressedScale = 0.92f)
                             .pointerHoverIcon(PointerIcon.Hand)
                             .graphicsLayer { alpha = playFabAlpha }
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .ividsHoverZoom(hovered = isFabHovered, shape = CircleShape, style = IvidsHoverStyle.ON_LIGHT),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Icon(
                                 imageVector = Icons.Rounded.PlayArrow,
                                 contentDescription = "Play $title",
@@ -304,33 +316,24 @@ fun LivingAlbumHero(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        Button(
+                        IvidsPrimaryButton(
                             onClick = onPrimaryAction,
                             enabled = primaryEnabled,
-                            shape = CircleShape,
                             contentPadding = PaddingValues(
                                 horizontal = if (isCompactMobile) 18.dp else 22.dp,
                                 vertical = if (isCompactMobile) 10.dp else 12.dp
-                            ),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = IvidsColorTokens.ChalkInk,
-                                contentColor = IvidsColorTokens.ObsidianStage,
-                                disabledContainerColor = IvidsColorTokens.ChalkInk.copy(alpha = 0.28f),
-                                disabledContentColor = IvidsColorTokens.ObsidianStage.copy(alpha = 0.6f)
-                            ),
-                            modifier = Modifier
-                                .then(if (primaryEnabled) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
-                                .tvFocusable(enabled = primaryEnabled, shape = CircleShape)
+                            )
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.PlayArrow,
                                 contentDescription = null,
+                                tint = IvidsColorTokens.ObsidianStage,
                                 modifier = Modifier.size(18.dp)
                             )
-                            Spacer(modifier = Modifier.width(6.dp))
                             Text(
                                 text = primaryActionLabel,
                                 style = MaterialTheme.typography.labelLarge,
+                                color = IvidsColorTokens.ObsidianStage,
                                 maxLines = 1,
                                 softWrap = false
                             )
@@ -422,19 +425,16 @@ fun LivingAlbumHero(
 
             // Place dismiss button last so it always stays above foreground layout in z-order.
             if (onDismiss != null) {
-                IconButton(
+                IvidsIconButton(
                     onClick = onDismiss,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(8.dp)
-                        .size(40.dp)
-                        .pointerHoverIcon(PointerIcon.Hand)
-                        .tvFocusable(shape = CircleShape)
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.Close,
                         contentDescription = "Dismiss",
-                        tint = IvidsColorTokens.ChalkInk.copy(alpha = 0.8f)
+                        tint = IvidsColorTokens.ChalkInk.copy(alpha = 0.85f)
                     )
                 }
             }

@@ -301,15 +301,16 @@ fun ConfirmationDialog(
         title = { Text(title, color = IvidsColorTokens.ChalkInk) },
         text = { Text(message, color = IvidsColorTokens.SlateMuted) },
         confirmButton = {
-            Button(
+            IvidsPrimaryButton(
                 onClick = onConfirm,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk,
-                    contentColor = if (isDestructive) IvidsColorTokens.ChalkInk else IvidsColorTokens.ObsidianStage
-                ),
-                modifier = Modifier.pointerHoverIcon(PointerIcon.Hand)
+                isDestructive = isDestructive,
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 18.dp, vertical = 10.dp)
             ) {
-                Text(confirmLabel)
+                Text(
+                    text = confirmLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isDestructive) IvidsColorTokens.ChalkInk else IvidsColorTokens.ObsidianStage
+                )
             }
         },
         dismissButton = {

@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ShimmerSkeletonRow
@@ -110,15 +111,8 @@ fun HomeScreen(
                                 color = IvidsColorTokens.ChalkInk,
                                 modifier = Modifier.weight(1f)
                             )
-                            Button(
-                                onClick = viewModel::refresh,
-                                shape = CircleShape,
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = IvidsColorTokens.ChalkInk,
-                                    contentColor = IvidsColorTokens.ObsidianStage
-                                )
-                            ) {
-                                Text(strings["retry"])
+                            IvidsPrimaryButton(onClick = viewModel::refresh) {
+                                Text(strings["retry"], color = IvidsColorTokens.ObsidianStage)
                             }
                         }
                     }

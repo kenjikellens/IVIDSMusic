@@ -40,6 +40,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.ConfirmationDialog
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.ToastController
@@ -149,9 +150,7 @@ fun PlaylistDetailScreen(
                             IvidsTonalPill(
                                 onClick = { viewModel.setDeleteConfirmVisible(true) },
                                 baseColor = IvidsColorTokens.DangerCoral.copy(alpha = 0.14f),
-                                hoverColor = IvidsColorTokens.DangerCoral.copy(alpha = 0.28f),
-                                baseBorderColor = IvidsColorTokens.DangerCoral.copy(alpha = 0.28f),
-                                hoverBorderColor = IvidsColorTokens.DangerCoral
+                                hoverStyle = IvidsHoverStyle.DESTRUCTIVE
                             ) {
                                 Icon(Icons.Rounded.Delete, null, tint = IvidsColorTokens.DangerCoral, modifier = Modifier.size(16.dp))
                                 Text(

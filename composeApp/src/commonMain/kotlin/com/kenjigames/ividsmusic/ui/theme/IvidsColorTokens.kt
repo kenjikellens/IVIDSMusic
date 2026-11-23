@@ -13,11 +13,11 @@ object IvidsColorTokens {
     val AbyssRail: Color = Color(0xFF000000)
     val ObsidianStage: Color = Color(0xFF090909)
     val GlassSurface: Color = Color(0xFF141414)
-    val GlassHover: Color = Color(0xFF2A2A2A)
+    val GlassHover: Color = Color(0xFF383838)
     val RecessedTrough: Color = Color(0xFF1C1C1C)
     val HairlineSubtle: Color = Color(0x14FFFFFF)
     val HoverBorder: Color = Color.Transparent
-    val HoverOverlay: Color = Color(0x26FFFFFF)
+    val HoverOverlay: Color = Color(0x24FFFFFF)
 
     val VinylSurface: Color = GlassSurface
     val GrooveElevated: Color = GlassHover

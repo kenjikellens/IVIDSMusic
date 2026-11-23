@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.CreatePlaylistDialog
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
@@ -352,17 +353,9 @@ private fun LibraryEmptyCard(
             Text(title, style = MaterialTheme.typography.titleLarge, color = IvidsColorTokens.ChalkInk)
             Text(description, style = MaterialTheme.typography.bodyMedium, color = IvidsColorTokens.SlateMuted)
             Spacer(modifier = Modifier.height(4.dp))
-            Button(
-                onClick = onAction,
-                shape = CircleShape,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = IvidsColorTokens.ChalkInk,
-                    contentColor = IvidsColorTokens.ObsidianStage
-                )
-            ) {
-                Icon(Icons.Rounded.Add, null, modifier = Modifier.size(18.dp))
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(actionLabel)
+            IvidsPrimaryButton(onClick = onAction) {
+                Icon(Icons.Rounded.Add, null, tint = IvidsColorTokens.ObsidianStage, modifier = Modifier.size(18.dp))
+                Text(actionLabel, color = IvidsColorTokens.ObsidianStage)
             }
         }
     }

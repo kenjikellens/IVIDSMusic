@@ -62,7 +62,10 @@ import com.kenjigames.ividsmusic.domain.model.UpdateMode
 import com.kenjigames.ividsmusic.platform.AppUpdateState
 import com.kenjigames.ividsmusic.ui.components.ConfirmationDialog
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
+import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
+import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
 import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
 import com.kenjigames.ividsmusic.ui.i18n.AppStrings
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
@@ -221,16 +224,11 @@ fun SettingsScreen(
                     horizontalPadding = rowHPad,
                     trailing = if (state.updateState is AppUpdateState.Available) {
                         {
-                            Button(
+                            IvidsPrimaryButton(
                                 onClick = viewModel::downloadAndInstallUpdate,
-                                shape = CircleShape,
-                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = IvidsColorTokens.ChalkInk,
-                                    contentColor = IvidsColorTokens.ObsidianStage
-                                )
+                                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
                             ) {
-                                Text(strings["update_now"], style = MaterialTheme.typography.labelMedium)
+                                Text(strings["update_now"], style = MaterialTheme.typography.labelMedium, color = IvidsColorTokens.ObsidianStage)
                             }
                         }
                     } else {
@@ -453,11 +451,6 @@ private fun SettingsListRow(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
-    val rowBg by animateColorAsState(
-        targetValue = if (isHovered) Color(0xFF181818) else Color.Transparent,
-        animationSpec = tween(140, easing = FastOutSlowInEasing),
-        label = "SettingsRowBg"
-    )
     val contentTint = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk
     val iconTint = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted
 
@@ -465,7 +458,11 @@ private fun SettingsListRow(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 58.dp)
-            .background(rowBg)
+            .ividsHoverZoom(
+                hovered = isHovered,
+                shape = RoundedCornerShape(10.dp),
+                style = if (isDestructive) IvidsHoverStyle.DESTRUCTIVE else IvidsHoverStyle.NEUTRAL
+            )
             .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.99f)
             .pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interactionSource)
@@ -529,11 +526,7 @@ private fun SettingsRadioRow(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val bg by animateColorAsState(
-        targetValue = when {
-            isHovered -> Color(0xFF1A1A1A)
-            selected -> Color(0xFF141414)
-            else -> Color.Transparent
-        },
+        targetValue = if (selected) Color(0xFF141414) else Color.Transparent,
         animationSpec = tween(120, easing = FastOutSlowInEasing),
         label = "SettingsRadioBg"
     )
@@ -543,6 +536,7 @@ private fun SettingsRadioRow(
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .background(bg)
+            .ividsHoverZoom(hovered = isHovered, shape = RoundedCornerShape(10.dp))
             .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.99f)
             .pointerHoverIcon(PointerIcon.Hand)
             .hoverable(interactionSource)

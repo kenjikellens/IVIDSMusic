@@ -53,6 +53,7 @@ import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.BitrateSelector
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
@@ -203,21 +204,15 @@ fun DownloaderScreen(
                             horizontalArrangement = Arrangement.spacedBy(10.dp),
                             verticalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Button(
+                            IvidsPrimaryButton(
                                 onClick = viewModel::startDownload,
-                                shape = CircleShape,
-                                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = IvidsColorTokens.ChalkInk,
-                                    contentColor = IvidsColorTokens.ObsidianStage
-                                ),
-                                modifier = Modifier.tvFocusable(shape = CircleShape)
+                                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 12.dp)
                             ) {
-                                Icon(Icons.Rounded.Download, null, modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(6.dp))
+                                Icon(Icons.Rounded.Download, null, tint = IvidsColorTokens.ObsidianStage, modifier = Modifier.size(18.dp))
                                 Text(
                                     text = "${strings["home_start"]} (${state.selectedQuality.label})",
                                     style = MaterialTheme.typography.labelLarge,
+                                    color = IvidsColorTokens.ObsidianStage,
                                     maxLines = 1,
                                     softWrap = false
                                 )
