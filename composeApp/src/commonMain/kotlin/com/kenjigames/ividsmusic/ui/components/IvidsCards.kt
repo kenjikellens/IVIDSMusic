@@ -136,11 +136,6 @@ fun MusicCard(
         animationSpec = tween(200, easing = FastOutSlowInEasing),
         label = "MusicCardPlayAlpha"
     )
-    val playFabScale by animateFloatAsState(
-        targetValue = if (isHovered || isTvMode) 1f else 0.72f,
-        animationSpec = spring(dampingRatio = 0.68f, stiffness = 450f),
-        label = "MusicCardPlayScale"
-    )
 
     Surface(
         modifier = modifier
@@ -212,11 +207,7 @@ fun MusicCard(
                             .padding(10.dp)
                             .size(42.dp)
                             .pointerHoverIcon(PointerIcon.Hand)
-                            .graphicsLayer {
-                                alpha = playFabAlpha
-                                scaleX = playFabScale
-                                scaleY = playFabScale
-                            }
+                            .graphicsLayer { alpha = playFabAlpha }
                     ) {
                         Box(contentAlignment = Alignment.Center) {
                             Icon(
