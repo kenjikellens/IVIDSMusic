@@ -1,191 +1,68 @@
-../.gitignore
-../app/.gitignore
-../app/build.gradle.kts
-../app/src/androidTest/java/com/kenjigames/ividsmusic/ExampleInstrumentedTest.kt
-../app/src/main/AndroidManifest.xml
-../app/src/main/java/com/kenjigames/ividsmusic/data/AppDatabase.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/dao/DiscoveryScoreDao.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/dao/HistoryDao.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/dao/PlaylistDao.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/dao/TrackDao.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/entity/DiscoveryScoreEntity.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/entity/HistoryEntity.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/entity/PlaylistEntity.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/entity/PlaylistTrackCrossRef.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/entity/TrackEntity.kt
-../app/src/main/java/com/kenjigames/ividsmusic/data/preferences/UserPreferencesRepository.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/model/Album.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/model/Artist.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/model/Genre.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/model/MusicItem.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/model/PlayerState.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/model/Playlist.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/model/Song.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/usecase/GetRecommendationsUseCase.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/usecase/ResolveStreamUseCase.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/usecase/SearchMusicUseCase.kt
-../app/src/main/java/com/kenjigames/ividsmusic/domain/usecase/ToggleLikeUseCase.kt
-../app/src/main/java/com/kenjigames/ividsmusic/network/api/DeezerApiService.kt
-../app/src/main/java/com/kenjigames/ividsmusic/network/DeezerApi.java
-../app/src/main/java/com/kenjigames/ividsmusic/network/DeezerSearchResponse.java
-../app/src/main/java/com/kenjigames/ividsmusic/network/dto/DeezerSearchResponseDto.kt
-../app/src/main/java/com/kenjigames/ividsmusic/network/dto/InvidiousVideoDto.kt
-../app/src/main/java/com/kenjigames/ividsmusic/network/InvidiousResolver.java
-../app/src/main/java/com/kenjigames/ividsmusic/network/NetworkModule.kt
-../app/src/main/java/com/kenjigames/ividsmusic/network/resolver/InvidiousStreamResolver.kt
-../app/src/main/java/com/kenjigames/ividsmusic/network/resolver/PipedStreamResolver.kt
-../app/src/main/java/com/kenjigames/ividsmusic/network/resolver/StreamResolver.kt
-../app/src/main/java/com/kenjigames/ividsmusic/network/resolver/YouTubeHtmlScraper.kt
-../app/src/main/java/com/kenjigames/ividsmusic/player/AudioCacheManager.kt
-../app/src/main/java/com/kenjigames/ividsmusic/player/PlaybackManager.kt
-../app/src/main/java/com/kenjigames/ividsmusic/player/PlaybackQueue.kt
-../app/src/main/java/com/kenjigames/ividsmusic/player/PlaybackService.kt
-../app/src/main/java/com/kenjigames/ividsmusic/repository/HistoryRepository.kt
-../app/src/main/java/com/kenjigames/ividsmusic/repository/LibraryRepository.kt
-../app/src/main/java/com/kenjigames/ividsmusic/repository/MusicRepository.kt
-../app/src/main/java/com/kenjigames/ividsmusic/repository/PlaylistRepository.kt
-../app/src/main/java/com/kenjigames/ividsmusic/repository/RecommendationRepository.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/header/TopSearchBar.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/list/TrackListItem.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/player/PlayerBottomBar.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/row/HorizontalTileRow.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/shared/EmptyState.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/shared/ErrorState.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/skeleton/ShimmerEffect.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/skeleton/SkeletonRow.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/skeleton/SkeletonTile.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/tile/AlbumTile.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/tile/ArtistTile.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/tile/BaseTile.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/component/tile/SongTile.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/navigation/BottomNavBar.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/navigation/NavGraph.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/navigation/Screen.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/home/HomeScreen.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/home/HomeViewModel.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/library/LibraryScreen.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/library/LibraryViewModel.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/profile/ProfileScreen.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/profile/ProfileViewModel.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/search/SearchScreen.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/search/SearchViewModel.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/settings/SettingsScreen.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/settings/SettingsViewModel.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/song/SongDetailScreen.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/screen/song/SongDetailViewModel.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/theme/Color.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/theme/Shape.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/theme/Theme.kt
-../app/src/main/java/com/kenjigames/ividsmusic/ui/theme/Type.kt
-../app/src/main/res/color/bottom_nav_colors.xml
-../app/src/main/res/drawable/card_interactive_bg.xml
-../app/src/main/res/drawable/ic_launcher_background.xml
-../app/src/main/res/drawable/ic_launcher_foreground.xml
-../app/src/main/res/drawable/player_bar_bg.xml
-../app/src/main/res/drawable/search_input_interactive.xml
-../app/src/main/res/drawable/tv_banner.xml
-../app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
-../app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
-../app/src/main/res/values-night/themes.xml
-../app/src/main/res/values/colors.xml
-../app/src/main/res/values/strings.xml
-../app/src/main/res/values/themes.xml
-../app/src/main/res/xml/backup_rules.xml
-../app/src/main/res/xml/data_extraction_rules.xml
-../app/src/main/res/xml/filepaths.xml
-../app/src/mobile/java/com/kenjigames/ividsmusic/MainActivity.kt
-../app/src/mobile/java/com/kenjigames/ividsmusic/UpdateManager.java
-../app/src/mobile/res/layout/activity_main.xml
-../app/src/mobile/res/layout/fragment_home.xml
-../app/src/mobile/res/layout/fragment_library.xml
-../app/src/mobile/res/layout/fragment_search.xml
-../app/src/mobile/res/layout/fragment_settings.xml
-../app/src/mobile/res/layout/item_track_card.xml
-../app/src/mobile/res/layout/item_track_row.xml
-../app/src/mobile/res/menu/bottom_nav_menu.xml
-../app/src/test/java/com/kenjigames/ividsmusic/ExampleUnitTest.kt
-../app/src/test/java/com/kenjigames/ividsmusic/PlaybackQueueTest.kt
-../app/src/test/java/com/kenjigames/ividsmusic/StreamResolverTest.kt
-../app/src/tv/java/com/kenjigames/ividsmusic/MainActivity.kt
-../app/src/tv/java/com/kenjigames/ividsmusic/UpdateManager.kt
-../app/src/tv/res/layout/activity_main.xml
-../build.gradle.kts
-../gradle.properties
-../pc/main.js
-../pc/package.json
-../pc/gui/index.css
-../pc/gui/index.html
-../pc/gui/lang/ar.json
-../pc/gui/lang/de.json
-../pc/gui/lang/en.json
-../pc/gui/lang/es.json
-../pc/gui/lang/fr.json
-../pc/gui/lang/hi.json
-../pc/gui/lang/it.json
-../pc/gui/lang/ja.json
-../pc/gui/lang/ko.json
-../pc/gui/lang/nl.json
-../pc/gui/lang/pl.json
-../pc/gui/lang/pt.json
-../pc/gui/lang/ro.json
-../pc/gui/lang/ru.json
-../pc/gui/lang/tr.json
-../pc/gui/lang/zh.json
-../pc/gui/loader.css
-../pc/gui/pages/album.html
-../pc/gui/pages/artist.html
-../pc/gui/pages/downloader.html
-../pc/gui/pages/home.html
-../pc/gui/pages/library.html
-../pc/gui/pages/playlist.html
-../pc/gui/pages/profile.html
-../pc/gui/pages/recommended.html
-../pc/gui/pages/search.html
-../pc/gui/pages/settings.html
-../pc/gui/pages/song.html
-../pc/gui/svg/brand.svg
-../pc/gui/svg/close.svg
-../pc/gui/svg/dislike.svg
-../pc/gui/svg/download.svg
-../pc/gui/svg/edit.svg
-../pc/gui/svg/folder.svg
-../pc/gui/svg/headphones.svg
-../pc/gui/svg/home.svg
-../pc/gui/svg/info.svg
-../pc/gui/svg/library.svg
-../pc/gui/svg/like.svg
-../pc/gui/svg/music.svg
-../pc/gui/svg/next.svg
-../pc/gui/svg/play-next.svg
-../pc/gui/svg/play.svg
-../pc/gui/svg/playlists.svg
-../pc/gui/svg/plus.svg
-../pc/gui/svg/previous.svg
-../pc/gui/svg/rocket.svg
-../pc/gui/svg/save.svg
-../pc/gui/svg/search.svg
-../pc/gui/svg/settings.svg
-../pc/gui/svg/shuffle.svg
-../pc/gui/svg/user.svg
-../pc/gui/svg/video.svg
-../pc/gui/svg/volume.svg
-../pc/gui/temp_server.js
-../pc/gui/tv-nav.css
-../pc/logic/api.js
-../pc/logic/cards.js
-../pc/logic/config.js
-../pc/logic/downloader.js
-../pc/logic/history.js
-../pc/logic/indexeddb-storage.js
-../pc/logic/language-manager.js
-../pc/logic/loader.js
-../pc/logic/pages.js
-../pc/logic/player.js
-../pc/logic/playlists.js
-../pc/logic/recommendations.js
-../pc/logic/router.js
-../pc/logic/settings-manager.js
-../pc/logic/toast.js
-../pc/logic/tv-nav.js
+# IVIDS Music - Source File Inventory
 
+Actual Kotlin Multiplatform / Compose Multiplatform project structure (`composeApp`, `core/domain`, `core/data`, `core/player`, and `docs`).
 
+## Root & Build Scripts
+- `README.md` - Main project overview & build instructions
+- `FEATURES_ROADMAP.md` - P0-P3 feature roadmap
+- `build.bat` / `run_pc.bat` - Release build & Desktop launcher scripts
+- `settings.gradle.kts` / `build.gradle.kts` / `gradle/libs.versions.toml`
+
+## `:composeApp` (`composeApp/src/`)
+
+### `commonMain/composeResources/`
+- `drawable/ic_ivids_brand.png` - App brand mark
+- `files/lang/*.json` - 16 localization bundles (`ar`, `de`, `en`, `es`, `fr`, `hi`, `it`, `ja`, `ko`, `nl`, `pl`, `pt`, `ro`, `ru`, `tr`, `zh`)
+- `font/*.ttf` - Bundled Inter & Plus Jakarta Sans fonts
+
+### `commonMain/kotlin/com/kenjigames/ividsmusic/`
+- `App.kt` - Root composable, navigation back-stack host, keyboard shortcuts, update modal, toast overlay
+- `di/AppModule.kt` - Koin app & ViewModel bindings
+- `platform/PlatformServices.kt` - Multiplatform platform bridge (`expect/actual`)
+- `ui/navigation/AppRoute.kt` - `AppRoute`, `SettingsSection`, `AppNavigator`, `NavTransitionType`
+- `ui/i18n/LocalizationManager.kt` - Instant runtime 16-language loader & `LocalStrings`
+- `ui/input/TextInputShortcutGuard.kt` - Prevents global media shortcuts while typing
+- `ui/player/PlayerViewModel.kt` & `NowPlayingSheet.kt` - Playback ViewModel & full-screen Now Playing sheet
+- `ui/shell/`:
+  - `AdaptiveAppShell.kt` - Root adaptive container (`MOBILE`, `DESKTOP`, `TV`), layout metrics & player hosts
+  - `MobileShellChrome.kt` - `MobileTopHeader`, `MobileBottomBar`, swipeable `MiniPlayerBar`
+  - `DesktopShellChrome.kt` - `SidebarNavigationRail`, `DesktopTopBar`
+  - `DesktopPlayerChrome.kt` - `DesktopPlayerDeck`, `QueueSideSheet`
+- `ui/components/`:
+  - `IvidsInteraction.kt` - `IvidsHoverStyle`, `resolveHoverColor`, `resolveRippleColor`, `ividsPressRipple`, `ividsHoverZoom`, `ividsTouchFeedback`
+  - `IvidsControls.kt` - `IvidsScrubber`, `IvidsSwitch`, `IvidsSegmentedBar`, `IvidsTonalPill`, `IvidsPrimaryButton`, `IvidsPlayCircleButton`, `IvidsIconButton`, `IvidsSelectableDialogItem`, `FramedScreenContainer`
+  - `IvidsLoaders.kt` - `IvidsVinylLoader`, `IvidsVinylLoadingBox`
+  - `IvidsCards.kt`, `TrackRowItem.kt`, `BitrateSelector.kt`, `BlurredArtworkBackdrop.kt`, `DialogsAndToasts.kt`, `TrackActionsModalHost.kt`
+- `ui/theme/` - `IvidsColorTokens.kt`, `IvidsTheme.kt`, `IvidsTypography.kt`, `ColorExtractor.kt`, `TvFocusModifier.kt`
+- `ui/screens/` - Screen & ViewModel pairs in `album/`, `artist/`, `downloader/`, `home/`, `library/`, `playlist/`, `profile/`, `recommended/`, `search/`, `settings/`, `song/`
+
+### `androidMain/` & `desktopMain/`
+- `androidMain/` - `MainActivity.kt`, `IvidsApplication.kt`, `AppModule.android.kt`, `PlatformServices.android.kt`, `BlurredArtworkBackdrop.android.kt`, `ColorExtractor.android.kt`
+- `desktopMain/` - `Main.kt`, `AppModule.desktop.kt`, `PlatformServices.desktop.kt`, `BlurredArtworkBackdrop.desktop.kt`, `ColorExtractor.desktop.kt`, `resources/icon.ico|png`
+
+### `:composeApp` Tests
+- `commonTest/.../UiLogicTest.kt`
+- `desktopTest/.../` - `DesktopIntegrationTest.kt`, `AppNavigatorTransitionTest.kt`, `PlayerViewModelP0Test.kt`, `MobileLayoutMetricsTest.kt`
+
+## `:core:domain` (`core/domain/src/`)
+- `commonMain/.../domain/model/` - `MusicModels.kt`, `PlaybackModels.kt`
+- `commonMain/.../domain/port/Repositories.kt` - Repository, `AudioEngine`, `StreamResolver`, and `OfflineDownloadManager` interfaces
+- `commonMain/.../domain/usecase/` - `PlaybackQueueController.kt`, `RecommendationEngine.kt`, `ResolveTrackStreamUseCase.kt`
+- `commonTest/.../` - `AudioQualityTest.kt`, `PlaybackQueueControllerTest.kt`, `RecommendationEngineTest.kt`
+
+## `:core:data` (`core/data/src/`)
+- `commonMain/sqldelight/.../IvidsMusic.sq` - SQLite schema & queries
+- `commonMain/.../data/di/DataModule.kt` - Koin data module
+- `commonMain/.../data/local/` - `AppStorageDirectories.kt`, `DataStorePreferencesRepository.kt`, `SqlLibraryRepository.kt`, `SqlScoreRepository.kt`
+- `commonMain/.../data/remote/` - `CompositeMusicDiscoveryRepository.kt`, `DeezerApiClient.kt`, `ItunesApiClient.kt`, `dto/`
+- `commonMain/.../data/stream/StreamResolverComponents.kt` - `CompositeStreamResolver`, `InMemoryStreamTtlCache`, `InvidiousFallbackResolver`
+- `jvmAndAndroidMain/.../data/` - `NativeDownloadManager.kt`, `FilePlaybackSessionRepository.kt`, `NewPipeStreamResolver.kt`, `NetworkSecurityGuard.kt`, `JvmLocalAudioLocator.kt`
+- `jvmMain/.../data/` - `DesktopFfmpegTranscoder.kt`, `DesktopNativeToolsManager.kt`, `YtDlpDesktopResolver.kt`, `PlatformDataModule.jvm.kt`
+- `androidMain/.../data/` - `AndroidNoOpTranscoder.kt`, `AndroidStreamFallback.kt`, `PlatformDataModule.android.kt`
+- `jvmTest/.../` - Data module, download, SQLite, preferences, discovery, stream, and security unit tests
+
+## `:core:player` (`core/player/src/`)
+- `commonMain/.../player/` - `EngineStateMachine.kt`, `StreamSourceValidator.kt`, `di/PlayerModule.kt`
+- `androidMain/.../player/android/` - `AndroidAudioEngine.kt`, `AndroidPlaybackService.kt`, `AudioCacheProvider.kt`, `PlaybackDataSourceFactory.kt`, `PlaybackErrorMapper.kt`, `StreamHeaderRegistry.kt`
+- `jvmMain/.../player/desktop/` - `DesktopAudioEngine.kt`, `DesktopMediaBackend.kt`, `LocalHeaderProxy.kt`, `DesktopAudioPrefetcher.kt`, `DesktopAudioCacheTranscoder.kt`, `DesktopErrorMapper.kt`, `DesktopNetworkGuard.kt`, `JavaFxRuntime.kt`
+- `jvmTest/.../` - `EngineStateMachineTest.kt`, `StreamSourceValidatorTest.kt`, `DesktopAudioCacheTranscoderTest.kt`, `DesktopAudioEngineTest.kt`, `LocalHeaderProxyTest.kt`, `PlayerModuleJvmTest.kt`

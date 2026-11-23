@@ -1,112 +1,45 @@
-# 💾 Local Data & Storage Architecture (Room & DataStore)
+# Local Data & Storage Architecture (SQLDelight & DataStore)
 
-This document defines the database entities, DAOs, and DataStore preference schemas for **IVIDS Music** in Kotlin.
+**IVIDS Music** stores library metadata, preferences, playback sessions, recommendation scores, and downloaded audio locally via `:core:data`.
 
----
+## Storage Stack Overview
 
-## 🏛️ Storage Stack Overview
-
-| Data Type | Storage Solution | Scope |
+| Data Type | Storage Mechanism | Implementation |
 |---|---|---|
-| **Liked Songs, Saved Albums, Custom Playlists** | **Room Database (SQLite)** | Persistent relational storage |
-| **Listening History (Last 20 tracks)** | **Room Database (SQLite)** | Historical playback log |
-| **Recommendation Interest Scores** | **Room Database (SQLite)** | Local discovery scoring matrix |
-| **UI Scale Factor, Theme Accent, Language** | **Jetpack DataStore** | Async Key-Value preferences |
-| **Downloaded Offline Audio Files** | **Android App Storage (`Context.filesDir`)** | Offline MP3 file storage |
+| Tracks, Likes, Playlists, Saved Albums | SQLDelight (`2.0.2`) SQLite DB (`IvidsMusic.sq`) | `SqlLibraryRepository` |
+| Listen History | SQLDelight (`listen_history`) | `SqlLibraryRepository` |
+| Discovery Interest Scores | SQLDelight (`discovery_scores`, `0..100` clamped) | `SqlScoreRepository` |
+| User Settings & Local Profile | AndroidX DataStore Preferences (`1.1.1`) | `DataStorePreferencesRepository` |
+| Playback Queue & Cursor Restore | Atomic JSON file (`session_state.json`) | `FilePlaybackSessionRepository` |
+| Offline Audio Files | Local app/music directories (`AppStorageDirectories`) | `NativeDownloadManager` |
 
----
+## SQLDelight Schema (`IvidsMusic.sq`)
 
-## 🗄️ Room Database Schema (`AppDatabase.kt`)
+Located at `core/data/src/commonMain/sqldelight/com/kenjigames/ividsmusic/data/db/IvidsMusic.sq`:
 
-### 1. `TrackEntity`
-Stores metadata for tracks saved, liked, or downloaded locally.
-```kotlin
-@Entity(tableName = "tracks")
-data class TrackEntity(
-    @PrimaryKey val id: String, // Deezer or YouTube track ID
-    val title: String,
-    val artistName: String,
-    val artistId: String,
-    val albumTitle: String,
-    val albumId: String,
-    val coverUrl: String,
-    val durationSeconds: Int,
-    val isLiked: Boolean = false,
-    val isDownloaded: Boolean = false,
-    val localFilePath: String? = null,
-    val addedTimestamp: Long = System.currentTimeMillis()
-)
-```
+- **`tracks`**: Stores `id`, `title`, `artist_name`, `artist_id`, `album_title`, `album_id`, `cover_url`, `duration_seconds`, `preview_url`, `genres_csv`, `release_year`, `rank`, `video_id`, `is_liked`, `is_downloaded`, `local_file_path`, `bitrate_kbps`, and `added_timestamp_ms`.
+- **`playlists` & `playlist_tracks`**: User playlists (`title`, `description`, `cover_gradient_index`) linked to tracks with ordered `position_index` and cascading deletes.
+- **`saved_albums`**: Saved album cards with cover, track count, and release year.
+- **`listen_history`**: Persistent playback history sorted by `played_timestamp_ms`.
+- **`discovery_scores`**: Tracks entity weights (`entity_key`, `entity_type`, `entity_id`, `display_name`, `score` constrained `CHECK (score >= 0 AND score <= 100)`, `last_updated_ms`).
 
-### 2. `PlaylistEntity` & `PlaylistTrackCrossRef`
-Custom user playlists and many-to-many relationship mapping.
-```kotlin
-@Entity(tableName = "playlists")
-data class PlaylistEntity(
-    @PrimaryKey(autoGenerate = true) val playlistId: Long = 0,
-    val title: String,
-    val description: String? = null,
-    val coverImagePath: String? = null,
-    val createdTimestamp: Long = System.currentTimeMillis()
-)
+Uses SQLDelight Android driver (`sqldelight-android-driver`) on Android and JVM SQLite driver (`sqldelight-sqlite-driver`) on Desktop.
 
-@Entity(
-    tableName = "playlist_track_cross_ref",
-    primaryKeys = ["playlistId", "trackId"]
-)
-data class PlaylistTrackCrossRef(
-    val playlistId: Long,
-    val trackId: String,
-    val positionInPlaylist: Int
-)
-```
+## DataStore Preferences (`DataStorePreferencesRepository.kt`)
 
-### 3. `HistoryEntity`
-Maintains the last 20 played tracks.
-```kotlin
-@Entity(tableName = "listen_history")
-data class HistoryEntity(
-    @PrimaryKey val trackId: String,
-    val title: String,
-    val artistName: String,
-    val coverUrl: String,
-    val playedTimestamp: Long = System.currentTimeMillis()
-)
-```
+Persists reactive `Flow<UserPreferences>` and `Flow<UserProfile>` without blocking the UI thread:
 
-### 4. `DiscoveryScoreEntity`
-Tracks local interest scores for artists, tracks, and genres.
-```kotlin
-@Entity(tableName = "discovery_scores")
-data class DiscoveryScoreEntity(
-    @PrimaryKey val entityKey: String, // e.g. "artist:123" or "genre:pop"
-    val entityType: String, // "TRACK", "ARTIST", "GENRE"
-    val score: Int = 0, // Clamped between 0 and 100
-    val lastUpdated: Long = System.currentTimeMillis()
-)
-```
+- **`download_quality_kbps`**: Preferred download bitrate (`128`, `196`, or `320` kbps; default `196`).
+- **`ui_scale_factor`**: UI scaling clamped within `0.75f..1.50f` in 5% increments.
+- **`language_code`**: Active locale (`en`, `nl`, `de`, `fr`, `es`, `it`, `pt`, `ro`, `ru`, `zh`, `hi`, `ar`, `ja`, `ko`, `pl`, `tr`).
+- **`dynamic_tint_enabled`**: Ambient cover-art tint toggle.
+- **`layout_mode`**: Persisted `LayoutMode` enum (`AUTO`, `MOBILE`, `DESKTOP`, `TV`).
+- **`update_mode` & `auto_update_enabled`**: Self-updater mode (`AUTO`, `MANUAL`, `OFF`, `DEVELOPER`).
+- **`playback_volume` & `playback_muted`**: Restored to `AudioEngine` on app launch.
+- **`profile_display_name`, `profile_bio`, `total_listening_seconds`**: Local listener profile stats.
+- **`custom_save_directory` & `ytdlp_last_check_ms`**: Offline download destination override and native tool update check timestamp.
 
----
+## Playback Session Persistence (`FilePlaybackSessionRepository.kt`)
 
-## 🔑 DataAccessObjects (DAOs)
-
-- `TrackDao`: CRUD operations for liked songs, downloaded tracks, and search indexing.
-- `PlaylistDao`: Create, update, delete playlists; insert/remove tracks; reorder track positions.
-- `HistoryDao`: Insert history items, enforce 20-item cap via `@Transaction`, query recently played.
-- `RecommendationDao`: Increment/decrement interest scores, retrieve top-scoring artists/genres for recommendation expansion.
-
----
-
-## ⚙️ DataStore Preferences (`UserPreferencesRepository.kt`)
-
-Stored asynchronously using `PreferencesDataStore`:
-
-```kotlin
-object PreferencesKeys {
-    val UI_SCALE_FACTOR = floatPreferencesKey("ui_scale_factor") // Default: 1.0f (100%)
-    val LANGUAGE_CODE = stringPreferencesKey("language_code") // Default: "en"
-    val THEME_ACCENT_COLOR = intPreferencesKey("theme_accent_color") // Default: HSL Tint
-    val AUTO_UPDATE_ENABLED = booleanPreferencesKey("auto_update_enabled") // Default: true
-}
-```
-Exposed via `Flow<UserPreferences>` for instant UI updates when settings change.
+- Atomically writes/reads `session_state.json` (queue, `currentIndex`, `positionMs`, `isShuffleEnabled`, `repeatMode`, `updatedAtMs`).
+- Ignores missing or corrupt JSON safely so startup restores paused playback without auto-playing unprompted.

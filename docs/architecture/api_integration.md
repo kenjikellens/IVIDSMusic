@@ -1,100 +1,38 @@
-# 🌐 Networking & API Integration Architecture (Retrofit / OkHttp)
+# Networking & API Integration Architecture
 
-This document describes the native Kotlin network layer for music discovery and audio stream resolution in **IVIDS Music**.
+**IVIDS Music** uses **Ktor (`3.0.1`)** with **OkHttp (`4.12.0`)** engine, **Kotlinx Serialization (`1.7.3`)**, **NewPipeExtractor (`v0.24.4`)**, and native fallbacks for catalog discovery and stream extraction.
 
----
+## Networking Stack
 
-## 📡 Networking Stack
-
-| Purpose | Library | Key Functions |
+| Purpose | Library / Component | Role |
 |---|---|---|
-| **HTTP Client** | **OkHttp 4.x** | Connection pooling, custom headers, rate-limiting retry interceptor |
-| **REST Client** | **Retrofit 2.x** | Type-safe API calls for Deezer & Invidious |
-| **JSON Serialization** | **Kotlinx Serialization** | High-performance JSON parsing into Kotlin data classes |
-| **Async Execution** | **Kotlin Coroutines + Flow** | Non-blocking asynchronous I/O and reactive data streams |
+| **HTTP Client** | Ktor `3.0.1` (`ktor-client-okhttp`) + Coroutines | Async JSON requests, content negotiation, timeouts |
+| **JSON Parsing** | `kotlinx.serialization.json` | DTO deserialization (`DeezerDtos.kt`, `ItunesDtos.kt`, `InvidiousDtos.kt`) |
+| **Catalog Primary** | `DeezerApiClient` | Track/artist/album search, charts, artist top tracks, related tracks |
+| **Catalog Fallback** | `ItunesApiClient` | Automatic catalog fallback when Deezer returns empty/errors |
+| **YouTube Streams** | `CompositeStreamResolver` | Tiered resolution + 30-minute bounded in-memory URL cache (`InMemoryStreamTtlCache`) |
+| **Desktop Tools** | `DesktopNativeToolsManager` | Bundles/updates `yt-dlp.exe` and `ffmpeg.exe` on Windows |
+| **Image & Color** | Coil 3 (`coil-compose` + `coil-network-ktor3`) + `ColorExtractor` | Album artwork caching and `expect/actual` background color/blur sampling |
 
----
+## Catalog Discovery (`CompositeMusicDiscoveryRepository.kt`)
 
-## 🔌 API Services
+- Wraps `DeezerApiClient` and `ItunesApiClient` behind `MusicDiscoveryRepository` (`:core:domain`).
+- Applies a thread-safe bounded LRU cache with a **15-minute TTL** to eliminate duplicate API calls across rapid navigation.
+- Falls back cleanly to iTunes when Deezer calls return empty or fail.
 
-### 1. `DeezerApiService.kt` (Music Discovery & Metadata)
-Base URL: `https://api.deezer.com/`
+## Multi-Tier Stream Resolution (`CompositeStreamResolver`)
 
-```kotlin
-interface DeezerApiService {
-    @GET("search")
-    suspend fun searchTracks(
-        @Query("q") query: String,
-        @Query("limit") limit: Int = 25,
-        @Query("index") index: Int = 0
-    ): DeezerSearchResponse
+`CompositeStreamResolver` executes ordered resolution tiers protected by `NetworkSecurityGuard` and `InMemoryStreamTtlCache` (30-min TTL):
 
-    @GET("chart/0/tracks")
-    suspend fun getGenreChart(
-        @Query("limit") limit: Int = 20
-    ): DeezerTrackListResponse
+1. **Local Storage (`JvmLocalAudioLocator` / `LocalAudioLocator`)**: Immediately returns `StreamSource.LocalFile` if downloaded `.mp3`/`.m4a` already exists.
+2. **In-Memory TTL Cache (`InMemoryStreamTtlCache`)**: Reuses valid remote URLs across replays, downloads, and seeks (`invalidate(trackId)` clears stale URLs on playback failure).
+3. **NewPipeExtractor (`NewPipeStreamResolver`)**: Extracts direct audio stream metadata in-process on JVM and Android without external proxies.
+4. **Invidious Parallel Race (`InvidiousFallbackResolver`)**: Races configured public Invidious mirrors in parallel with a `3.5s` timeout, cancelling slower requests as soon as one succeeds.
+5. **Platform Final Fallback (`PlatformStreamFallback`)**:
+   - **Desktop (`YtDlpDesktopResolver`)**: Invokes bundled/updated `yt-dlp.exe` (and `DesktopFfmpegTranscoder` for offline downloads).
+   - **Android (`AndroidStreamFallback`)**: Returns structured `DomainError.StreamNotFound` when earlier extractors fail.
 
-    @GET("artist/{id}")
-    suspend fun getArtistDetails(@Path("id") artistId: String): DeezerArtistResponse
+## Artwork Blur & Ambient Tinting (`ColorExtractor`, `BlurredArtworkBackdrop`)
 
-    @GET("artist/{id}/top")
-    suspend fun getArtistTopTracks(@Path("id") artistId: String): DeezerTrackListResponse
-
-    @GET("album/{id}")
-    suspend fun getAlbumDetails(@Path("id") albumId: String): DeezerAlbumResponse
-}
-```
-
-### 2. `iTunesApiService.kt` (Redundant Fallback)
-Base URL: `https://itunes.apple.com/`
-- Serves as an automatic network fallback if Deezer API endpoints are degraded or rate-limited.
-
-### 3. `InvidiousApiService.kt` (YouTube Audio Stream Resolution)
-Rotates across public Invidious & Piped instances (e.g. `vid.puffyan.us`, `invidious.nerdvpn.de`):
-
-```kotlin
-interface InvidiousApiService {
-    @GET("api/v1/search")
-    suspend fun searchVideos(
-        @Query("q") searchQuery: String,
-        @Query("type") type: String = "video"
-    ): List<InvidiousVideoDto>
-
-    @GET("api/v1/videos/{id}")
-    suspend fun getVideoStreams(
-        @Path("id") videoId: String
-    ): InvidiousStreamDetailsDto
-}
-```
-
----
-
-## 🛡️ Resilience & HTML Scraping Fallback
-
-If all external Invidious API instances fail or become rate-limited:
-1. **Fallback Scraper (`YouTubeScraper.kt`)**: Executes a direct OkHttp GET request to `https://www.youtube.com/results?search_query=...` with standard browser `User-Agent` headers.
-2. **Regex Parsing**: Extracts `videoId` from raw HTML response (`ytInitialData` JSON block).
-3. **Stream Resolution**: Resolves audio stream URL from `videoId`.
-
----
-
-## 🎨 Canvas Palette Tinting (`ColorExtractor.kt`)
-
-In place of HTML Canvas pixel sampling, native Android uses **Coil Compose** with the **Android Palette API**:
-
-```kotlin
-suspend fun extractAccentColor(context: Context, imageUrl: String): Color {
-    val request = ImageRequest.Builder(context)
-        .data(imageUrl)
-        .allowHardware(false) // Required for Palette sampling
-        .build()
-    
-    val drawable = context.imageLoader.execute(request).drawable
-    val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return DefaultAccentColor
-    
-    val palette = Palette.from(bitmap).generate()
-    val dominantColorInt = palette.getVibrantColor(palette.getDominantColor(0xFF6200EE.toInt()))
-    return Color(dominantColorInt)
-}
-```
-Provides dynamic accent colors for backgrounds and player bars across all screens.
+- **`BlurredArtworkBackdrop` (`expect/actual`)**: Downloads/downsamples artwork off the main thread into a pre-blurred `ImageBitmap` on Android and Desktop, rendering backdrops with a 420ms crossfade and contrast scrim at zero per-frame blur cost.
+- **`ColorExtractor`**: Samples artwork tint via `androidx.palette.ktx` on Android (`ColorExtractor.android.kt`) and AWT pixel quantization on Desktop (`ColorExtractor.desktop.kt`).
