@@ -6,7 +6,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
 import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
@@ -15,13 +17,23 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.kenjigames.ividsmusic.data.local.AppStorageDirectories
+import com.kenjigames.ividsmusic.data.stream.DesktopNativeToolsManager
+import com.kenjigames.ividsmusic.data.stream.YtDlpDesktopResolver
 import com.kenjigames.ividsmusic.di.initKoin
 import com.kenjigames.ividsmusic.domain.port.AudioEngine
+import com.kenjigames.ividsmusic.player.desktop.DesktopAudioPrefetcher
 import com.kenjigames.ividsmusic.resources.Res
 import com.kenjigames.ividsmusic.resources.ic_ivids_brand
+import com.kenjigames.ividsmusic.ui.input.TextInputShortcutGuard
 import com.kenjigames.ividsmusic.ui.navigation.AppNavigator
 import com.kenjigames.ividsmusic.ui.navigation.AppRoute
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinContext
 import org.koin.core.context.stopKoin
@@ -51,6 +63,15 @@ fun main() {
     val playerViewModel = koin.get<PlayerViewModel>()
     val navigator = koin.get<AppNavigator>()
     val audioEngine = koin.get<AudioEngine>()
+    val toolsManager = koin.get<DesktopNativeToolsManager>()
+    val ytDlpResolver = koin.get<YtDlpDesktopResolver>()
+    val backgroundScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    backgroundScope.launch {
+        toolsManager.ensureToolsReady(
+            ytDlpCurrentPath = ytDlpResolver.findYtDlpExecutable(),
+            ffmpegCurrentPath = DesktopAudioPrefetcher.findAvailableFfmpegPath()
+        )
+    }
 
     application {
         var searchFocusTrigger by remember { mutableIntStateOf(0) }
@@ -58,6 +79,8 @@ fun main() {
 
         Window(
             onCloseRequest = {
+                runCatching { runBlocking { playerViewModel.saveSessionNow() } }
+                runCatching { backgroundScope.cancel() }
                 runCatching { audioEngine.release() }
                 runCatching { stopKoin() }
                 exitApplication()
@@ -77,7 +100,14 @@ fun main() {
                 }
             },
             onKeyEvent = { event ->
-                if (event.type != KeyEventType.KeyDown) return@Window false
+                if (event.type != KeyEventType.KeyDown ||
+                    TextInputShortcutGuard.isTyping() ||
+                    event.isCtrlPressed ||
+                    event.isAltPressed ||
+                    event.isMetaPressed
+                ) {
+                    return@Window false
+                }
                 when (event.key) {
                     Key.Spacebar -> {
                         playerViewModel.togglePlayPause()

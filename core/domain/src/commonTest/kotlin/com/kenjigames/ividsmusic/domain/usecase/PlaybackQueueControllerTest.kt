@@ -1,5 +1,6 @@
 package com.kenjigames.ividsmusic.domain.usecase
 
+import com.kenjigames.ividsmusic.domain.model.PlaybackSessionSnapshot
 import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.domain.model.Track
 import kotlin.random.Random
@@ -103,6 +104,31 @@ class PlaybackQueueControllerTest {
 
         controller.removeAt(0)
         assertEquals(listOf("1", "2", "99"), controller.state.value.queue.map { it.id })
+        assertEquals(1, controller.state.value.currentIndex)
+    }
+
+    /** Verifies peekNext respects RepeatMode without mutating index and restoreState restores snapshots safely. */
+    @Test
+    fun peekNextAndRestoreSessionPreserveOrderAndBounds() {
+        val controller = PlaybackQueueController(Random(9))
+        controller.restoreState(
+            PlaybackSessionSnapshot(
+                queue = tracks,
+                currentIndex = 99,
+                positionMs = 45_000L,
+                isShuffleEnabled = false,
+                repeatMode = RepeatMode.ALL
+            )
+        )
+        assertEquals(3, controller.state.value.currentIndex)
+        assertEquals("4", controller.state.value.currentTrack?.id)
+        assertEquals("1", controller.peekNext()?.id)
+        assertEquals(3, controller.state.value.currentIndex)
+
+        controller.setRepeatMode(RepeatMode.OFF)
+        assertNull(controller.peekNext())
+        controller.jumpTo(1)
+        assertEquals("3", controller.peekNext()?.id)
         assertEquals(1, controller.state.value.currentIndex)
     }
 }

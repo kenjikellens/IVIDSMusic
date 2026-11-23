@@ -13,8 +13,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.InterceptPlatformTextInput
 import androidx.compose.ui.unit.LayoutDirection
+import com.kenjigames.ividsmusic.ui.input.TextInputShortcutGuard
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.UserPreferences
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
@@ -63,6 +66,7 @@ import org.koin.core.parameter.parametersOf
  * Root Compose Multiplatform entrypoint wiring [IvidsTheme], [LocalizationManager],
  * [AdaptiveAppShell], all 11 screens, and transient toast overlays across Desktop, Mobile, and TV.
  */
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun IvidsApp(
     searchFocusTrigger: Int = 0
@@ -124,7 +128,17 @@ fun IvidsApp(
             layoutDirection = layoutDirection
         ) {
             CompositionLocalProvider(LocalStrings provides strings) {
-                if (showCreatePlaylistModal) {
+                InterceptPlatformTextInput(
+                    interceptor = { request, nextHandler ->
+                        TextInputShortcutGuard.onSessionStarted()
+                        try {
+                            nextHandler.startInputMethod(request)
+                        } finally {
+                            TextInputShortcutGuard.onSessionEnded()
+                        }
+                    }
+                ) {
+                    if (showCreatePlaylistModal) {
                     CreatePlaylistDialog(
                         onDismiss = { showCreatePlaylistModal = false },
                         onCreate = { title, desc ->
@@ -328,6 +342,7 @@ fun IvidsApp(
                     }
 
                     ToastHost(controller = toastController)
+                }
                 }
             }
         }

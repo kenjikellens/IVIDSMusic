@@ -59,6 +59,7 @@ import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material.icons.rounded.Repeat
 import androidx.compose.material.icons.rounded.RepeatOne
 import androidx.compose.material.icons.rounded.Search
@@ -200,6 +201,7 @@ fun AdaptiveAppShell(
                                 onExpand = { nowPlayingExpanded = true },
                                 onTogglePlayPause = playerViewModel::togglePlayPause,
                                 onToggleLike = playerViewModel::toggleLikeCurrent,
+                                onRetry = playerViewModel::retryCurrent,
                                 modifier = Modifier
                                     .align(Alignment.BottomCenter)
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
@@ -444,9 +446,11 @@ private fun MiniPlayerBar(
     onExpand: () -> Unit,
     onTogglePlayPause: () -> Unit,
     onToggleLike: () -> Unit,
+    onRetry: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val track = playerState.currentTrack ?: return
+    val strings = LocalStrings.current
     val accent = LocalDynamicAccent.current
     val progress = if (playerState.durationMs > 0L) {
         (playerState.positionMs.toFloat() / playerState.durationMs.toFloat()).coerceIn(0f, 1f)
@@ -503,15 +507,26 @@ private fun MiniPlayerBar(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
+                        val errorText = playerState.errorMessage
                         Text(
-                            text = track.artist,
+                            text = errorText ?: track.artist,
                             style = MaterialTheme.typography.bodySmall,
-                            color = IvidsColorTokens.SlateMuted,
+                            color = if (errorText != null) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
                     }
-                    IconButton(onClick = onToggleLike, modifier = Modifier.size(36.dp)) {
+                    if (playerState.errorMessage != null) {
+                        IconButton(onClick = onRetry, modifier = Modifier.size(36.dp)) {
+                            Icon(
+                                imageVector = Icons.Rounded.Refresh,
+                                contentDescription = strings["retry"],
+                                tint = IvidsColorTokens.DangerCoral,
+                                modifier = Modifier.size(19.dp)
+                            )
+                        }
+                    } else {
+                        IconButton(onClick = onToggleLike, modifier = Modifier.size(36.dp)) {
                         Icon(
                             imageVector = if (playerState.isCurrentLiked) {
                                 Icons.Rounded.Favorite
@@ -521,6 +536,7 @@ private fun MiniPlayerBar(
                             contentDescription = null,
                             tint = if (playerState.isCurrentLiked) accent else IvidsColorTokens.SlateMuted
                         )
+                        }
                     }
                     Surface(
                         onClick = onTogglePlayPause,
@@ -994,14 +1010,53 @@ private fun DesktopPlayerDeck(
                         modifier = Modifier.clickable(enabled = track != null, onClick = onOpenNowPlaying)
                     )
                     if (track != null) {
-                        Text(
-                            text = track.artist,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = IvidsColorTokens.SlateMuted,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.clickable { onOpenArtist(track.artistId, track.artist) }
-                        )
+                        val errorText = playerState.errorMessage
+                        if (errorText != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                            ) {
+                                Text(
+                                    text = errorText,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = IvidsColorTokens.DangerCoral,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+                                IconButton(
+                                    onClick = playerViewModel::retryCurrent,
+                                    modifier = Modifier.size(22.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Refresh,
+                                        contentDescription = strings["retry"],
+                                        tint = IvidsColorTokens.DangerCoral,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                                IconButton(
+                                    onClick = playerViewModel::dismissError,
+                                    modifier = Modifier.size(22.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Close,
+                                        contentDescription = strings["close"],
+                                        tint = IvidsColorTokens.SlateMuted,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                            }
+                        } else {
+                            Text(
+                                text = track.artist,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = IvidsColorTokens.SlateMuted,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.clickable { onOpenArtist(track.artistId, track.artist) }
+                            )
+                        }
                     }
                 }
                 if (track != null) {

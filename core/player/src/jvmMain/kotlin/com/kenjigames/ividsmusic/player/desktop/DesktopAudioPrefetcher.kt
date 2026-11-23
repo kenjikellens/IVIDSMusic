@@ -7,6 +7,11 @@ package com.kenjigames.ividsmusic.player.desktop
 object DesktopAudioPrefetcher {
 
     /**
+     * Resolves any installed or managed `ffmpeg.exe` path on Desktop, or returns `null` if unavailable.
+     */
+    fun findAvailableFfmpegPath(): String? = DesktopAudioCacheTranscoder.findFfmpegExecutable()
+
+    /**
      * Resolves and transcodes a remote stream into the local JavaFX `.mp3` cache using [cacheKeyHint].
      * Safe no-op when `ffmpeg` is absent or the target file is already cached.
      */

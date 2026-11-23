@@ -156,7 +156,7 @@ class PlayerViewModel(
     }
 
     /**
-     * Toggles between playing and paused states, or restarts the current track if playback ended.
+     * Toggles between playing and paused states, or starts/resumes the restored track if idle or ended.
      */
     fun togglePlayPause() {
         val state = _uiState.value
@@ -164,11 +164,29 @@ class PlayerViewModel(
         scope.launch {
             val status = audioEngine.snapshot.value.status
             when {
-                state.isPlaying -> audioEngine.pause()
-                status == PlaybackStatus.ENDED || status == PlaybackStatus.IDLE -> launchTrackPlayback(track)
+                state.isPlaying -> {
+                    audioEngine.pause()
+                    saveSessionNow()
+                }
+                status == PlaybackStatus.ENDED || status == PlaybackStatus.IDLE || status == PlaybackStatus.ERROR -> {
+                    val seekTarget = if (status == PlaybackStatus.IDLE) pendingRestorePositionMs else 0L
+                    pendingRestorePositionMs = 0L
+                    launchTrackPlayback(track, initialPositionMs = seekTarget)
+                }
                 else -> audioEngine.resume()
             }
         }
+    }
+
+    /**
+     * Clears stream cache for the active track and retries playback from the last visible position.
+     */
+    fun retryCurrent() {
+        val track = _uiState.value.currentTrack ?: return
+        val resumePos = _uiState.value.positionMs.coerceAtLeast(pendingRestorePositionMs)
+        pendingRestorePositionMs = 0L
+        resolveStream.invalidate(track.id)
+        launchTrackPlayback(track, initialPositionMs = resumePos)
     }
 
     /**
@@ -217,28 +235,34 @@ class PlayerViewModel(
     }
 
     /**
-     * Updates normalized audio output volume (`0.0f..1.0f`) and clears mute state when positive.
+     * Updates normalized audio output volume (`0.0f..1.0f`), clears mute when positive, and debounces DataStore persistence.
      */
     fun setVolume(volume: Float) {
         val clamped = volume.coerceIn(0f, 1f)
         if (clamped > 0f) preMuteVolume = clamped
-        _uiState.update { it.copy(volume = clamped, isMuted = clamped == 0f) }
+        val muted = clamped <= 0.001f
+        _uiState.update { it.copy(volume = clamped, isMuted = muted) }
         scope.launch {
             audioEngine.setVolume(clamped)
         }
+        persistVolumeDebounced(volume = if (muted) preMuteVolume else clamped, isMuted = muted)
     }
 
     /**
-     * Mutes or restores audio output volume cleanly while preserving the pre-mute level.
+     * Mutes or restores audio output volume cleanly while preserving pre-mute gain across launches.
      */
     fun toggleMute() {
         val currentlyMuted = _uiState.value.isMuted || _uiState.value.volume <= 0.001f
         if (currentlyMuted) {
-            setVolume(preMuteVolume.coerceAtLeast(0.5f))
+            val restored = preMuteVolume.coerceAtLeast(0.5f)
+            _uiState.update { it.copy(volume = restored, isMuted = false) }
+            scope.launch { audioEngine.setVolume(restored) }
+            persistVolumeDebounced(volume = restored, isMuted = false)
         } else {
             preMuteVolume = _uiState.value.volume.coerceAtLeast(0.5f)
             _uiState.update { it.copy(volume = 0f, isMuted = true) }
             scope.launch { audioEngine.setVolume(0f) }
+            persistVolumeDebounced(volume = preMuteVolume, isMuted = true)
         }
     }
 
@@ -280,11 +304,15 @@ class PlayerViewModel(
     }
 
     /**
-     * Clears the playback queue and stops active audio playback cleanly.
+     * Clears the playback queue, removes persisted session state, and stops active audio playback cleanly.
      */
     fun clearQueue() {
         queueController.clear()
-        scope.launch { audioEngine.stop() }
+        prefetchJob?.cancel()
+        scope.launch {
+            audioEngine.stop()
+            sessionRepository?.clear()
+        }
     }
 
     /**
@@ -365,20 +393,50 @@ class PlayerViewModel(
     }
 
     /**
-     * Releases background coroutines when the desktop application terminates.
+     * Persists the active queue and playback cursor immediately into [PlaybackSessionRepository].
+     * Called on pause, track switches, and window shutdown.
+     */
+    suspend fun saveSessionNow() {
+        val repo = sessionRepository ?: return
+        val q = queueController.state.value
+        val state = _uiState.value
+        if (q.queue.isEmpty()) {
+            repo.clear()
+            return
+        }
+        repo.save(
+            PlaybackSessionSnapshot(
+                queue = q.queue,
+                currentIndex = q.currentIndex,
+                positionMs = state.positionMs.coerceAtLeast(0L),
+                isShuffleEnabled = q.isShuffleEnabled,
+                repeatMode = q.repeatMode,
+                updatedAtMs = System.currentTimeMillis()
+            )
+        )
+    }
+
+    /**
+     * Cancels active playback, prefetch, and persistence coroutines when the app terminates.
      */
     fun dispose() {
         activePlaybackJob?.cancel()
         accentJob?.cancel()
+        prefetchJob?.cancel()
+        volumePersistJob?.cancel()
         scope.cancel()
     }
 
     /**
      * Resolves [track]'s audio stream, invokes [AudioEngine.play] (with one cache-invalidated retry on failure),
-     * records listening history/clicks, and launches asynchronous dynamic album-art color extraction.
+     * seeks to [initialPositionMs] once playing, records history, and launches dynamic album-art color extraction.
      */
-    private fun launchTrackPlayback(track: Track) {
+    private fun launchTrackPlayback(track: Track, initialPositionMs: Long = 0L) {
         activePlaybackJob?.cancel()
+        prefetchJob?.cancel()
+        pendingRestorePositionMs = 0L
+        pendingSeekOnReadyMs = initialPositionMs.coerceAtLeast(0L)
+        prefetchedForTrackId = null
         val sessionId = ++playbackSessionSeq
         _uiState.update {
             it.copy(
@@ -386,7 +444,7 @@ class PlayerViewModel(
                 isPlaying = false,
                 isResolving = true,
                 isBuffering = true,
-                positionMs = 0L,
+                positionMs = initialPositionMs.coerceAtLeast(0L),
                 durationMs = track.durationSeconds * 1000L,
                 errorMessage = null
             )
@@ -394,6 +452,7 @@ class PlayerViewModel(
         extractAccentForTrack(track)
 
         activePlaybackJob = scope.launch {
+            saveSessionNow()
             try {
                 val quality = _uiState.value.activeQuality
                 var resolved = resolveStream(track, quality)
@@ -465,6 +524,12 @@ class PlayerViewModel(
                 snap to queueState
             }.collectLatest { (snap, queueState) ->
                 val currentTrack = queueState.currentTrack
+                val restoredPos = pendingRestorePositionMs
+                val displayPositionMs = if (snap.status == PlaybackStatus.IDLE && restoredPos > 0L) {
+                    restoredPos
+                } else {
+                    snap.positionMs
+                }
                 _uiState.update { prev ->
                     prev.copy(
                         currentTrack = currentTrack ?: prev.currentTrack,
@@ -474,13 +539,31 @@ class PlayerViewModel(
                         repeatMode = queueState.repeatMode,
                         isPlaying = snap.isPlaying,
                         isBuffering = snap.isBuffering || prev.isResolving,
-                        positionMs = snap.positionMs,
+                        positionMs = displayPositionMs,
                         durationMs = snap.durationMs.takeIf { it > 0L }
                             ?: ((currentTrack?.durationSeconds ?: 0) * 1000L),
                         volume = snap.volume,
                         isMuted = snap.volume <= 0.001f,
                         errorMessage = snap.errorMessage ?: prev.errorMessage
                     )
+                }
+
+                if (snap.isPlaying && pendingSeekOnReadyMs > 1_000L) {
+                    val seekTarget = pendingSeekOnReadyMs
+                    pendingSeekOnReadyMs = 0L
+                    scope.launch { audioEngine.seekTo(seekTarget) }
+                }
+
+                if (snap.isPlaying && currentTrack != null && prefetchedForTrackId != currentTrack.id) {
+                    scheduleNextTrackPrefetch(currentTrack.id)
+                }
+
+                if (snap.isPlaying && currentTrack != null) {
+                    val now = System.currentTimeMillis()
+                    if (now - lastSessionSaveMs >= SESSION_AUTOSAVE_INTERVAL_MS) {
+                        lastSessionSaveMs = now
+                        scope.launch { saveSessionNow() }
+                    }
                 }
 
                 if (snap.status == PlaybackStatus.ENDED &&
@@ -524,7 +607,7 @@ class PlayerViewModel(
     }
 
     /**
-     * Keeps liked, downloaded, and preferred quality flags synchronized with active track state.
+     * Keeps liked, downloaded, volume, and preferred quality flags synchronized with active track state.
      */
     private fun observeLibraryAndPreferences() {
         scope.launch {
@@ -533,18 +616,84 @@ class PlayerViewModel(
                 libraryRepository.observeLikedTracks(),
                 libraryRepository.observeDownloadedTracks()
             ) { prefs, liked, downloaded ->
-                Triple(prefs.downloadQuality, liked.map { it.id }.toSet(), downloaded.map { it.id }.toSet())
-            }.collectLatest { (quality, likedIds, downloadedIds) ->
+                Triple(prefs, liked.map { it.id }.toSet(), downloaded.map { it.id }.toSet())
+            }.collectLatest { (prefs, likedIds, downloadedIds) ->
+                if (!initialVolumeRestored) {
+                    initialVolumeRestored = true
+                    preMuteVolume = prefs.volume.coerceIn(0f, 1f).coerceAtLeast(0.5f)
+                    val targetGain = if (prefs.isMuted) 0f else prefs.volume.coerceIn(0f, 1f)
+                    _uiState.update { it.copy(volume = targetGain, isMuted = prefs.isMuted || targetGain <= 0.001f) }
+                    audioEngine.setVolume(targetGain)
+                }
                 _uiState.update { state ->
                     val id = state.currentTrack?.id
                     state.copy(
-                        activeQuality = quality,
+                        activeQuality = prefs.downloadQuality,
                         isCurrentLiked = id != null && id in likedIds,
                         isCurrentDownloaded = id != null && id in downloadedIds
                     )
                 }
             }
         }
+    }
+
+    /**
+     * Restores the last persisted queue and track cursor on startup in a paused state without auto-playing.
+     */
+    private fun restoreLastSession() {
+        val repo = sessionRepository ?: return
+        scope.launch {
+            val snapshot = repo.load() ?: return@launch
+            if (snapshot.queue.isEmpty() || _uiState.value.currentTrack != null) return@launch
+            queueController.restoreState(snapshot)
+            val restoredTrack = queueController.state.value.currentTrack ?: return@launch
+            val safePos = snapshot.positionMs.coerceAtLeast(0L)
+            pendingRestorePositionMs = safePos
+            _uiState.update {
+                it.copy(
+                    currentTrack = restoredTrack,
+                    queue = queueController.state.value.queue,
+                    currentIndex = queueController.state.value.currentIndex,
+                    isShuffleEnabled = queueController.state.value.isShuffleEnabled,
+                    repeatMode = queueController.state.value.repeatMode,
+                    positionMs = safePos,
+                    durationMs = restoredTrack.durationSeconds * 1000L
+                )
+            }
+            extractAccentForTrack(restoredTrack)
+        }
+    }
+
+    /**
+     * Schedules background prefetching of the next queued track after 2.5 seconds of stable playback.
+     */
+    private fun scheduleNextTrackPrefetch(activeTrackId: String) {
+        val prefetcher = streamPrefetcher ?: return
+        prefetchedForTrackId = activeTrackId
+        prefetchJob?.cancel()
+        prefetchJob = scope.launch {
+            delay(PREFETCH_STABILITY_DELAY_MS)
+            val upcoming = queueController.peekNext() ?: return@launch
+            if (upcoming.id == activeTrackId) return@launch
+            runCatching { prefetcher.prefetch(upcoming, _uiState.value.activeQuality) }
+        }
+    }
+
+    /**
+     * Debounces volume/mute writes to [PreferencesRepository] so slider drags avoid excessive disk I/O.
+     */
+    private fun persistVolumeDebounced(volume: Float, isMuted: Boolean) {
+        volumePersistJob?.cancel()
+        volumePersistJob = scope.launch {
+            delay(VOLUME_PERSIST_DEBOUNCE_MS)
+            preferencesRepository.setVolumeState(volume.coerceIn(0f, 1f), isMuted)
+        }
+    }
+
+    private companion object {
+        const val PREFETCH_STABILITY_DELAY_MS = 2_500L
+        const val VOLUME_PERSIST_DEBOUNCE_MS = 250L
+        const val SESSION_AUTOSAVE_INTERVAL_MS = 5_000L
     }
 
     /**
