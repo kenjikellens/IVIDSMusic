@@ -74,11 +74,22 @@ actual fun platformDataModule(directories: AppStorageDirectories): Module = modu
 
     single<LocalAudioLocator> { JvmLocalAudioLocator() }
     single { NewPipeStreamResolver(okHttpClient = get()) }
-    single<StreamTierResolver>(named(PRIMARY_STREAM_EXTRACTOR_QUALIFIER)) { get<NewPipeStreamResolver>() }
     single<YouTubeMetadataPreviewer> { get<NewPipeStreamResolver>() }
 
-    single { YtDlpDesktopResolver(bundledToolsDir = directories.bundledToolsDir, json = get()) }
+    single {
+        val newPipe = get<NewPipeStreamResolver>()
+        YtDlpDesktopResolver(
+            bundledToolsDir = directories.bundledToolsDir,
+            json = get(),
+            videoUrlLookup = { track -> newPipe.findMatchingWatchUrl(track) }
+        )
+    }
     single<PlatformStreamFallback> { get<YtDlpDesktopResolver>() }
+    single<StreamTierResolver>(named(PRIMARY_STREAM_EXTRACTOR_QUALIFIER)) {
+        val ytDlp = get<YtDlpDesktopResolver>()
+        val newPipe = get<NewPipeStreamResolver>()
+        if (ytDlp.findYtDlpExecutable() != null) ytDlp else newPipe
+    }
     single<AudioTranscoder> { DesktopFfmpegTranscoder(bundledToolsDir = directories.bundledToolsDir) }
 
     single<OfflineDownloadManager> {

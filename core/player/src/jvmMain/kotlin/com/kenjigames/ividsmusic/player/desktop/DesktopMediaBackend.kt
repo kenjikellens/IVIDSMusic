@@ -114,7 +114,9 @@ internal class JavaFxMediaBackend : DesktopMediaBackend {
             return Result.failure(failure)
         }
 
-        val proxy = if (headers.isNotEmpty()) {
+        val isRemoteHttp = mediaUri.startsWith("http://", ignoreCase = true) ||
+            mediaUri.startsWith("https://", ignoreCase = true)
+        val proxy = if (isRemoteHttp || headers.isNotEmpty()) {
             try {
                 LocalHeaderProxy(targetUrl = mediaUri, headers = headers)
             } catch (throwable: Throwable) {

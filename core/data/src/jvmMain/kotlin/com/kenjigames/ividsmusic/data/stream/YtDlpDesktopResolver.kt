@@ -21,21 +21,25 @@ import kotlin.coroutines.cancellation.CancellationException
 class YtDlpDesktopResolver(
     private val bundledToolsDir: String?,
     private val json: Json,
+    private val videoUrlLookup: (suspend (Track) -> String?)? = null,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val clockMs: () -> Long = { System.currentTimeMillis() },
     private val timeoutSeconds: Long = DEFAULT_TIMEOUT_SECONDS
 ) : PlatformStreamFallback {
 
     /**
-     * Resolves a direct M4A stream URL via `yt-dlp.exe` using either known `track.videoId` or `ytsearch1:` query.
+     * Resolves a progressive MP4/M4A stream URL via `yt-dlp.exe` using `track.videoId`, fast NewPipe watch-URL lookup, or `ytsearch1:`.
      */
     override suspend fun resolveTrack(
         track: Track,
         preferredQuality: AudioQuality
     ): AppResult<StreamSource.RemoteUrl> {
-        val target = track.videoId?.takeIf { it.isNotBlank() }?.let { "https://www.youtube.com/watch?v=$it" }
-            ?: "ytsearch1:${buildYouTubeSearchQuery(track)}"
-        return executeYtDlpUrlLookup(target, track.videoId, preferredQuality)
+        val knownWatchUrl = track.videoId?.takeIf { it.isNotBlank() }?.let { "https://www.youtube.com/watch?v=$it" }
+            ?: videoUrlLookup?.invoke(track)
+        val resolvedVideoId = track.videoId?.takeIf { it.isNotBlank() }
+            ?: knownWatchUrl?.let(::extractYouTubeVideoId)
+        val target = knownWatchUrl ?: "ytsearch1:${buildYouTubeSearchQuery(track)}"
+        return executeYtDlpUrlLookup(target, resolvedVideoId, preferredQuality)
     }
 
     /**
@@ -107,7 +111,7 @@ class YtDlpDesktopResolver(
             "--no-playlist",
             "--no-warnings",
             "-f",
-            "bestaudio[ext=m4a]/bestaudio",
+            "18/b[ext=mp4]/best[ext=mp4]/bestaudio[ext=m4a]/best",
             "-g",
             target
         )
@@ -187,16 +191,27 @@ class YtDlpDesktopResolver(
         }
     }
 
-    /** Resolves `yt-dlp.exe` from the configured tools folder, working directory, or system PATH. */
+    /** Resolves `yt-dlp.exe` from the configured tools folder, working/parent resource directories, or system PATH. */
     internal fun findYtDlpExecutable(): String? {
         val candidates = buildList {
             if (!bundledToolsDir.isNullOrBlank()) {
                 add(File(bundledToolsDir, "yt-dlp.exe"))
                 add(File(bundledToolsDir, "yt-dlp"))
             }
+            val appResourcesDir = System.getProperty("compose.application.resources.dir")
+            if (!appResourcesDir.isNullOrBlank()) {
+                add(File(appResourcesDir, "yt-dlp.exe"))
+            }
             val userDir = System.getProperty("user.dir")
             if (!userDir.isNullOrBlank()) {
-                add(File(userDir, "yt-dlp.exe"))
+                val current = File(userDir)
+                add(File(current, "yt-dlp.exe"))
+                add(File(current, "resources/windows/yt-dlp.exe"))
+                add(File(current, "composeApp/resources/windows/yt-dlp.exe"))
+                current.parentFile?.let { parent ->
+                    add(File(parent, "yt-dlp.exe"))
+                    add(File(parent, "composeApp/resources/windows/yt-dlp.exe"))
+                }
             }
         }
         val direct = candidates.firstOrNull { it.exists() && it.isFile }

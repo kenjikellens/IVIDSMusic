@@ -417,11 +417,18 @@ class NativeDownloadManager(
         activeJobs[downloadId] = job
     }
 
+    /**
+     * Streams [source] into [partFile], automatically switching to bounded 512 KB range chunks for YouTube `googlevideo.com` URLs.
+     */
     private suspend fun streamToPartFile(
         downloadId: String,
         source: StreamSource.RemoteUrl,
         partFile: File
     ) = withContext(ioDispatcher) {
+        if (source.url.contains("googlevideo.com", ignoreCase = true)) {
+            streamChunkedRangesToPartFile(downloadId, source, partFile)
+            return@withContext
+        }
         val reqBuilder = Request.Builder().url(source.url)
         for ((k, v) in source.headers) {
             reqBuilder.addHeader(k, v)
@@ -430,6 +437,10 @@ class NativeDownloadManager(
         activeCalls[downloadId] = call
 
         call.execute().use { response ->
+            if (response.code == 403) {
+                streamChunkedRangesToPartFile(downloadId, source, partFile)
+                return@withContext
+            }
             if (!response.isSuccessful) {
                 throw DownloadHttpException(response.code, "HTTP ${response.code} downloading audio stream")
             }
@@ -483,6 +494,100 @@ class NativeDownloadManager(
             if (!partFile.exists() || partFile.length() <= 0L) {
                 throw IllegalStateException("Downloaded audio file is empty")
             }
+        }
+    }
+
+    /**
+     * Downloads [source] in sequential 512 KB bounded `Range` chunks so YouTube `rqh=1` CDNs never reject with HTTP 403.
+     */
+    private suspend fun streamChunkedRangesToPartFile(
+        downloadId: String,
+        source: StreamSource.RemoteUrl,
+        partFile: File
+    ) = withContext(ioDispatcher) {
+        var cursor = 0L
+        var totalBytes: Long? = null
+        var windowBytes = 0L
+        var windowStartMs = clockMs()
+        var lastEmitMs = 0L
+        val buffer = ByteArray(DEFAULT_BUFFER_BYTES)
+
+        FileOutputStream(partFile, false).use { output ->
+            while (totalBytes == null || cursor < totalBytes) {
+                ensureActive()
+                val chunkEnd = totalBytes?.let { minOf(it - 1L, cursor + RANGE_CHUNK_BYTES - 1L) }
+                    ?: (cursor + RANGE_CHUNK_BYTES - 1L)
+                val reqBuilder = Request.Builder()
+                    .url(source.url)
+                    .header("User-Agent", DEFAULT_DOWNLOAD_USER_AGENT)
+                    .header("Range", "bytes=$cursor-$chunkEnd")
+                for ((k, v) in source.headers) {
+                    reqBuilder.header(k, v)
+                }
+                val call = okHttpClient.newCall(reqBuilder.build())
+                activeCalls[downloadId] = call
+
+                var chunkReadBytes = 0L
+                call.execute().use { response ->
+                    if (!response.isSuccessful) {
+                        throw DownloadHttpException(response.code, "HTTP ${response.code} downloading audio chunk")
+                    }
+                    if (totalBytes == null) {
+                        val contentRange = response.header("Content-Range")
+                        val parsedTotal = contentRange
+                            ?.substringAfter('/', "")
+                            ?.trim()
+                            ?.takeIf { it.isNotEmpty() && it.all(Char::isDigit) }
+                            ?.toLongOrNull()
+                        totalBytes = parsedTotal ?: response.body?.contentLength()?.takeIf { it > 0L }
+                    }
+                    val body = response.body ?: throw IllegalStateException("Empty HTTP chunk body")
+                    body.byteStream().use { input ->
+                        while (true) {
+                            ensureActive()
+                            val read = input.read(buffer)
+                            if (read == -1) break
+                            output.write(buffer, 0, read)
+                            chunkReadBytes += read
+                            cursor += read
+                            windowBytes += read
+
+                            val now = clockMs()
+                            val elapsedWindowMs = (now - windowStartMs).coerceAtLeast(1L)
+                            val knownTotal = totalBytes
+                            if (now - lastEmitMs >= PROGRESS_EMIT_INTERVAL_MS || (knownTotal != null && cursor >= knownTotal)) {
+                                val bytesPerSec = (windowBytes * 1_000L) / elapsedWindowMs
+                                val progress = if (knownTotal != null && knownTotal > 0L) {
+                                    (cursor.toFloat() / knownTotal.toFloat()).coerceIn(0f, 1f)
+                                } else {
+                                    0f
+                                }
+                                updateItemState(
+                                    downloadId,
+                                    DownloadState.Downloading(
+                                        progress = progress,
+                                        bytesPerSec = bytesPerSec,
+                                        downloadedBytes = cursor,
+                                        totalBytes = knownTotal
+                                    )
+                                )
+                                lastEmitMs = now
+                                if (elapsedWindowMs >= SPEED_WINDOW_RESET_MS) {
+                                    windowBytes = 0L
+                                    windowStartMs = now
+                                }
+                            }
+                        }
+                    }
+                }
+                if (chunkReadBytes <= 0L) break
+                if (totalBytes == null && chunkReadBytes < RANGE_CHUNK_BYTES) break
+            }
+            output.flush()
+        }
+
+        if (!partFile.exists() || partFile.length() <= 0L) {
+            throw IllegalStateException("Downloaded audio file is empty")
         }
     }
 
@@ -548,7 +653,10 @@ class NativeDownloadManager(
 
     companion object {
         private const val DEFAULT_BUFFER_BYTES = 16 * 1024
+        private const val RANGE_CHUNK_BYTES = 524_288L
         private const val PROGRESS_EMIT_INTERVAL_MS = 120L
         private const val SPEED_WINDOW_RESET_MS = 1_000L
+        private const val DEFAULT_DOWNLOAD_USER_AGENT =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
     }
 }

@@ -183,6 +183,21 @@ class NewPipeStreamResolver(
         }
     }
 
+    /**
+     * Searches YouTube via NewPipe and returns the best matching watch URL within 15s duration tolerance, or `null`.
+     * Used by [resolveTrack] and by Desktop `yt-dlp.exe` resolution to avoid slow `ytsearch1:` process lookups.
+     */
+    suspend fun findMatchingWatchUrl(track: Track): String? = withContext(ioDispatcher) {
+        try {
+            ensureInitialized()
+            searchBestMatchingVideoUrl(track)
+        } catch (cancel: CancellationException) {
+            throw cancel
+        } catch (_: Exception) {
+            null
+        }
+    }
+
     private fun ensureInitialized() {
         if (initialized.compareAndSet(false, true)) {
             try {

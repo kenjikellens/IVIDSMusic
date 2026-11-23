@@ -14,8 +14,9 @@ import java.util.UUID
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
- * Ephemeral loopback HTTP proxy attaching custom headers to remote audio streams for JavaFX `Media`.
- * Bridges `Range` and `HEAD` requests over `127.0.0.1` and closes sockets deterministically on [close].
+ * Ephemeral loopback HTTP proxy bridging remote audio streams (such as YouTube `googlevideo.com`
+ * DASH `audio/mp4`) into OpenJFX `Media`. Normalizes `audio/mp4` to OpenJFX-compatible `audio/x-m4a`,
+ * translates rejected `HEAD` probes into 1-byte `GET` range probes, and attaches required headers.
  */
 internal class LocalHeaderProxy(
     private val targetUrl: String,
@@ -23,13 +24,13 @@ internal class LocalHeaderProxy(
 ) : Closeable {
 
     private val closed = AtomicBoolean(false)
-    private val token = "ivids-${UUID.randomUUID()}"
-    private val serverSocket = ServerSocket(0, 8, InetAddress.getLoopbackAddress())
+    private val token = "ivids-${UUID.randomUUID()}.m4a"
+    private val serverSocket = ServerSocket(0, 16, InetAddress.getLoopbackAddress())
     private val activeSockets: MutableSet<Socket> = Collections.synchronizedSet(mutableSetOf())
 
     /**
-     * Loopback URL passed to JavaFX `Media` so all audio fetches include [headers].
-     * Bound dynamically to an ephemeral localhost port until [close] is invoked.
+     * Loopback `.m4a` URL passed to JavaFX `Media` so OpenJFX `Locator` recognizes the M4A container
+     * and routes all `HEAD` and byte-range `GET` fetches through this proxy.
      */
     val localUrl: String = "http://127.0.0.1:${serverSocket.localPort}/$token"
 
@@ -121,94 +122,339 @@ internal class LocalHeaderProxy(
         }
     }
 
+    @Volatile
+    private var cachedTotalLength: Long = -1L
+
     /**
-     * Opens an upstream [HttpURLConnection], attaches [headers] and range headers, and relays the response to [output].
-     * Follows up to 5 HTTP/HTTPS redirects manually so cross-scheme redirects retain custom headers.
+     * Streams upstream audio in bounded 512 KB byte-range chunks while normalizing `audio/mp4` to `audio/x-m4a`.
+     * Prevents YouTube `googlevideo.com` (`rqh=1`) from rejecting un-ranged or full-file GET/HEAD requests with HTTP 403.
      */
     private fun forwardToUpstream(request: ParsedRequest, output: BufferedOutputStream) {
-        var currentUrl = targetUrl
-        var connection: HttpURLConnection? = null
+        if (request.method == "HEAD") {
+            handleHeadRequest(output)
+            return
+        }
+
+        val parsedRange = parseRawRangeSpec(request.range)
+        val startByte = parsedRange?.first ?: 0L
+        val requestedEndByte = parsedRange?.second
+        val knownTotal = cachedTotalLength
+
+        // Determine the end byte of the first upstream chunk (never exceeding 512 KB per request).
+        val firstChunkMaxEnd = startByte + UPSTREAM_CHUNK_BYTES - 1L
+        val firstChunkEnd = when {
+            requestedEndByte != null && requestedEndByte >= startByte -> minOf(requestedEndByte, firstChunkMaxEnd)
+            knownTotal > startByte -> minOf(knownTotal - 1L, firstChunkMaxEnd)
+            else -> firstChunkMaxEnd
+        }
+
+        val firstConn = followRedirects(
+            rangeHeader = "bytes=$startByte-$firstChunkEnd",
+            ifRangeHeader = request.ifRange,
+        ) ?: run {
+            writeStatusResponse(output, 502, "Bad Gateway")
+            return
+        }
+
+        val totalLength: Long
+        val finalEndByte: Long
+        val normalizedContentType: String
         try {
-            repeat(MAX_REDIRECTS + 1) { hop ->
-                val conn = openConfiguredConnection(currentUrl, request)
-                val status = conn.responseCode
-                if (status in REDIRECT_CODES && hop < MAX_REDIRECTS) {
-                    val location = conn.getHeaderField("Location")
-                    conn.disconnect()
-                    if (location.isNullOrBlank()) {
-                        writeStatusResponse(output, 502, "Bad Gateway")
-                        return
-                    }
-                    currentUrl = URI(currentUrl).resolve(location).toString()
-                    return@repeat
-                }
-                connection = conn
-                relayResponse(conn, request.method == "HEAD", output)
+            val firstStatus = firstConn.responseCode
+            normalizedContentType = normalizeJavaFxContentType(firstConn.getHeaderField("Content-Type"))
+            if (firstStatus !in 200..299) {
+                writeStatusResponse(output, firstStatus, firstConn.responseMessage ?: "Upstream Error")
                 return
             }
-            writeStatusResponse(output, 502, "Too Many Redirects")
+
+            val contentRange = firstConn.getHeaderField("Content-Range")
+            val totalFromRange = parseTotalFromContentRange(contentRange)
+            val firstContentLen = firstConn.getHeaderField("Content-Length")?.trim()?.toLongOrNull() ?: -1L
+            totalLength = when {
+                totalFromRange != null && totalFromRange > 0L -> totalFromRange.also { cachedTotalLength = it }
+                knownTotal > 0L -> knownTotal
+                firstContentLen > 0L -> startByte + firstContentLen
+                else -> -1L
+            }
+
+            if (totalLength <= 0L) {
+                // Non-rangeable upstream fallback
+                relaySingleConnection(firstConn, normalizedContentType, output, startByte == 0L)
+                return
+            }
+
+            finalEndByte = when {
+                requestedEndByte != null && requestedEndByte >= startByte ->
+                    minOf(requestedEndByte, totalLength - 1L)
+                else -> totalLength - 1L
+            }
+
+            val isPartial = request.range != null
+            val responseLength = finalEndByte - startByte + 1L
+            val headerBlock = buildString {
+                if (isPartial) {
+                    append("HTTP/1.1 206 Partial Content\r\n")
+                    append("Content-Range: bytes ").append(startByte).append('-').append(finalEndByte)
+                        .append('/').append(totalLength).append("\r\n")
+                } else {
+                    append("HTTP/1.1 200 OK\r\n")
+                }
+                append("Content-Type: ").append(normalizedContentType).append("\r\n")
+                append("Content-Length: ").append(responseLength).append("\r\n")
+                append("Accept-Ranges: bytes\r\n")
+                append("Connection: close\r\n\r\n")
+            }
+            output.write(headerBlock.toByteArray(Charsets.US_ASCII))
+            output.flush()
+
+            val firstActualEnd = minOf(firstChunkEnd, finalEndByte)
+            val firstExpectedBytes = firstActualEnd - startByte + 1L
+            val firstWritten = streamChunkBody(
+                conn = firstConn,
+                expectedBytes = firstExpectedBytes,
+                patchFtypBrandAtZero = (startByte == 0L),
+                output = output,
+            )
+            if (firstWritten <= 0L) return
+            var cursor = startByte + firstWritten
+
+            while (cursor <= finalEndByte && !closed.get()) {
+                val chunkEnd = minOf(finalEndByte, cursor + UPSTREAM_CHUNK_BYTES - 1L)
+                val chunkConn = followRedirects(
+                    rangeHeader = "bytes=$cursor-$chunkEnd",
+                    ifRangeHeader = request.ifRange,
+                ) ?: break
+                try {
+                    val code = chunkConn.responseCode
+                    if (code !in 200..299) break
+                    val expected = chunkEnd - cursor + 1L
+                    val written = streamChunkBody(
+                        conn = chunkConn,
+                        expectedBytes = expected,
+                        patchFtypBrandAtZero = false,
+                        output = output,
+                    )
+                    if (written <= 0L) break
+                    cursor += written
+                } finally {
+                    chunkConn.disconnect()
+                }
+            }
         } finally {
-            connection?.disconnect()
+            firstConn.disconnect()
         }
     }
 
     /**
-     * Creates and configures an [HttpURLConnection] to [urlString] with custom [headers] and client range headers.
-     * Disables automatic redirects so protocol-crossing redirects keep configured headers intact.
+     * Responds to JavaFX `HEAD` probes using a bounded 1 KB `GET` range probe so YouTube CDNs never return 403.
      */
-    private fun openConfiguredConnection(urlString: String, request: ParsedRequest): HttpURLConnection {
+    private fun handleHeadRequest(output: BufferedOutputStream) {
+        val conn = followRedirects(rangeHeader = "bytes=0-1023", ifRangeHeader = null) ?: run {
+            writeStatusResponse(output, 502, "Bad Gateway")
+            return
+        }
+        try {
+            val status = conn.responseCode
+            if (status !in 200..299) {
+                writeStatusResponse(output, status, conn.responseMessage ?: "Upstream Error")
+                return
+            }
+            val normalizedContentType = normalizeJavaFxContentType(conn.getHeaderField("Content-Type"))
+            val totalFromRange = parseTotalFromContentRange(conn.getHeaderField("Content-Range"))
+            val contentLen = conn.getHeaderField("Content-Length")?.trim()?.toLongOrNull() ?: -1L
+            runCatching { conn.inputStream.use { it.readBytes() } }
+            val totalLength = when {
+                totalFromRange != null && totalFromRange > 0L -> totalFromRange.also { cachedTotalLength = it }
+                contentLen > 0L -> contentLen
+                else -> cachedTotalLength
+            }
+            val headHeaders = buildString {
+                append("HTTP/1.1 200 OK\r\n")
+                append("Content-Type: ").append(normalizedContentType).append("\r\n")
+                if (totalLength > 0L) {
+                    append("Content-Length: ").append(totalLength).append("\r\n")
+                }
+                append("Accept-Ranges: bytes\r\n")
+                append("Connection: close\r\n\r\n")
+            }
+            output.write(headHeaders.toByteArray(Charsets.US_ASCII))
+            output.flush()
+        } finally {
+            conn.disconnect()
+        }
+    }
+
+    /**
+     * Reads up to [expectedBytes] from [conn], rewriting `ftypdash` at bytes `4..11` to `ftypM4A ` when [patchFtypBrandAtZero] is true.
+     */
+    private fun streamChunkBody(
+        conn: HttpURLConnection,
+        expectedBytes: Long,
+        patchFtypBrandAtZero: Boolean,
+        output: BufferedOutputStream,
+    ): Long {
+        conn.inputStream.use { stream ->
+            val buffer = ByteArray(STREAM_BUFFER_BYTES)
+            var totalReceived = 0L
+            var patchedHeader = !patchFtypBrandAtZero
+            while (!closed.get() && totalReceived < expectedBytes) {
+                val toRead = minOf(buffer.size.toLong(), expectedBytes - totalReceived).toInt()
+                val read = stream.read(buffer, 0, toRead)
+                if (read < 0) break
+                if (!patchedHeader && totalReceived == 0L && read >= 12) {
+                    patchDashFtypInPlace(buffer, read)
+                    patchedHeader = true
+                }
+                output.write(buffer, 0, read)
+                totalReceived += read
+            }
+            output.flush()
+            return totalReceived
+        }
+    }
+
+    /**
+     * Relays a single non-rangeable upstream connection directly to [output].
+     */
+    private fun relaySingleConnection(
+        conn: HttpURLConnection,
+        normalizedContentType: String,
+        output: BufferedOutputStream,
+        patchFtypBrandAtZero: Boolean,
+    ) {
+        val rawStatus = conn.responseCode
+        val reason = conn.responseMessage?.takeIf { it.isNotBlank() } ?: "OK"
+        val headerBlock = buildString {
+            append("HTTP/1.1 ").append(rawStatus).append(' ').append(reason).append("\r\n")
+            append("Content-Type: ").append(normalizedContentType).append("\r\n")
+            append("Accept-Ranges: bytes\r\n")
+            append("Connection: close\r\n\r\n")
+        }
+        output.write(headerBlock.toByteArray(Charsets.US_ASCII))
+        output.flush()
+        conn.inputStream.use { stream ->
+            val buffer = ByteArray(STREAM_BUFFER_BYTES)
+            var firstChunk = patchFtypBrandAtZero
+            while (!closed.get()) {
+                val read = stream.read(buffer)
+                if (read < 0) break
+                if (firstChunk && read >= 12) {
+                    patchDashFtypInPlace(buffer, read)
+                    firstChunk = false
+                }
+                output.write(buffer, 0, read)
+            }
+            output.flush()
+        }
+    }
+
+    /**
+     * Rewrites MP4 major brand `ftypdash` at offset `4..11` to `ftypM4A ` so OpenJFX `MediaUtils` accepts the header.
+     */
+    private fun patchDashFtypInPlace(buffer: ByteArray, length: Int) {
+        if (length < 12) return
+        val isFtyp = buffer[4] == 'f'.code.toByte() &&
+            buffer[5] == 't'.code.toByte() &&
+            buffer[6] == 'y'.code.toByte() &&
+            buffer[7] == 'p'.code.toByte()
+        val isDash = buffer[8] == 'd'.code.toByte() &&
+            buffer[9] == 'a'.code.toByte() &&
+            buffer[10] == 's'.code.toByte() &&
+            buffer[11] == 'h'.code.toByte()
+        if (isFtyp && isDash) {
+            buffer[8] = 'M'.code.toByte()
+            buffer[9] = '4'.code.toByte()
+            buffer[10] = 'A'.code.toByte()
+            buffer[11] = ' '.code.toByte()
+        }
+    }
+
+    /**
+     * Extracts the total byte length from an HTTP `Content-Range: bytes start-end/total` response header.
+     */
+    private fun parseTotalFromContentRange(contentRange: String?): Long? {
+        if (contentRange.isNullOrBlank()) return null
+        return contentRange
+            .substringAfter('/', "")
+            .trim()
+            .takeIf { it.isNotEmpty() && it.all(Char::isDigit) }
+            ?.toLongOrNull()
+    }
+
+    /**
+     * Parses a client `Range: bytes=start-end` header into `(startByte, optionalEndByte)`.
+     */
+    private fun parseRawRangeSpec(rangeHeader: String?): Pair<Long, Long?>? {
+        if (rangeHeader.isNullOrBlank()) return null
+        val trimmed = rangeHeader.trim()
+        if (!trimmed.startsWith("bytes=", ignoreCase = true)) return null
+        val spec = trimmed.substringAfter('=').substringBefore(',').trim()
+        val dash = spec.indexOf('-')
+        if (dash < 0) return null
+        val startPart = spec.substring(0, dash).trim()
+        val endPart = spec.substring(dash + 1).trim()
+        val start = startPart.toLongOrNull() ?: return null
+        val end = if (endPart.isEmpty()) null else endPart.toLongOrNull()
+        return start to end
+    }
+
+    /**
+     * Follows up to [MAX_REDIRECTS] HTTP/HTTPS redirects manually so cross-scheme redirects retain custom headers.
+     */
+    private fun followRedirects(rangeHeader: String?, ifRangeHeader: String?): HttpURLConnection? {
+        var currentUrl = targetUrl
+        repeat(MAX_REDIRECTS + 1) { hop ->
+            val conn = openConfiguredConnection(currentUrl, rangeHeader, ifRangeHeader)
+            val status = conn.responseCode
+            if (status in REDIRECT_CODES && hop < MAX_REDIRECTS) {
+                val location = conn.getHeaderField("Location")
+                conn.disconnect()
+                if (location.isNullOrBlank()) return null
+                currentUrl = URI(currentUrl).resolve(location).toString()
+                return@repeat
+            }
+            return conn
+        }
+        return null
+    }
+
+    /**
+     * Creates and configures a `GET` [HttpURLConnection] to [urlString] with custom [headers] and bounded [rangeHeader].
+     */
+    private fun openConfiguredConnection(
+        urlString: String,
+        rangeHeader: String?,
+        ifRangeHeader: String?,
+    ): HttpURLConnection {
         val conn = (URI(urlString).toURL().openConnection() as HttpURLConnection).apply {
-            requestMethod = request.method
+            requestMethod = "GET"
             instanceFollowRedirects = false
             connectTimeout = CONNECT_TIMEOUT_MS
             readTimeout = READ_TIMEOUT_MS
+            setRequestProperty("User-Agent", DEFAULT_USER_AGENT)
             for ((name, value) in headers) {
                 setRequestProperty(name, value)
             }
-            request.range?.let { setRequestProperty("Range", it) }
-            request.ifRange?.let { setRequestProperty("If-Range", it) }
+            if (!rangeHeader.isNullOrBlank()) {
+                setRequestProperty("Range", rangeHeader)
+            }
+            if (!ifRangeHeader.isNullOrBlank()) {
+                setRequestProperty("If-Range", ifRangeHeader)
+            }
         }
         return conn
     }
 
     /**
-     * Writes upstream HTTP status, content headers, and streamed body bytes directly to [output].
-     * Streams via an 8 KB buffer so large audio files are never buffered wholly in heap memory.
+     * Maps YouTube/CDN MIME types like `audio/mp4` onto OpenJFX `MediaManager`-supported types (`audio/x-m4a`).
      */
-    private fun relayResponse(
-        conn: HttpURLConnection,
-        isHead: Boolean,
-        output: BufferedOutputStream,
-    ) {
-        val statusCode = conn.responseCode
-        val reason = conn.responseMessage?.takeIf { it.isNotBlank() } ?: "OK"
-        val headerBlock = buildString {
-            append("HTTP/1.1 ").append(statusCode).append(' ').append(reason).append("\r\n")
-            for (headerName in FORWARDED_RESPONSE_HEADERS) {
-                val value = conn.getHeaderField(headerName)
-                if (!value.isNullOrBlank()) {
-                    append(headerName).append(": ").append(value).append("\r\n")
-                }
-            }
-            append("Connection: close\r\n\r\n")
-        }
-        output.write(headerBlock.toByteArray(Charsets.US_ASCII))
-        output.flush()
-        if (isHead) return
-
-        val upstreamStream: InputStream = if (statusCode in 200..399) {
-            conn.inputStream
-        } else {
-            conn.errorStream ?: return
-        }
-        upstreamStream.use { stream ->
-            val buffer = ByteArray(STREAM_BUFFER_BYTES)
-            while (!closed.get()) {
-                val read = stream.read(buffer)
-                if (read < 0) break
-                output.write(buffer, 0, read)
-            }
-            output.flush()
+    private fun normalizeJavaFxContentType(upstreamType: String?): String {
+        val clean = upstreamType?.substringBefore(';')?.trim()?.lowercase().orEmpty()
+        return when {
+            clean == "audio/mpeg" || clean == "audio/mp3" -> "audio/mpeg"
+            clean == "audio/x-wav" || clean == "audio/wav" -> "audio/x-wav"
+            clean == "audio/x-aiff" || clean == "audio/aiff" -> "audio/x-aiff"
+            else -> "audio/x-m4a"
         }
     }
 
@@ -285,14 +531,11 @@ internal class LocalHeaderProxy(
         const val CONNECT_TIMEOUT_MS: Int = 15_000
         const val READ_TIMEOUT_MS: Int = 30_000
         const val STREAM_BUFFER_BYTES: Int = 8_192
+        const val UPSTREAM_CHUNK_BYTES: Long = 524_288L
         const val MAX_HEADER_LINE_BYTES: Int = 8_192
         const val MAX_REDIRECTS: Int = 5
+        const val DEFAULT_USER_AGENT: String =
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
         val REDIRECT_CODES = setOf(301, 302, 303, 307, 308)
-        val FORWARDED_RESPONSE_HEADERS = listOf(
-            "Content-Type",
-            "Content-Length",
-            "Content-Range",
-            "Accept-Ranges",
-        )
     }
 }
