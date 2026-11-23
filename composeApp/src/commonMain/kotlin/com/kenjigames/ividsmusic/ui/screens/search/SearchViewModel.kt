@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.screens.search
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.kenjigames.ividsmusic.domain.model.Album
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.Artist
@@ -42,6 +43,7 @@ data class SearchUiState(
  * Coordinates debounced Deezer/iTunes searches, category tabs, year filtering, and pagination
  * for [SearchScreen].
  */
+@Stable
 class SearchViewModel(
     private val discoveryRepository: MusicDiscoveryRepository
 ) {

@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.screens.library
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.kenjigames.ividsmusic.domain.model.Album
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.HistoryEntry
@@ -78,6 +79,7 @@ data class LibraryUiState(
  * Observes local SQLite collections ([LibraryRepository]) and drives real-time filtering,
  * history clearing, and playlist creation inside [LibraryScreen].
  */
+@Stable
 class LibraryViewModel(
     private val libraryRepository: LibraryRepository,
     private val toastController: ToastController

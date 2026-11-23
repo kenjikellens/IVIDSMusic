@@ -89,6 +89,7 @@ import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -263,20 +264,13 @@ fun AdaptiveAppShell(
                         )
                         Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
                             content(currentRoute, shellMode)
-                            if (playerState.currentTrack != null) {
-                                MiniPlayerBar(
-                                    playerState = playerState,
-                                    onExpand = { setNowPlayingExpanded(true) },
-                                    onTogglePlayPause = playerViewModel::togglePlayPause,
-                                    onToggleLike = playerViewModel::toggleLikeCurrent,
-                                    onRetry = playerViewModel::retryCurrent,
-                                    onSkipPrevious = playerViewModel::previous,
-                                    onSkipNext = playerViewModel::next,
-                                    modifier = Modifier
-                                        .align(Alignment.BottomCenter)
-                                        .padding(horizontal = 12.dp, vertical = 10.dp)
-                                )
-                            }
+                            MiniPlayerHost(
+                                playerViewModel = playerViewModel,
+                                onExpand = { setNowPlayingExpanded(true) },
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                            )
                         }
                         MobileBottomBar(
                             currentRoute = currentRoute,
@@ -326,11 +320,8 @@ fun AdaptiveAppShell(
                                             thickness = 1.dp,
                                             color = IvidsColorTokens.HairlineSubtle
                                         )
-                                        QueueSideSheet(
-                                            playerState = playerState,
-                                            onJumpTo = playerViewModel::jumpToQueueIndex,
-                                            onRemove = playerViewModel::removeFromQueue,
-                                            onClear = playerViewModel::clearQueue,
+                                        QueueSideSheetHost(
+                                            playerViewModel = playerViewModel,
                                             onClose = { desktopQueueOpen = false }
                                         )
                                     }
@@ -341,8 +332,8 @@ fun AdaptiveAppShell(
                                 thickness = 1.dp,
                                 color = IvidsColorTokens.HairlineSubtle
                             )
-                            DesktopPlayerDeck(
-                                playerState = playerState,
+                            DesktopPlayerHost(
+                                playerViewModel = playerViewModel,
                                 queueOpen = desktopQueueOpen,
                                 onToggleQueue = { desktopQueueOpen = !desktopQueueOpen },
                                 onOpenNowPlaying = { setNowPlayingExpanded(true) },
@@ -351,8 +342,7 @@ fun AdaptiveAppShell(
                                 },
                                 onOpenSongDetail = { id ->
                                     navigator.navigateTo(AppRoute.SongDetail(id))
-                                },
-                                playerViewModel = playerViewModel
+                                }
                             )
                         }
                     }
@@ -364,10 +354,9 @@ fun AdaptiveAppShell(
                 enter = slideInVertically { it } + fadeIn(),
                 exit = slideOutVertically { it } + fadeOut()
             ) {
-                NowPlayingSheet(
-                    playerState = playerState,
-                    playlists = playlists,
+                NowPlayingSheetHost(
                     playerViewModel = playerViewModel,
+                    playlists = playlists,
                     onCreatePlaylist = onCreatePlaylist,
                     onOpenArtist = { id, name -> navigator.navigateTo(AppRoute.ArtistDetail(id, name)) },
                     onOpenSongDetail = { id -> navigator.navigateTo(AppRoute.SongDetail(id)) },
@@ -376,6 +365,98 @@ fun AdaptiveAppShell(
             }
         }
     }
+}
+
+/**
+ * Isolates live 250ms playback state collection for [MiniPlayerBar] so screens underneath do
+ * not recompose on progress ticks.
+ */
+@Composable
+private fun MiniPlayerHost(
+    playerViewModel: PlayerViewModel,
+    onExpand: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val liveState by playerViewModel.uiState.collectAsState()
+    if (liveState.currentTrack != null) {
+        MiniPlayerBar(
+            playerState = liveState,
+            onExpand = onExpand,
+            onTogglePlayPause = playerViewModel::togglePlayPause,
+            onToggleLike = playerViewModel::toggleLikeCurrent,
+            onRetry = playerViewModel::retryCurrent,
+            onSkipPrevious = playerViewModel::previous,
+            onSkipNext = playerViewModel::next,
+            modifier = modifier
+        )
+    }
+}
+
+/**
+ * Isolates live 250ms playback state collection for [DesktopPlayerDeck] so desktop rail and
+ * active discovery screens never recompose on scrubber position ticks.
+ */
+@Composable
+private fun DesktopPlayerHost(
+    playerViewModel: PlayerViewModel,
+    queueOpen: Boolean,
+    onToggleQueue: () -> Unit,
+    onOpenNowPlaying: () -> Unit,
+    onOpenArtist: (artistId: String, artistName: String) -> Unit,
+    onOpenSongDetail: (trackId: String) -> Unit
+) {
+    val liveState by playerViewModel.uiState.collectAsState()
+    DesktopPlayerDeck(
+        playerState = liveState,
+        queueOpen = queueOpen,
+        onToggleQueue = onToggleQueue,
+        onOpenNowPlaying = onOpenNowPlaying,
+        onOpenArtist = onOpenArtist,
+        onOpenSongDetail = onOpenSongDetail,
+        playerViewModel = playerViewModel
+    )
+}
+
+/**
+ * Isolates live queue/track observation for Desktop's docked [QueueSideSheet].
+ */
+@Composable
+private fun QueueSideSheetHost(
+    playerViewModel: PlayerViewModel,
+    onClose: () -> Unit
+) {
+    val liveState by playerViewModel.uiState.collectAsState()
+    QueueSideSheet(
+        playerState = liveState,
+        onJumpTo = playerViewModel::jumpToQueueIndex,
+        onRemove = playerViewModel::removeFromQueue,
+        onClear = playerViewModel::clearQueue,
+        onClose = onClose
+    )
+}
+
+/**
+ * Isolates live 250ms playback telemetry for the expandable [NowPlayingSheet] overlay.
+ */
+@Composable
+private fun NowPlayingSheetHost(
+    playerViewModel: PlayerViewModel,
+    playlists: List<Playlist>,
+    onCreatePlaylist: () -> Unit,
+    onOpenArtist: (artistId: String, artistName: String) -> Unit,
+    onOpenSongDetail: (trackId: String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    val liveState by playerViewModel.uiState.collectAsState()
+    NowPlayingSheet(
+        playerState = liveState,
+        playlists = playlists,
+        playerViewModel = playerViewModel,
+        onCreatePlaylist = onCreatePlaylist,
+        onOpenArtist = onOpenArtist,
+        onOpenSongDetail = onOpenSongDetail,
+        onDismiss = onDismiss
+    )
 }
 
 /**

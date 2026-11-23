@@ -31,7 +31,11 @@ import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.i18n.LocalizationManager
 import com.kenjigames.ividsmusic.ui.navigation.AppNavigator
 import com.kenjigames.ividsmusic.ui.navigation.AppRoute
+import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
+import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import com.kenjigames.ividsmusic.ui.screens.album.AlbumDetailScreen
 import com.kenjigames.ividsmusic.ui.screens.album.AlbumViewModel
 import com.kenjigames.ividsmusic.ui.screens.artist.ArtistDetailScreen
@@ -93,12 +97,28 @@ fun IvidsApp(
 
     val preferences by preferencesRepository.preferences.collectAsState(initial = UserPreferences())
     val strings by localizationManager.strings.collectAsState()
-    val playerState by playerViewModel.uiState.collectAsState()
     val backStack by navigator.backStack.collectAsState()
     val playlists by libraryRepository.observePlaylists().collectAsState(initial = emptyList())
     val likedTracks by libraryRepository.observeLikedTracks().collectAsState(initial = emptyList())
     val downloadedTracks by libraryRepository.observeDownloadedTracks().collectAsState(initial = emptyList())
-    val downloaderState by downloaderViewModel.uiState.collectAsState()
+    val activeDownloadCount by remember(downloaderViewModel) {
+        downloaderViewModel.uiState.map { it.activeDownloads.size }.distinctUntilChanged()
+    }.collectAsState(initial = 0)
+    val dynamicAccent by remember(playerViewModel) {
+        playerViewModel.uiState.map { it.dynamicAccent }.distinctUntilChanged()
+    }.collectAsState(initial = IvidsColorTokens.PrimaryCyan)
+    // Isolate screen-relevant track flags from 250ms positionMs updates to prevent root recomposition storms.
+    val playerState by remember(playerViewModel) {
+        playerViewModel.uiState.map {
+            PlayerUiState(
+                currentTrack = it.currentTrack,
+                activeQuality = it.activeQuality,
+                isCurrentLiked = it.isCurrentLiked,
+                isCurrentDownloaded = it.isCurrentDownloaded,
+                dynamicAccent = it.dynamicAccent
+            )
+        }.distinctUntilChanged()
+    }.collectAsState(initial = PlayerUiState())
 
     val likedIds = remember(likedTracks) { likedTracks.map { it.id }.toSet() }
     val downloadedIds = remember(downloadedTracks) { downloadedTracks.map { it.id }.toSet() }
@@ -125,7 +145,7 @@ fun IvidsApp(
 
         IvidsTheme(
             uiScale = preferences.uiScale,
-            dynamicAccent = playerState.dynamicAccent,
+            dynamicAccent = dynamicAccent,
             dynamicTintEnabled = preferences.dynamicTintEnabled,
             isTvMode = shellMode == ShellMode.TV,
             layoutDirection = layoutDirection
@@ -173,7 +193,7 @@ fun IvidsApp(
                         playerViewModel = playerViewModel,
                         playlists = playlists,
                         searchFocusTrigger = searchFocusTrigger,
-                        activeDownloadCount = downloaderState.activeDownloads.size,
+                        activeDownloadCount = activeDownloadCount,
                         nowPlayingExpanded = nowPlayingExpanded,
                         onNowPlayingExpandedChange = onNowPlayingExpandedChange,
                         onHeaderSearchSubmit = { q ->

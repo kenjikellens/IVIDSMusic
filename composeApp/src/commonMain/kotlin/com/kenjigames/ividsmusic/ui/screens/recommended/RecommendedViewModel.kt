@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.screens.recommended
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.InterestScore
 import com.kenjigames.ividsmusic.domain.model.RecommendationFeed
@@ -42,6 +43,7 @@ data class RecommendedUiState(
  * Triggers cosine-similarity personalized discovery via [RecommendationEngine] and surfaces
  * local interest weights from [ScoreRepository].
  */
+@Stable
 class RecommendedViewModel(
     private val recommendationEngine: RecommendationEngine,
     private val scoreRepository: ScoreRepository,

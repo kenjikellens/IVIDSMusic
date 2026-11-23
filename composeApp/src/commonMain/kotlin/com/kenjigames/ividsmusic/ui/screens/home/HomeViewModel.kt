@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.screens.home
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.kenjigames.ividsmusic.domain.model.Album
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.Artist
@@ -40,6 +41,7 @@ data class HomeUiState(
 /**
  * Loads curated genre shelves, top artists, top albums, and recent listening history for [HomeScreen].
  */
+@Stable
 class HomeViewModel(
     private val discoveryRepository: MusicDiscoveryRepository,
     private val libraryRepository: LibraryRepository

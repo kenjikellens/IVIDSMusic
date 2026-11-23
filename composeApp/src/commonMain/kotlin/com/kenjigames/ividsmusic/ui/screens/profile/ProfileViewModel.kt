@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.screens.profile
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.HistoryEntry
 import com.kenjigames.ividsmusic.domain.model.InterestScore
@@ -43,6 +44,7 @@ data class ProfileUiState(
  * Aggregates local listener stats, 20-track listening history, top genre weights, and local
  * profile editing via [PreferencesRepository], [LibraryRepository], and [ScoreRepository].
  */
+@Stable
 class ProfileViewModel(
     private val preferencesRepository: PreferencesRepository,
     private val libraryRepository: LibraryRepository,

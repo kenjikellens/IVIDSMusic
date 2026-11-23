@@ -2,6 +2,8 @@ package com.kenjigames.ividsmusic.ui.theme
 
 import androidx.compose.ui.graphics.Color
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import org.jetbrains.skia.Bitmap
 import org.jetbrains.skia.Canvas
@@ -23,6 +25,7 @@ actual object ColorExtractor {
     private const val MAX_BYTES = 2 * 1024 * 1024
     private const val SAMPLE_SIZE = 24
 
+    private val fetchSemaphore = Semaphore(4)
     private val cacheLock = Any()
     private val colorCache = object : LinkedHashMap<String, Color>(MAX_CACHE_ENTRIES, 0.75f, true) {
         /** Evicts the least-recently-used artwork swatch once [colorCache] exceeds 120 entries. */
@@ -52,52 +55,69 @@ actual object ColorExtractor {
             }
         }
         return withContext(Dispatchers.IO) {
-            var connection: HttpURLConnection? = null
-            try {
-                connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 4_000
-                    readTimeout = 4_000
-                    setRequestProperty("User-Agent", "IVIDS-Music-Desktop")
-                }
-                if (connection.responseCode !in 200..299) return@withContext null
-                val bytes = connection.inputStream.use { input ->
-                    val out = ByteArrayOutputStream()
-                    val buf = ByteArray(8192)
-                    var total = 0
-                    while (true) {
-                        val read = input.read(buf)
-                        if (read <= 0) break
-                        total += read
-                        if (total > MAX_BYTES) break
-                        out.write(buf, 0, read)
-                    }
-                    out.toByteArray()
-                }
-                if (bytes.isEmpty()) return@withContext null
-
-                val extracted = Image.makeFromEncoded(bytes).use { image ->
-                    Bitmap().use { bitmap ->
-                        bitmap.allocPixels(ImageInfo.makeN32Premul(SAMPLE_SIZE, SAMPLE_SIZE))
-                        Canvas(bitmap).use { canvas ->
-                            canvas.drawImageRect(
-                                image = image,
-                                src = Rect.makeWH(image.width.toFloat(), image.height.toFloat()),
-                                dst = Rect.makeWH(SAMPLE_SIZE.toFloat(), SAMPLE_SIZE.toFloat())
-                            )
-                        }
-                        sampleDominantArgb(bitmap)
-                    }
-                } ?: return@withContext null
-
-                val clamped = clampAccentContrast(extracted, Color.Unspecified)
+            fetchSemaphore.withPermit {
                 synchronized(cacheLock) {
-                    colorCache[imageUrl] = clamped
+                    if (colorCache.containsKey(imageUrl)) {
+                        return@withPermit colorCache[imageUrl]?.takeIf { it != Color.Unspecified }
+                    }
                 }
-                clamped.takeIf { it != Color.Unspecified }
-            } catch (_: Exception) {
-                null
-            } finally {
-                connection?.disconnect()
+                var connection: HttpURLConnection? = null
+                try {
+                    connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 4_000
+                        readTimeout = 4_000
+                        setRequestProperty("User-Agent", "IVIDS-Music-Desktop")
+                    }
+                    if (connection.responseCode !in 200..299 || connection.contentLengthLong > MAX_BYTES) {
+                        synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
+                        return@withPermit null
+                    }
+                    val bytes = connection.inputStream.use { input ->
+                        val out = ByteArrayOutputStream()
+                        val buf = ByteArray(8192)
+                        var total = 0
+                        while (true) {
+                            val read = input.read(buf)
+                            if (read <= 0) break
+                            total += read
+                            if (total > MAX_BYTES) return@withPermit null
+                            out.write(buf, 0, read)
+                        }
+                        out.toByteArray()
+                    }
+                    if (bytes.isEmpty()) {
+                        synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
+                        return@withPermit null
+                    }
+
+                    val extracted = Image.makeFromEncoded(bytes).use { image ->
+                        Bitmap().use { bitmap ->
+                            bitmap.allocPixels(ImageInfo.makeN32Premul(SAMPLE_SIZE, SAMPLE_SIZE))
+                            Canvas(bitmap).use { canvas ->
+                                canvas.drawImageRect(
+                                    image = image,
+                                    src = Rect.makeWH(image.width.toFloat(), image.height.toFloat()),
+                                    dst = Rect.makeWH(SAMPLE_SIZE.toFloat(), SAMPLE_SIZE.toFloat())
+                                )
+                            }
+                            sampleDominantArgb(bitmap)
+                        }
+                    } ?: run {
+                        synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
+                        return@withPermit null
+                    }
+
+                    val clamped = clampAccentContrast(extracted, Color.Unspecified)
+                    synchronized(cacheLock) {
+                        colorCache[imageUrl] = clamped
+                    }
+                    clamped.takeIf { it != Color.Unspecified }
+                } catch (_: Exception) {
+                    synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
+                    null
+                } finally {
+                    connection?.disconnect()
+                }
             }
         }
     }

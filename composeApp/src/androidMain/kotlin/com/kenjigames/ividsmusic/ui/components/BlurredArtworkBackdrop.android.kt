@@ -5,6 +5,8 @@ import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
 import java.net.HttpURLConnection
@@ -14,6 +16,7 @@ private const val ANDROID_BLUR_CACHE_SIZE = 32
 private const val ANDROID_BLUR_TARGET_PX = 56
 private const val ANDROID_BLUR_MAX_BYTES = 2 * 1024 * 1024
 
+private val androidBlurSemaphore = Semaphore(4)
 private val androidBlurLock = Any()
 private val androidBlurCache = object : LinkedHashMap<String, ImageBitmap>(ANDROID_BLUR_CACHE_SIZE, 0.75f, true) {
     /** Evicts the least-recently-used pre-blurred artwork bitmap once the cache exceeds 32 entries. */
@@ -31,55 +34,62 @@ actual suspend fun loadBlurredArtworkBitmap(imageUrl: String?): ImageBitmap? {
         androidBlurCache[imageUrl]?.let { return it }
     }
     return withContext(Dispatchers.IO) {
-        var decoded: Bitmap? = null
-        var scaled: Bitmap? = null
-        var connection: HttpURLConnection? = null
-        try {
-            connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
-                connectTimeout = 4_000
-                readTimeout = 4_000
-                setRequestProperty("User-Agent", "IVIDS-Music-Android")
-            }
-            if (connection.responseCode !in 200..299) return@withContext null
-            val bytes = connection.inputStream.use { input ->
-                val out = ByteArrayOutputStream()
-                val buf = ByteArray(8192)
-                var total = 0
-                while (true) {
-                    val read = input.read(buf)
-                    if (read <= 0) break
-                    total += read
-                    if (total > ANDROID_BLUR_MAX_BYTES) break
-                    out.write(buf, 0, read)
-                }
-                out.toByteArray()
-            }
-            if (bytes.isEmpty()) return@withContext null
-
-            val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
-            BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
-            val maxDim = maxOf(bounds.outWidth, bounds.outHeight).coerceAtLeast(1)
-            var sample = 1
-            while (maxDim / sample > 128) sample *= 2
-
-            decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply {
-                inSampleSize = sample
-            }) ?: return@withContext null
-
-            scaled = Bitmap.createScaledBitmap(decoded, ANDROID_BLUR_TARGET_PX, ANDROID_BLUR_TARGET_PX, true)
-            val blurred = boxBlurBitmap(scaled, radius = 5)
-            val imageBitmap = blurred.asImageBitmap()
-
+        androidBlurSemaphore.withPermit {
             synchronized(androidBlurLock) {
-                androidBlurCache[imageUrl] = imageBitmap
+                androidBlurCache[imageUrl]?.let { return@withPermit it }
             }
-            imageBitmap
-        } catch (_: Exception) {
-            null
-        } finally {
-            if (scaled != null && scaled !== decoded) scaled.recycle()
-            decoded?.recycle()
-            connection?.disconnect()
+            var decoded: Bitmap? = null
+            var scaled: Bitmap? = null
+            var connection: HttpURLConnection? = null
+            try {
+                connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
+                    connectTimeout = 4_000
+                    readTimeout = 4_000
+                    setRequestProperty("User-Agent", "IVIDS-Music-Android")
+                }
+                if (connection.responseCode !in 200..299 || connection.contentLengthLong > ANDROID_BLUR_MAX_BYTES) {
+                    return@withPermit null
+                }
+                val bytes = connection.inputStream.use { input ->
+                    val out = ByteArrayOutputStream()
+                    val buf = ByteArray(8192)
+                    var total = 0
+                    while (true) {
+                        val read = input.read(buf)
+                        if (read <= 0) break
+                        total += read
+                        if (total > ANDROID_BLUR_MAX_BYTES) return@withPermit null
+                        out.write(buf, 0, read)
+                    }
+                    out.toByteArray()
+                }
+                if (bytes.isEmpty()) return@withPermit null
+
+                val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+                BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
+                val maxDim = maxOf(bounds.outWidth, bounds.outHeight).coerceAtLeast(1)
+                var sample = 1
+                while (maxDim / sample > 128) sample *= 2
+
+                decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size, BitmapFactory.Options().apply {
+                    inSampleSize = sample
+                }) ?: return@withPermit null
+
+                scaled = Bitmap.createScaledBitmap(decoded, ANDROID_BLUR_TARGET_PX, ANDROID_BLUR_TARGET_PX, true)
+                val blurred = boxBlurBitmap(scaled, radius = 5)
+                val imageBitmap = blurred.asImageBitmap()
+
+                synchronized(androidBlurLock) {
+                    androidBlurCache[imageUrl] = imageBitmap
+                }
+                imageBitmap
+            } catch (_: Exception) {
+                null
+            } finally {
+                if (scaled != null && scaled !== decoded) scaled.recycle()
+                decoded?.recycle()
+                connection?.disconnect()
+            }
         }
     }
 }

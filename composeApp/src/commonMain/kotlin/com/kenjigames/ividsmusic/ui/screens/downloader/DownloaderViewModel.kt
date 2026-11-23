@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.screens.downloader
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.AudioQuality
 import com.kenjigames.ividsmusic.domain.model.DownloadItem
@@ -44,6 +45,7 @@ data class DownloaderUiState(
  * Coordinates direct URL previews, per-download [AudioQuality] selection (`4..320` kbps),
  * active downloads, Desktop folder selection, and offline `saved/` directory scanning.
  */
+@Stable
 class DownloaderViewModel(
     private val downloadManager: OfflineDownloadManager,
     private val libraryRepository: LibraryRepository,

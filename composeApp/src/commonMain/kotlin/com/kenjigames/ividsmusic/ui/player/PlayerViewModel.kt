@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.player
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import androidx.compose.ui.graphics.Color
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.AudioEngineCommand
@@ -73,6 +74,7 @@ data class PlayerUiState(
  * Application-wide playback coordinator connecting Compose UI controls to [AudioEngine],
  * [PlaybackQueueController], [ResolveTrackStreamUseCase], [RecommendationEngine], and [ColorExtractor].
  */
+@Stable
 class PlayerViewModel(
     private val audioEngine: AudioEngine,
     private val queueController: PlaybackQueueController,
@@ -708,7 +710,7 @@ class PlayerViewModel(
     private companion object {
         const val PREFETCH_STABILITY_DELAY_MS = 2_500L
         const val VOLUME_PERSIST_DEBOUNCE_MS = 250L
-        const val SESSION_AUTOSAVE_INTERVAL_MS = 5_000L
+        const val SESSION_AUTOSAVE_INTERVAL_MS = 15_000L
     }
 
     /**

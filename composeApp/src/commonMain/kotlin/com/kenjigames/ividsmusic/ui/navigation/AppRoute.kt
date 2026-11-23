@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.navigation
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +47,7 @@ enum class RootDestination {
  * Manages the immutable navigation back-stack for IVIDS Music screens without platform-coupled
  * Fragment/NavHost overhead.
  */
+@Stable
 class AppNavigator(initialRoute: AppRoute = AppRoute.Home) {
 
     private val _backStack = MutableStateFlow(listOf(initialRoute))

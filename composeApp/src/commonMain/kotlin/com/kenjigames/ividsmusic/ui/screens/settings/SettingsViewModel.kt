@@ -1,6 +1,7 @@
 package com.kenjigames.ividsmusic.ui.screens.settings
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.AudioQuality
 import com.kenjigames.ividsmusic.domain.model.LayoutMode
@@ -50,6 +51,7 @@ data class SettingsUiState(
  * Coordinates persisted user settings ([PreferencesRepository]), instant 16-language hot-swapping
  * ([LocalizationManager]), cache/score resets, and native self-updates ([AppUpdateChecker]).
  */
+@Stable
 class SettingsViewModel(
     private val preferencesRepository: PreferencesRepository,
     private val scoreRepository: ScoreRepository,

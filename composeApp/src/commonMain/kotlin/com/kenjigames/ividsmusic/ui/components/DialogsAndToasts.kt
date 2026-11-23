@@ -31,6 +31,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.Stable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -63,6 +64,7 @@ data class ToastMessage(
 /**
  * Lightweight coordinator emitting non-blocking status toast notifications across all screens.
  */
+@Stable
 class ToastController {
     private val _current = MutableStateFlow<ToastMessage?>(null)
     val current: StateFlow<ToastMessage?> = _current.asStateFlow()
