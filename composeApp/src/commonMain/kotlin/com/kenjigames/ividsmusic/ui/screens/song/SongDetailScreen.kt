@@ -2,19 +2,15 @@ package com.kenjigames.ividsmusic.ui.screens.song
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -23,8 +19,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
-import androidx.compose.material.icons.automirrored.rounded.PlaylistPlay
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
+import androidx.compose.material.icons.rounded.Album
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
@@ -34,7 +30,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,7 +40,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
-import com.kenjigames.ividsmusic.ui.components.DetailHeaderArtworkWash
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
@@ -87,15 +81,10 @@ fun SongDetailScreen(
     val accent = LocalDynamicAccent.current
     val playlistModal = rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
 
-    Box(modifier = modifier.fillMaxSize()) {
-        DetailHeaderArtworkWash(
-            artworkUrl = state.track?.coverUrl,
-            modifier = Modifier.fillMaxWidth().height(340.dp)
-        )
-        FramedScreenContainer(
-            maxWidth = 1360.dp,
-            modifier = Modifier.fillMaxSize()
-        ) {
+    FramedScreenContainer(
+        maxWidth = 1360.dp,
+        modifier = modifier.fillMaxSize()
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = PaddingValues(start = 24.dp, end = 24.dp, top = 22.dp, bottom = 104.dp),
@@ -177,11 +166,12 @@ fun SongDetailScreen(
                                 onClick = { onOpenArtist(track.artistId, track.artist) }
                             )
                             if (track.albumId.isNotBlank()) {
-                                TextButton(onClick = { onOpenAlbum(track.albumId) }) {
-                                    Icon(Icons.AutoMirrored.Rounded.PlaylistPlay, null, tint = IvidsColorTokens.SlateMuted)
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(track.album.ifBlank { strings["albums"] }, color = IvidsColorTokens.ChalkInk)
-                                }
+                                SongActionPill(
+                                    icon = Icons.Rounded.Album,
+                                    label = track.album.ifBlank { strings["albums"] },
+                                    accent = accent,
+                                    onClick = { onOpenAlbum(track.albumId) }
+                                )
                             }
                         }
 
@@ -256,7 +246,6 @@ fun SongDetailScreen(
                 }
             }
         }
-    }
     }
 }
 

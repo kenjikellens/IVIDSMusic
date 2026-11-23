@@ -285,9 +285,10 @@ fun LivingAlbumHero(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
-        color = IvidsColorTokens.GlassSurface
+        color = IvidsColorTokens.GlassSurface,
+        border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle)
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(24.dp))) {
             BlurredArtworkBackdrop(
                 artworkUrl = artworkUrl,
                 tintColor = null,

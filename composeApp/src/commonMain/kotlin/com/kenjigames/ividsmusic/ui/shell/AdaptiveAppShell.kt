@@ -90,6 +90,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -230,7 +231,7 @@ fun AdaptiveAppShell(
                                 color = IvidsColorTokens.HairlineSubtle
                             )
 
-                            Box(modifier = Modifier.weight(1f).fillMaxHeight()) {
+                            Box(modifier = Modifier.weight(1f).fillMaxHeight().clipToBounds()) {
                                 Column(modifier = Modifier.fillMaxSize()) {
                                     DesktopTopBar(
                                         canNavigateBack = canNavigateBack,
@@ -239,7 +240,7 @@ fun AdaptiveAppShell(
                                         onSearchSubmit = onHeaderSearchSubmit,
                                         onOpenProfile = { navigator.switchRootTab(AppRoute.Profile) }
                                     )
-                                    Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                                    Box(modifier = Modifier.weight(1f).fillMaxWidth().clipToBounds()) {
                                         content(currentRoute, shellMode)
                                     }
                                 }
@@ -461,9 +462,10 @@ private fun MiniPlayerBar(
             .shadow(16.dp, RoundedCornerShape(18.dp), ambientColor = Color.Black, spotColor = Color.Black)
             .clickable(onClick = onExpand),
         shape = RoundedCornerShape(18.dp),
-        color = IvidsColorTokens.GlassSurface
+        color = IvidsColorTokens.GlassSurface,
+        border = BorderStroke(1.dp, IvidsColorTokens.HairlineSubtle)
     ) {
-        Box(modifier = Modifier.fillMaxWidth()) {
+        Box(modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp))) {
             BlurredArtworkBackdrop(
                 artworkUrl = track.coverUrl,
                 tintColor = accent,
@@ -592,6 +594,7 @@ private fun SidebarNavigationRail(
         modifier = Modifier
             .fillMaxHeight()
             .width(if (expanded) 236.dp else 78.dp)
+            .clipToBounds()
             .background(IvidsColorTokens.AbyssRail)
     ) {
         Column(
@@ -960,6 +963,7 @@ private fun DesktopPlayerDeck(
         modifier = Modifier
             .fillMaxWidth()
             .height(84.dp)
+            .clipToBounds()
             .background(IvidsColorTokens.RecessedTrough)
     ) {
         if (track != null) {
