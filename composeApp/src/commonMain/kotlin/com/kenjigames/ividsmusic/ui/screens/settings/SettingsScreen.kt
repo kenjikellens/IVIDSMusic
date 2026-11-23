@@ -378,8 +378,10 @@ fun SettingsScreen(
 }
 
 /**
- * Renders a single label + pill action row inside a [SettingsGroupPanel].
+ * Renders a label + pill action row inside [SettingsGroupPanel], wrapping cleanly onto two lines
+ * on compact mobile phones so button labels never squeeze descriptions.
  */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun SettingsActionRow(
     title: String,
@@ -388,26 +390,58 @@ private fun SettingsActionRow(
     isDestructive: Boolean,
     onClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
-            Text(subtitle, style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
-        }
-        IvidsTonalPill(
-            onClick = onClick,
-            baseColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.14f) else IvidsColorTokens.RecessedTrough,
-            hoverColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.26f) else IvidsColorTokens.GlassHover,
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 9.dp)
+    val isCompactMobile = LocalLayoutMetrics.current.isCompactMobile
+
+    if (isCompactMobile) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = actionLabel,
-                style = MaterialTheme.typography.labelLarge,
-                color = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk
-            )
+            Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                Text(title, style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+            }
+            IvidsTonalPill(
+                onClick = onClick,
+                baseColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.14f) else IvidsColorTokens.RecessedTrough,
+                hoverColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover,
+                baseBorderColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.30f) else IvidsColorTokens.HairlineSubtle,
+                hoverBorderColor = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.HoverBorder,
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 9.dp)
+            ) {
+                Text(
+                    text = actionLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk,
+                    maxLines = 1,
+                    softWrap = false
+                )
+            }
+        }
+    } else {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f).padding(end = 16.dp)) {
+                Text(title, style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = IvidsColorTokens.SlateMuted)
+            }
+            IvidsTonalPill(
+                onClick = onClick,
+                baseColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.14f) else IvidsColorTokens.RecessedTrough,
+                hoverColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.28f) else IvidsColorTokens.GlassHover,
+                baseBorderColor = if (isDestructive) IvidsColorTokens.DangerCoral.copy(alpha = 0.30f) else IvidsColorTokens.HairlineSubtle,
+                hoverBorderColor = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.HoverBorder,
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 9.dp)
+            ) {
+                Text(
+                    text = actionLabel,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.ChalkInk
+                )
+            }
         }
     }
 }
