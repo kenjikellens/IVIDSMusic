@@ -12,6 +12,7 @@ import com.kenjigames.ividsmusic.data.download.AndroidNoOpTranscoder
 import com.kenjigames.ividsmusic.data.download.AudioTranscoder
 import com.kenjigames.ividsmusic.data.download.NativeDownloadManager
 import com.kenjigames.ividsmusic.data.local.AppStorageDirectories
+import com.kenjigames.ividsmusic.data.local.FilePlaybackSessionRepository
 import com.kenjigames.ividsmusic.data.stream.AndroidStreamFallback
 import com.kenjigames.ividsmusic.data.stream.JvmLocalAudioLocator
 import com.kenjigames.ividsmusic.data.stream.LocalAudioLocator
@@ -20,6 +21,7 @@ import com.kenjigames.ividsmusic.data.stream.PlatformStreamFallback
 import com.kenjigames.ividsmusic.data.stream.StreamTierResolver
 import com.kenjigames.ividsmusic.data.stream.YouTubeMetadataPreviewer
 import com.kenjigames.ividsmusic.domain.port.OfflineDownloadManager
+import com.kenjigames.ividsmusic.domain.port.PlaybackSessionRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import okhttp3.OkHttpClient
@@ -85,6 +87,11 @@ actual fun platformDataModule(directories: AppStorageDirectories): Module = modu
 
     single<PlatformStreamFallback> { AndroidStreamFallback() }
     single<AudioTranscoder> { AndroidNoOpTranscoder() }
+
+    single<PlaybackSessionRepository> {
+        val filesDir = File(directories.filesDir).apply { mkdirs() }
+        FilePlaybackSessionRepository(sessionFile = File(filesDir, "session_state.json"), json = get())
+    }
 
     single<OfflineDownloadManager> {
         NativeDownloadManager(

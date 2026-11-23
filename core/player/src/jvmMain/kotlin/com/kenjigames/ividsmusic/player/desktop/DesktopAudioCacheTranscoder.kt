@@ -42,11 +42,14 @@ internal object DesktopAudioCacheTranscoder {
     private val keyLocks = ConcurrentHashMap<String, Mutex>()
 
     /**
-     * Locates `ffmpeg.exe` across packaged app resources, working/parent resource folders, WinGet Links, and `PATH`.
+     * Locates `ffmpeg.exe` across managed user tools, packaged app resources, working/parent dirs, WinGet, and `PATH`.
      * Returns the absolute executable path or `null` when `ffmpeg` is not installed.
      */
     internal fun findFfmpegExecutable(): String? {
         val candidates = mutableListOf<File>()
+        System.getenv("LOCALAPPDATA")?.takeIf { it.isNotBlank() }?.let { localAppData ->
+            candidates.add(File(localAppData, "IVIDSMusic/tools/ffmpeg.exe"))
+        }
         System.getProperty("compose.application.resources.dir")?.takeIf { it.isNotBlank() }?.let { dir ->
             candidates.add(File(dir, "ffmpeg.exe"))
             candidates.add(File(dir, "ffmpeg"))

@@ -14,6 +14,7 @@ import com.kenjigames.ividsmusic.domain.model.HistoryEntry
 import com.kenjigames.ividsmusic.domain.model.InterestScore
 import com.kenjigames.ividsmusic.domain.model.LayoutMode
 import com.kenjigames.ividsmusic.domain.model.Playlist
+import com.kenjigames.ividsmusic.domain.model.PlaybackSessionSnapshot
 import com.kenjigames.ividsmusic.domain.model.SearchOverview
 import com.kenjigames.ividsmusic.domain.model.StreamSource
 import com.kenjigames.ividsmusic.domain.model.Track
@@ -250,8 +251,33 @@ interface PreferencesRepository {
     /** Updates the local profile [displayName] and [bio]. */
     suspend fun updateProfile(displayName: String, bio: String): AppResult<Unit>
 
+    /** Persists normalized playback volume (`0.0f..1.0f`) and mute toggle across app launches. */
+    suspend fun setVolumeState(volume: Float, isMuted: Boolean): AppResult<Unit>
+
     /** Increments cumulative listening duration by [seconds] when positive. */
     suspend fun addListeningSeconds(seconds: Long): AppResult<Unit>
+}
+
+/**
+ * Local persistence port storing the user's last active queue, index, and playback cursor across restarts.
+ */
+interface PlaybackSessionRepository {
+    /** Loads the last persisted [PlaybackSessionSnapshot], returning `null` if absent or unreadable. */
+    suspend fun load(): PlaybackSessionSnapshot?
+
+    /** Persists [snapshot] atomically to local storage without blocking UI state updates. */
+    suspend fun save(snapshot: PlaybackSessionSnapshot): AppResult<Unit>
+
+    /** Removes any persisted session snapshot from local storage. */
+    suspend fun clear(): AppResult<Unit>
+}
+
+/**
+ * Coordinates silent background prefetching for the upcoming queue track (URL resolution + optional MP3 cache).
+ */
+interface StreamPrefetcher {
+    /** Warms stream caches for [track] targeting [preferredQuality] ahead of track transition. */
+    suspend fun prefetch(track: Track, preferredQuality: AudioQuality)
 }
 
 /**

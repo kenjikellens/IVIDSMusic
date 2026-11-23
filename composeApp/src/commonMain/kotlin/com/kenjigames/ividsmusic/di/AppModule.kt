@@ -49,7 +49,9 @@ fun uiModule(): Module = module {
             recommendationEngine = get(),
             preferencesRepository = get(),
             offlineDownloadManager = get(),
-            toastController = get()
+            toastController = get(),
+            sessionRepository = get(),
+            streamPrefetcher = get()
         )
     } onClose { it?.dispose() }
 

@@ -88,6 +88,19 @@ data class PlaybackState(
 )
 
 /**
+ * Immutable persisted snapshot of the user's last playback queue, active track pointer, and position.
+ * Restored in a paused state across app restarts by `PlayerViewModel`.
+ */
+data class PlaybackSessionSnapshot(
+    val queue: List<Track> = emptyList(),
+    val currentIndex: Int = -1,
+    val positionMs: Long = 0L,
+    val isShuffleEnabled: Boolean = false,
+    val repeatMode: RepeatMode = RepeatMode.OFF,
+    val updatedAtMs: Long = 0L
+)
+
+/**
  * Exhaustive state machine for an individual offline track download task.
  * Emits real-time throughput and progress snapshots for Downloader and Track UI cards.
  */

@@ -6,12 +6,15 @@ import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.AudioEngineCommand
 import com.kenjigames.ividsmusic.domain.model.AudioQuality
 import com.kenjigames.ividsmusic.domain.model.PlaybackStatus
+import com.kenjigames.ividsmusic.domain.model.PlaybackSessionSnapshot
 import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.domain.port.AudioEngine
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.domain.port.OfflineDownloadManager
+import com.kenjigames.ividsmusic.domain.port.PlaybackSessionRepository
 import com.kenjigames.ividsmusic.domain.port.PreferencesRepository
+import com.kenjigames.ividsmusic.domain.port.StreamPrefetcher
 import com.kenjigames.ividsmusic.domain.usecase.PlaybackQueueController
 import com.kenjigames.ividsmusic.domain.usecase.RecommendationEngine
 import com.kenjigames.ividsmusic.domain.usecase.ResolveTrackStreamUseCase
@@ -24,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -69,7 +73,9 @@ class PlayerViewModel(
     private val recommendationEngine: RecommendationEngine,
     private val preferencesRepository: PreferencesRepository,
     private val offlineDownloadManager: OfflineDownloadManager,
-    private val toastController: ToastController
+    private val toastController: ToastController,
+    private val sessionRepository: PlaybackSessionRepository? = null,
+    private val streamPrefetcher: StreamPrefetcher? = null
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val _uiState = MutableStateFlow(PlayerUiState())
@@ -79,14 +85,22 @@ class PlayerViewModel(
 
     private var activePlaybackJob: Job? = null
     private var accentJob: Job? = null
+    private var prefetchJob: Job? = null
+    private var volumePersistJob: Job? = null
     private var playbackSessionSeq: Long = 0L
     private var handledEndedSessionSeq: Long = -1L
     private var preMuteVolume: Float = 1.0f
+    private var initialVolumeRestored: Boolean = false
+    private var pendingRestorePositionMs: Long = 0L
+    private var pendingSeekOnReadyMs: Long = 0L
+    private var prefetchedForTrackId: String? = null
+    private var lastSessionSaveMs: Long = 0L
 
     init {
         observeEngineAndQueue()
         observeExternalCommands()
         observeLibraryAndPreferences()
+        restoreLastSession()
     }
 
     /**

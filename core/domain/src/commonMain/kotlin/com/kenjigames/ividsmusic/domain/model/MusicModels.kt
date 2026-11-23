@@ -229,7 +229,9 @@ data class UserPreferences(
     val dynamicTintEnabled: Boolean = true,
     val autoUpdateEnabled: Boolean = true,
     val updateMode: UpdateMode = UpdateMode.AUTO,
-    val layoutMode: LayoutMode = LayoutMode.AUTO
+    val layoutMode: LayoutMode = LayoutMode.AUTO,
+    val volume: Float = 1.0f,
+    val isMuted: Boolean = false
 )
 
 /**

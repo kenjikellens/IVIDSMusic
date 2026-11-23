@@ -48,6 +48,8 @@ class DataStorePreferencesRepository(
         val rawLayoutMode = prefs[KEY_LAYOUT_MODE]?.let { name ->
             LayoutMode.entries.firstOrNull { it.name == name }
         } ?: LayoutMode.AUTO
+        val rawVolume = (prefs[KEY_VOLUME] ?: 1.0f).coerceIn(0f, 1f)
+        val rawMuted = prefs[KEY_IS_MUTED] ?: false
 
         UserPreferences(
             downloadQuality = AudioQuality.fromKbps(rawQuality),
@@ -56,7 +58,9 @@ class DataStorePreferencesRepository(
             dynamicTintEnabled = prefs[KEY_DYNAMIC_TINT_ENABLED] ?: true,
             autoUpdateEnabled = rawAutoUpdate,
             updateMode = rawUpdateMode,
-            layoutMode = rawLayoutMode
+            layoutMode = rawLayoutMode,
+            volume = rawVolume,
+            isMuted = rawMuted
         )
     }
 
@@ -126,6 +130,21 @@ class DataStorePreferencesRepository(
         }
     }
 
+    /** Persists normalized playback volume (`0.0f..1.0f`) and mute flag into DataStore. */
+    override suspend fun setVolumeState(volume: Float, isMuted: Boolean): AppResult<Unit> = editPrefs { prefs ->
+        prefs[KEY_VOLUME] = volume.coerceIn(0f, 1f)
+        prefs[KEY_IS_MUTED] = isMuted
+    }
+
+    /** Reads epoch millis of the last `yt-dlp.exe` release check, or `0L` if never checked. */
+    suspend fun getLastYtDlpCheckMs(): Long =
+        (safeData.first()[KEY_YTDLP_LAST_CHECK_MS] ?: 0L).coerceAtLeast(0L)
+
+    /** Persists epoch millis of the most recent `yt-dlp.exe` release check. */
+    suspend fun setLastYtDlpCheckMs(timestampMs: Long): AppResult<Unit> = editPrefs { prefs ->
+        prefs[KEY_YTDLP_LAST_CHECK_MS] = timestampMs.coerceAtLeast(0L)
+    }
+
     /** Increments cumulative listening duration by [seconds] when strictly positive. */
     override suspend fun addListeningSeconds(seconds: Long): AppResult<Unit> {
         if (seconds <= 0L) return AppResult.Success(Unit)
@@ -180,5 +199,8 @@ class DataStorePreferencesRepository(
         private val KEY_PROFILE_BIO = stringPreferencesKey("profile_bio")
         private val KEY_LISTENING_SECONDS = longPreferencesKey("total_listening_seconds")
         private val KEY_CUSTOM_SAVE_DIR = stringPreferencesKey("custom_save_directory")
+        private val KEY_VOLUME = floatPreferencesKey("playback_volume")
+        private val KEY_IS_MUTED = booleanPreferencesKey("playback_muted")
+        private val KEY_YTDLP_LAST_CHECK_MS = longPreferencesKey("ytdlp_last_check_ms")
     }
 }

@@ -12,6 +12,8 @@ import com.kenjigames.ividsmusic.data.download.AudioTranscoder
 import com.kenjigames.ividsmusic.data.download.DesktopFfmpegTranscoder
 import com.kenjigames.ividsmusic.data.download.NativeDownloadManager
 import com.kenjigames.ividsmusic.data.local.AppStorageDirectories
+import com.kenjigames.ividsmusic.data.local.FilePlaybackSessionRepository
+import com.kenjigames.ividsmusic.data.stream.DesktopNativeToolsManager
 import com.kenjigames.ividsmusic.data.stream.JvmLocalAudioLocator
 import com.kenjigames.ividsmusic.data.stream.LocalAudioLocator
 import com.kenjigames.ividsmusic.data.stream.NewPipeStreamResolver
@@ -20,6 +22,7 @@ import com.kenjigames.ividsmusic.data.stream.StreamTierResolver
 import com.kenjigames.ividsmusic.data.stream.YouTubeMetadataPreviewer
 import com.kenjigames.ividsmusic.data.stream.YtDlpDesktopResolver
 import com.kenjigames.ividsmusic.domain.port.OfflineDownloadManager
+import com.kenjigames.ividsmusic.domain.port.PlaybackSessionRepository
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import okhttp3.OkHttpClient
@@ -91,6 +94,20 @@ actual fun platformDataModule(directories: AppStorageDirectories): Module = modu
         if (ytDlp.findYtDlpExecutable() != null) ytDlp else newPipe
     }
     single<AudioTranscoder> { DesktopFfmpegTranscoder(bundledToolsDir = directories.bundledToolsDir) }
+
+    single<PlaybackSessionRepository> {
+        val filesDir = File(directories.filesDir).apply { mkdirs() }
+        FilePlaybackSessionRepository(sessionFile = File(filesDir, "session_state.json"), json = get())
+    }
+
+    single {
+        DesktopNativeToolsManager(
+            directories = get(),
+            preferencesRepository = get(),
+            okHttpClient = get(),
+            json = get()
+        )
+    }
 
     single<OfflineDownloadManager> {
         NativeDownloadManager(

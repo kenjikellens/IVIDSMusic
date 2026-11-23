@@ -209,9 +209,12 @@ class YtDlpDesktopResolver(
         }
     }
 
-    /** Resolves `yt-dlp.exe` from the configured tools folder, working/parent resource directories, or system PATH. */
+    /** Resolves `yt-dlp.exe` prioritizing managed user tools, then bundled resources, working dirs, and PATH. */
     internal fun findYtDlpExecutable(): String? {
         val candidates = buildList {
+            System.getenv("LOCALAPPDATA")?.takeIf { it.isNotBlank() }?.let { localAppData ->
+                add(File(localAppData, "IVIDSMusic/tools/yt-dlp.exe"))
+            }
             if (!bundledToolsDir.isNullOrBlank()) {
                 add(File(bundledToolsDir, "yt-dlp.exe"))
                 add(File(bundledToolsDir, "yt-dlp"))

@@ -1,5 +1,6 @@
 package com.kenjigames.ividsmusic.domain.usecase
 
+import com.kenjigames.ividsmusic.domain.model.PlaybackSessionSnapshot
 import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.domain.model.Track
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -271,5 +272,38 @@ class PlaybackQueueController(
     fun clear() {
         originalQueue = emptyList()
         _state.value = _state.value.copy(queue = emptyList(), currentIndex = -1)
+    }
+
+    /**
+     * Returns the next upcoming [Track] according to [RepeatMode] without mutating [state].
+     * Used for background next-track stream prefetching once playback stabilizes.
+     */
+    fun peekNext(): Track? {
+        val current = _state.value
+        if (current.queue.isEmpty()) return null
+        if (current.repeatMode == RepeatMode.ONE) return current.currentTrack
+        val nextIndex = current.currentIndex + 1
+        if (nextIndex in current.queue.indices) return current.queue[nextIndex]
+        return if (current.repeatMode == RepeatMode.ALL) current.queue.first() else null
+    }
+
+    /**
+     * Hydrates queue order, active index, shuffle flag, and repeat mode from a persisted [snapshot].
+     * Coerces invalid indices safely and replaces [state] atomically without starting audio playback.
+     */
+    fun restoreState(snapshot: PlaybackSessionSnapshot) {
+        if (snapshot.queue.isEmpty()) {
+            clear()
+            return
+        }
+        val restoredQueue = snapshot.queue.toList()
+        originalQueue = restoredQueue
+        val safeIndex = snapshot.currentIndex.coerceIn(0, restoredQueue.lastIndex)
+        _state.value = QueueState(
+            queue = restoredQueue,
+            currentIndex = safeIndex,
+            isShuffleEnabled = snapshot.isShuffleEnabled,
+            repeatMode = snapshot.repeatMode
+        )
     }
 }
