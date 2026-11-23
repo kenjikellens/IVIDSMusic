@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="player-jvm">
+    <output-path>$PROJECT_DIR$/core/player/build/libs</output-path>
+    <root id="archive" name="player-jvm.jar">
+      <element id="module-output" name="IVIDS_Music.core.player.jvmMain" />
+    </root>
+  </artifact>
+</component>
