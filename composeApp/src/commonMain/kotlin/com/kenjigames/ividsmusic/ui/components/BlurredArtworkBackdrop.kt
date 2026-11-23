@@ -13,6 +13,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.scale
@@ -71,8 +72,9 @@ fun BlurredArtworkBackdrop(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxSize()
-                            .scale(1.22f)
-                            .blur(blurRadius)
+                            .clipToBounds()
+                            .scale(1.16f)
+                            .blur(blurRadius, edgeTreatment = BlurredEdgeTreatment.Rectangle)
                     )
                 }
 
