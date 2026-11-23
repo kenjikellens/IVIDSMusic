@@ -341,8 +341,8 @@ fun <T> IvidsSegmentedBar(
 }
 
 /**
- * Tactile tonal pill button with smooth spring lift, high-contrast neutral hover elevation,
- * illuminated border rim, and desktop hand cursor feedback.
+ * Tactile tonal pill button with smooth high-contrast neutral hover elevation,
+ * illuminated border rim, and desktop hand cursor feedback without scaling distortion.
  */
 @Composable
 fun IvidsTonalPill(
@@ -369,11 +369,6 @@ fun IvidsTonalPill(
         animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "TonalPillBorder"
     )
-    val scale by animateFloatAsState(
-        targetValue = if (enabled && isHovered) 1.025f else 1f,
-        animationSpec = spring(dampingRatio = 0.78f, stiffness = 420f),
-        label = "TonalPillScale"
-    )
 
     Surface(
         onClick = onClick,
@@ -382,10 +377,6 @@ fun IvidsTonalPill(
         color = bg,
         border = BorderStroke(1.dp, border),
         modifier = modifier
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
             .then(if (enabled) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
             .hoverable(interactionSource, enabled = enabled)
             .tvFocusable(shape = CircleShape)

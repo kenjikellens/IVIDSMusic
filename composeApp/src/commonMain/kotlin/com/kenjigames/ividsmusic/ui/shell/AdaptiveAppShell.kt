@@ -711,20 +711,11 @@ private fun SidebarNavButton(
         animationSpec = tween(220, easing = FastOutSlowInEasing),
         label = "NavButtonText"
     )
-    val itemScale by animateFloatAsState(
-        targetValue = if (isHovered && !selected) 1.018f else 1f,
-        animationSpec = spring(dampingRatio = 0.80f, stiffness = 420f),
-        label = "NavButtonScale"
-    )
 
     Surface(
         modifier = Modifier
             .fillMaxWidth()
             .height(44.dp)
-            .graphicsLayer {
-                scaleX = itemScale
-                scaleY = itemScale
-            }
             .pointerHoverIcon(PointerIcon.Hand)
             .tvFocusable(shape = RoundedCornerShape(10.dp))
             .hoverable(interactionSource)

@@ -73,8 +73,8 @@ import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
  * Renders a tonal artwork card for tracks, albums, or circular artist portraits that softly
- * blends its own cover artwork's dominant color and responds smoothly to hover with spring scale,
- * lifted shadow, illuminated border, hand cursor, and an animated Play FAB.
+ * blends its own cover artwork's dominant color and responds smoothly to hover with surface
+ * brightening, lifted shadow, illuminated border, hand cursor, and an animated Play FAB.
  */
 @Composable
 fun MusicCard(
@@ -126,11 +126,6 @@ fun MusicCard(
         animationSpec = tween(240, easing = FastOutSlowInEasing),
         label = "MusicCardBorder"
     )
-    val cardScale by animateFloatAsState(
-        targetValue = if (isHovered) 1.028f else 1f,
-        animationSpec = spring(dampingRatio = 0.78f, stiffness = 420f),
-        label = "MusicCardScale"
-    )
     val cardElevation by animateDpAsState(
         targetValue = if (isHovered) 18.dp else 2.dp,
         animationSpec = tween(240, easing = FastOutSlowInEasing),
@@ -150,10 +145,6 @@ fun MusicCard(
     Surface(
         modifier = modifier
             .width(width)
-            .graphicsLayer {
-                scaleX = cardScale
-                scaleY = cardScale
-            }
             .shadow(
                 elevation = cardElevation,
                 shape = RoundedCornerShape(16.dp),

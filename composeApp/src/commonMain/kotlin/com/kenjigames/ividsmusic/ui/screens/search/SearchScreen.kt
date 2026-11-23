@@ -254,11 +254,6 @@ fun SearchScreen(
                         browseCategories.forEach { cat ->
                             val tileHoverSource = remember { MutableInteractionSource() }
                             val tileHovered by tileHoverSource.collectIsHoveredAsState()
-                            val tileScale by animateFloatAsState(
-                                targetValue = if (tileHovered) 1.03f else 1f,
-                                animationSpec = spring(dampingRatio = 0.78f, stiffness = 420f),
-                                label = "CategoryTileScale"
-                            )
                             val tileBorder by animateColorAsState(
                                 targetValue = if (tileHovered) cat.tint.copy(alpha = 0.75f) else Color(0x14FFFFFF),
                                 animationSpec = tween(220, easing = FastOutSlowInEasing),
@@ -268,10 +263,6 @@ fun SearchScreen(
                                 modifier = Modifier
                                     .width(184.dp)
                                     .height(98.dp)
-                                    .graphicsLayer {
-                                        scaleX = tileScale
-                                        scaleY = tileScale
-                                    }
                                     .pointerHoverIcon(PointerIcon.Hand)
                                     .hoverable(tileHoverSource)
                                     .tvFocusable(shape = RoundedCornerShape(18.dp))
