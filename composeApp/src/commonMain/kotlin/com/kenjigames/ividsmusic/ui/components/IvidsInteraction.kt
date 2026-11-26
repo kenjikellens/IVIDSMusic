@@ -2,7 +2,9 @@ package com.kenjigames.ividsmusic.ui.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
+import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
@@ -18,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
@@ -34,8 +37,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.util.lerp
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import kotlin.math.hypot
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -59,13 +64,13 @@ fun resolveHoverColor(style: IvidsHoverStyle): Color = when (style) {
 }
 
 /**
- * Resolves the pointer-originated press ripple color matching a semantic [IvidsHoverStyle].
+ * Resolves the subtle, pointer-originated press ripple color matching a semantic [IvidsHoverStyle].
  */
 fun resolveRippleColor(style: IvidsHoverStyle): Color = when (style) {
-    IvidsHoverStyle.NEUTRAL -> Color(0x40FFFFFF)
-    IvidsHoverStyle.ON_LIGHT -> Color(0x40000000)
-    IvidsHoverStyle.PRIMARY_ACCENT -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.30f)
-    IvidsHoverStyle.DESTRUCTIVE -> IvidsColorTokens.DangerCoral.copy(alpha = 0.20f)
+    IvidsHoverStyle.NEUTRAL -> Color(0x1EFFFFFF)
+    IvidsHoverStyle.ON_LIGHT -> Color(0x1F000000)
+    IvidsHoverStyle.PRIMARY_ACCENT -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.20f)
+    IvidsHoverStyle.DESTRUCTIVE -> IvidsColorTokens.DangerCoral.copy(alpha = 0.16f)
 }
 
 /**
@@ -92,21 +97,25 @@ class IvidsPressRippleIndication(private val color: Color) : IndicationNodeFacto
         other is IvidsPressRippleIndication && other.color == color
 }
 
-/** Holds per-press expanding wave radius and fade-out alpha animations for [PressRippleNode]. */
-private data class ActiveRippleWave(
+private val RippleExpandEasing = CubicBezierEasing(0.16f, 0f, 0f, 1f)
+
+/** Holds per-press expanding wave radius, center drift, and fade animations for [PressRippleNode]. */
+private class ActiveRippleWave(
     val press: PressInteraction.Press,
-    val radius: Animatable<Float, AnimationVector1D>,
-    val alpha: Animatable<Float, AnimationVector1D>
+    val radiusProgress: Animatable<Float, AnimationVector1D>,
+    val centerProgress: Animatable<Float, AnimationVector1D>,
+    val alpha: Animatable<Float, AnimationVector1D>,
+    var released: Boolean = false
 )
 
-/** Modifier node tracking active [PressInteraction] waves and drawing clipped radial ripples. */
+/** Modifier node tracking active [PressInteraction] waves and drawing soft feathered radial ripples. */
 private class PressRippleNode(
     private val interactionSource: InteractionSource,
     private val color: Color
 ) : Modifier.Node(), DrawModifierNode {
     private val activeWaves = mutableStateListOf<ActiveRippleWave>()
 
-    /** Subscribes to press events and launches expanding radial ripple animations on tap/click. */
+    /** Subscribes to press events and launches smooth fluid radial ripple waves on tap/click. */
     override fun onAttach() {
         coroutineScope.launch {
             interactionSource.interactions.collect { interaction ->
@@ -114,14 +123,27 @@ private class PressRippleNode(
                     is PressInteraction.Press -> {
                         val wave = ActiveRippleWave(
                             press = interaction,
-                            radius = Animatable(0f),
-                            alpha = Animatable(1f)
+                            radiusProgress = Animatable(0f),
+                            centerProgress = Animatable(0f),
+                            alpha = Animatable(0f)
                         )
                         activeWaves.add(wave)
                         launch {
-                            wave.radius.animateTo(
+                            wave.alpha.animateTo(
                                 targetValue = 1f,
-                                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing)
+                                animationSpec = tween(durationMillis = 75, easing = LinearEasing)
+                            )
+                        }
+                        launch {
+                            wave.radiusProgress.animateTo(
+                                targetValue = 1f,
+                                animationSpec = tween(durationMillis = 420, easing = RippleExpandEasing)
+                            )
+                        }
+                        launch {
+                            wave.centerProgress.animateTo(
+                                targetValue = 1f,
+                                animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing)
                             )
                         }
                     }
@@ -132,15 +154,14 @@ private class PressRippleNode(
                             else -> null
                         }
                         val wave = activeWaves.lastOrNull { it.press == press }
-                        if (wave != null) {
+                        if (wave != null && !wave.released) {
+                            wave.released = true
                             launch {
-                                if (wave.radius.value < 0.85f) {
-                                    wave.radius.animateTo(
-                                        targetValue = 1f,
-                                        animationSpec = tween(durationMillis = 150, easing = FastOutSlowInEasing)
-                                    )
-                                }
-                                wave.alpha.animateTo(0f, tween(durationMillis = 160))
+                                delay(120L)
+                                wave.alpha.animateTo(
+                                    targetValue = 0f,
+                                    animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
+                                )
                                 activeWaves.remove(wave)
                             }
                         }
@@ -155,24 +176,44 @@ private class PressRippleNode(
         activeWaves.clear()
     }
 
-    /** Draws child content followed by clipped radial press waves expanding from click origin. */
+    /** Draws child content followed by clipped soft radial gradient waves flowing from click origin. */
     override fun ContentDrawScope.draw() {
         drawContent()
         if (activeWaves.isEmpty()) return
+        val centerX = size.width / 2f
+        val centerY = size.height / 2f
+        val startRadius = (maxOf(size.width, size.height) * 0.14f).coerceIn(8.dp.toPx(), 24.dp.toPx())
         clipRect {
             activeWaves.forEach { wave ->
-                val maxR = maxOf(
-                    hypot(wave.press.pressPosition.x, wave.press.pressPosition.y),
-                    hypot(size.width - wave.press.pressPosition.x, wave.press.pressPosition.y),
-                    hypot(wave.press.pressPosition.x, size.height - wave.press.pressPosition.y),
-                    hypot(size.width - wave.press.pressPosition.x, size.height - wave.press.pressPosition.y)
+                val pressPos = wave.press.pressPosition
+                val maxCornerDist = maxOf(
+                    hypot(pressPos.x, pressPos.y),
+                    hypot(size.width - pressPos.x, pressPos.y),
+                    hypot(pressPos.x, size.height - pressPos.y),
+                    hypot(size.width - pressPos.x, size.height - pressPos.y)
                 ).coerceAtLeast(1f)
+                val endRadius = maxCornerDist * 1.08f
+                val currentRadius = lerp(startRadius, endRadius, wave.radiusProgress.value).coerceAtLeast(1f)
+                val driftFraction = wave.centerProgress.value * 0.45f
+                val drawCenter = Offset(
+                    x = lerp(pressPos.x, centerX, driftFraction),
+                    y = lerp(pressPos.y, centerY, driftFraction)
+                )
                 val alpha = wave.alpha.value.coerceIn(0f, 1f)
                 if (alpha > 0.005f) {
+                    val tint = color.copy(alpha = color.alpha * alpha)
+                    val brush = Brush.radialGradient(
+                        0.0f to tint,
+                        0.68f to tint.copy(alpha = tint.alpha * 0.92f),
+                        0.88f to tint.copy(alpha = tint.alpha * 0.45f),
+                        1.0f to Color.Transparent,
+                        center = drawCenter,
+                        radius = currentRadius
+                    )
                     drawCircle(
-                        color = color.copy(alpha = color.alpha * alpha),
-                        radius = maxR * wave.radius.value,
-                        center = wave.press.pressPosition
+                        brush = brush,
+                        radius = currentRadius,
+                        center = drawCenter
                     )
                 }
             }

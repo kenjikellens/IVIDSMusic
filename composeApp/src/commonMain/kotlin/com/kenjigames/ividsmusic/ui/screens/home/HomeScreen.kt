@@ -22,6 +22,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -45,6 +46,133 @@ import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
+
+/**
+ * Typed quick-pick entry shown in the top Spotify-style Home grid.
+ */
+@Immutable
+sealed interface HomeQuickPick {
+    /** Quick-pick tile linking to the user's Liked Songs collection. */
+    data class LikedSongs(val tracks: List<Track>) : HomeQuickPick
+
+    /** Quick-pick tile linking to a user-created playlist. */
+    data class PlaylistPick(val playlist: Playlist) : HomeQuickPick
+
+    /** Quick-pick tile for a recent or recommended track with its playback queue context. */
+    data class TrackPick(val track: Track, val queueContext: List<Track>) : HomeQuickPick
+}
+
+/**
+ * Deduplicated Home screen feed projection separating quick picks, hero highlight, and remaining history.
+ */
+@Immutable
+data class HomeFeedProjection(
+    val quickPicks: List<HomeQuickPick>,
+    val heroTrack: Track?,
+    val remainingRecent: List<Track>
+)
+
+/**
+ * Returns a case-folded `(title, artist)` key for deduplicating tracks across history and live charts.
+ */
+private fun Track.normalizedTrackKey(): Pair<String, String> =
+    title.trim().lowercase() to artist.trim().lowercase()
+
+/**
+ * Projects [HomeUiState], [playlists], and [likedTracks] into a deduplicated Spotify-style Home feed.
+ * Heals stale history cover URLs from live charts and keeps Quick Picks, Hero, and Recently Listened distinct.
+ */
+fun buildHomeFeedProjection(
+    state: HomeUiState,
+    playlists: List<Playlist>,
+    likedTracks: List<Track>,
+    maxQuickPicks: Int = 6
+): HomeFeedProjection {
+    val chartTracks = state.genreSections.flatMap { it.tracks }
+    val chartCoverById = HashMap<String, String>()
+    val chartCoverByKey = HashMap<Pair<String, String>, String>()
+    chartTracks.forEach { track ->
+        if (track.coverUrl.isNotBlank()) {
+            chartCoverById.putIfAbsent(track.id, track.coverUrl)
+            chartCoverByKey.putIfAbsent(track.normalizedTrackKey(), track.coverUrl)
+        }
+    }
+
+    val libraryCoverById = HashMap<String, String>()
+    val libraryCoverByKey = HashMap<Pair<String, String>, String>()
+    (likedTracks + playlists.flatMap { it.tracks }).forEach { track ->
+        if (track.coverUrl.isNotBlank()) {
+            libraryCoverById.putIfAbsent(track.id, track.coverUrl)
+            libraryCoverByKey.putIfAbsent(track.normalizedTrackKey(), track.coverUrl)
+        }
+    }
+
+    val healedRecent = state.continueListening.map { track ->
+        val freshCover = chartCoverById[track.id]
+            ?: chartCoverByKey[track.normalizedTrackKey()]
+            ?: track.coverUrl.ifBlank { null }
+            ?: libraryCoverById[track.id]
+            ?: libraryCoverByKey[track.normalizedTrackKey()]
+            ?: ""
+        if (freshCover != track.coverUrl) track.copy(coverUrl = freshCover) else track
+    }
+
+    val quickPicks = mutableListOf<HomeQuickPick>()
+    val usedTrackIds = HashSet<String>()
+    val usedTrackKeys = HashSet<Pair<String, String>>()
+
+    if (likedTracks.isNotEmpty() && quickPicks.size < maxQuickPicks) {
+        quickPicks += HomeQuickPick.LikedSongs(likedTracks)
+    }
+    playlists.take((maxQuickPicks - quickPicks.size).coerceAtMost(3).coerceAtLeast(0)).forEach { pl ->
+        quickPicks += HomeQuickPick.PlaylistPick(pl)
+    }
+
+    healedRecent.forEach { track ->
+        if (quickPicks.size >= maxQuickPicks) return@forEach
+        val key = track.normalizedTrackKey()
+        if (track.id !in usedTrackIds && key !in usedTrackKeys) {
+            usedTrackIds += track.id
+            usedTrackKeys += key
+            quickPicks += HomeQuickPick.TrackPick(track, healedRecent)
+        }
+    }
+
+    if (quickPicks.size < maxQuickPicks && state.genreSections.isNotEmpty()) {
+        val maxDepth = state.genreSections.maxOf { it.tracks.size }
+        for (depth in 0 until maxDepth) {
+            if (quickPicks.size >= maxQuickPicks) break
+            for (section in state.genreSections) {
+                if (quickPicks.size >= maxQuickPicks) break
+                val candidate = section.tracks.getOrNull(depth) ?: continue
+                val key = candidate.normalizedTrackKey()
+                if (candidate.id !in usedTrackIds && key !in usedTrackKeys) {
+                    usedTrackIds += candidate.id
+                    usedTrackKeys += key
+                    quickPicks += HomeQuickPick.TrackPick(candidate, section.tracks)
+                }
+            }
+        }
+    }
+
+    val heroCandidate = chartTracks.firstOrNull { track ->
+        track.coverUrl.isNotBlank() &&
+            track.id !in usedTrackIds &&
+            track.normalizedTrackKey() !in usedTrackKeys
+    } ?: chartTracks.firstOrNull { track ->
+        track.id !in usedTrackIds && track.normalizedTrackKey() !in usedTrackKeys
+    } ?: state.heroTrack
+
+    val remainingRecent = healedRecent.filter { track ->
+        track.id !in usedTrackIds && track.normalizedTrackKey() !in usedTrackKeys
+    }
+
+    return HomeFeedProjection(
+        quickPicks = quickPicks,
+        heroTrack = heroCandidate,
+        remainingRecent = remainingRecent
+    )
+}
 
 /**
  * Resolves the localized greeting string key from local 24-hour clock [hour24].
@@ -81,6 +209,9 @@ fun HomeScreen(
     val metrics = LocalLayoutMetrics.current
     val sidePad = metrics.screenHorizontalPadding
     val greetingKey = remember { resolveGreetingKey(currentLocalHour24()) }
+    val projection = remember(state, playlists, likedTracks) {
+        buildHomeFeedProjection(state = state, playlists = playlists, likedTracks = likedTracks)
+    }
     val playlistModal = if (libraryRepository != null && toastController != null) {
         rememberTrackPlaylistModalState(playlists, libraryRepository, toastController)
     } else {
@@ -125,67 +256,47 @@ fun HomeScreen(
                         color = IvidsColorTokens.ChalkInk
                     )
 
-                    val quickPickData = buildList {
-                        if (likedTracks.isNotEmpty()) {
-                            add(Triple("liked", strings["liked_songs"], likedTracks.firstOrNull()?.coverUrl))
-                        }
-                        playlists.take(3).forEach { pl ->
-                            add(Triple("pl_${pl.id}", pl.title, pl.tracks.firstOrNull()?.coverUrl))
-                        }
-                        val remainingSlots = (6 - size).coerceAtLeast(0)
-                        state.continueListening.take(remainingSlots).forEach { tr ->
-                            add(Triple("tr_${tr.id}", tr.title, tr.coverUrl))
-                        }
-                    }.take(6)
-
-                    if (quickPickData.isNotEmpty()) {
+                    if (projection.quickPicks.isNotEmpty()) {
                         val columns = if (metrics.isCompactMobile) 2 else 3
                         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            quickPickData.chunked(columns).forEach { rowItems ->
+                            projection.quickPicks.chunked(columns).forEach { rowItems ->
                                 Row(
                                     modifier = Modifier.fillMaxWidth(),
                                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    rowItems.forEach { (key, title, art) ->
-                                        when {
-                                            key == "liked" -> SpotifyQuickPickTile(
-                                                title = title,
+                                    rowItems.forEach { pick ->
+                                        when (pick) {
+                                            is HomeQuickPick.LikedSongs -> SpotifyQuickPickTile(
+                                                title = strings["liked_songs"],
                                                 artworkUrl = null,
                                                 leadingIcon = Icons.Rounded.Favorite,
                                                 leadingIconTint = IvidsColorTokens.DangerCoral,
                                                 onClick = onOpenLikedSongs,
-                                                onPlayClick = { onPlayTrack(likedTracks.first(), likedTracks) },
+                                                onPlayClick = { onPlayTrack(pick.tracks.first(), pick.tracks) },
                                                 modifier = Modifier.weight(1f)
                                             )
-                                            key.startsWith("pl_") -> {
-                                                val plId = key.removePrefix("pl_").toLongOrNull()
-                                                val pl = playlists.firstOrNull { it.id == plId }
+                                            is HomeQuickPick.PlaylistPick -> {
+                                                val pl = pick.playlist
                                                 SpotifyQuickPickTile(
-                                                    title = title,
-                                                    artworkUrl = art,
+                                                    title = pl.title,
+                                                    artworkUrl = pl.tracks.firstOrNull()?.coverUrl,
                                                     leadingIcon = Icons.Rounded.LibraryMusic,
-                                                    onClick = { if (plId != null) onOpenPlaylist(plId) },
-                                                    onPlayClick = pl?.tracks?.firstOrNull()?.let { first ->
+                                                    onClick = { onOpenPlaylist(pl.id) },
+                                                    onPlayClick = pl.tracks.firstOrNull()?.let { first ->
                                                         { onPlayTrack(first, pl.tracks) }
                                                     },
                                                     modifier = Modifier.weight(1f)
                                                 )
                                             }
-                                            else -> {
-                                                val trId = key.removePrefix("tr_")
-                                                val tr = state.continueListening.firstOrNull { it.id == trId }
-                                                SpotifyQuickPickTile(
-                                                    title = title,
-                                                    subtitle = tr?.artist,
-                                                    artworkUrl = art,
-                                                    leadingIcon = Icons.Rounded.MusicNote,
-                                                    onClick = { if (tr != null) onOpenTrack(tr) },
-                                                    onPlayClick = tr?.let {
-                                                        { onPlayTrack(it, state.continueListening) }
-                                                    },
-                                                    modifier = Modifier.weight(1f)
-                                                )
-                                            }
+                                            is HomeQuickPick.TrackPick -> SpotifyQuickPickTile(
+                                                title = pick.track.title,
+                                                subtitle = pick.track.artist,
+                                                artworkUrl = pick.track.coverUrl,
+                                                leadingIcon = Icons.Rounded.MusicNote,
+                                                onClick = { onOpenTrack(pick.track) },
+                                                onPlayClick = { onPlayTrack(pick.track, pick.queueContext) },
+                                                modifier = Modifier.weight(1f)
+                                            )
                                         }
                                     }
                                     repeat(columns - rowItems.size) {
@@ -199,7 +310,12 @@ fun HomeScreen(
             }
             if (!state.isHeroDismissed) {
                 item(key = "hero") {
-                    val hero = state.heroTrack
+                    val hero = projection.heroTrack
+                    val heroQueue = state.genreSections
+                        .firstOrNull { sec -> hero != null && sec.tracks.any { it.id == hero.id } }
+                        ?.tracks
+                        ?: state.genreSections.firstOrNull()?.tracks
+                        ?: listOfNotNull(hero)
                     LivingAlbumHero(
                         eyebrow = strings["trending_header"],
                         title = hero?.title ?: strings["welcome_title"],
@@ -208,7 +324,7 @@ fun HomeScreen(
                         primaryActionLabel = strings["start_listening"],
                         onPrimaryAction = {
                             if (hero != null) {
-                                onPlayTrack(hero, state.genreSections.firstOrNull()?.tracks ?: listOf(hero))
+                                onPlayTrack(hero, heroQueue)
                             } else {
                                 onExploreTrends()
                             }
@@ -247,7 +363,7 @@ fun HomeScreen(
                 }
             }
 
-            if (state.continueListening.isNotEmpty()) {
+            if (projection.remainingRecent.isNotEmpty()) {
                 item(key = "recent_history") {
                     Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         Text(
@@ -260,13 +376,13 @@ fun HomeScreen(
                             contentPadding = PaddingValues(horizontal = sidePad),
                             horizontalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 12.dp else 16.dp)
                         ) {
-                            items(state.continueListening, key = { "recent_${it.id}" }) { track ->
+                            items(projection.remainingRecent, key = { "recent_${it.id}" }) { track ->
                                 MusicCard(
                                     title = track.title,
                                     subtitle = track.artist,
                                     artworkUrl = track.coverUrl,
                                     onClick = { onOpenTrack(track) },
-                                    onPlayClick = { onPlayTrack(track, state.continueListening) },
+                                    onPlayClick = { onPlayTrack(track, projection.remainingRecent) },
                                     contextMenuItems = cardActionsFor(track)
                                 )
                             }
