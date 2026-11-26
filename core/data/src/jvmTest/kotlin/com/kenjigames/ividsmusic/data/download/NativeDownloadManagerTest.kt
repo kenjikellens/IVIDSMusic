@@ -243,7 +243,13 @@ class NativeDownloadManagerTest {
         assertEquals(customDir.absolutePath, manager.getSavedDirectoryPath())
         assertTrue(libraryRepository.observeDownloadedTracks().first().any { it.title == "Custom Song" })
 
+        val initialCacheBytes = manager.getAudioCacheBytes()
+        val nestedCache = File(cacheDir, "nested").apply { mkdirs() }
+        File(nestedCache, "chunk.bin").writeBytes(ByteArray(2048) { 3 })
+        assertEquals(initialCacheBytes + 2048L, manager.getAudioCacheBytes())
+
         assertTrue(manager.clearAudioCache() is AppResult.Success)
         assertEquals(0, cacheDir.listFiles()?.size ?: 0)
+        assertEquals(0L, manager.getAudioCacheBytes())
     }
 }

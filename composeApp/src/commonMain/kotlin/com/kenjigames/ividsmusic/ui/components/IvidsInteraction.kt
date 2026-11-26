@@ -28,6 +28,9 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.scale
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isSecondaryPressed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.node.DelegatableNode
 import androidx.compose.ui.node.DrawModifierNode
 import androidx.compose.ui.unit.dp
@@ -228,5 +231,28 @@ fun Modifier.ividsTouchFeedback(
     this.graphicsLayer {
         scaleX = scale
         scaleY = scale
+    }
+}
+
+/**
+ * Invokes [onClick] when a secondary (right) mouse button press occurs over the element,
+ * enabling desktop context menus cleanly in multiplatform `commonMain` code.
+ */
+fun Modifier.onSecondaryClick(
+    enabled: Boolean = true,
+    onClick: () -> Unit
+): Modifier = if (!enabled) {
+    this
+} else {
+    this.pointerInput(enabled) {
+        awaitPointerEventScope {
+            while (true) {
+                val event = awaitPointerEvent()
+                if (event.type == PointerEventType.Press && event.buttons.isSecondaryPressed) {
+                    event.changes.forEach { it.consume() }
+                    onClick()
+                }
+            }
+        }
     }
 }

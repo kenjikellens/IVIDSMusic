@@ -51,12 +51,13 @@ fun uiModule(): Module = module {
             offlineDownloadManager = get(),
             toastController = get(),
             sessionRepository = get(),
-            streamPrefetcher = get()
+            streamPrefetcher = get(),
+            discoveryRepository = get()
         )
     } onClose { it?.dispose() }
 
     single { HomeViewModel(discoveryRepository = get(), libraryRepository = get()) } onClose { it?.dispose() }
-    single { SearchViewModel(discoveryRepository = get()) } onClose { it?.dispose() }
+    single { SearchViewModel(discoveryRepository = get(), preferencesRepository = get()) } onClose { it?.dispose() }
     single { LibraryViewModel(libraryRepository = get(), toastController = get()) } onClose { it?.dispose() }
     single {
         DownloaderViewModel(

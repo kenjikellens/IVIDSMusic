@@ -2,12 +2,17 @@ package com.kenjigames.ividsmusic
 
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.LayoutMode
+import com.kenjigames.ividsmusic.domain.model.Track
+import com.kenjigames.ividsmusic.domain.model.TrackSortOption
+import com.kenjigames.ividsmusic.ui.components.formatByteSize
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
 import com.kenjigames.ividsmusic.ui.components.formatDurationSeconds
+import com.kenjigames.ividsmusic.ui.components.formatPlaylistTotalDuration
 import com.kenjigames.ividsmusic.ui.i18n.AppStrings
 import com.kenjigames.ividsmusic.ui.i18n.SupportedLanguage
 import com.kenjigames.ividsmusic.ui.navigation.AppNavigator
 import com.kenjigames.ividsmusic.ui.navigation.AppRoute
+import com.kenjigames.ividsmusic.ui.screens.library.sortAndFilterTracks
 import com.kenjigames.ividsmusic.ui.shell.ShellMode
 import com.kenjigames.ividsmusic.ui.shell.resolveShellMode
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
@@ -88,6 +93,27 @@ class UiLogicTest {
         assertEquals("3:05", formatDurationSeconds(185))
         assertEquals("1:01:05", formatDurationSeconds(3665))
         assertEquals("0:42", formatDurationMillis(42_500L))
+        assertEquals("512 B", formatByteSize(512L))
+        assertEquals("2.0 MB", formatByteSize(2L * 1024L * 1024L))
+        assertEquals("45m 0s", formatPlaylistTotalDuration(45 * 60))
+        assertEquals("1h 15m", formatPlaylistTotalDuration(75 * 60))
         assertEquals(IvidsColorTokens.PrimaryCyan, clampAccentContrast(0xFF050505.toInt(), IvidsColorTokens.PrimaryCyan))
+    }
+
+    /**
+     * Verifies library track sorting across Title, Artist, Duration, text query, and Offline-only filtering.
+     */
+    @Test
+    fun sortAndFilterTracksOrdersAndFiltersOffline() {
+        val tracks = listOf(
+            Track(id = "1", title = "Zeta", artist = "Beta", durationSeconds = 200, isDownloaded = false),
+            Track(id = "2", title = "Alpha", artist = "Gamma", durationSeconds = 120, isDownloaded = true),
+            Track(id = "3", title = "Mid", artist = "Alpha", durationSeconds = 300, isDownloaded = false)
+        )
+        assertEquals(listOf("2", "3", "1"), sortAndFilterTracks(tracks, "", TrackSortOption.TITLE, false, emptySet()).map { it.id })
+        assertEquals(listOf("3", "1", "2"), sortAndFilterTracks(tracks, "", TrackSortOption.ARTIST, false, emptySet()).map { it.id })
+        assertEquals(listOf("3", "1", "2"), sortAndFilterTracks(tracks, "", TrackSortOption.DURATION, false, emptySet()).map { it.id })
+        assertEquals(listOf("2", "3"), sortAndFilterTracks(tracks, "", TrackSortOption.TITLE, true, setOf("3")).map { it.id })
+        assertEquals(listOf("1"), sortAndFilterTracks(tracks, "beta", TrackSortOption.RECENT, false, emptySet()).map { it.id })
     }
 }

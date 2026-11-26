@@ -7,6 +7,7 @@ import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.HistoryEntry
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.model.Track
+import com.kenjigames.ividsmusic.domain.model.TrackSortOption
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import kotlinx.coroutines.CoroutineScope
@@ -31,29 +32,55 @@ enum class LibraryTab {
 }
 
 /**
+ * Pure helper sorting and filtering [tracks] by text [query], [sortOption], and [offlineOnly].
+ */
+fun sortAndFilterTracks(
+    tracks: List<Track>,
+    query: String,
+    sortOption: TrackSortOption,
+    offlineOnly: Boolean,
+    downloadedIds: Set<String>
+): List<Track> {
+    val trimmed = query.trim()
+    val filtered = tracks.filter { track ->
+        val matchesQuery = trimmed.isEmpty() ||
+            track.title.contains(trimmed, ignoreCase = true) ||
+            track.artist.contains(trimmed, ignoreCase = true) ||
+            track.album.contains(trimmed, ignoreCase = true)
+        val matchesOffline = !offlineOnly || track.isDownloaded || track.id in downloadedIds
+        matchesQuery && matchesOffline
+    }
+    return when (sortOption) {
+        TrackSortOption.RECENT -> filtered
+        TrackSortOption.TITLE -> filtered.sortedBy { it.title.lowercase() }
+        TrackSortOption.ARTIST -> filtered.sortedBy { it.artist.lowercase() }
+        TrackSortOption.DURATION -> filtered.sortedByDescending { it.durationSeconds }
+    }
+}
+
+/**
  * Immutable UI state for [LibraryScreen] holding filtered liked tracks, saved albums, custom
- * playlists, and recent listening history.
+ * playlists, sort/offline filters, and recent listening history.
  */
 @Immutable
 data class LibraryUiState(
     val selectedTab: LibraryTab = LibraryTab.LIKED_SONGS,
     val searchQuery: String = "",
+    val sortOption: TrackSortOption = TrackSortOption.RECENT,
+    val offlineOnly: Boolean = false,
     val likedTracks: List<Track> = emptyList(),
     val savedAlbums: List<Album> = emptyList(),
     val playlists: List<Playlist> = emptyList(),
     val recentlyListened: List<HistoryEntry> = emptyList(),
     val isCreatePlaylistOpen: Boolean = false
 ) {
-    /** Liked tracks filtered dynamically by [searchQuery]. */
+    /** Liked tracks filtered dynamically by [searchQuery], [sortOption], and optional offline filter. */
+    fun filteredLikedTracks(downloadedIds: Set<String> = emptySet()): List<Track> =
+        sortAndFilterTracks(likedTracks, searchQuery, sortOption, offlineOnly, downloadedIds)
+
+    /** Backward-compatible filtered liked tracks property using track-embedded download flags. */
     val filteredLikedTracks: List<Track>
-        get() = if (searchQuery.isBlank()) {
-            likedTracks
-        } else {
-            likedTracks.filter {
-                it.title.contains(searchQuery, ignoreCase = true) ||
-                    it.artist.contains(searchQuery, ignoreCase = true)
-            }
-        }
+        get() = filteredLikedTracks(emptySet())
 
     /** Saved albums filtered dynamically by [searchQuery]. */
     val filteredSavedAlbums: List<Album>
@@ -106,6 +133,20 @@ class LibraryViewModel(
      */
     fun onSearchQueryChanged(query: String) {
         _uiState.update { it.copy(searchQuery = query) }
+    }
+
+    /**
+     * Changes the active [TrackSortOption] used for Liked Songs ordering.
+     */
+    fun setSortOption(option: TrackSortOption) {
+        _uiState.update { it.copy(sortOption = option) }
+    }
+
+    /**
+     * Toggles whether Liked Songs only displays tracks downloaded for offline playback.
+     */
+    fun toggleOfflineOnly() {
+        _uiState.update { it.copy(offlineOnly = !it.offlineOnly) }
     }
 
     /**

@@ -32,6 +32,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -50,6 +52,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
@@ -68,6 +71,18 @@ import com.kenjigames.ividsmusic.ui.theme.tvFocusable
  * Renders a flat YouTube/Spotify artwork tile directly on the dark stage with optional hover lift
  * on Desktop and responsive circular/rounded cover framing plus a Play FAB.
  */
+/**
+ * Descriptor for an individual desktop right-click context menu action on [MusicCard].
+ */
+data class CardContextMenuAction(
+    val label: String,
+    val onClick: () -> Unit
+)
+
+/**
+ * Renders a borderless album, artist, or track card with smooth hover illumination, optional
+ * desktop right-click context menu, and a floating Play action button.
+ */
 @Composable
 fun MusicCard(
     title: String,
@@ -78,12 +93,14 @@ fun MusicCard(
     isCircular: Boolean = false,
     badgeText: String? = null,
     onPlayClick: (() -> Unit)? = null,
+    contextMenuItems: List<CardContextMenuAction> = emptyList(),
     width: Dp = LocalLayoutMetrics.current.cardWidth
 ) {
     val isTvMode = LocalIsTvMode.current
     val metrics = LocalLayoutMetrics.current
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    var menuExpanded by remember { mutableStateOf(false) }
 
     val playFabAlpha by animateFloatAsState(
         targetValue = when {
@@ -95,17 +112,19 @@ fun MusicCard(
         label = "MusicCardPlayAlpha"
     )
 
-    Surface(
-        onClick = onClick,
-        interactionSource = interactionSource,
-        modifier = modifier
-            .width(width)
-            .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.965f)
-            .pointerHoverIcon(PointerIcon.Hand)
-            .tvFocusable(shape = RoundedCornerShape(14.dp)),
-        shape = RoundedCornerShape(14.dp),
-        color = Color.Transparent
-    ) {
+    Box(modifier = modifier.width(width)) {
+        Surface(
+            onClick = onClick,
+            interactionSource = interactionSource,
+            modifier = Modifier
+                .fillMaxWidth()
+                .onSecondaryClick(enabled = contextMenuItems.isNotEmpty()) { menuExpanded = true }
+                .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.965f)
+                .pointerHoverIcon(PointerIcon.Hand)
+                .tvFocusable(shape = RoundedCornerShape(14.dp)),
+            shape = RoundedCornerShape(14.dp),
+            color = Color.Transparent
+        ) {
         Column(
             modifier = Modifier
                 .ividsHoverZoom(
@@ -208,6 +227,127 @@ fun MusicCard(
                     color = IvidsColorTokens.SlateMuted,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+
+        if (contextMenuItems.isNotEmpty()) {
+            DropdownMenu(
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
+                containerColor = IvidsColorTokens.GlassSurface
+            ) {
+                contextMenuItems.forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(item.label, color = IvidsColorTokens.ChalkInk) },
+                        onClick = {
+                            menuExpanded = false
+                            item.onClick()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Compact horizontal Spotify-style quick-pick tile with leading 56dp artwork or icon, bold title,
+ * and hover-revealed play button on a borderless neutral charcoal surface.
+ */
+@Composable
+fun SpotifyQuickPickTile(
+    title: String,
+    artworkUrl: String?,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    leadingIcon: ImageVector = Icons.Rounded.MusicNote,
+    leadingIconTint: Color = IvidsColorTokens.SlateMuted,
+    onPlayClick: (() -> Unit)? = null
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val playAlpha by animateFloatAsState(
+        targetValue = if (isHovered) 1f else 0f,
+        animationSpec = tween(140, easing = FastOutSlowInEasing),
+        label = "QuickPickPlayAlpha"
+    )
+
+    Surface(
+        onClick = onClick,
+        interactionSource = interactionSource,
+        shape = RoundedCornerShape(10.dp),
+        color = Color(0xFF181818),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(58.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.975f)
+            .pointerHoverIcon(PointerIcon.Hand)
+            .tvFocusable(shape = RoundedCornerShape(10.dp))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .ividsHoverZoom(hovered = isHovered, shape = RoundedCornerShape(10.dp)),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(58.dp)
+                    .background(IvidsColorTokens.GlassSurface),
+                contentAlignment = Alignment.Center
+            ) {
+                if (!artworkUrl.isNullOrBlank()) {
+                    AsyncImage(
+                        model = artworkUrl,
+                        contentDescription = title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(
+                        imageVector = leadingIcon,
+                        contentDescription = null,
+                        tint = leadingIconTint,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = IvidsColorTokens.ChalkInk,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                if (!subtitle.isNullOrBlank()) {
+                    Text(
+                        text = subtitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = IvidsColorTokens.SlateMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+            if (onPlayClick != null && playAlpha > 0.02f) {
+                IvidsPlayCircleButton(
+                    isPlaying = false,
+                    isBuffering = false,
+                    contentDescription = "Play $title",
+                    onClick = onPlayClick,
+                    size = 36.dp,
+                    iconSize = 20.dp,
+                    modifier = Modifier
+                        .padding(end = 10.dp)
+                        .graphicsLayer { alpha = playAlpha }
                 )
             }
         }

@@ -316,6 +316,17 @@ class NativeDownloadManager(
     }
 
     /**
+     * Sums total byte size of all temporary cached files inside [AppStorageDirectories.cacheDir].
+     */
+    override suspend fun getAudioCacheBytes(): Long = withContext(ioDispatcher) {
+        val cacheRoot = File(directories.cacheDir)
+        if (!cacheRoot.exists() || !cacheRoot.isDirectory) return@withContext 0L
+        cacheRoot.walkTopDown()
+            .filter { it.isFile }
+            .sumOf { it.length() }
+    }
+
+    /**
      * Returns the current offline saved directory path synchronously.
      */
     override fun getSavedDirectoryPath(): String = saveDirectoryHolder.current()

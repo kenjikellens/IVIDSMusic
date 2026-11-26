@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -28,11 +30,14 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Download
+import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Home
 import androidx.compose.material.icons.rounded.LibraryMusic
+import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Person
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
@@ -60,11 +65,14 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.clickable
+import coil3.compose.AsyncImage
+import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.resources.Res
 import com.kenjigames.ividsmusic.resources.ic_ivids_brand
 import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
@@ -79,14 +87,20 @@ import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 import org.jetbrains.compose.resources.painterResource
 
 /**
- * Pure neutral dark borderless sidebar navigation rail rendered on Desktop (`>= 600dp`) and Android TV.
+ * Pure neutral dark borderless sidebar navigation rail rendered on Desktop (`>= 600dp`) and Android TV,
+ * including a scrollable Spotify-style playlists section when expanded.
  */
 @Composable
 internal fun SidebarNavigationRail(
     currentRoute: AppRoute,
     expanded: Boolean,
     isTv: Boolean,
-    onSelectRoute: (AppRoute) -> Unit
+    onSelectRoute: (AppRoute) -> Unit,
+    playlists: List<Playlist> = emptyList(),
+    likedCount: Int = 0,
+    onOpenLikedSongs: () -> Unit = {},
+    onOpenPlaylist: (Long) -> Unit = {},
+    onCreatePlaylist: () -> Unit = {}
 ) {
     val strings = LocalStrings.current
     val primaryEntries = remember {
@@ -169,6 +183,149 @@ internal fun SidebarNavigationRail(
                     selected = entry.matcher(currentRoute),
                     expanded = expanded,
                     onClick = { onSelectRoute(entry.route) }
+                )
+            }
+
+            if (expanded && !isTv) {
+                HorizontalDivider(
+                    color = IvidsColorTokens.HairlineSubtle,
+                    modifier = Modifier.padding(vertical = 10.dp, horizontal = 8.dp)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = strings["your_playlists"],
+                        style = MaterialTheme.typography.labelLarge,
+                        color = IvidsColorTokens.SlateMuted,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    IvidsIconButton(onClick = onCreatePlaylist, size = 28.dp) {
+                        Icon(
+                            imageVector = Icons.Rounded.Add,
+                            contentDescription = strings["create_playlist"],
+                            tint = IvidsColorTokens.SlateMuted,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
+                }
+                LazyColumn(
+                    modifier = Modifier.weight(1f).fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
+                    item(key = "sidebar_liked_songs") {
+                        SidebarPlaylistRow(
+                            title = strings["liked_songs"],
+                            subtitle = if (likedCount == 1) strings["track_singular"] else strings.format("tracks_count", "count" to likedCount.toString()),
+                            artworkUrl = null,
+                            isLikedPin = true,
+                            selected = currentRoute is AppRoute.Library,
+                            onClick = onOpenLikedSongs
+                        )
+                    }
+                    items(playlists, key = { "sidebar_pl_${it.id}" }) { pl ->
+                        SidebarPlaylistRow(
+                            title = pl.title,
+                            subtitle = if (pl.tracks.size == 1) strings["track_singular"] else strings.format("tracks_count", "count" to pl.tracks.size.toString()),
+                            artworkUrl = pl.tracks.firstOrNull()?.coverUrl,
+                            isLikedPin = false,
+                            selected = currentRoute is AppRoute.PlaylistDetail && currentRoute.playlistId == pl.id,
+                            onClick = { onOpenPlaylist(pl.id) }
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Compact borderless Spotify-style playlist or Liked Songs item inside [SidebarNavigationRail].
+ */
+@Composable
+private fun SidebarPlaylistRow(
+    title: String,
+    subtitle: String,
+    artworkUrl: String?,
+    isLikedPin: Boolean,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val hoverStyle = if (selected) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interactionSource)
+            .tvFocusable(shape = RoundedCornerShape(10.dp))
+            .clickable(
+                interactionSource = interactionSource,
+                indication = ividsPressRipple(hoverStyle),
+                onClick = onClick
+            ),
+        shape = RoundedCornerShape(10.dp),
+        color = if (selected) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.14f) else Color.Transparent
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .ividsHoverZoom(hovered = isHovered, shape = RoundedCornerShape(10.dp), style = hoverStyle)
+                .padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(34.dp)
+                    .clip(RoundedCornerShape(7.dp))
+                    .background(
+                        if (isLikedPin) IvidsColorTokens.DangerCoral.copy(alpha = 0.18f) else IvidsColorTokens.GlassSurface
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                when {
+                    isLikedPin -> Icon(
+                        imageVector = Icons.Rounded.Favorite,
+                        contentDescription = null,
+                        tint = IvidsColorTokens.DangerCoral,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    !artworkUrl.isNullOrBlank() -> AsyncImage(
+                        model = artworkUrl,
+                        contentDescription = title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    else -> Icon(
+                        imageVector = Icons.Rounded.MusicNote,
+                        contentDescription = null,
+                        tint = IvidsColorTokens.SlateMuted,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (selected) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.ChalkInk,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = IvidsColorTokens.SlateMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
         }

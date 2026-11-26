@@ -219,6 +219,16 @@ enum class LayoutMode {
 }
 
 /**
+ * Sort order options for track lists in Library and Playlist Detail screens.
+ */
+enum class TrackSortOption {
+    RECENT,
+    TITLE,
+    ARTIST,
+    DURATION
+}
+
+/**
  * Reactive snapshot of all user-configurable application settings persisted locally in DataStore.
  * Observed by the Compose shell and DownloadManager via [com.kenjigames.ividsmusic.domain.port.PreferencesRepository].
  */
@@ -231,7 +241,9 @@ data class UserPreferences(
     val updateMode: UpdateMode = UpdateMode.AUTO,
     val layoutMode: LayoutMode = LayoutMode.AUTO,
     val volume: Float = 1.0f,
-    val isMuted: Boolean = false
+    val isMuted: Boolean = false,
+    val recentSearches: List<String> = emptyList(),
+    val autoplayEnabled: Boolean = true
 )
 
 /**

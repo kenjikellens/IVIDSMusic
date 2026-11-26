@@ -8,6 +8,7 @@ import com.kenjigames.ividsmusic.domain.model.Artist
 import com.kenjigames.ividsmusic.domain.model.SearchFilterType
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.domain.port.MusicDiscoveryRepository
+import com.kenjigames.ividsmusic.domain.port.PreferencesRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -17,12 +18,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 /**
  * Immutable UI state for [SearchScreen] supporting debounced queries, [SearchFilterType] tabs,
- * release-year range filtering, and offset pagination.
+ * persisted recent searches, release-year range filtering, and offset pagination.
  */
 @Immutable
 data class SearchUiState(
@@ -30,6 +32,7 @@ data class SearchUiState(
     val filterType: SearchFilterType = SearchFilterType.ALL,
     val yearFilterEnabled: Boolean = false,
     val yearRange: ClosedFloatingPointRange<Float> = 1970f..2026f,
+    val recentSearches: List<String> = emptyList(),
     val artists: List<Artist> = emptyList(),
     val songs: List<Track> = emptyList(),
     val albums: List<Album> = emptyList(),
@@ -40,12 +43,13 @@ data class SearchUiState(
 )
 
 /**
- * Coordinates debounced Deezer/iTunes searches, category tabs, year filtering, and pagination
- * for [SearchScreen].
+ * Coordinates debounced Deezer/iTunes searches, recent search history, category tabs, year filtering,
+ * and pagination for [SearchScreen].
  */
 @Stable
 class SearchViewModel(
-    private val discoveryRepository: MusicDiscoveryRepository
+    private val discoveryRepository: MusicDiscoveryRepository,
+    private val preferencesRepository: PreferencesRepository? = null
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -55,6 +59,10 @@ class SearchViewModel(
 
     private var debounceJob: Job? = null
     private var currentOffset = 0
+
+    init {
+        observeRecentSearches()
+    }
 
     /**
      * Updates the query string and triggers a debounced search after 350ms (or resets when blank).
@@ -88,7 +96,40 @@ class SearchViewModel(
         debounceJob?.cancel()
         _uiState.update { it.copy(query = query) }
         if (query.isNotBlank()) {
-            scope.launch { executeSearch(append = false) }
+            scope.launch {
+                preferencesRepository?.addRecentSearch(query)
+                executeSearch(append = false)
+            }
+        }
+    }
+
+    /**
+     * Removes a single [query] entry from persisted recent search history.
+     */
+    fun removeRecentSearch(query: String) {
+        scope.launch {
+            preferencesRepository?.removeRecentSearch(query)
+        }
+    }
+
+    /**
+     * Clears all persisted recent search queries.
+     */
+    fun clearRecentSearches() {
+        scope.launch {
+            preferencesRepository?.clearRecentSearches()
+        }
+    }
+
+    /**
+     * Observes persisted recent search queries from [PreferencesRepository].
+     */
+    private fun observeRecentSearches() {
+        val repo = preferencesRepository ?: return
+        scope.launch {
+            repo.preferences.collectLatest { prefs ->
+                _uiState.update { it.copy(recentSearches = prefs.recentSearches) }
+            }
         }
     }
 
@@ -168,16 +209,21 @@ class SearchViewModel(
         when (state.filterType) {
             SearchFilterType.ALL -> {
                 when (val res = discoveryRepository.searchOverview(trimmed, limitPerSection = 12, yearRange = yearRange)) {
-                    is AppResult.Success -> _uiState.update {
-                        it.copy(
-                            artists = res.data.artists,
-                            songs = res.data.songs,
-                            albums = res.data.albums,
-                            isLoading = false,
-                            isLoadingMore = false,
-                            canLoadMore = false,
-                            errorMessage = null
-                        )
+                    is AppResult.Success -> {
+                        if (res.data.artists.isNotEmpty() || res.data.songs.isNotEmpty() || res.data.albums.isNotEmpty()) {
+                            preferencesRepository?.addRecentSearch(trimmed)
+                        }
+                        _uiState.update {
+                            it.copy(
+                                artists = res.data.artists,
+                                songs = res.data.songs,
+                                albums = res.data.albums,
+                                isLoading = false,
+                                isLoadingMore = false,
+                                canLoadMore = false,
+                                errorMessage = null
+                            )
+                        }
                     }
                     is AppResult.Failure -> _uiState.update {
                         it.copy(isLoading = false, isLoadingMore = false, errorMessage = res.error.message)

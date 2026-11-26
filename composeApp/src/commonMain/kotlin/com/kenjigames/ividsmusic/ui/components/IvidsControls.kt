@@ -159,6 +159,11 @@ fun IvidsScrubber(
             val corner = CornerRadius(barH / 2f, barH / 2f)
             val thumbPx = animatedThumbRadius.toPx()
             val fillWidth = (size.width * fraction).coerceIn(0f, size.width)
+            val activeAccent = if (enabled && (isHovered || isDragging)) {
+                IvidsColorTokens.PrimaryCyan
+            } else {
+                IvidsColorTokens.ChalkInk
+            }
 
             drawRoundRect(
                 color = Color(0x28FFFFFF),
@@ -169,7 +174,7 @@ fun IvidsScrubber(
 
             if (fillWidth > 0.5f) {
                 drawRoundRect(
-                    color = IvidsColorTokens.ChalkInk,
+                    color = activeAccent,
                     topLeft = Offset(0f, barTop),
                     size = Size(fillWidth, barH),
                     cornerRadius = corner
@@ -180,12 +185,16 @@ fun IvidsScrubber(
                 val thumbX = fillWidth.coerceIn(thumbPx, (size.width - thumbPx).coerceAtLeast(thumbPx))
                 val centerY = size.height / 2f
                 drawCircle(
-                    color = Color(0x33FFFFFF),
+                    color = if (isHovered || isDragging) {
+                        IvidsColorTokens.PrimaryCyan.copy(alpha = 0.28f)
+                    } else {
+                        Color(0x33FFFFFF)
+                    },
                     radius = thumbPx * 1.55f,
                     center = Offset(thumbX, centerY)
                 )
                 drawCircle(
-                    color = IvidsColorTokens.ChalkInk,
+                    color = activeAccent,
                     radius = thumbPx,
                     center = Offset(thumbX, centerY)
                 )
@@ -617,5 +626,39 @@ fun FramedScreenContainer(
             modifier = Modifier.widthIn(max = maxWidth).fillMaxWidth(),
             content = content
         )
+    }
+}
+
+/**
+ * Formats a non-negative byte count into a human-readable `B`, `KB`, `MB`, or `GB` label.
+ */
+fun formatByteSize(bytes: Long): String {
+    val safe = bytes.coerceAtLeast(0L)
+    return when {
+        safe < 1024L -> "$safe B"
+        safe < 1024L * 1024L -> "${safe / 1024L} KB"
+        safe < 1024L * 1024L * 1024L -> {
+            val tenths = (safe * 10L / (1024L * 1024L))
+            "${tenths / 10L}.${tenths % 10L} MB"
+        }
+        else -> {
+            val hundredths = (safe * 100L / (1024L * 1024L * 1024L))
+            "${hundredths / 100L}.${(hundredths % 100L).toString().padStart(2, '0')} GB"
+        }
+    }
+}
+
+/**
+ * Formats a cumulative duration in seconds into compact Spotify-style `Xh Ym` or `Xm Ys` text.
+ */
+fun formatPlaylistTotalDuration(totalSeconds: Int): String {
+    val safe = totalSeconds.coerceAtLeast(0)
+    val hours = safe / 3600
+    val minutes = (safe % 3600) / 60
+    val seconds = safe % 60
+    return when {
+        hours > 0 -> "${hours}h ${minutes}m"
+        minutes > 0 -> "${minutes}m ${seconds}s"
+        else -> "${seconds}s"
     }
 }

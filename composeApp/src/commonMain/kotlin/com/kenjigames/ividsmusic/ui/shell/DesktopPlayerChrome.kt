@@ -28,12 +28,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.QueueMusic
 import androidx.compose.material.icons.automirrored.rounded.VolumeOff
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
+import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.MusicNote
 import androidx.compose.material.icons.rounded.Refresh
@@ -71,6 +75,7 @@ import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
 import com.kenjigames.ividsmusic.ui.components.IvidsIconButton
 import com.kenjigames.ividsmusic.ui.components.IvidsPlayCircleButton
 import com.kenjigames.ividsmusic.ui.components.IvidsScrubber
+import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.formatDurationMillis
 import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
@@ -387,14 +392,17 @@ internal fun DesktopPlayerDeck(
 }
 
 /**
- * Collapsible borderless right-hand queue drawer on Desktop allowing quick track jumps and removal.
+ * Collapsible borderless right-hand queue drawer on Desktop showing Now Playing, reorderable
+ * Next Up items with cover art, and an Autoplay Radio toggle.
  */
 @Composable
 internal fun QueueSideSheet(
     playerState: PlayerUiState,
     onJumpTo: (Int) -> Unit,
+    onMoveTrack: (Int, Int) -> Unit,
     onRemove: (Int) -> Unit,
     onClear: () -> Unit,
+    onToggleAutoplay: () -> Unit,
     onClose: () -> Unit
 ) {
     val strings = LocalStrings.current
@@ -402,7 +410,7 @@ internal fun QueueSideSheet(
     Box(
         modifier = Modifier
             .fillMaxHeight()
-            .width(316.dp)
+            .width(332.dp)
             .background(IvidsColorTokens.AbyssRail)
     ) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -430,6 +438,29 @@ internal fun QueueSideSheet(
                 }
             }
 
+            Spacer(modifier = Modifier.height(6.dp))
+
+            IvidsTonalPill(
+                onClick = onToggleAutoplay,
+                baseColor = if (playerState.autoplayEnabled) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
+                hoverStyle = if (playerState.autoplayEnabled) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.AutoAwesome,
+                    contentDescription = null,
+                    tint = if (playerState.autoplayEnabled) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = strings["autoplay_radio"],
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (playerState.autoplayEnabled) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
             HorizontalDivider(color = IvidsColorTokens.HairlineSubtle, modifier = Modifier.padding(vertical = 10.dp))
 
             if (playerState.queue.isEmpty()) {
@@ -437,62 +468,159 @@ internal fun QueueSideSheet(
                     Text(strings["queue_empty"], style = MaterialTheme.typography.bodyMedium, color = IvidsColorTokens.SlateMuted)
                 }
             } else {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    itemsIndexed(playerState.queue, key = { idx, t -> "${idx}_${t.id}" }) { idx, item ->
-                        val active = idx == playerState.currentIndex
-                        val queueItemSource = remember { MutableInteractionSource() }
-                        val queueHovered by queueItemSource.collectIsHoveredAsState()
-                        val queueItemBg by animateColorAsState(
-                            targetValue = if (active) Color(0x1CFFFFFF) else IvidsColorTokens.GlassSurface,
-                            animationSpec = tween(200, easing = FastOutSlowInEasing),
-                            label = "QueueRowBg"
-                        )
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .pointerHoverIcon(PointerIcon.Hand)
-                                .hoverable(queueItemSource)
-                                .tvFocusable(shape = RoundedCornerShape(10.dp))
-                                .clickable { onJumpTo(idx) },
-                            shape = RoundedCornerShape(10.dp),
-                            color = queueItemBg
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .ividsHoverZoom(hovered = queueHovered, shape = RoundedCornerShape(10.dp))
-                                    .padding(horizontal = 12.dp, vertical = 10.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Text(
-                                    text = (idx + 1).toString(),
-                                    style = IvidsTextStyles.tabularBadge(),
-                                    color = if (active) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = item.title,
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = IvidsColorTokens.ChalkInk,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                    Text(
-                                        text = item.artist,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = IvidsColorTokens.SlateMuted,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                                IconButton(onClick = { onRemove(idx) }, modifier = Modifier.size(28.dp)) {
-                                    Icon(Icons.Rounded.Close, strings["remove"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(14.dp))
-                                }
-                            }
+                val activeIndex = playerState.currentIndex.coerceIn(-1, playerState.queue.lastIndex)
+                val nowPlayingTrack = playerState.queue.getOrNull(activeIndex)
+                val upNextEntries = playerState.queue.mapIndexed { idx, track -> idx to track }
+                    .filter { (idx, _) -> idx != activeIndex }
+
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    if (nowPlayingTrack != null) {
+                        item(key = "q_hdr_now") {
+                            Text(
+                                text = strings["now_playing_section"],
+                                style = MaterialTheme.typography.labelMedium,
+                                color = IvidsColorTokens.SlateMuted,
+                                modifier = Modifier.padding(bottom = 2.dp)
+                            )
+                        }
+                        item(key = "q_now_${nowPlayingTrack.id}") {
+                            QueueTrackCard(
+                                item = nowPlayingTrack,
+                                isActive = true,
+                                canMoveUp = false,
+                                canMoveDown = false,
+                                onJump = { onJumpTo(activeIndex) },
+                                onMoveUp = {},
+                                onMoveDown = {},
+                                onRemove = { onRemove(activeIndex) }
+                            )
+                        }
+                    }
+
+                    if (upNextEntries.isNotEmpty()) {
+                        item(key = "q_hdr_next") {
+                            Text(
+                                text = strings["next_up_section"],
+                                style = MaterialTheme.typography.labelMedium,
+                                color = IvidsColorTokens.SlateMuted,
+                                modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+                            )
+                        }
+                        itemsIndexed(upNextEntries, key = { _, pair -> "q_next_${pair.first}_${pair.second.id}" }) { _, (idx, item) ->
+                            QueueTrackCard(
+                                item = item,
+                                isActive = false,
+                                canMoveUp = idx > 0 && idx - 1 != activeIndex,
+                                canMoveDown = idx < playerState.queue.lastIndex && idx + 1 != activeIndex,
+                                onJump = { onJumpTo(idx) },
+                                onMoveUp = { onMoveTrack(idx, idx - 1) },
+                                onMoveDown = { onMoveTrack(idx, idx + 1) },
+                                onRemove = { onRemove(idx) }
+                            )
                         }
                     }
                 }
+            }
+        }
+    }
+}
+
+/**
+ * Renders a single borderless queue track card with artwork thumbnail, reorder arrows, and remove button.
+ */
+@Composable
+private fun QueueTrackCard(
+    item: com.kenjigames.ividsmusic.domain.model.Track,
+    isActive: Boolean,
+    canMoveUp: Boolean,
+    canMoveDown: Boolean,
+    onJump: () -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit,
+    onRemove: () -> Unit
+) {
+    val strings = LocalStrings.current
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+    val bg by animateColorAsState(
+        targetValue = if (isActive) Color(0xFF1A1A1A) else IvidsColorTokens.GlassSurface,
+        animationSpec = tween(160, easing = FastOutSlowInEasing),
+        label = "QueueCardBg"
+    )
+
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .pointerHoverIcon(PointerIcon.Hand)
+            .hoverable(interactionSource)
+            .tvFocusable(shape = RoundedCornerShape(10.dp))
+            .clickable(onClick = onJump),
+        shape = RoundedCornerShape(10.dp),
+        color = bg
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .ividsHoverZoom(hovered = isHovered, shape = RoundedCornerShape(10.dp))
+                .padding(horizontal = 10.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(IvidsColorTokens.RecessedTrough),
+                contentAlignment = Alignment.Center
+            ) {
+                if (item.coverUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = item.coverUrl,
+                        contentDescription = item.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(Icons.Rounded.MusicNote, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
+                }
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = if (isActive) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.ChalkInk,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = item.artist,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = IvidsColorTokens.SlateMuted,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (isActive) {
+                Icon(
+                    imageVector = Icons.Rounded.GraphicEq,
+                    contentDescription = null,
+                    tint = IvidsColorTokens.PrimaryCyan,
+                    modifier = Modifier.size(18.dp)
+                )
+            } else {
+                if (canMoveUp) {
+                    IconButton(onClick = onMoveUp, modifier = Modifier.size(26.dp)) {
+                        Icon(Icons.Rounded.ArrowUpward, strings["move_up"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(14.dp))
+                    }
+                }
+                if (canMoveDown) {
+                    IconButton(onClick = onMoveDown, modifier = Modifier.size(26.dp)) {
+                        Icon(Icons.Rounded.ArrowDownward, strings["move_down"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(14.dp))
+                    }
+                }
+            }
+            IconButton(onClick = onRemove, modifier = Modifier.size(26.dp)) {
+                Icon(Icons.Rounded.Close, strings["remove"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(14.dp))
             }
         }
     }

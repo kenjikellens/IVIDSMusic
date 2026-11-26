@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -36,6 +37,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Close
+import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -63,12 +65,12 @@ import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.domain.model.Playlist
 import com.kenjigames.ividsmusic.domain.model.SearchFilterType
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
+import com.kenjigames.ividsmusic.ui.components.CardContextMenuAction
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
-import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
@@ -242,15 +244,62 @@ fun SearchScreen(
             }
 
             if (state.query.isBlank()) {
-                item(key = "browse_hero") {
-                    LivingAlbumHero(
-                        eyebrow = strings["tagline"],
-                        title = strings["start_experience_title"],
-                        subtitle = strings["start_experience_desc"],
-                        artworkUrl = null,
-                        primaryActionLabel = strings["explore_trends"],
-                        onPrimaryAction = { viewModel.submitQuery("Top Hits") }
-                    )
+                if (state.recentSearches.isNotEmpty()) {
+                    item(key = "recent_searches") {
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = strings["recent_searches"],
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = IvidsColorTokens.ChalkInk
+                                )
+                                TextButton(onClick = viewModel::clearRecentSearches) {
+                                    Text(strings["clear_recent"], color = IvidsColorTokens.SlateMuted)
+                                }
+                            }
+                            FlowRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                state.recentSearches.forEach { recent ->
+                                    IvidsTonalPill(
+                                        onClick = { viewModel.submitQuery(recent) },
+                                        baseColor = IvidsColorTokens.GlassSurface,
+                                        hoverColor = IvidsColorTokens.GlassHover,
+                                        contentPadding = PaddingValues(start = 12.dp, end = 8.dp, top = 7.dp, bottom = 7.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.History,
+                                            contentDescription = null,
+                                            tint = IvidsColorTokens.SlateMuted,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Text(
+                                            text = recent,
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = IvidsColorTokens.ChalkInk,
+                                            maxLines = 1
+                                        )
+                                        IconButton(
+                                            onClick = { viewModel.removeRecentSearch(recent) },
+                                            modifier = Modifier.size(20.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Close,
+                                                contentDescription = strings["remove"],
+                                                tint = IvidsColorTokens.SlateMuted,
+                                                modifier = Modifier.size(14.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 item(key = "browse_categories") {
                     @Composable
@@ -359,7 +408,10 @@ fun SearchScreen(
                                         subtitle = strings["artists"],
                                         artworkUrl = artist.coverUrl,
                                         isCircular = true,
-                                        onClick = { onOpenArtist(artist.id, artist.name) }
+                                        onClick = { onOpenArtist(artist.id, artist.name) },
+                                        contextMenuItems = listOf(
+                                            CardContextMenuAction(strings["view_artist"]) { onOpenArtist(artist.id, artist.name) }
+                                        )
                                     )
                                 }
                             }
@@ -389,7 +441,10 @@ fun SearchScreen(
                                         subtitle = album.artist,
                                         artworkUrl = album.coverUrl,
                                         badgeText = album.releaseYear?.toString(),
-                                        onClick = { onOpenAlbum(album.id) }
+                                        onClick = { onOpenAlbum(album.id) },
+                                        contextMenuItems = listOf(
+                                            CardContextMenuAction(strings["view_artist"]) { onOpenArtist(album.artistId, album.artist) }
+                                        )
                                     )
                                 }
                             }

@@ -38,6 +38,8 @@ data class SettingsUiState(
     val language: SupportedLanguage = SupportedLanguage.EN,
     val defaultQuality: AudioQuality = AudioQuality.Q196,
     val dynamicTintEnabled: Boolean = true,
+    val autoplayEnabled: Boolean = true,
+    val audioCacheBytes: Long = 0L,
     val layoutMode: LayoutMode = LayoutMode.AUTO,
     val updateMode: UpdateMode = UpdateMode.AUTO,
     val appVersion: String = "0.2.5",
@@ -70,6 +72,7 @@ class SettingsViewModel(
 
     init {
         observePreferencesAndUpdates()
+        refreshAudioCacheSize()
     }
 
     /**
@@ -112,6 +115,15 @@ class SettingsViewModel(
     }
 
     /**
+     * Enables or disables infinite recommendation radio autoplay when the queue ends.
+     */
+    fun setAutoplayEnabled(enabled: Boolean) {
+        scope.launch {
+            preferencesRepository.setAutoplayEnabled(enabled)
+        }
+    }
+
+    /**
      * Overrides the responsive shell [LayoutMode] (`AUTO`, `MOBILE`, `DESKTOP`, or `TV`).
      */
     fun setLayoutMode(mode: LayoutMode) {
@@ -148,14 +160,27 @@ class SettingsViewModel(
     }
 
     /**
-     * Clears cached streaming audio files and temporary stream URL caches cleanly.
+     * Clears cached streaming audio files, refreshes the displayed cache byte counter, and notifies user.
      */
     fun clearAudioCache() {
         scope.launch {
             when (val res = offlineDownloadManager.clearAudioCache()) {
-                is AppResult.Success -> toastController.show(localizationManager.strings.value["cache_cleared"])
+                is AppResult.Success -> {
+                    refreshAudioCacheSize()
+                    toastController.show(localizationManager.strings.value["cache_cleared"])
+                }
                 is AppResult.Failure -> toastController.show(res.error.message, isError = true)
             }
+        }
+    }
+
+    /**
+     * Queries [OfflineDownloadManager.getAudioCacheBytes] and updates [SettingsUiState.audioCacheBytes].
+     */
+    fun refreshAudioCacheSize() {
+        scope.launch {
+            val bytes = offlineDownloadManager.getAudioCacheBytes()
+            _uiState.update { it.copy(audioCacheBytes = bytes) }
         }
     }
 
@@ -227,6 +252,7 @@ class SettingsViewModel(
                         language = SupportedLanguage.fromCode(prefs.languageCode),
                         defaultQuality = prefs.downloadQuality,
                         dynamicTintEnabled = prefs.dynamicTintEnabled,
+                        autoplayEnabled = prefs.autoplayEnabled,
                         layoutMode = prefs.layoutMode,
                         updateMode = prefs.updateMode,
                         updateState = update

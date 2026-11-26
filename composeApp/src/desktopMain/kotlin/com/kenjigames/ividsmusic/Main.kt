@@ -3,8 +3,10 @@ package com.kenjigames.ividsmusic
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
@@ -13,8 +15,10 @@ import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import com.kenjigames.ividsmusic.data.local.AppStorageDirectories
@@ -35,11 +39,62 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.KoinContext
 import org.koin.core.context.stopKoin
+import java.awt.GraphicsEnvironment
 import java.io.File
 import kotlin.system.exitProcess
+
+@Serializable
+private data class WindowBounds(
+    val widthDp: Float = 1280f,
+    val heightDp: Float = 820f,
+    val xDp: Float? = null,
+    val yDp: Float? = null
+)
+
+/** Loads persisted window bounds from [file], returning defaults if absent or off-screen. */
+private fun loadWindowBounds(file: File): WindowBounds {
+    val raw = runCatching { file.takeIf { it.isFile }?.readText() }.getOrNull() ?: return WindowBounds()
+    val parsed = runCatching { Json { ignoreUnknownKeys = true }.decodeFromString<WindowBounds>(raw) }.getOrNull()
+        ?: return WindowBounds()
+    val safeW = parsed.widthDp.coerceIn(720f, 3840f)
+    val safeH = parsed.heightDp.coerceIn(520f, 2160f)
+    val x = parsed.xDp
+    val y = parsed.yDp
+    val visibleOnAnyMonitor = if (x != null && y != null) {
+        runCatching {
+            GraphicsEnvironment.getLocalGraphicsEnvironment().screenDevices.any { device ->
+                val b = device.defaultConfiguration.bounds
+                x >= b.x - 100 && x <= b.x + b.width - 120 && y >= b.y - 40 && y <= b.y + b.height - 120
+            }
+        }.getOrDefault(false)
+    } else {
+        false
+    }
+    return if (visibleOnAnyMonitor) {
+        WindowBounds(safeW, safeH, x, y)
+    } else {
+        WindowBounds(safeW, safeH, null, null)
+    }
+}
+
+/** Saves current desktop window size and position to [file] safely. */
+private fun saveWindowBounds(file: File, widthDp: Dp, heightDp: Dp, position: WindowPosition) {
+    val x = (position as? WindowPosition.Absolute)?.x?.value
+    val y = (position as? WindowPosition.Absolute)?.y?.value
+    val payload = WindowBounds(
+        widthDp = widthDp.value.coerceAtLeast(720f),
+        heightDp = heightDp.value.coerceAtLeast(520f),
+        xDp = x,
+        yDp = y
+    )
+    runCatching { file.writeText(Json.encodeToString(payload)) }
+}
 
 /**
  * Configures JVM and Skiko rendering system properties before AWT/Swing initializes so Windows
@@ -75,12 +130,25 @@ fun main() {
         )
     }
 
+    val boundsFile = File(directories.filesDir, "window_bounds.json")
+    val initialBounds = loadWindowBounds(boundsFile)
+
     application {
         var searchFocusTrigger by remember { mutableIntStateOf(0) }
-        val windowState = rememberWindowState(width = 1280.dp, height = 820.dp)
+        var nowPlayingExpanded by remember { mutableStateOf(false) }
+        val windowState = rememberWindowState(
+            width = initialBounds.widthDp.dp,
+            height = initialBounds.heightDp.dp,
+            position = if (initialBounds.xDp != null && initialBounds.yDp != null) {
+                WindowPosition.Absolute(initialBounds.xDp.dp, initialBounds.yDp.dp)
+            } else {
+                WindowPosition.Aligned(Alignment.Center)
+            }
+        )
 
         Window(
             onCloseRequest = {
+                saveWindowBounds(boundsFile, windowState.size.width, windowState.size.height, windowState.position)
                 runCatching { runBlocking { playerViewModel.saveSessionNow() } }
                 runCatching { backgroundScope.cancel() }
                 runCatching { audioEngine.release() }
@@ -92,12 +160,45 @@ fun main() {
             state = windowState,
             icon = painterResource(Res.drawable.ic_ivids_brand),
             onPreviewKeyEvent = { event ->
-                if (event.type == KeyEventType.KeyDown && event.isCtrlPressed && event.key == Key.K) {
-                    searchFocusTrigger += 1
-                    if (navigator.currentRoute !is AppRoute.Search) {
-                        navigator.navigateTo(AppRoute.Search())
+                if (event.type == KeyEventType.KeyDown) {
+                    when {
+                        event.isCtrlPressed && event.key == Key.K -> {
+                            searchFocusTrigger += 1
+                            if (navigator.currentRoute !is AppRoute.Search) {
+                                navigator.navigateTo(AppRoute.Search())
+                            }
+                            true
+                        }
+                        event.key == Key.Escape && nowPlayingExpanded -> {
+                            nowPlayingExpanded = false
+                            true
+                        }
+                        event.key == Key.MediaPlayPause -> {
+                            playerViewModel.togglePlayPause()
+                            true
+                        }
+                        event.key == Key.MediaPlay -> {
+                            if (!playerViewModel.uiState.value.isPlaying) playerViewModel.togglePlayPause()
+                            true
+                        }
+                        event.key == Key.MediaPause || event.key == Key.MediaStop -> {
+                            if (playerViewModel.uiState.value.isPlaying) playerViewModel.togglePlayPause()
+                            true
+                        }
+                        event.key == Key.MediaNext -> {
+                            playerViewModel.next()
+                            true
+                        }
+                        event.key == Key.MediaPrevious -> {
+                            playerViewModel.previous()
+                            true
+                        }
+                        event.key == Key.VolumeMute -> {
+                            playerViewModel.toggleMute()
+                            true
+                        }
+                        else -> false
                     }
-                    true
                 } else {
                     false
                 }
@@ -118,6 +219,18 @@ fun main() {
                     }
                     Key.M -> {
                         playerViewModel.toggleMute()
+                        true
+                    }
+                    Key.S -> {
+                        playerViewModel.toggleShuffle()
+                        true
+                    }
+                    Key.R -> {
+                        playerViewModel.cycleRepeatMode()
+                        true
+                    }
+                    Key.L -> {
+                        playerViewModel.toggleLikeCurrent()
                         true
                     }
                     Key.DirectionLeft -> {
@@ -146,7 +259,11 @@ fun main() {
                 window.contentPane.background = obsidianAwt
             }
             KoinContext(context = koin) {
-                IvidsApp(searchFocusTrigger = searchFocusTrigger)
+                IvidsApp(
+                    searchFocusTrigger = searchFocusTrigger,
+                    nowPlayingExpanded = nowPlayingExpanded,
+                    onNowPlayingExpandedChange = { nowPlayingExpanded = it }
+                )
             }
         }
     }

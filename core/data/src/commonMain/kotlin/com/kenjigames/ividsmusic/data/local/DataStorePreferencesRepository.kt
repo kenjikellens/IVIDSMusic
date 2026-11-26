@@ -50,6 +50,8 @@ class DataStorePreferencesRepository(
         } ?: LayoutMode.AUTO
         val rawVolume = (prefs[KEY_VOLUME] ?: 1.0f).coerceIn(0f, 1f)
         val rawMuted = prefs[KEY_IS_MUTED] ?: false
+        val rawRecent = decodeRecentSearches(prefs[KEY_RECENT_SEARCHES])
+        val rawAutoplay = prefs[KEY_AUTOPLAY_ENABLED] ?: true
 
         UserPreferences(
             downloadQuality = AudioQuality.fromKbps(rawQuality),
@@ -60,7 +62,9 @@ class DataStorePreferencesRepository(
             updateMode = rawUpdateMode,
             layoutMode = rawLayoutMode,
             volume = rawVolume,
-            isMuted = rawMuted
+            isMuted = rawMuted,
+            recentSearches = rawRecent,
+            autoplayEnabled = rawAutoplay
         )
     }
 
@@ -154,6 +158,39 @@ class DataStorePreferencesRepository(
         }
     }
 
+    /** Prepends [query] to persisted recent searches with case-insensitive deduplication, capped at 10 items. */
+    override suspend fun addRecentSearch(query: String): AppResult<Unit> {
+        val clean = query.trim().replace(RECENT_SEARCH_DELIMITER, ' ')
+        if (clean.isEmpty()) return AppResult.Success(Unit)
+        return editPrefs { prefs ->
+            val existing = decodeRecentSearches(prefs[KEY_RECENT_SEARCHES])
+            val updated = (listOf(clean) + existing.filterNot { it.equals(clean, ignoreCase = true) })
+                .take(MAX_RECENT_SEARCHES)
+            prefs[KEY_RECENT_SEARCHES] = updated.joinToString(RECENT_SEARCH_DELIMITER.toString())
+        }
+    }
+
+    /** Removes any recent search matching [query] (case-insensitive) from DataStore. */
+    override suspend fun removeRecentSearch(query: String): AppResult<Unit> {
+        val clean = query.trim()
+        if (clean.isEmpty()) return AppResult.Success(Unit)
+        return editPrefs { prefs ->
+            val updated = decodeRecentSearches(prefs[KEY_RECENT_SEARCHES])
+                .filterNot { it.equals(clean, ignoreCase = true) }
+            prefs[KEY_RECENT_SEARCHES] = updated.joinToString(RECENT_SEARCH_DELIMITER.toString())
+        }
+    }
+
+    /** Clears all persisted recent search history entries from DataStore. */
+    override suspend fun clearRecentSearches(): AppResult<Unit> = editPrefs { prefs ->
+        prefs.remove(KEY_RECENT_SEARCHES)
+    }
+
+    /** Persists whether infinite recommendation radio autoplay is enabled when the queue ends. */
+    override suspend fun setAutoplayEnabled(enabled: Boolean): AppResult<Unit> = editPrefs { prefs ->
+        prefs[KEY_AUTOPLAY_ENABLED] = enabled
+    }
+
     /** Reads any user-configured custom offline save directory path persisted in DataStore, or `null`. */
     suspend fun getCustomSaveDirectory(): String? =
         safeData.first()[KEY_CUSTOM_SAVE_DIR]?.takeIf { it.isNotBlank() }
@@ -179,6 +216,14 @@ class DataStorePreferencesRepository(
         return (clamped * 20f).roundToInt() / 20f
     }
 
+    /** Splits serialized recent search string on the unit-separator delimiter into non-blank queries. */
+    private fun decodeRecentSearches(raw: String?): List<String> =
+        raw.orEmpty()
+            .split(RECENT_SEARCH_DELIMITER)
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .take(MAX_RECENT_SEARCHES)
+
     companion object {
         const val MIN_UI_SCALE = 0.75f
         const val MAX_UI_SCALE = 1.50f
@@ -187,6 +232,8 @@ class DataStorePreferencesRepository(
         const val DEFAULT_DISPLAY_NAME = "Listener"
         private const val MAX_NAME_LENGTH = 30
         private const val MAX_BIO_LENGTH = 120
+        private const val MAX_RECENT_SEARCHES = 10
+        private const val RECENT_SEARCH_DELIMITER = '\u001F'
 
         private val KEY_DOWNLOAD_QUALITY = intPreferencesKey("download_quality_kbps")
         private val KEY_UI_SCALE = floatPreferencesKey("ui_scale_factor")
@@ -202,5 +249,7 @@ class DataStorePreferencesRepository(
         private val KEY_VOLUME = floatPreferencesKey("playback_volume")
         private val KEY_IS_MUTED = booleanPreferencesKey("playback_muted")
         private val KEY_YTDLP_LAST_CHECK_MS = longPreferencesKey("ytdlp_last_check_ms")
+        private val KEY_RECENT_SEARCHES = stringPreferencesKey("recent_search_queries")
+        private val KEY_AUTOPLAY_ENABLED = booleanPreferencesKey("autoplay_enabled")
     }
 }

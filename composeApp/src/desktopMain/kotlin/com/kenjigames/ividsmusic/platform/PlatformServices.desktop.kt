@@ -161,3 +161,8 @@ internal fun isNewerVersion(current: String, latest: String): Boolean {
     }
     return false
 }
+
+/**
+ * Returns the desktop host's current local hour of day (`0..23`).
+ */
+actual fun currentLocalHour24(): Int = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)

@@ -115,4 +115,29 @@ class SqlScoreAndPreferencesTest {
         assertEquals("Hi-Fi audio fan", profile.bio)
         assertEquals(125L, profile.totalListeningSeconds)
     }
+
+    /**
+     * Verifies recent search deduplication, 10-item cap, removal, clear, and autoplay persistence.
+     */
+    @Test
+    fun recentSearchesDeduplicateCapAtTenAndAutoplayPersists() = runTest {
+        (1..12).forEach { idx ->
+            preferencesRepository.addRecentSearch("Query $idx")
+        }
+        preferencesRepository.addRecentSearch("query 12")
+        val prefsAfterCap = preferencesRepository.preferences.first()
+        assertEquals(10, prefsAfterCap.recentSearches.size)
+        assertEquals("query 12", prefsAfterCap.recentSearches.first())
+        assertFalse(prefsAfterCap.recentSearches.contains("Query 1"))
+        assertFalse(prefsAfterCap.recentSearches.contains("Query 2"))
+
+        preferencesRepository.removeRecentSearch("Query 11")
+        assertFalse(preferencesRepository.preferences.first().recentSearches.contains("Query 11"))
+
+        preferencesRepository.clearRecentSearches()
+        assertTrue(preferencesRepository.preferences.first().recentSearches.isEmpty())
+
+        preferencesRepository.setAutoplayEnabled(false)
+        assertFalse(preferencesRepository.preferences.first().autoplayEnabled)
+    }
 }

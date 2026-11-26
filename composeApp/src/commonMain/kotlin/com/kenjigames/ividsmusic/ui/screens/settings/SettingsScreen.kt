@@ -63,6 +63,7 @@ import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
 import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
 import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
+import com.kenjigames.ividsmusic.ui.components.formatByteSize
 import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
 import com.kenjigames.ividsmusic.ui.components.ividsPressRipple
 import com.kenjigames.ividsmusic.ui.i18n.AppStrings
@@ -188,6 +189,21 @@ fun SettingsScreen(
                     onClick = { onOpenSection(SettingsSection.AUDIO_QUALITY) }
                 )
             }
+            item(key = "row_autoplay") {
+                SettingsListRow(
+                    icon = Icons.Rounded.AutoAwesome,
+                    title = strings["autoplay_radio"],
+                    subtitle = strings["autoplay_radio_desc"],
+                    horizontalPadding = rowHPad,
+                    trailing = {
+                        IvidsSwitch(
+                            checked = state.autoplayEnabled,
+                            onCheckedChange = viewModel::setAutoplayEnabled
+                        )
+                    },
+                    onClick = { viewModel.setAutoplayEnabled(!state.autoplayEnabled) }
+                )
+            }
 
             item(key = "div_updates") {
                 HorizontalDivider(color = IvidsColorTokens.HairlineSubtle, modifier = Modifier.padding(vertical = 8.dp))
@@ -263,6 +279,7 @@ fun SettingsScreen(
                 SettingsListRow(
                     icon = Icons.Rounded.DeleteSweep,
                     title = strings["clear_cache"],
+                    subtitle = strings.format("cache_size_label", "size" to formatByteSize(state.audioCacheBytes)),
                     horizontalPadding = rowHPad,
                     onClick = viewModel::clearAudioCache
                 )

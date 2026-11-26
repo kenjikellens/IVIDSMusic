@@ -130,6 +130,7 @@ fun TrackRowItem(
         interactionSource = interactionSource,
         modifier = modifier
             .fillMaxWidth()
+            .onSecondaryClick { menuExpanded = true }
             .ividsTouchFeedback(interactionSource = interactionSource, pressedScale = 0.985f)
             .pointerHoverIcon(PointerIcon.Hand)
             .tvFocusable(shape = RoundedCornerShape(12.dp)),
@@ -161,7 +162,7 @@ fun TrackRowItem(
                             Icon(
                                 imageVector = Icons.Rounded.GraphicEq,
                                 contentDescription = null,
-                                tint = IvidsColorTokens.ChalkInk,
+                                tint = IvidsColorTokens.PrimaryCyan,
                                 modifier = Modifier.size(18.dp)
                             )
                         }
@@ -228,7 +229,7 @@ fun TrackRowItem(
                 Text(
                     text = track.title,
                     style = MaterialTheme.typography.titleMedium,
-                    color = IvidsColorTokens.ChalkInk,
+                    color = if (isCurrentlyPlaying) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.ChalkInk,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )

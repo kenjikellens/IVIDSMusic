@@ -3,6 +3,7 @@ package com.kenjigames.ividsmusic.ui.screens.playlist
 import androidx.compose.runtime.Immutable
 import com.kenjigames.ividsmusic.domain.model.AppResult
 import com.kenjigames.ividsmusic.domain.model.Playlist
+import com.kenjigames.ividsmusic.domain.model.TrackSortOption
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import kotlinx.coroutines.CoroutineScope
@@ -23,6 +24,9 @@ import kotlinx.coroutines.launch
 @Immutable
 data class PlaylistDetailUiState(
     val playlist: Playlist? = null,
+    val searchQuery: String = "",
+    val sortOption: TrackSortOption = TrackSortOption.RECENT,
+    val offlineOnly: Boolean = false,
     val isEditing: Boolean = false,
     val editTitle: String = "",
     val editDescription: String = "",
@@ -75,6 +79,27 @@ class PlaylistDetailViewModel(
      */
     fun onEditDescriptionChanged(value: String) {
         _uiState.update { it.copy(editDescription = value) }
+    }
+
+    /**
+     * Updates the local playlist track filter query.
+     */
+    fun onSearchQueryChanged(query: String) {
+        _uiState.update { it.copy(searchQuery = query) }
+    }
+
+    /**
+     * Sets the active [TrackSortOption] for displaying tracks in this playlist.
+     */
+    fun setSortOption(option: TrackSortOption) {
+        _uiState.update { it.copy(sortOption = option) }
+    }
+
+    /**
+     * Toggles whether only offline-downloaded tracks are shown in this playlist.
+     */
+    fun toggleOfflineOnly() {
+        _uiState.update { it.copy(offlineOnly = !it.offlineOnly) }
     }
 
     /**

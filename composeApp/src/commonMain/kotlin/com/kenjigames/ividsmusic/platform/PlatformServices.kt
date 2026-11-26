@@ -63,3 +63,8 @@ expect class AppUpdateChecker {
     /** Resets update state back to [AppUpdateState.Idle] when dismissed by the user. */
     fun dismiss()
 }
+
+/**
+ * Returns the device's current local hour of day in `0..23` for time-of-day UI greetings.
+ */
+expect fun currentLocalHour24(): Int

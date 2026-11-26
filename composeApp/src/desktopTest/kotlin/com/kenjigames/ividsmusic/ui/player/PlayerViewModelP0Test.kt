@@ -177,6 +177,63 @@ class PlayerViewModelP0Test {
         vm.dispose()
     }
 
+    /** Verifies [PlayerViewModel.moveQueueTrack] reorders queued tracks and saves the session. */
+    @Test
+    fun moveQueueTrackReordersAndPersistsSession() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        val t1 = Track("t1", "Song 1", "Artist 1", durationSeconds = 180)
+        val t2 = Track("t2", "Song 2", "Artist 2", durationSeconds = 200)
+        val t3 = Track("t3", "Song 3", "Artist 3", durationSeconds = 220)
+        val sessionRepo = FakeSessionRepository(null)
+        val vm = PlayerViewModel(
+            audioEngine = FakeAudioEngine(),
+            queueController = PlaybackQueueController(),
+            resolveStream = ResolveTrackStreamUseCase(FakeLibraryRepository(), FakeStreamResolver()),
+            libraryRepository = FakeLibraryRepository(),
+            recommendationEngine = RecommendationEngine(FakeScoreRepository(), FakeDiscoveryRepository()) { 1_000L },
+            preferencesRepository = FakePreferencesRepository(UserPreferences()),
+            offlineDownloadManager = FakeDownloadManager(),
+            toastController = ToastController(),
+            sessionRepository = sessionRepo
+        )
+        vm.playTrack(t1, listOf(t1, t2, t3))
+        runCurrent()
+        vm.moveQueueTrack(fromIndex = 2, toIndex = 1)
+        runCurrent()
+        assertEquals(listOf("t1", "t3", "t2"), vm.uiState.value.queue.map { it.id })
+        vm.dispose()
+    }
+
+    /** Verifies autoplay radio seeds related tracks when queue ends with RepeatMode.OFF. */
+    @Test
+    fun autoplayRadioEnqueuesRelatedTracksOnQueueEnd() = runTest {
+        Dispatchers.setMain(UnconfinedTestDispatcher(testScheduler))
+        val t1 = Track("t1", "Starter", "Artist", durationSeconds = 180)
+        val radioTrack = Track("r1", "Radio Pick", "Artist B", durationSeconds = 190)
+        val engine = FakeAudioEngine()
+        val discovery = object : MusicDiscoveryRepository by FakeDiscoveryRepository() {
+            override suspend fun getRelatedTracks(trackId: String, limit: Int) = AppResult.Success(listOf(radioTrack))
+        }
+        val vm = PlayerViewModel(
+            audioEngine = engine,
+            queueController = PlaybackQueueController(),
+            resolveStream = ResolveTrackStreamUseCase(FakeLibraryRepository(), FakeStreamResolver()),
+            libraryRepository = FakeLibraryRepository(),
+            recommendationEngine = RecommendationEngine(FakeScoreRepository(), discovery) { 1_000L },
+            preferencesRepository = FakePreferencesRepository(UserPreferences(autoplayEnabled = true)),
+            offlineDownloadManager = FakeDownloadManager(),
+            toastController = ToastController(),
+            discoveryRepository = discovery
+        )
+        vm.playTrack(t1, listOf(t1))
+        runCurrent()
+        engine.emitEnded()
+        runCurrent()
+        assertEquals("r1", vm.uiState.value.currentTrack?.id)
+        assertEquals(2, vm.uiState.value.queue.size)
+        vm.dispose()
+    }
+
     private class FakeAudioEngine : AudioEngine {
         private val _snapshot = MutableStateFlow(EngineSnapshot())
         override val snapshot: StateFlow<EngineSnapshot> = _snapshot.asStateFlow()
@@ -215,6 +272,11 @@ class PlayerViewModelP0Test {
 
         override suspend fun stop() {
             _snapshot.value = EngineSnapshot(volume = _snapshot.value.volume)
+        }
+
+        /** Simulates track completion for autoplay unit testing. */
+        fun emitEnded() {
+            _snapshot.value = _snapshot.value.copy(status = PlaybackStatus.ENDED, isPlaying = false)
         }
 
         override fun release() {}
@@ -262,6 +324,13 @@ class PlayerViewModelP0Test {
         }
         override suspend fun updateProfile(displayName: String, bio: String) = AppResult.Success(Unit)
         override suspend fun addListeningSeconds(seconds: Long) = AppResult.Success(Unit)
+        override suspend fun addRecentSearch(query: String) = AppResult.Success(Unit)
+        override suspend fun removeRecentSearch(query: String) = AppResult.Success(Unit)
+        override suspend fun clearRecentSearches() = AppResult.Success(Unit)
+        override suspend fun setAutoplayEnabled(enabled: Boolean): AppResult<Unit> {
+            state.value = state.value.copy(autoplayEnabled = enabled)
+            return AppResult.Success(Unit)
+        }
     }
 
     private class FakeLibraryRepository : LibraryRepository {
@@ -328,6 +397,7 @@ class PlayerViewModelP0Test {
         override suspend fun getSavedStorageBytes(): Long = 0L
         override suspend fun setCustomSaveDirectory(path: String) = AppResult.Success(Unit)
         override suspend fun clearAudioCache() = AppResult.Success(Unit)
+        override suspend fun getAudioCacheBytes(): Long = 0L
         override fun getSavedDirectoryPath(): String = ""
     }
 }

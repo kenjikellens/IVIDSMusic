@@ -142,8 +142,11 @@ fun AdaptiveAppShell(
     onCreatePlaylist: () -> Unit,
     modifier: Modifier = Modifier,
     activeDownloadCount: Int = 0,
+    likedCount: Int = 0,
     nowPlayingExpanded: Boolean? = null,
     onNowPlayingExpandedChange: ((Boolean) -> Unit)? = null,
+    onOpenLikedSongs: () -> Unit = { navigator.switchRootTab(AppRoute.Library) },
+    onOpenPlaylist: (Long) -> Unit = { navigator.navigateTo(AppRoute.PlaylistDetail(it)) },
     content: @Composable (AppRoute, ShellMode) -> Unit
 ) {
     var internalNowPlayingExpanded by remember { mutableStateOf(false) }
@@ -222,7 +225,12 @@ fun AdaptiveAppShell(
                                     currentRoute = currentRoute,
                                     expanded = isExpandedRail,
                                     isTv = shellMode == ShellMode.TV,
-                                    onSelectRoute = { navigator.switchRootTab(it) }
+                                    onSelectRoute = { navigator.switchRootTab(it) },
+                                    playlists = playlists,
+                                    likedCount = likedCount,
+                                    onOpenLikedSongs = onOpenLikedSongs,
+                                    onOpenPlaylist = onOpenPlaylist,
+                                    onCreatePlaylist = onCreatePlaylist
                                 )
                                 VerticalDivider(
                                     thickness = 1.dp,
@@ -363,8 +371,10 @@ private fun QueueSideSheetHost(
     QueueSideSheet(
         playerState = liveState,
         onJumpTo = playerViewModel::jumpToQueueIndex,
+        onMoveTrack = playerViewModel::moveQueueTrack,
         onRemove = playerViewModel::removeFromQueue,
         onClear = playerViewModel::clearQueue,
+        onToggleAutoplay = playerViewModel::toggleAutoplay,
         onClose = onClose
     )
 }

@@ -192,6 +192,7 @@ fun IvidsApp(
                         playlists = playlists,
                         searchFocusTrigger = searchFocusTrigger,
                         activeDownloadCount = activeDownloadCount,
+                        likedCount = likedTracks.size,
                         nowPlayingExpanded = nowPlayingExpanded,
                         onNowPlayingExpandedChange = onNowPlayingExpandedChange,
                         onHeaderSearchSubmit = { q ->
@@ -210,7 +211,14 @@ fun IvidsApp(
                                 onExploreTrends = {
                                     searchViewModel.submitQuery("Top Hits")
                                     navigator.navigateTo(AppRoute.Search("Top Hits"))
-                                }
+                                },
+                                playlists = playlists,
+                                likedTracks = likedTracks,
+                                playerViewModel = playerViewModel,
+                                libraryRepository = libraryRepository,
+                                toastController = toastController,
+                                onOpenPlaylist = { id -> navigator.navigateTo(AppRoute.PlaylistDetail(id)) },
+                                onOpenLikedSongs = { navigator.switchRootTab(AppRoute.Library) }
                             )
 
                             is AppRoute.Search -> SearchScreen(

@@ -256,6 +256,18 @@ interface PreferencesRepository {
 
     /** Increments cumulative listening duration by [seconds] when positive. */
     suspend fun addListeningSeconds(seconds: Long): AppResult<Unit>
+
+    /** Prepends a non-blank [query] to recent search history (case-insensitive deduplication, capped at 10). */
+    suspend fun addRecentSearch(query: String): AppResult<Unit>
+
+    /** Removes a matching [query] from persisted recent search history. */
+    suspend fun removeRecentSearch(query: String): AppResult<Unit>
+
+    /** Clears all persisted recent search queries from DataStore. */
+    suspend fun clearRecentSearches(): AppResult<Unit>
+
+    /** Enables or disables infinite radio autoplay when the active queue reaches its end. */
+    suspend fun setAutoplayEnabled(enabled: Boolean): AppResult<Unit>
 }
 
 /**
@@ -321,6 +333,9 @@ interface OfflineDownloadManager {
 
     /** Deletes cached stream/audio temp artifacts under the app cache directory and clears stream TTL cache. */
     suspend fun clearAudioCache(): AppResult<Unit>
+
+    /** Sums total byte size occupied by temporary cached files inside the audio cache directory. */
+    suspend fun getAudioCacheBytes(): Long
 
     /** Returns the current saved directory absolute path synchronously. */
     fun getSavedDirectoryPath(): String

@@ -12,6 +12,7 @@ import com.kenjigames.ividsmusic.domain.model.RepeatMode
 import com.kenjigames.ividsmusic.domain.model.Track
 import com.kenjigames.ividsmusic.domain.port.AudioEngine
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
+import com.kenjigames.ividsmusic.domain.port.MusicDiscoveryRepository
 import com.kenjigames.ividsmusic.domain.port.OfflineDownloadManager
 import com.kenjigames.ividsmusic.domain.port.PlaybackSessionRepository
 import com.kenjigames.ividsmusic.domain.port.PreferencesRepository
@@ -57,6 +58,7 @@ data class PlayerUiState(
     val currentIndex: Int = -1,
     val isCurrentLiked: Boolean = false,
     val isCurrentDownloaded: Boolean = false,
+    val autoplayEnabled: Boolean = true,
     val activeQuality: AudioQuality = AudioQuality.Q196,
     val dynamicAccent: Color = IvidsColorTokens.ChalkInk,
     val errorMessage: String? = null
@@ -85,7 +87,8 @@ class PlayerViewModel(
     private val offlineDownloadManager: OfflineDownloadManager,
     private val toastController: ToastController,
     private val sessionRepository: PlaybackSessionRepository? = null,
-    private val streamPrefetcher: StreamPrefetcher? = null
+    private val streamPrefetcher: StreamPrefetcher? = null,
+    private val discoveryRepository: MusicDiscoveryRepository? = null
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private val _uiState = MutableStateFlow(PlayerUiState())
@@ -299,6 +302,25 @@ class PlayerViewModel(
         recordOutgoingEarlySkip()
         val target = queueController.jumpTo(index) ?: return
         launchTrackPlayback(target)
+    }
+
+    /**
+     * Moves a queued track from [fromIndex] to [toIndex] and persists the updated session order.
+     */
+    fun moveQueueTrack(fromIndex: Int, toIndex: Int) {
+        queueController.moveTrack(fromIndex, toIndex)
+        scope.launch { saveSessionNow() }
+    }
+
+    /**
+     * Toggles infinite recommendation radio autoplay when the active queue reaches its end.
+     */
+    fun toggleAutoplay() {
+        val nextEnabled = !_uiState.value.autoplayEnabled
+        _uiState.update { it.copy(autoplayEnabled = nextEnabled) }
+        scope.launch {
+            preferencesRepository.setAutoplayEnabled(nextEnabled)
+        }
     }
 
     /**
@@ -596,7 +618,8 @@ class PlayerViewModel(
     }
 
     /**
-     * Awards completion score, increments listening seconds, and advances to the next queued track.
+     * Awards completion score, increments listening seconds, advances to the next queued track, or
+     * seeds infinite radio tracks when autoplay is enabled and the queue finishes with repeat off.
      */
     private suspend fun handleTrackCompleted(completedTrack: Track) {
         recommendationEngine.recordTrackCompletion(completedTrack.id)
@@ -606,6 +629,28 @@ class PlayerViewModel(
         val nextTrack = queueController.next(respectRepeatOne = true)
         if (nextTrack != null) {
             launchTrackPlayback(nextTrack)
+            return
+        }
+        if (queueController.state.value.repeatMode == RepeatMode.OFF && _uiState.value.autoplayEnabled) {
+            val existingIds = queueController.state.value.queue.map { it.id }.toSet()
+            val related = (discoveryRepository?.getRelatedTracks(completedTrack.id, limit = 10) as? AppResult.Success)
+                ?.data
+                .orEmpty()
+                .filter { it.id !in existingIds }
+            val candidates = related.ifEmpty {
+                (recommendationEngine.generateRecommendations(savedTrackIds = existingIds) as? AppResult.Success)
+                    ?.data
+                    ?.discoveryMix
+                    .orEmpty()
+                    .filter { it.id !in existingIds }
+            }
+            if (candidates.isNotEmpty()) {
+                candidates.take(8).forEach { queueController.addToQueue(it) }
+                val radioNext = queueController.next(respectRepeatOne = false)
+                if (radioNext != null) {
+                    launchTrackPlayback(radioNext)
+                }
+            }
         }
     }
 
@@ -646,6 +691,7 @@ class PlayerViewModel(
                     val id = state.currentTrack?.id
                     state.copy(
                         activeQuality = prefs.downloadQuality,
+                        autoplayEnabled = prefs.autoplayEnabled,
                         isCurrentLiked = id != null && id in likedIds,
                         isCurrentDownloaded = id != null && id in downloadedIds
                     )

@@ -40,12 +40,16 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.PlaylistAdd
 import androidx.compose.material.icons.automirrored.rounded.VolumeOff
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
+import androidx.compose.material.icons.rounded.ArrowDownward
+import androidx.compose.material.icons.rounded.ArrowUpward
+import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.DeleteSweep
 import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.FavoriteBorder
+import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.MusicNote
@@ -286,6 +290,8 @@ fun NowPlayingSheet(
                                 Column(modifier = Modifier.fillMaxSize().padding(20.dp)) {
                                     NowPlayingQueueHeader(
                                         hasItems = playerState.queue.isNotEmpty(),
+                                        autoplayEnabled = playerState.autoplayEnabled,
+                                        onToggleAutoplay = playerViewModel::toggleAutoplay,
                                         onClear = playerViewModel::clearQueue
                                     )
                                     HorizontalDivider(
@@ -306,13 +312,17 @@ fun NowPlayingSheet(
                                                 items = playerState.queue,
                                                 key = { idx, item -> "${idx}_${item.id}" }
                                             ) { index, item ->
-                                                NowPlayingQueueRow(
-                                                    index = index,
-                                                    item = item,
-                                                    isActive = index == playerState.currentIndex,
-                                                    onJump = { playerViewModel.jumpToQueueIndex(index) },
-                                                    onRemove = { playerViewModel.removeFromQueue(index) }
-                                                )
+                                                    NowPlayingQueueRow(
+                                                        index = index,
+                                                        item = item,
+                                                        isActive = index == playerState.currentIndex,
+                                                        canMoveUp = index > 0,
+                                                        canMoveDown = index < playerState.queue.lastIndex,
+                                                        onJump = { playerViewModel.jumpToQueueIndex(index) },
+                                                        onMoveUp = { playerViewModel.moveQueueTrack(index, index - 1) },
+                                                        onMoveDown = { playerViewModel.moveQueueTrack(index, index + 1) },
+                                                        onRemove = { playerViewModel.removeFromQueue(index) }
+                                                    )
                                             }
                                         }
                                     }
@@ -377,6 +387,8 @@ fun NowPlayingSheet(
                                         Column(modifier = Modifier.fillMaxSize().padding(14.dp)) {
                                             NowPlayingQueueHeader(
                                                 hasItems = playerState.queue.isNotEmpty(),
+                                                autoplayEnabled = playerState.autoplayEnabled,
+                                                onToggleAutoplay = playerViewModel::toggleAutoplay,
                                                 onClear = playerViewModel::clearQueue
                                             )
                                             HorizontalDivider(
@@ -407,7 +419,11 @@ fun NowPlayingSheet(
                                                             index = index,
                                                             item = item,
                                                             isActive = index == playerState.currentIndex,
+                                                            canMoveUp = index > 0,
+                                                            canMoveDown = index < playerState.queue.lastIndex,
                                                             onJump = { playerViewModel.jumpToQueueIndex(index) },
+                                                            onMoveUp = { playerViewModel.moveQueueTrack(index, index - 1) },
+                                                            onMoveDown = { playerViewModel.moveQueueTrack(index, index + 1) },
                                                             onRemove = { playerViewModel.removeFromQueue(index) }
                                                         )
                                                     }
@@ -428,9 +444,14 @@ fun NowPlayingSheet(
 /**
  * Renders the Next Up header and optional Clear Queue button inside [NowPlayingSheet].
  */
+/**
+ * Renders the queue section header with an Autoplay Radio toggle and Clear Queue button.
+ */
 @Composable
 private fun NowPlayingQueueHeader(
     hasItems: Boolean,
+    autoplayEnabled: Boolean,
+    onToggleAutoplay: () -> Unit,
     onClear: () -> Unit
 ) {
     val strings = LocalStrings.current
@@ -439,11 +460,34 @@ private fun NowPlayingQueueHeader(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = strings["next_up"],
-            style = MaterialTheme.typography.titleLarge,
-            color = IvidsColorTokens.ChalkInk
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Text(
+                text = strings["next_up"],
+                style = MaterialTheme.typography.titleLarge,
+                color = IvidsColorTokens.ChalkInk
+            )
+            IvidsTonalPill(
+                onClick = onToggleAutoplay,
+                baseColor = if (autoplayEnabled) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f) else IvidsColorTokens.RecessedTrough,
+                hoverStyle = if (autoplayEnabled) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL,
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 5.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.AutoAwesome,
+                    contentDescription = null,
+                    tint = if (autoplayEnabled) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted,
+                    modifier = Modifier.size(14.dp)
+                )
+                Text(
+                    text = strings["autoplay_radio"],
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (autoplayEnabled) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted
+                )
+            }
+        }
         if (hasItems) {
             TextButton(onClick = onClear) {
                 Icon(
@@ -460,14 +504,19 @@ private fun NowPlayingQueueHeader(
 }
 
 /**
- * Renders a single borderless queue item inside [NowPlayingSheet].
+ * Renders a single borderless queue item inside [NowPlayingSheet] with cover art, reorder controls,
+ * and active cyan playing highlight.
  */
 @Composable
 private fun NowPlayingQueueRow(
     index: Int,
     item: Track,
     isActive: Boolean,
+    canMoveUp: Boolean,
+    canMoveDown: Boolean,
     onJump: () -> Unit,
+    onMoveUp: () -> Unit,
+    onMoveDown: () -> Unit,
     onRemove: () -> Unit
 ) {
     val strings = LocalStrings.current
@@ -480,21 +529,33 @@ private fun NowPlayingQueueRow(
         color = if (isActive) Color(0x1CFFFFFF) else Color(0x0AFFFFFF)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = (index + 1).toString(),
-                style = IvidsTextStyles.tabularBadge(),
-                color = if (isActive) IvidsColorTokens.ChalkInk else IvidsColorTokens.SlateMuted,
-                modifier = Modifier.width(24.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(IvidsColorTokens.RecessedTrough),
+                contentAlignment = Alignment.Center
+            ) {
+                if (item.coverUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = item.coverUrl,
+                        contentDescription = item.title,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Icon(Icons.Rounded.MusicNote, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
+                }
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.titleSmall,
-                    color = IvidsColorTokens.ChalkInk,
+                    color = if (isActive) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.ChalkInk,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -506,15 +567,34 @@ private fun NowPlayingQueueRow(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+            if (isActive) {
+                Icon(
+                    imageVector = Icons.Rounded.GraphicEq,
+                    contentDescription = null,
+                    tint = IvidsColorTokens.PrimaryCyan,
+                    modifier = Modifier.size(18.dp)
+                )
+            } else {
+                if (canMoveUp) {
+                    IconButton(onClick = onMoveUp, modifier = Modifier.size(28.dp)) {
+                        Icon(Icons.Rounded.ArrowUpward, strings["move_up"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(15.dp))
+                    }
+                }
+                if (canMoveDown) {
+                    IconButton(onClick = onMoveDown, modifier = Modifier.size(28.dp)) {
+                        Icon(Icons.Rounded.ArrowDownward, strings["move_down"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(15.dp))
+                    }
+                }
+            }
             IconButton(
                 onClick = onRemove,
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(28.dp)
             ) {
                 Icon(
                     imageVector = Icons.Rounded.Close,
                     contentDescription = strings["remove"],
                     tint = IvidsColorTokens.SlateMuted,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(15.dp)
                 )
             }
         }
