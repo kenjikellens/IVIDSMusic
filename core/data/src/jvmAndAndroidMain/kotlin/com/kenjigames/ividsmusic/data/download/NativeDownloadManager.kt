@@ -5,6 +5,7 @@ import com.kenjigames.ividsmusic.data.local.AppStorageDirectories
 import com.kenjigames.ividsmusic.data.local.DataStorePreferencesRepository
 import com.kenjigames.ividsmusic.data.stream.InMemoryStreamTtlCache
 import com.kenjigames.ividsmusic.data.stream.JvmLocalAudioLocator
+import com.kenjigames.ividsmusic.data.stream.NetworkSecurityGuard
 import com.kenjigames.ividsmusic.data.stream.YouTubeMetadataPreviewer
 import com.kenjigames.ividsmusic.data.stream.extractYouTubeVideoId
 import com.kenjigames.ividsmusic.domain.model.AppResult
@@ -432,20 +433,27 @@ class NativeDownloadManager(
     }
 
     /**
-     * Streams [source] into [partFile], automatically switching to bounded 512 KB range chunks for YouTube `googlevideo.com` URLs.
+     * Streams [source] into [partFile] after validating its HTTP(S) URL and sanitizing headers,
+     * automatically switching to bounded 512 KB range chunks for YouTube `googlevideo.com` URLs.
      */
     private suspend fun streamToPartFile(
         downloadId: String,
         source: StreamSource.RemoteUrl,
         partFile: File
     ) = withContext(ioDispatcher) {
-        if (source.url.contains("googlevideo.com", ignoreCase = true)) {
-            streamChunkedRangesToPartFile(downloadId, source, partFile)
+        val validatedUri = NetworkSecurityGuard.validateHttpUri(source.url, allowPrivateHosts = true)
+            ?: throw IllegalArgumentException("Invalid download stream URL scheme or syntax")
+        val safeUrl = validatedUri.toString()
+        if (safeUrl.contains("googlevideo.com", ignoreCase = true)) {
+            streamChunkedRangesToPartFile(downloadId, source.copy(url = safeUrl), partFile)
             return@withContext
         }
-        val reqBuilder = Request.Builder().url(source.url)
+        val reqBuilder = Request.Builder().url(safeUrl)
         for ((k, v) in source.headers) {
-            reqBuilder.addHeader(k, v)
+            val cleanName = NetworkSecurityGuard.sanitizeHeaderValue(k).trim()
+            if (cleanName.isNotEmpty()) {
+                reqBuilder.addHeader(cleanName, NetworkSecurityGuard.sanitizeHeaderValue(v))
+            }
         }
         val call = okHttpClient.newCall(reqBuilder.build())
         activeCalls[downloadId] = call
@@ -536,7 +544,10 @@ class NativeDownloadManager(
                     .header("User-Agent", DEFAULT_DOWNLOAD_USER_AGENT)
                     .header("Range", "bytes=$cursor-$chunkEnd")
                 for ((k, v) in source.headers) {
-                    reqBuilder.header(k, v)
+                    val cleanName = NetworkSecurityGuard.sanitizeHeaderValue(k).trim()
+                    if (cleanName.isNotEmpty()) {
+                        reqBuilder.header(cleanName, NetworkSecurityGuard.sanitizeHeaderValue(v))
+                    }
                 }
                 val call = okHttpClient.newCall(reqBuilder.build())
                 activeCalls[downloadId] = call

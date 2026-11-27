@@ -162,7 +162,7 @@ class CompositeMusicDiscoveryRepository(
                             val tracks = (itunesClient.searchTracks(genre, limit = 12) as? AppResult.Success)
                                 ?.data.orEmpty()
                             CategoryRow(
-                                id = genre.lowercase().replace(Regex("\\s+"), "-"),
+                                id = genre.lowercase().replace(WHITESPACE_REGEX, "-"),
                                 title = genre,
                                 tracks = tracks
                             )
@@ -299,5 +299,6 @@ class CompositeMusicDiscoveryRepository(
     companion object {
         const val DEFAULT_CACHE_TTL_MS = 15 * 60 * 1000L
         private const val MAX_CACHE_ENTRIES = 200
+        private val WHITESPACE_REGEX = Regex("\\s+")
     }
 }

@@ -66,6 +66,7 @@ import com.kenjigames.ividsmusic.ui.components.IvidsSwitch
 import com.kenjigames.ividsmusic.ui.components.formatByteSize
 import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
 import com.kenjigames.ividsmusic.ui.components.ividsPressRipple
+import com.kenjigames.ividsmusic.ui.components.rememberDelayedOnClick
 import com.kenjigames.ividsmusic.ui.i18n.AppStrings
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.i18n.SupportedLanguage
@@ -470,6 +471,7 @@ private fun SettingsListRow(
     val iconTint = if (isDestructive) IvidsColorTokens.DangerCoral else IvidsColorTokens.SlateMuted
 
     val hoverStyle = if (isDestructive) IvidsHoverStyle.DESTRUCTIVE else IvidsHoverStyle.NEUTRAL
+    val delayedClick = rememberDelayedOnClick(delayMs = 130L, onClick = onClick)
 
     Row(
         modifier = Modifier
@@ -487,7 +489,7 @@ private fun SettingsListRow(
             .clickable(
                 interactionSource = interactionSource,
                 indication = ividsPressRipple(hoverStyle),
-                onClick = onClick
+                onClick = delayedClick
             )
             .padding(horizontal = horizontalPadding, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -547,7 +549,7 @@ private fun SettingsRadioRow(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val bg by animateColorAsState(
-        targetValue = if (selected) Color(0xFF141414) else Color.Transparent,
+        targetValue = if (selected) IvidsColorTokens.GlassSurface else Color.Transparent,
         animationSpec = tween(120, easing = FastOutSlowInEasing),
         label = "SettingsRadioBg"
     )

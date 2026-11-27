@@ -32,6 +32,11 @@ class DesktopNativeToolsManager(
     private val clockMs: () -> Long = { System.currentTimeMillis() },
 ) {
 
+    private val noRedirectClient: OkHttpClient = okHttpClient.newBuilder()
+        .followRedirects(false)
+        .followSslRedirects(false)
+        .build()
+
     /**
      * Resolves and ensures existence of the user-writable desktop tools folder (`.../IVIDSMusic/tools`).
      * Uses the parent of [AppStorageDirectories.filesDir] so cache clears never delete managed executables.
@@ -210,10 +215,6 @@ class DesktopNativeToolsManager(
         startUrl: String,
         crossinline handler: (okhttp3.Response) -> T?
     ): T? {
-        val noRedirectClient = okHttpClient.newBuilder()
-            .followRedirects(false)
-            .followSslRedirects(false)
-            .build()
         var currentUrl = startUrl
         repeat(MAX_REDIRECTS + 1) { hop ->
             if (NetworkSecurityGuard.validateHttpUri(currentUrl, allowPrivateHosts = false) == null) return null
@@ -235,17 +236,29 @@ class DesktopNativeToolsManager(
         return null
     }
 
+    /**
+     * Runs `--version` on [executablePath] with a 4-second timeout and reads the first output line safely.
+     * Ensures streams are closed and any hanging child process is forcibly terminated in `finally`.
+     */
     private fun readToolVersionLine(executablePath: String): String? {
         val file = File(executablePath)
         if (!file.isFile) return null
+        var proc: Process? = null
         return runCatching {
-            val proc = ProcessBuilder(executablePath, "--version").start()
-            val finished = proc.waitFor(4L, TimeUnit.SECONDS)
+            proc = ProcessBuilder(executablePath, "--version")
+                .redirectErrorStream(true)
+                .start()
+            val activeProc = proc!!
+            val finished = activeProc.waitFor(4L, TimeUnit.SECONDS)
             if (!finished) {
-                proc.destroyForcibly()
+                activeProc.destroyForcibly()
                 return@runCatching null
             }
-            proc.inputStream.bufferedReader().readLine()?.trim()
+            activeProc.inputStream.bufferedReader().use { it.readLine()?.trim() }
+        }.also {
+            if (proc?.isAlive == true) {
+                proc?.destroyForcibly()
+            }
         }.getOrNull()
     }
 

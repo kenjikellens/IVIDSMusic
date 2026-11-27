@@ -18,28 +18,42 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.DownloadDone
+import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Pause
 import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.SwapVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -63,6 +77,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.kenjigames.ividsmusic.domain.model.TrackSortOption
+import com.kenjigames.ividsmusic.ui.i18n.AppStrings
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
@@ -303,6 +319,7 @@ fun <T> IvidsSegmentedBar(
             animationSpec = tween(140, easing = FastOutSlowInEasing),
             label = "SegmentFg"
         )
+        val delayedSelect = rememberDelayedOnClick(delayMs = 110L) { onSelect(item) }
         Box(
             modifier = Modifier
                 .clip(RoundedCornerShape(8.dp))
@@ -318,8 +335,9 @@ fun <T> IvidsSegmentedBar(
                 .tvFocusable(shape = RoundedCornerShape(8.dp))
                 .clickable(
                     interactionSource = interactionSource,
-                    indication = ividsPressRipple(if (isSelected) IvidsHoverStyle.ON_LIGHT else IvidsHoverStyle.NEUTRAL)
-                ) { onSelect(item) }
+                    indication = ividsPressRipple(if (isSelected) IvidsHoverStyle.ON_LIGHT else IvidsHoverStyle.NEUTRAL),
+                    onClick = delayedSelect
+                )
                 .padding(horizontal = if (isCompactMobile) 14.dp else 15.dp, vertical = 8.dp),
             contentAlignment = Alignment.Center
         ) {
@@ -375,6 +393,7 @@ fun IvidsTonalPill(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val delayedClick = rememberDelayedOnClick(delayMs = 130L, onClick = onClick)
 
     val resolvedBase = if (baseColor == IvidsColorTokens.RecessedTrough || baseColor == IvidsColorTokens.GlassSurface) {
         Color(0xFF1D1D1D)
@@ -399,7 +418,7 @@ fun IvidsTonalPill(
                 enabled = enabled,
                 interactionSource = interactionSource,
                 indication = ividsPressRipple(hoverStyle),
-                onClick = onClick
+                onClick = delayedClick
             )
     ) {
         Row(
@@ -527,6 +546,7 @@ fun IvidsIconButton(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val delayedClick = rememberDelayedOnClick(delayMs = 130L, onClick = onClick)
 
     Box(
         modifier = modifier
@@ -542,7 +562,7 @@ fun IvidsIconButton(
                 enabled = enabled,
                 interactionSource = interactionSource,
                 indication = ividsPressRipple(hoverStyle),
-                onClick = onClick
+                onClick = delayedClick
             ),
         contentAlignment = Alignment.Center,
         content = content
@@ -660,5 +680,185 @@ fun formatPlaylistTotalDuration(totalSeconds: Int): String {
         hours > 0 -> "${hours}h ${minutes}m"
         minutes > 0 -> "${minutes}m ${seconds}s"
         else -> "${seconds}s"
+    }
+}
+
+/**
+ * Returns standard dark-theme [TextFieldColors] for search and URL input fields across screens.
+ * Eliminates duplicated `OutlinedTextFieldDefaults.colors(...)` blocks while preserving focus borders.
+ */
+@Composable
+fun ividsSearchFieldColors(
+    unfocusedContainerColor: Color = IvidsColorTokens.RecessedTrough
+): TextFieldColors = OutlinedTextFieldDefaults.colors(
+    focusedContainerColor = IvidsColorTokens.GlassSurface,
+    unfocusedContainerColor = unfocusedContainerColor,
+    focusedBorderColor = IvidsColorTokens.HairlineBorder,
+    unfocusedBorderColor = Color.Transparent,
+    focusedTextColor = IvidsColorTokens.ChalkInk,
+    unfocusedTextColor = IvidsColorTokens.ChalkInk
+)
+
+/**
+ * Resolves the localized display label for a [TrackSortOption] inside sort menus and controls.
+ */
+private fun resolveSortLabel(option: TrackSortOption, strings: AppStrings): String = when (option) {
+    TrackSortOption.RECENT -> strings["sort_recent"]
+    TrackSortOption.TITLE -> strings["sort_title"]
+    TrackSortOption.ARTIST -> strings["sort_artist"]
+    TrackSortOption.DURATION -> strings["sort_duration"]
+}
+
+/**
+ * Renders a compact single-line track control bar with a sort dropdown menu, `Offline only`
+ * filter toggle, and optional trailing playback actions for [LibraryScreen] and [PlaylistDetailScreen].
+ */
+@Composable
+fun TrackSortFilterRow(
+    selectedSort: TrackSortOption,
+    offlineOnly: Boolean,
+    onSelectSort: (TrackSortOption) -> Unit,
+    onToggleOfflineOnly: () -> Unit,
+    strings: AppStrings,
+    modifier: Modifier = Modifier,
+    trailingContent: (@Composable RowScope.() -> Unit)? = null
+) {
+    var sortMenuExpanded by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Box {
+            IvidsTonalPill(
+                onClick = { sortMenuExpanded = true },
+                baseColor = IvidsColorTokens.GlassSurface,
+                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 7.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Rounded.SwapVert,
+                    contentDescription = strings["sort_by"],
+                    tint = IvidsColorTokens.SlateMuted,
+                    modifier = Modifier.size(16.dp)
+                )
+                Text(
+                    text = resolveSortLabel(selectedSort, strings),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = IvidsColorTokens.ChalkInk,
+                    maxLines = 1,
+                    softWrap = false
+                )
+                Icon(
+                    imageVector = Icons.Rounded.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = IvidsColorTokens.SlateMuted,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+            DropdownMenu(
+                expanded = sortMenuExpanded,
+                onDismissRequest = { sortMenuExpanded = false },
+                containerColor = IvidsColorTokens.GlassSurface
+            ) {
+                TrackSortOption.entries.forEach { opt ->
+                    val isSelected = selectedSort == opt
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = resolveSortLabel(opt, strings),
+                                color = if (isSelected) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.ChalkInk
+                            )
+                        },
+                        trailingIcon = if (isSelected) {
+                            {
+                                Icon(
+                                    imageVector = Icons.Rounded.Check,
+                                    contentDescription = null,
+                                    tint = IvidsColorTokens.PrimaryCyan,
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        } else {
+                            null
+                        },
+                        onClick = {
+                            sortMenuExpanded = false
+                            onSelectSort(opt)
+                        }
+                    )
+                }
+            }
+        }
+
+        IvidsTonalPill(
+            onClick = onToggleOfflineOnly,
+            baseColor = if (offlineOnly) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
+            hoverStyle = if (offlineOnly) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 7.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.DownloadDone,
+                contentDescription = null,
+                tint = if (offlineOnly) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted,
+                modifier = Modifier.size(15.dp)
+            )
+            Text(
+                text = strings["offline_only"],
+                style = MaterialTheme.typography.labelMedium,
+                color = if (offlineOnly) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.ChalkInk,
+                maxLines = 1,
+                softWrap = false
+            )
+        }
+
+        if (trailingContent != null) {
+            Spacer(modifier = Modifier.weight(1f))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                content = trailingContent
+            )
+        }
+    }
+}
+
+/**
+ * Renders the desktop Spotify-style track table column header (`#`, Title, Duration icon) with
+ * configurable [trailingWidth] above a hairline divider.
+ */
+@Composable
+fun TrackTableHeader(
+    strings: AppStrings,
+    trailingWidth: Dp = 84.dp,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+            Text(
+                text = "#",
+                style = IvidsTextStyles.tabularBadge(),
+                color = IvidsColorTokens.SlateMuted,
+                modifier = Modifier.width(26.dp)
+            )
+            Text(
+                text = strings["title_column"],
+                style = MaterialTheme.typography.labelMedium,
+                color = IvidsColorTokens.SlateMuted,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                imageVector = Icons.Rounded.Schedule,
+                contentDescription = strings["duration_column"],
+                tint = IvidsColorTokens.SlateMuted,
+                modifier = Modifier.size(16.dp)
+            )
+            Spacer(modifier = Modifier.width(trailingWidth))
+        }
+        HorizontalDivider(color = IvidsColorTokens.HairlineSubtle)
     }
 }

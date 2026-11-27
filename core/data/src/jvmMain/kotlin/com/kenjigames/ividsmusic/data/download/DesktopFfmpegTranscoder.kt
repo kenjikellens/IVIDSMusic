@@ -96,9 +96,12 @@ class DesktopFfmpegTranscoder(
         }
     }
 
-    /** Locates `ffmpeg.exe` from tools folder, working directory, WinGet links, or PATH environment variable. */
+    /** Locates `ffmpeg.exe` from managed user tools, bundled dir, working dir, WinGet links, or PATH. */
     internal fun findFfmpegExecutable(): String? {
         val candidates = mutableListOf<File>()
+        System.getenv("LOCALAPPDATA")?.takeIf { it.isNotBlank() }?.let { localAppData ->
+            candidates.add(File(localAppData, "IVIDSMusic/tools/ffmpeg.exe"))
+        }
         if (!bundledToolsDir.isNullOrBlank()) {
             candidates.add(File(bundledToolsDir, "ffmpeg.exe"))
             candidates.add(File(bundledToolsDir, "ffmpeg"))

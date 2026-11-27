@@ -114,7 +114,7 @@ class UiVisualSnapshotRunner {
                 preferencesRepository = sample.prefsRepo,
                 scoreRepository = sample.scoreRepo,
                 offlineDownloadManager = sample.downloadMgr,
-                localizationManager = LocalizationManager(Json { ignoreUnknownKeys = true }),
+                localizationManager = LocalizationManager(snapshotJson),
                 appUpdateChecker = AppUpdateChecker(sample.platformBridge),
                 platformBridge = sample.platformBridge,
                 toastController = sample.toastController
@@ -424,9 +424,13 @@ class UiVisualSnapshotRunner {
     /** Loads English JSON strings directly from `composeResources/files/lang/en.json`. */
     private fun loadEnglishStrings(): AppStrings {
         val enFile = File("src/commonMain/composeResources/files/lang/en.json")
-        val parsed = Json { ignoreUnknownKeys = true }.parseToJsonElement(enFile.readText()).jsonObject
+        val parsed = snapshotJson.parseToJsonElement(enFile.readText()).jsonObject
         val entries = parsed.mapValues { it.value.jsonPrimitive.content }
         return AppStrings(language = SupportedLanguage.EN, entries = entries, englishFallback = entries)
+    }
+
+    private companion object {
+        val snapshotJson = Json { ignoreUnknownKeys = true }
     }
 
     /** Deterministic in-memory sample fixtures populating Home, Search, Library, and Player. */

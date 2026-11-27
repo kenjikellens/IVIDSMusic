@@ -76,34 +76,39 @@ fun IvidsTheme(
     )
     val clampedScale = uiScale.coerceIn(0.75f, 1.50f)
     val baseDensity = LocalDensity.current
-    val effectiveDensity = if (abs(clampedScale - 1.0f) > 0.01f) {
-        Density(
-            density = baseDensity.density * clampedScale,
-            fontScale = baseDensity.fontScale
-        )
-    } else {
-        baseDensity
+    val effectiveDensity = remember(baseDensity, clampedScale) {
+        if (abs(clampedScale - 1.0f) > 0.01f) {
+            Density(
+                density = baseDensity.density * clampedScale,
+                fontScale = baseDensity.fontScale
+            )
+        } else {
+            baseDensity
+        }
     }
 
-    val colorScheme = darkColorScheme(
-        primary = IvidsColorTokens.ChalkInk,
-        onPrimary = IvidsColorTokens.ObsidianStage,
-        secondary = IvidsColorTokens.GlassHover,
-        onSecondary = IvidsColorTokens.ChalkInk,
-        tertiary = IvidsColorTokens.SlateMuted,
-        background = IvidsColorTokens.ObsidianStage,
-        onBackground = IvidsColorTokens.ChalkInk,
-        surface = IvidsColorTokens.GlassSurface,
-        onSurface = IvidsColorTokens.ChalkInk,
-        surfaceVariant = IvidsColorTokens.GlassHover,
-        onSurfaceVariant = IvidsColorTokens.SlateMuted,
-        outline = IvidsColorTokens.HairlineSubtle,
-        error = IvidsColorTokens.DangerCoral,
-        onError = IvidsColorTokens.ChalkInk
-    )
+    val colorScheme = remember {
+        darkColorScheme(
+            primary = IvidsColorTokens.ChalkInk,
+            onPrimary = IvidsColorTokens.ObsidianStage,
+            secondary = IvidsColorTokens.GlassHover,
+            onSecondary = IvidsColorTokens.ChalkInk,
+            tertiary = IvidsColorTokens.SlateMuted,
+            background = IvidsColorTokens.ObsidianStage,
+            onBackground = IvidsColorTokens.ChalkInk,
+            surface = IvidsColorTokens.GlassSurface,
+            onSurface = IvidsColorTokens.ChalkInk,
+            surfaceVariant = IvidsColorTokens.GlassHover,
+            onSurfaceVariant = IvidsColorTokens.SlateMuted,
+            outline = IvidsColorTokens.HairlineSubtle,
+            error = IvidsColorTokens.DangerCoral,
+            onError = IvidsColorTokens.ChalkInk
+        )
+    }
+    val extendedColors = remember { IvidsExtendedColors() }
 
     CompositionLocalProvider(
-        LocalIvidsColors provides IvidsExtendedColors(),
+        LocalIvidsColors provides extendedColors,
         LocalDynamicAccent provides animatedAccent,
         LocalIndication provides remember { ividsPressRipple(IvidsHoverStyle.NEUTRAL) },
         LocalUiScale provides clampedScale,

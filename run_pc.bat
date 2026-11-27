@@ -16,7 +16,7 @@ if exist "composeApp\build\compose\binaries\main\app\IVIDS Music\IVIDS Music.exe
 
 :run_gradle
 echo Launching IVIDS Music Desktop via Gradle...
-call gradlew.bat :composeApp:run
+call gradlew.bat :composeApp:run --no-daemon
 if %ERRORLEVEL% NEQ 0 (
     echo.
     echo [ERROR] Failed to launch IVIDS Music Desktop (exit code %ERRORLEVEL%).

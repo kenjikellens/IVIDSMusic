@@ -28,6 +28,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 
+private val GROOVE_FACTORS = floatArrayOf(0.80f, 0.64f, 0.48f)
+
 /**
  * Unified spinning vinyl record loader rendered on Canvas across buffering play controls and
  * screen loading states with concentric grooves, rotating specular sheen, and signature center label.
@@ -64,7 +66,7 @@ fun IvidsVinylLoader(
                 center = center,
                 style = Stroke(width = grooveStroke)
             )
-            listOf(0.80f, 0.64f, 0.48f).forEach { factor ->
+            GROOVE_FACTORS.forEach { factor ->
                 drawCircle(
                     color = grooveColor.copy(alpha = 0.22f),
                     radius = radius * factor,

@@ -14,8 +14,14 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.drawBehind
@@ -64,13 +70,13 @@ fun resolveHoverColor(style: IvidsHoverStyle): Color = when (style) {
 }
 
 /**
- * Resolves the subtle, pointer-originated press ripple color matching a semantic [IvidsHoverStyle].
+ * Resolves the pointer-originated press ripple color matching a semantic [IvidsHoverStyle].
  */
 fun resolveRippleColor(style: IvidsHoverStyle): Color = when (style) {
-    IvidsHoverStyle.NEUTRAL -> Color(0x1EFFFFFF)
-    IvidsHoverStyle.ON_LIGHT -> Color(0x1F000000)
-    IvidsHoverStyle.PRIMARY_ACCENT -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.20f)
-    IvidsHoverStyle.DESTRUCTIVE -> IvidsColorTokens.DangerCoral.copy(alpha = 0.16f)
+    IvidsHoverStyle.NEUTRAL -> Color(0x20FFFFFF)
+    IvidsHoverStyle.ON_LIGHT -> Color(0x1C000000)
+    IvidsHoverStyle.PRIMARY_ACCENT -> IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f)
+    IvidsHoverStyle.DESTRUCTIVE -> IvidsColorTokens.DangerCoral.copy(alpha = 0.14f)
 }
 
 /**
@@ -131,19 +137,19 @@ private class PressRippleNode(
                         launch {
                             wave.alpha.animateTo(
                                 targetValue = 1f,
-                                animationSpec = tween(durationMillis = 75, easing = LinearEasing)
+                                animationSpec = tween(durationMillis = 50, easing = LinearEasing)
                             )
                         }
                         launch {
                             wave.radiusProgress.animateTo(
                                 targetValue = 1f,
-                                animationSpec = tween(durationMillis = 420, easing = RippleExpandEasing)
+                                animationSpec = tween(durationMillis = 380, easing = RippleExpandEasing)
                             )
                         }
                         launch {
                             wave.centerProgress.animateTo(
                                 targetValue = 1f,
-                                animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing)
+                                animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing)
                             )
                         }
                     }
@@ -157,10 +163,10 @@ private class PressRippleNode(
                         if (wave != null && !wave.released) {
                             wave.released = true
                             launch {
-                                delay(120L)
+                                delay(130L)
                                 wave.alpha.animateTo(
                                     targetValue = 0f,
-                                    animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
+                                    animationSpec = tween(durationMillis = 300, easing = FastOutSlowInEasing)
                                 )
                                 activeWaves.remove(wave)
                             }
@@ -185,7 +191,11 @@ private class PressRippleNode(
         val startRadius = (maxOf(size.width, size.height) * 0.14f).coerceIn(8.dp.toPx(), 24.dp.toPx())
         clipRect {
             activeWaves.forEach { wave ->
-                val pressPos = wave.press.pressPosition
+                val rawPressPos = wave.press.pressPosition
+                val pressPos = Offset(
+                    x = rawPressPos.x.coerceIn(0f, size.width),
+                    y = rawPressPos.y.coerceIn(0f, size.height)
+                )
                 val maxCornerDist = maxOf(
                     hypot(pressPos.x, pressPos.y),
                     hypot(size.width - pressPos.x, pressPos.y),
@@ -204,8 +214,7 @@ private class PressRippleNode(
                     val tint = color.copy(alpha = color.alpha * alpha)
                     val brush = Brush.radialGradient(
                         0.0f to tint,
-                        0.68f to tint.copy(alpha = tint.alpha * 0.92f),
-                        0.88f to tint.copy(alpha = tint.alpha * 0.45f),
+                        0.90f to tint,
                         1.0f to Color.Transparent,
                         center = drawCenter,
                         radius = currentRadius
@@ -215,6 +224,36 @@ private class PressRippleNode(
                         radius = currentRadius,
                         center = drawCenter
                     )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Wraps [onClick] with a short [delayMs] commit delay and double-tap guard so the press ripple
+ * remains visible before navigation, dialogs, or state transitions unmount the clicked element.
+ */
+@Composable
+fun rememberDelayedOnClick(
+    delayMs: Long = 140L,
+    onClick: () -> Unit
+): () -> Unit {
+    val scope = rememberCoroutineScope()
+    val latestOnClick by rememberUpdatedState(onClick)
+    var pending by remember { mutableStateOf(false) }
+    return remember(delayMs) {
+        {
+            if (!pending) {
+                if (delayMs <= 0L) {
+                    latestOnClick()
+                } else {
+                    pending = true
+                    scope.launch {
+                        delay(delayMs)
+                        pending = false
+                        latestOnClick()
+                    }
                 }
             }
         }

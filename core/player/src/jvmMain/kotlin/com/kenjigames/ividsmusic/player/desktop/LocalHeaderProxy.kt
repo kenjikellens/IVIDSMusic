@@ -399,10 +399,12 @@ internal class LocalHeaderProxy(
     }
 
     /**
-     * Follows up to [MAX_REDIRECTS] HTTP/HTTPS redirects safely via [DesktopNetworkGuard] while retaining custom headers.
+     * Validates the initial target URI and follows up to [MAX_REDIRECTS] HTTP/HTTPS redirects safely via [DesktopNetworkGuard].
+     * Retains custom request headers across validated hops while blocking unsafe schemes and SSRF downgrades.
      */
     private fun followRedirects(rangeHeader: String?, ifRangeHeader: String?): HttpURLConnection? {
-        var currentUrl = targetUrl
+        val initialUri = DesktopNetworkGuard.validateHttpUri(targetUrl, allowPrivateHosts = true) ?: return null
+        var currentUrl = initialUri.toString()
         repeat(MAX_REDIRECTS + 1) { hop ->
             val conn = openConfiguredConnection(currentUrl, rangeHeader, ifRangeHeader)
             val status = conn.responseCode

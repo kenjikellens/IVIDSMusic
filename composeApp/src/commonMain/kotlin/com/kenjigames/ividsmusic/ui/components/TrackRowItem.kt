@@ -124,9 +124,10 @@ fun TrackRowItem(
     )
     val thumbSize = if (metrics.isCompactMobile) 42.dp else 46.dp
     val iconButtonSize = if (metrics.isCompactMobile) 42.dp else 36.dp
+    val delayedPlay = rememberDelayedOnClick(delayMs = 120L, onClick = onPlay)
 
     Surface(
-        onClick = onPlay,
+        onClick = delayedPlay,
         interactionSource = interactionSource,
         modifier = modifier
             .fillMaxWidth()

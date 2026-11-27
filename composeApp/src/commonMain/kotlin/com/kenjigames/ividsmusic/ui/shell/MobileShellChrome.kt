@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +43,6 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -73,7 +73,8 @@ import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
 import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
 import com.kenjigames.ividsmusic.ui.components.IvidsIconButton
 import com.kenjigames.ividsmusic.ui.components.IvidsPlayCircleButton
-import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
+import com.kenjigames.ividsmusic.ui.components.ividsPressRipple
+import com.kenjigames.ividsmusic.ui.i18n.AppStrings
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.navigation.AppRoute
 import com.kenjigames.ividsmusic.ui.player.PlayerUiState
@@ -82,8 +83,26 @@ import kotlin.math.roundToInt
 import org.jetbrains.compose.resources.painterResource
 
 /**
- * Renders the aligned top navigation header on Mobile screens with back navigation, active download
- * count badge, and quick Downloader/Settings shortcuts.
+ * Resolves the localized mobile top-bar title for [route], returning `null` on Home so the brand
+ * mark remains visible there.
+ */
+private fun resolveMobileHeaderTitle(route: AppRoute, strings: AppStrings): String? = when (route) {
+    is AppRoute.Home -> null
+    is AppRoute.Recommended -> strings["nav_foryou"]
+    is AppRoute.Search -> strings["search"]
+    is AppRoute.Library -> strings["library"]
+    is AppRoute.Profile -> strings["you"]
+    is AppRoute.Downloader -> strings["nav_downloader"]
+    is AppRoute.Settings, is AppRoute.SettingsDetail -> strings["settings"]
+    is AppRoute.PlaylistDetail -> strings["playlists"]
+    is AppRoute.ArtistDetail -> route.artistName.ifBlank { strings["artists"] }
+    is AppRoute.AlbumDetail -> strings["albums"]
+    is AppRoute.SongDetail -> strings["song"]
+}
+
+/**
+ * Renders the aligned top navigation header on Mobile screens with contextual screen titles,
+ * back navigation, active download count badge, and quick Downloader/Settings shortcuts.
  */
 @Composable
 internal fun MobileTopHeader(
@@ -95,6 +114,7 @@ internal fun MobileTopHeader(
     onOpenSettings: () -> Unit
 ) {
     val strings = LocalStrings.current
+    val headerTitle = resolveMobileHeaderTitle(currentRoute, strings)
 
     Column(modifier = Modifier.fillMaxWidth().background(IvidsColorTokens.ObsidianStage)) {
         Row(
@@ -103,39 +123,50 @@ internal fun MobileTopHeader(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Row(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (canNavigateBack) {
-                    IconButton(onClick = onBack, modifier = Modifier.size(40.dp)) {
+                    IvidsIconButton(onClick = onBack, size = 40.dp) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                             contentDescription = strings["back"],
                             tint = IvidsColorTokens.ChalkInk
                         )
                     }
-                } else {
+                } else if (headerTitle == null) {
                     Image(
                         painter = painterResource(Res.drawable.ic_ivids_brand),
                         contentDescription = "IVIDS Music",
                         modifier = Modifier.size(28.dp).clip(RoundedCornerShape(8.dp))
                     )
                 }
-                Text(
-                    text = "IVIDS",
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
-                    color = IvidsColorTokens.PrimaryCyan
-                )
-                Text(
-                    text = "MUSIC",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = IvidsColorTokens.ChalkInk
-                )
+                if (headerTitle != null) {
+                    Text(
+                        text = headerTitle,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = IvidsColorTokens.ChalkInk,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                } else {
+                    Text(
+                        text = "IVIDS",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.ExtraBold),
+                        color = IvidsColorTokens.PrimaryCyan
+                    )
+                    Text(
+                        text = "MUSIC",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = IvidsColorTokens.ChalkInk
+                    )
+                }
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 Box(contentAlignment = Alignment.TopEnd) {
-                    IconButton(onClick = onOpenDownloader) {
+                    IvidsIconButton(onClick = onOpenDownloader, size = 40.dp) {
                         Icon(
                             imageVector = Icons.Rounded.Download,
                             contentDescription = strings["nav_downloader"],
@@ -145,7 +176,7 @@ internal fun MobileTopHeader(
                     if (activeDownloadCount > 0) {
                         Box(
                             modifier = Modifier
-                                .padding(top = 6.dp, end = 6.dp)
+                                .padding(top = 4.dp, end = 4.dp)
                                 .size(16.dp)
                                 .clip(CircleShape)
                                 .background(IvidsColorTokens.ChalkInk),
@@ -160,7 +191,7 @@ internal fun MobileTopHeader(
                         }
                     }
                 }
-                IconButton(onClick = onOpenSettings) {
+                IvidsIconButton(onClick = onOpenSettings, size = 40.dp) {
                     Icon(
                         imageVector = Icons.Rounded.Settings,
                         contentDescription = strings["settings"],
@@ -222,20 +253,26 @@ internal fun MobileBottomBar(
                         modifier = Modifier
                             .weight(1f)
                             .fillMaxHeight()
-                            .ividsTouchFeedback(interactionSource = tabInteraction, pressedScale = 0.92f)
-                            .clip(RoundedCornerShape(14.dp))
-                            .clickable(interactionSource = tabInteraction, indication = null) {
-                                onSelectRoute(entry.route)
-                            }
+                            .clickable(
+                                interactionSource = tabInteraction,
+                                indication = null,
+                                onClick = { onSelectRoute(entry.route) }
+                            )
                             .padding(horizontal = 2.dp, vertical = 6.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(width = 48.dp, height = 28.dp)
+                                .size(width = 48.dp, height = 30.dp)
                                 .clip(CircleShape)
-                                .background(indicatorColor),
+                                .background(indicatorColor)
+                                .indication(
+                                    interactionSource = tabInteraction,
+                                    indication = ividsPressRipple(
+                                        if (selected) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+                                    )
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(

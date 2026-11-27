@@ -79,6 +79,7 @@ import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
 import com.kenjigames.ividsmusic.ui.components.IvidsIconButton
 import com.kenjigames.ividsmusic.ui.components.ividsHoverZoom
 import com.kenjigames.ividsmusic.ui.components.ividsPressRipple
+import com.kenjigames.ividsmusic.ui.components.rememberDelayedOnClick
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.navigation.AppRoute
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
@@ -258,6 +259,7 @@ private fun SidebarPlaylistRow(
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val hoverStyle = if (selected) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+    val delayedClick = rememberDelayedOnClick(delayMs = 140L, onClick = onClick)
 
     Surface(
         modifier = Modifier
@@ -269,7 +271,7 @@ private fun SidebarPlaylistRow(
             .clickable(
                 interactionSource = interactionSource,
                 indication = ividsPressRipple(hoverStyle),
-                onClick = onClick
+                onClick = delayedClick
             ),
         shape = RoundedCornerShape(10.dp),
         color = if (selected) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.14f) else Color.Transparent
@@ -371,6 +373,7 @@ private fun SidebarNavButton(
     )
 
     val navHoverStyle = if (selected) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL
+    val delayedClick = rememberDelayedOnClick(delayMs = 140L, onClick = onClick)
 
     Surface(
         modifier = Modifier
@@ -383,7 +386,7 @@ private fun SidebarNavButton(
             .clickable(
                 interactionSource = interactionSource,
                 indication = ividsPressRipple(navHoverStyle),
-                onClick = onClick
+                onClick = delayedClick
             ),
         shape = RoundedCornerShape(10.dp),
         color = bgColor

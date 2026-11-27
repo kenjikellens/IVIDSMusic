@@ -55,6 +55,8 @@ import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
+import com.kenjigames.ividsmusic.ui.components.formatByteSize
+import com.kenjigames.ividsmusic.ui.components.ividsSearchFieldColors
 import com.kenjigames.ividsmusic.ui.components.rememberTrackPlaylistModalState
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerUiState
@@ -63,21 +65,6 @@ import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
-
-/**
- * Formats [bytes] into a crisp human-readable KB / MB / GB storage label.
- */
-internal fun formatBytes(bytes: Long): String {
-    if (bytes <= 0L) return "0 MB"
-    val mb = bytes / (1024.0 * 1024.0)
-    return if (mb >= 1024.0) {
-        val gb = ((mb / 1024.0) * 100.0).toLong() / 100.0
-        "$gb GB"
-    } else {
-        val roundedMb = (mb * 10.0).toLong() / 10.0
-        "$roundedMb MB"
-    }
-}
 
 /**
  * Renders the centered Downloader & Saved Offline Media screen (max 900dp) using adaptive
@@ -136,14 +123,7 @@ fun DownloaderScreen(
                                 placeholder = { Text(strings["home_url_placeholder"], color = IvidsColorTokens.SlateMuted) },
                                 singleLine = true,
                                 shape = RoundedCornerShape(14.dp),
-                                colors = OutlinedTextFieldDefaults.colors(
-                                    focusedContainerColor = IvidsColorTokens.RecessedTrough,
-                                    unfocusedContainerColor = IvidsColorTokens.RecessedTrough,
-                                    focusedBorderColor = IvidsColorTokens.HairlineBorder,
-                                    unfocusedBorderColor = Color.Transparent,
-                                    focusedTextColor = IvidsColorTokens.ChalkInk,
-                                    unfocusedTextColor = IvidsColorTokens.ChalkInk
-                                ),
+                                colors = ividsSearchFieldColors(),
                                 modifier = Modifier.fillMaxWidth().tvFocusable(shape = RoundedCornerShape(14.dp))
                             )
                         }
@@ -305,7 +285,7 @@ fun DownloaderScreen(
                         Column(modifier = Modifier.weight(1f).padding(end = 12.dp)) {
                             Text(strings["storage_used"], style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
                             Text(
-                                text = "${formatBytes(state.storageUsedBytes)} • ${state.savedTracks.size} ${strings["saved_tracks"]}",
+                                text = "${formatByteSize(state.storageUsedBytes)} • ${state.savedTracks.size} ${strings["saved_tracks"]}",
                                 style = IvidsTextStyles.tabularBadge(),
                                 color = IvidsColorTokens.SlateMuted
                             )

@@ -275,7 +275,7 @@ class DeezerApiClient(
             val artistKey = track.artist.trim().lowercase()
             if (artistKey.isEmpty()) true else seenArtists.add(artistKey)
         }.take(CATEGORY_ROW_LIMIT)
-        val id = genre.lowercase().replace(Regex("\\s+"), "-").replace("'", "")
+        val id = genre.lowercase().replace(WHITESPACE_REGEX, "-").replace("'", "")
         return CategoryRow(id = id, title = genre, tracks = uniqueTracks)
     }
 
@@ -380,6 +380,7 @@ class DeezerApiClient(
     companion object {
         const val BASE_URL = "https://api.deezer.com"
         private const val CATEGORY_ROW_LIMIT = 12
+        private val WHITESPACE_REGEX = Regex("\\s+")
         val GENRE_IDS: Map<String, Int> = mapOf(
             "Pop" to 132,
             "Rock" to 152,

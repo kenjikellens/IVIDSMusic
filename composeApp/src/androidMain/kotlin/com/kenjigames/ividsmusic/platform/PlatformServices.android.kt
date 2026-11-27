@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.core.content.FileProvider
 import com.kenjigames.ividsmusic.BuildConfig
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,11 +44,12 @@ actual class PlatformBridge(private val context: Context) {
     }
 
     /**
-     * Opens [url] in an external Android browser activity using FLAG_ACTIVITY_NEW_TASK.
+     * Opens [url] in an external Android browser activity after validating an `http://` or `https://` scheme.
      */
     actual fun openExternalUrl(url: String) {
+        if (!isValidExternalHttpUrl(url)) return
         runCatching {
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url)).apply {
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url.trim())).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             }
             context.startActivity(intent)
@@ -62,7 +64,7 @@ actual class PlatformBridge(private val context: Context) {
 actual class AppUpdateChecker(
     private val context: Context,
     private val platformBridge: PlatformBridge,
-    private val json: Json = Json { ignoreUnknownKeys = true }
+    private val json: Json = DefaultPlatformJson
 ) {
     private val _state = MutableStateFlow<AppUpdateState>(AppUpdateState.Idle)
     actual val state: StateFlow<AppUpdateState> = _state.asStateFlow()
@@ -117,6 +119,8 @@ actual class AppUpdateChecker(
                 } else {
                     AppUpdateState.UpToDate
                 }
+            } catch (cancel: CancellationException) {
+                throw cancel
             } catch (e: Exception) {
                 _state.value = AppUpdateState.Error(e.message ?: "Update check failed")
             } finally {
@@ -127,17 +131,21 @@ actual class AppUpdateChecker(
 
     /**
      * Streams the selected APK asset into `cacheDir/updates` and launches Android's package
-     * installer intent through FileProvider.
+     * installer intent through FileProvider after validating the HTTP(S) download URL.
      */
     actual suspend fun downloadAndInstallUpdate() {
         val current = _state.value as? AppUpdateState.Available ?: return
+        if (!isValidExternalHttpUrl(current.downloadUrl)) {
+            _state.value = AppUpdateState.Error("Invalid update download URL")
+            return
+        }
         withContext(Dispatchers.IO) {
             var connection: HttpURLConnection? = null
             try {
                 _state.value = AppUpdateState.Downloading(0f)
                 val updateDir = File(context.cacheDir, "updates").apply { mkdirs() }
                 val apkFile = File(updateDir, "IVIDSMusic-update.apk")
-                connection = (URI.create(current.downloadUrl).toURL().openConnection() as HttpURLConnection).apply {
+                connection = (URI.create(current.downloadUrl.trim()).toURL().openConnection() as HttpURLConnection).apply {
                     connectTimeout = 12_000
                     readTimeout = 20_000
                     instanceFollowRedirects = true
@@ -173,6 +181,8 @@ actual class AppUpdateChecker(
                 }
                 context.startActivity(installIntent)
                 _state.value = AppUpdateState.ReadyToInstall("Installer launched")
+            } catch (cancel: CancellationException) {
+                throw cancel
             } catch (e: Exception) {
                 _state.value = AppUpdateState.Error(e.message ?: "Update download failed")
             } finally {
@@ -192,22 +202,6 @@ actual class AppUpdateChecker(
         const val GITHUB_RELEASE_URL =
             "https://api.github.com/repos/kenjikellens/IVIDSMusic/releases/latest"
     }
-}
-
-/**
- * Compares dot-separated semantic version tags such as `0.2.5` and `v0.3.0`.
- */
-internal fun isNewerVersion(current: String, latest: String): Boolean {
-    val cParts = current.trim().removePrefix("v").split(".")
-    val lParts = latest.trim().removePrefix("v").split(".")
-    val maxLen = maxOf(cParts.size, lParts.size)
-    for (i in 0 until maxLen) {
-        val cVal = cParts.getOrNull(i)?.filter(Char::isDigit)?.toIntOrNull() ?: 0
-        val lVal = lParts.getOrNull(i)?.filter(Char::isDigit)?.toIntOrNull() ?: 0
-        if (lVal > cVal) return true
-        if (cVal > lVal) return false
-    }
-    return false
 }
 
 /**

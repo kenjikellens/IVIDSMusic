@@ -15,6 +15,8 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.cancellation.CancellationException
 import kotlin.math.abs
+import kotlin.math.exp
+import kotlin.math.ln
 import kotlin.math.sqrt
 
 /**
@@ -59,12 +61,15 @@ class RecommendationEngine(
     }
 
     /**
-     * Applies like scoring for [track]: `+3` to the track and `+2` distributed across its genres.
+     * Applies like scoring for [track]: `+3` to the track, `+2` to its artist, and `+2` distributed across its genres.
      * Mutates [ScoreRepository] and resolves genres lazily if missing from [track].
      */
     suspend fun recordLikeTrack(track: Track) {
         if (track.id.isBlank()) return
         adjustScore(ScoreEntityType.TRACK, track.id, track.title, delta = 3)
+        if (track.artistId.isNotBlank()) {
+            adjustScore(ScoreEntityType.ARTIST, track.artistId, track.artist, delta = 2)
+        }
         val genres = resolveGenresForTrack(track)
         applyGenreDelta(genres, totalDelta = 2)
     }
@@ -117,18 +122,19 @@ class RecommendationEngine(
     suspend fun generateRecommendations(
         savedTrackIds: Set<String> = emptySet()
     ): AppResult<RecommendationFeed> = try {
+        val nowMs = clockMs()
         val allScores = scoreRepository.getAllScores()
         val topTracks = allScores
             .filter { it.entityType == ScoreEntityType.TRACK && it.score > 0 }
-            .sortedByDescending { it.score }
+            .sortedByDescending { it.score * recencyWeight(it.lastUpdatedMs, nowMs) }
             .take(MAX_SEED_ITEMS)
         val topArtists = allScores
             .filter { it.entityType == ScoreEntityType.ARTIST && it.score > 0 }
-            .sortedByDescending { it.score }
+            .sortedByDescending { it.score * recencyWeight(it.lastUpdatedMs, nowMs) }
             .take(MAX_SEED_ITEMS)
         val topGenres = allScores
             .filter { it.entityType == ScoreEntityType.GENRE && it.score > 0 }
-            .sortedByDescending { it.score }
+            .sortedByDescending { it.score * recencyWeight(it.lastUpdatedMs, nowMs) }
             .take(MAX_GENRE_SEEDS)
 
         if (topTracks.isEmpty() && topArtists.isEmpty()) {
@@ -147,7 +153,11 @@ class RecommendationEngine(
             val trackScoreMap = allScores
                 .filter { it.entityType == ScoreEntityType.TRACK }
                 .associate { it.entityId to it.score }
-            val userVector = buildUserProfileVector(allScores)
+            val topArtistIds = topArtists.map { it.entityId }.toSet()
+            val seedTracks = candidatePool.filter { track ->
+                (trackScoreMap[track.id] ?: 0) > 0 || track.artistId in topArtistIds
+            }
+            val userVector = buildUserProfileVector(allScores, nowMs = nowMs, seedTracks = seedTracks)
 
             val scoredPool = candidatePool
                 .map { candidate ->
@@ -163,9 +173,10 @@ class RecommendationEngine(
                 .sortedByDescending { it.second }
                 .map { it.first }
 
-            val discoveryMix = scoredPool
-                .filterNot { it.id in savedTrackIds }
-                .take(DISCOVERY_MIX_LIMIT)
+            val discoveryMix = diversifyDiscoveryMix(
+                candidates = scoredPool,
+                savedTrackIds = savedTrackIds
+            )
 
             val primaryGenres = topGenres.take(2)
             val genreFusionTitle = when {
@@ -240,19 +251,11 @@ class RecommendationEngine(
             .forEach { genre -> raw["genre_$genre"] = 1.0 }
 
         track.releaseYear?.let { year ->
-            val eraKey = when {
-                year < 1990 -> "era_classic"
-                year < 2005 -> "era_90s_00s"
-                year < 2018 -> "era_modern"
-                else -> "era_recent"
-            }
-            raw[eraKey] = 1.0
+            raw[releaseYearToEraKey(year)] = ERA_FEATURE_WEIGHT
         }
 
-        raw["popularity"] = if (track.rank > 0) {
-            (track.rank / 1_000_000.0).coerceIn(0.0, 1.0)
-        } else {
-            0.5
+        if (track.rank > 0) {
+            raw["popularity"] = (track.rank / 1_000_000.0).coerceIn(0.0, 1.0) * POPULARITY_FEATURE_WEIGHT
         }
 
         val magnitude = sqrt(raw.values.sumOf { it * it })
@@ -261,25 +264,143 @@ class RecommendationEngine(
     }
 
     /**
-     * Projects stored genre and artist [InterestScore] entries into a sparse user taste coordinate vector.
-     * Centers genre weights around score `10` and artist weights around score `15`.
+     * Projects stored [InterestScore] entries into a sparse user taste coordinate vector with logarithmic
+     * non-negative weighting for `score > 0`, explicit zero-score penalties, recency decay, and optional [seedTracks] era/popularity signals.
      */
-    fun buildUserProfileVector(scores: List<InterestScore>): Map<String, Double> {
+    fun buildUserProfileVector(
+        scores: List<InterestScore>,
+        nowMs: Long = clockMs(),
+        seedTracks: List<Track> = emptyList()
+    ): Map<String, Double> {
         val userVector = LinkedHashMap<String, Double>()
         for (entry in scores) {
+            val decay = recencyWeight(entry.lastUpdatedMs, nowMs)
+            val weight = when {
+                entry.score > 0 -> positiveLogWeight(entry.score) * decay
+                else -> -DISLIKED_PENALTY_WEIGHT * decay
+            }
             when (entry.entityType) {
                 ScoreEntityType.GENRE -> {
                     val key = "genre_${entry.entityId.trim().lowercase()}"
-                    userVector[key] = (userVector[key] ?: 0.0) + ((entry.score - 10) / 10.0)
+                    userVector[key] = (userVector[key] ?: 0.0) + weight
                 }
                 ScoreEntityType.ARTIST -> {
                     val key = "artist_${entry.entityId}"
-                    userVector[key] = (userVector[key] ?: 0.0) + ((entry.score - 15) / 10.0)
+                    userVector[key] = (userVector[key] ?: 0.0) + weight
                 }
                 ScoreEntityType.TRACK -> Unit
             }
         }
+        if (seedTracks.isNotEmpty()) {
+            val eraAccumulator = LinkedHashMap<String, Double>()
+            var popularitySum = 0.0
+            var popularityCount = 0
+            seedTracks.forEach { track ->
+                track.releaseYear?.let { year ->
+                    val eraKey = releaseYearToEraKey(year)
+                    eraAccumulator[eraKey] = (eraAccumulator[eraKey] ?: 0.0) + 1.0
+                }
+                if (track.rank > 0) {
+                    popularitySum += (track.rank / 1_000_000.0).coerceIn(0.0, 1.0)
+                    popularityCount++
+                }
+            }
+            val totalEras = eraAccumulator.values.sum()
+            if (totalEras > 0.0) {
+                eraAccumulator.forEach { (eraKey, count) ->
+                    userVector[eraKey] = (count / totalEras) * ERA_FEATURE_WEIGHT
+                }
+            }
+            if (popularityCount > 0) {
+                userVector["popularity"] = (popularitySum / popularityCount) * POPULARITY_FEATURE_WEIGHT
+            }
+        }
         return userVector
+    }
+
+    /**
+     * Computes an exponential recency multiplier in `[0.25, 1.0]` with a 21-day half-life relative to [nowMs].
+     */
+    internal fun recencyWeight(lastUpdatedMs: Long, nowMs: Long): Double {
+        if (lastUpdatedMs <= 0L || nowMs <= lastUpdatedMs) return 1.0
+        val ageDays = (nowMs - lastUpdatedMs).toDouble() / MS_PER_DAY
+        return exp(-LN_2 * (ageDays / RECENCY_HALF_LIFE_DAYS)).coerceIn(MIN_RECENCY_WEIGHT, 1.0)
+    }
+
+    /**
+     * Maps positive integer interest scores (`>= 1`) monotonically onto a non-negative logarithmic scale.
+     */
+    private fun positiveLogWeight(score: Int): Double =
+        ln(1.0 + score.toDouble()) / LOG_SCALE_DIVISOR
+
+    /**
+     * Buckets [year] into one of four release-era feature coordinate keys.
+     */
+    private fun releaseYearToEraKey(year: Int): String = when {
+        year < 1990 -> "era_classic"
+        year < 2005 -> "era_90s_00s"
+        year < 2018 -> "era_modern"
+        else -> "era_recent"
+    }
+
+    /**
+     * Builds a diversified Discovery Mix from ranked [candidates], excluding [savedTrackIds], capping
+     * tracks per artist in the primary pass, and spreading genres before filling remaining slots.
+     */
+    internal fun diversifyDiscoveryMix(
+        candidates: List<Track>,
+        savedTrackIds: Set<String>,
+        limit: Int = DISCOVERY_MIX_LIMIT,
+        maxPerArtist: Int = MAX_TRACKS_PER_ARTIST,
+        maxPerPrimaryGenre: Int = MAX_TRACKS_PER_GENRE
+    ): List<Track> {
+        val eligible = candidates
+            .filterNot { it.id in savedTrackIds }
+            .distinctBy { it.title.trim().lowercase() to it.artist.trim().lowercase() }
+        if (eligible.isEmpty() || limit <= 0) return emptyList()
+
+        val selected = mutableListOf<Track>()
+        val selectedIds = HashSet<String>()
+        val artistCounts = HashMap<String, Int>()
+        val genreCounts = HashMap<String, Int>()
+
+        // Pass 1: enforce both per-artist and soft primary-genre caps for Spotify Daily Mix spread.
+        for (track in eligible) {
+            if (selected.size >= limit) break
+            val artistKey = track.artistId.ifBlank { track.artist.trim().lowercase() }
+            val genreKey = track.genres.firstOrNull()?.trim()?.lowercase()
+            val underArtistCap = (artistCounts[artistKey] ?: 0) < maxPerArtist
+            val underGenreCap = genreKey == null || (genreCounts[genreKey] ?: 0) < maxPerPrimaryGenre
+            if (underArtistCap && underGenreCap) {
+                selected += track
+                selectedIds += track.id
+                artistCounts[artistKey] = (artistCounts[artistKey] ?: 0) + 1
+                if (genreKey != null) genreCounts[genreKey] = (genreCounts[genreKey] ?: 0) + 1
+            }
+        }
+        // Pass 2: relax genre cap first while still respecting per-artist cap.
+        if (selected.size < limit) {
+            for (track in eligible) {
+                if (selected.size >= limit) break
+                if (track.id in selectedIds) continue
+                val artistKey = track.artistId.ifBlank { track.artist.trim().lowercase() }
+                if ((artistCounts[artistKey] ?: 0) < maxPerArtist) {
+                    selected += track
+                    selectedIds += track.id
+                    artistCounts[artistKey] = (artistCounts[artistKey] ?: 0) + 1
+                }
+            }
+        }
+        // Pass 3: fill any leftover slots on small catalogs so results are never unnecessarily truncated.
+        if (selected.size < limit) {
+            for (track in eligible) {
+                if (selected.size >= limit) break
+                if (selectedIds.add(track.id)) {
+                    selected += track
+                }
+            }
+        }
+        return selected
     }
 
     /**
@@ -415,7 +536,17 @@ class RecommendationEngine(
         private const val MAX_SEED_ITEMS = 5
         private const val MAX_GENRE_SEEDS = 3
         private const val DISCOVERY_MIX_LIMIT = 12
+        private const val MAX_TRACKS_PER_ARTIST = 2
+        private const val MAX_TRACKS_PER_GENRE = 4
         private const val SECTION_LIMIT = 10
         private const val SKIP_PENALTY_WEIGHT = 0.4
+        private const val DISLIKED_PENALTY_WEIGHT = 0.25
+        private const val ERA_FEATURE_WEIGHT = 0.35
+        private const val POPULARITY_FEATURE_WEIGHT = 0.25
+        private const val RECENCY_HALF_LIFE_DAYS = 21.0
+        private const val MIN_RECENCY_WEIGHT = 0.25
+        private const val MS_PER_DAY = 86_400_000.0
+        private val LN_2 = ln(2.0)
+        private val LOG_SCALE_DIVISOR = ln(31.0)
     }
 }

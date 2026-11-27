@@ -2,6 +2,37 @@ package com.kenjigames.ividsmusic.platform
 
 import androidx.compose.runtime.Immutable
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.serialization.json.Json
+
+/** Shared lenient [Json] instance used as default parser by platform update checkers. */
+internal val DefaultPlatformJson: Json = Json { ignoreUnknownKeys = true }
+
+/**
+ * Validates that [url] uses an `http://` or `https://` scheme without control characters so
+ * external browser intents and update downloads cannot invoke local file or custom URI handlers.
+ */
+internal fun isValidExternalHttpUrl(url: String): Boolean {
+    val trimmed = url.trim()
+    if (trimmed.isEmpty() || trimmed.any { it.isWhitespace() || it.isISOControl() }) return false
+    val lower = trimmed.lowercase()
+    return lower.startsWith("https://") || lower.startsWith("http://")
+}
+
+/**
+ * Compares dot-separated semantic version tags such as `0.2.5` and `v0.3.0`.
+ */
+internal fun isNewerVersion(current: String, latest: String): Boolean {
+    val cParts = current.trim().removePrefix("v").split(".")
+    val lParts = latest.trim().removePrefix("v").split(".")
+    val maxLen = maxOf(cParts.size, lParts.size)
+    for (i in 0 until maxLen) {
+        val cVal = cParts.getOrNull(i)?.filter(Char::isDigit)?.toIntOrNull() ?: 0
+        val lVal = lParts.getOrNull(i)?.filter(Char::isDigit)?.toIntOrNull() ?: 0
+        if (lVal > cVal) return true
+        if (cVal > lVal) return false
+    }
+    return false
+}
 
 /**
  * Platform bridge exposing device form factor, version info, directory chooser, and external

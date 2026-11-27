@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import com.kenjigames.ividsmusic.platform.isValidExternalHttpUrl
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -25,6 +27,47 @@ private val androidBlurCache = object : LinkedHashMap<String, ImageBitmap>(ANDRO
 }
 
 /**
+ * Validates [imageUrl] as HTTP(S) and downloads up to [maxBytes] into memory for Android artwork
+ * decoding, rethrowing [CancellationException] and returning `null` on HTTP or size violations.
+ */
+internal fun fetchBoundedAndroidImageBytes(
+    imageUrl: String,
+    maxBytes: Int = ANDROID_BLUR_MAX_BYTES
+): ByteArray? {
+    if (!isValidExternalHttpUrl(imageUrl)) return null
+    var connection: HttpURLConnection? = null
+    return try {
+        connection = (URI.create(imageUrl.trim()).toURL().openConnection() as HttpURLConnection).apply {
+            connectTimeout = 4_000
+            readTimeout = 4_000
+            setRequestProperty("User-Agent", "IVIDS-Music-Android")
+        }
+        if (connection.responseCode !in 200..299 || connection.contentLengthLong > maxBytes) {
+            return null
+        }
+        connection.inputStream.use { input ->
+            val out = ByteArrayOutputStream()
+            val buf = ByteArray(8192)
+            var total = 0
+            while (true) {
+                val read = input.read(buf)
+                if (read <= 0) break
+                total += read
+                if (total > maxBytes) return null
+                out.write(buf, 0, read)
+            }
+            out.toByteArray().takeIf { it.isNotEmpty() }
+        }
+    } catch (cancel: CancellationException) {
+        throw cancel
+    } catch (_: Exception) {
+        null
+    } finally {
+        connection?.disconnect()
+    }
+}
+
+/**
  * Downloads [imageUrl] on IO dispatcher, downsamples to 56x56, applies a fast 2-pass box blur
  * compatible with Android API 24+, and caches the resulting [ImageBitmap] for smooth 60+ FPS rendering.
  */
@@ -40,30 +83,9 @@ actual suspend fun loadBlurredArtworkBitmap(imageUrl: String?): ImageBitmap? {
             }
             var decoded: Bitmap? = null
             var scaled: Bitmap? = null
-            var connection: HttpURLConnection? = null
             try {
-                connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 4_000
-                    readTimeout = 4_000
-                    setRequestProperty("User-Agent", "IVIDS-Music-Android")
-                }
-                if (connection.responseCode !in 200..299 || connection.contentLengthLong > ANDROID_BLUR_MAX_BYTES) {
-                    return@withPermit null
-                }
-                val bytes = connection.inputStream.use { input ->
-                    val out = ByteArrayOutputStream()
-                    val buf = ByteArray(8192)
-                    var total = 0
-                    while (true) {
-                        val read = input.read(buf)
-                        if (read <= 0) break
-                        total += read
-                        if (total > ANDROID_BLUR_MAX_BYTES) return@withPermit null
-                        out.write(buf, 0, read)
-                    }
-                    out.toByteArray()
-                }
-                if (bytes.isEmpty()) return@withPermit null
+                val bytes = fetchBoundedAndroidImageBytes(imageUrl, ANDROID_BLUR_MAX_BYTES)
+                    ?: return@withPermit null
 
                 val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                 BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
@@ -83,12 +105,13 @@ actual suspend fun loadBlurredArtworkBitmap(imageUrl: String?): ImageBitmap? {
                     androidBlurCache[imageUrl] = imageBitmap
                 }
                 imageBitmap
+            } catch (cancel: CancellationException) {
+                throw cancel
             } catch (_: Exception) {
                 null
             } finally {
                 if (scaled != null && scaled !== decoded) scaled.recycle()
                 decoded?.recycle()
-                connection?.disconnect()
             }
         }
     }

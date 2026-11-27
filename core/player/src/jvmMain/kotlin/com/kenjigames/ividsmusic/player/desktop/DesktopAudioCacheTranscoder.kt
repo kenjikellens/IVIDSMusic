@@ -406,7 +406,7 @@ internal object DesktopAudioCacheTranscoder {
     }
 
     /**
-     * Opens an upstream HTTP `GET` connection following up to [MAX_REDIRECTS] hops validated by [DesktopNetworkGuard].
+     * Validates [startUrl] and opens an upstream HTTP `GET` connection following up to [MAX_REDIRECTS] hops via [DesktopNetworkGuard].
      * Strips CRLF characters from all forwarded headers and blocks public-to-private redirect hops.
      */
     private fun followRedirects(
@@ -414,7 +414,8 @@ internal object DesktopAudioCacheTranscoder {
         headers: Map<String, String>,
         rangeHeader: String?,
     ): HttpURLConnection? {
-        var currentUrl = startUrl
+        val initialUri = DesktopNetworkGuard.validateHttpUri(startUrl, allowPrivateHosts = true) ?: return null
+        var currentUrl = initialUri.toString()
         repeat(MAX_REDIRECTS + 1) { hop ->
             val conn = (URI(currentUrl).toURL().openConnection() as HttpURLConnection).apply {
                 requestMethod = "GET"

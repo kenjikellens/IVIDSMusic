@@ -12,63 +12,54 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Close
-import androidx.compose.material.icons.rounded.DownloadDone
 import androidx.compose.material.icons.rounded.LibraryMusic
-import androidx.compose.material.icons.rounded.Schedule
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Shuffle
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.kenjigames.ividsmusic.domain.model.TrackSortOption
 import com.kenjigames.ividsmusic.domain.port.LibraryRepository
 import com.kenjigames.ividsmusic.ui.components.CreatePlaylistDialog
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
-import com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle
+import com.kenjigames.ividsmusic.ui.components.IvidsIconButton
 import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsSegmentedBar
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
-import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
+import com.kenjigames.ividsmusic.ui.components.TrackSortFilterRow
+import com.kenjigames.ividsmusic.ui.components.TrackTableHeader
+import com.kenjigames.ividsmusic.ui.components.ividsSearchFieldColors
 import com.kenjigames.ividsmusic.ui.components.rememberTrackPlaylistModalState
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerUiState
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
-import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Renders the user's local Library inside a framed viewport (max 1360dp) with adaptive mobile
- * padding, sort and offline-only filters, Spotify track table headers, and collection tabs.
+ * Renders the user's local Library inside a framed viewport (max 1360dp) with underline
+ * collection tabs, compact sort and offline filters, and clean empty states without clutter.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -100,6 +91,11 @@ fun LibraryScreen(
     ) {
         state.filteredLikedTracks(downloadedIds)
     }
+    val hasAnyContent = state.likedTracks.isNotEmpty() ||
+        state.savedAlbums.isNotEmpty() ||
+        state.playlists.isNotEmpty() ||
+        state.searchQuery.isNotEmpty() ||
+        state.offlineOnly
 
     if (state.isCreatePlaylistOpen) {
         CreatePlaylistDialog(
@@ -114,36 +110,81 @@ fun LibraryScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = ividsScreenPadding(top = 22.dp),
-            verticalArrangement = Arrangement.spacedBy(22.dp)
+            contentPadding = ividsScreenPadding(top = if (metrics.isCompactMobile) 12.dp else 22.dp),
+            verticalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 16.dp else 20.dp)
         ) {
-            item(key = "library_hero") {
-                LivingAlbumHero(
-                    eyebrow = strings["library"],
-                    title = strings["library"],
-                    subtitle = strings["library_desc"],
-                    artworkUrl = state.likedTracks.firstOrNull()?.coverUrl,
-                    primaryActionLabel = strings["play_all"],
-                    onPrimaryAction = {
-                        val tracks = state.filteredLikedTracks
-                        if (tracks.isNotEmpty()) {
-                            playerViewModel.playQueue(tracks)
-                        } else {
-                            onExploreMusic()
+            if (!metrics.isCompactMobile) {
+                item(key = "library_desktop_header") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = strings["library"],
+                            style = MaterialTheme.typography.headlineMedium,
+                            color = IvidsColorTokens.ChalkInk
+                        )
+                        IvidsTonalPill(
+                            onClick = { viewModel.setCreatePlaylistDialogVisible(true) },
+                            baseColor = IvidsColorTokens.GlassSurface,
+                            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 9.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Add,
+                                contentDescription = null,
+                                tint = IvidsColorTokens.ChalkInk,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Text(
+                                text = strings["create_playlist"],
+                                style = MaterialTheme.typography.labelLarge,
+                                color = IvidsColorTokens.ChalkInk,
+                                maxLines = 1,
+                                softWrap = false
+                            )
                         }
-                    },
-                    secondaryActionLabel = strings["create_playlist"],
-                    onSecondaryAction = { viewModel.setCreatePlaylistDialogVisible(true) }
-                )
+                    }
+                }
             }
 
             item(key = "library_controls") {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+                        IvidsSegmentedBar(
+                            items = LibraryTab.entries,
+                            selected = state.selectedTab,
+                            labelProvider = { tab ->
+                                val (label, count) = when (tab) {
+                                    LibraryTab.LIKED_SONGS -> strings["liked_songs"] to state.likedTracks.size
+                                    LibraryTab.SAVED_ALBUMS -> strings["albums"] to state.savedAlbums.size
+                                    LibraryTab.PLAYLISTS -> strings["playlists"] to state.playlists.size
+                                }
+                                if (count > 0) "$label ($count)" else label
+                            },
+                            onSelect = viewModel::selectTab,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (metrics.isCompactMobile) {
+                            IvidsIconButton(
+                                onClick = { viewModel.setCreatePlaylistDialogVisible(true) },
+                                size = 36.dp
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Add,
+                                    contentDescription = strings["create_playlist"],
+                                    tint = IvidsColorTokens.ChalkInk,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            }
+                        }
+                    }
+
+                    if (hasAnyContent) {
                         OutlinedTextField(
                             value = state.searchQuery,
                             onValueChange = viewModel::onSearchQueryChanged,
@@ -157,97 +198,51 @@ fun LibraryScreen(
                                 }
                             },
                             singleLine = true,
-                            shape = RoundedCornerShape(16.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = IvidsColorTokens.GlassSurface,
-                                unfocusedContainerColor = IvidsColorTokens.RecessedTrough,
-                                focusedBorderColor = IvidsColorTokens.HairlineBorder,
-                                unfocusedBorderColor = Color.Transparent,
-                                focusedTextColor = IvidsColorTokens.ChalkInk,
-                                unfocusedTextColor = IvidsColorTokens.ChalkInk
-                            ),
-                            modifier = Modifier.weight(1f).tvFocusable(shape = RoundedCornerShape(16.dp))
+                            shape = RoundedCornerShape(14.dp),
+                            colors = ividsSearchFieldColors(),
+                            modifier = Modifier.fillMaxWidth().tvFocusable(shape = RoundedCornerShape(14.dp))
                         )
-                        IvidsTonalPill(
-                            onClick = {
-                                val tracks = state.filteredLikedTracks
-                                if (tracks.isNotEmpty()) playerViewModel.playQueue(tracks, shuffled = true)
-                            },
-                            enabled = state.filteredLikedTracks.isNotEmpty(),
-                            baseColor = IvidsColorTokens.GlassSurface,
-                            hoverColor = IvidsColorTokens.GlassHover,
-                            contentPadding = PaddingValues(horizontal = 18.dp, vertical = 14.dp)
-                        ) {
-                            Icon(Icons.Rounded.Shuffle, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(18.dp))
-                            Text(
-                                text = strings["shuffle"],
-                                style = MaterialTheme.typography.labelLarge,
-                                color = IvidsColorTokens.ChalkInk,
-                                maxLines = 1,
-                                softWrap = false
-                            )
-                        }
                     }
 
-                    val tabOptions = listOf(
-                        LibraryTab.LIKED_SONGS to "${strings["liked_songs"]} (${state.likedTracks.size})",
-                        LibraryTab.SAVED_ALBUMS to "${strings["saved_albums"]} (${state.savedAlbums.size})",
-                        LibraryTab.PLAYLISTS to "${strings["playlists"]} (${state.playlists.size})"
-                    )
-                    IvidsSegmentedBar(
-                        items = tabOptions.map { it.first },
-                        selected = state.selectedTab,
-                        labelProvider = { tab -> tabOptions.first { it.first == tab }.second },
-                        onSelect = viewModel::selectTab
-                    )
-
-                    if (state.selectedTab == LibraryTab.LIKED_SONGS) {
-                        val sortLabels = mapOf(
-                            TrackSortOption.RECENT to strings["sort_recent"],
-                            TrackSortOption.TITLE to strings["sort_title"],
-                            TrackSortOption.ARTIST to strings["sort_artist"],
-                            TrackSortOption.DURATION to strings["sort_duration"]
-                        )
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            TrackSortOption.entries.forEach { opt ->
-                                val selected = state.sortOption == opt
-                                IvidsTonalPill(
-                                    onClick = { viewModel.setSortOption(opt) },
-                                    baseColor = if (selected) IvidsColorTokens.ChalkInk else IvidsColorTokens.GlassSurface,
-                                    hoverStyle = if (selected) IvidsHoverStyle.ON_LIGHT else IvidsHoverStyle.NEUTRAL,
-                                    contentPadding = PaddingValues(horizontal = 13.dp, vertical = 6.dp)
-                                ) {
-                                    Text(
-                                        text = sortLabels[opt].orEmpty(),
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = if (selected) IvidsColorTokens.ObsidianStage else IvidsColorTokens.ChalkInk,
-                                        maxLines = 1
-                                    )
+                    if (state.selectedTab == LibraryTab.LIKED_SONGS &&
+                        (state.likedTracks.isNotEmpty() || state.offlineOnly)
+                    ) {
+                        TrackSortFilterRow(
+                            selectedSort = state.sortOption,
+                            offlineOnly = state.offlineOnly,
+                            onSelectSort = viewModel::setSortOption,
+                            onToggleOfflineOnly = viewModel::toggleOfflineOnly,
+                            strings = strings,
+                            trailingContent = if (filteredLiked.isNotEmpty()) {
+                                {
+                                    IvidsIconButton(
+                                        onClick = { playerViewModel.playQueue(filteredLiked) },
+                                        size = 36.dp,
+                                        hoverStyle = com.kenjigames.ividsmusic.ui.components.IvidsHoverStyle.PRIMARY_ACCENT
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.PlayArrow,
+                                            contentDescription = strings["play_all"],
+                                            tint = IvidsColorTokens.PrimaryCyan,
+                                            modifier = Modifier.size(21.dp)
+                                        )
+                                    }
+                                    IvidsIconButton(
+                                        onClick = { playerViewModel.playQueue(filteredLiked, shuffled = true) },
+                                        size = 36.dp
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Shuffle,
+                                            contentDescription = strings["shuffle"],
+                                            tint = IvidsColorTokens.SlateMuted,
+                                            modifier = Modifier.size(19.dp)
+                                        )
+                                    }
                                 }
+                            } else {
+                                null
                             }
-                            IvidsTonalPill(
-                                onClick = viewModel::toggleOfflineOnly,
-                                baseColor = if (state.offlineOnly) IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f) else IvidsColorTokens.GlassSurface,
-                                hoverStyle = if (state.offlineOnly) IvidsHoverStyle.PRIMARY_ACCENT else IvidsHoverStyle.NEUTRAL,
-                                contentPadding = PaddingValues(horizontal = 13.dp, vertical = 6.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.DownloadDone,
-                                    contentDescription = null,
-                                    tint = if (state.offlineOnly) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.SlateMuted,
-                                    modifier = Modifier.size(15.dp)
-                                )
-                                Text(
-                                    text = strings["offline_only"],
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = if (state.offlineOnly) IvidsColorTokens.PrimaryCyan else IvidsColorTokens.ChalkInk,
-                                    maxLines = 1
-                                )
-                            }
-                        }
+                        )
                     }
                 }
             }
@@ -266,19 +261,7 @@ fun LibraryScreen(
                     } else {
                         if (!metrics.isCompactMobile) {
                             item(key = "liked_table_header") {
-                                Column {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(14.dp)
-                                    ) {
-                                        Text("#", style = IvidsTextStyles.tabularBadge(), color = IvidsColorTokens.SlateMuted, modifier = Modifier.width(26.dp))
-                                        Text(strings["title_column"], style = MaterialTheme.typography.labelMedium, color = IvidsColorTokens.SlateMuted, modifier = Modifier.weight(1f))
-                                        Icon(Icons.Rounded.Schedule, strings["duration_column"], tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-                                        Spacer(modifier = Modifier.width(84.dp))
-                                    }
-                                    HorizontalDivider(color = IvidsColorTokens.HairlineSubtle)
-                                }
+                                TrackTableHeader(strings = strings, trailingWidth = 84.dp)
                             }
                         }
                         itemsIndexed(filteredLiked, key = { idx, t -> "ll_${idx}_${t.id}" }) { idx, track ->
@@ -348,9 +331,14 @@ fun LibraryScreen(
                                 verticalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 state.filteredPlaylists.forEach { playlist ->
+                                    val subtitle = if (playlist.tracks.size == 1) {
+                                        strings["track_singular"]
+                                    } else {
+                                        strings.format("tracks_count", "count" to playlist.tracks.size.toString())
+                                    }
                                     MusicCard(
                                         title = playlist.title,
-                                        subtitle = "${playlist.tracks.size} ${strings["songs"]}",
+                                        subtitle = subtitle,
                                         artworkUrl = playlist.tracks.firstOrNull()?.coverUrl,
                                         onClick = { onOpenPlaylist(playlist.id) },
                                         onPlayClick = {
@@ -360,39 +348,6 @@ fun LibraryScreen(
                                         }
                                     )
                                 }
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (state.recentlyListened.isNotEmpty()) {
-                item(key = "library_recent") {
-                    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = strings["recently_listened"],
-                                style = MaterialTheme.typography.titleLarge,
-                                color = IvidsColorTokens.ChalkInk
-                            )
-                            TextButton(onClick = viewModel::clearHistory) {
-                                Text(strings["clear_all"], color = IvidsColorTokens.SlateMuted)
-                            }
-                        }
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            val recentTracks = state.recentlyListened.map { it.track }
-                            items(recentTracks, key = { "lh_${it.id}" }) { track ->
-                                MusicCard(
-                                    title = track.title,
-                                    subtitle = track.artist,
-                                    artworkUrl = track.coverUrl,
-                                    onClick = { onOpenSongDetail(track.id) },
-                                    onPlayClick = { playerViewModel.playTrack(track, recentTracks) }
-                                )
                             }
                         }
                     }

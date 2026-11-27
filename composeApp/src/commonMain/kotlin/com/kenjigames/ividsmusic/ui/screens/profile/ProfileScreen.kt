@@ -1,20 +1,19 @@
 package com.kenjigames.ividsmusic.ui.screens.profile
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -25,8 +24,6 @@ import androidx.compose.material.icons.rounded.Download
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -42,26 +39,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import coil3.compose.AsyncImage
 import com.kenjigames.ividsmusic.domain.model.Track
+import com.kenjigames.ividsmusic.ui.components.BlurredArtworkBackdrop
 import com.kenjigames.ividsmusic.ui.components.FramedScreenContainer
+import com.kenjigames.ividsmusic.ui.components.IvidsIconButton
+import com.kenjigames.ividsmusic.ui.components.IvidsPrimaryButton
 import com.kenjigames.ividsmusic.ui.components.IvidsTonalPill
-import com.kenjigames.ividsmusic.ui.components.LivingAlbumHero
 import com.kenjigames.ividsmusic.ui.components.MusicCard
+import com.kenjigames.ividsmusic.ui.components.ividsSearchFieldColors
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
 import com.kenjigames.ividsmusic.ui.player.PlayerViewModel
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.ividsScreenPadding
-import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
 /**
- * Displays the framed listener profile card (max 900dp) with adaptive mobile stat tiles of equal
- * height, deduplicated [FlowRow] action pills, listening history, and top genre weights.
+ * Displays the framed listener profile page (max 900dp) with an avatar header, compact stat
+ * tiles, recent listening carousel, and interactive top genre breakdown.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
@@ -75,6 +77,9 @@ fun ProfileScreen(
     val state by viewModel.uiState.collectAsState()
     val strings = LocalStrings.current
     val metrics = LocalLayoutMetrics.current
+    val displayName = state.profile.displayName.ifBlank { strings["listener"] }
+    val avatarInitial = displayName.firstOrNull()?.uppercaseChar()?.toString() ?: "I"
+    val recentCover = state.recentlyPlayed.firstOrNull()?.track?.coverUrl
 
     if (state.isEditModalOpen) {
         AlertDialog(
@@ -89,6 +94,8 @@ fun ProfileScreen(
                         label = { Text(strings["profile_name_label"]) },
                         placeholder = { Text(strings["profile_name_placeholder"]) },
                         singleLine = true,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ividsSearchFieldColors(),
                         modifier = Modifier.fillMaxWidth()
                     )
                     OutlinedTextField(
@@ -97,20 +104,18 @@ fun ProfileScreen(
                         label = { Text(strings["profile_bio_label"]) },
                         placeholder = { Text(strings["profile_bio_placeholder"]) },
                         maxLines = 3,
+                        shape = RoundedCornerShape(14.dp),
+                        colors = ividsSearchFieldColors(),
                         modifier = Modifier.fillMaxWidth()
                     )
                 }
             },
             confirmButton = {
-                Button(
+                IvidsPrimaryButton(
                     onClick = viewModel::saveProfile,
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = IvidsColorTokens.ChalkInk,
-                        contentColor = IvidsColorTokens.ObsidianStage
-                    )
+                    contentPadding = PaddingValues(horizontal = 18.dp, vertical = 9.dp)
                 ) {
-                    Text(strings["profile_save"])
+                    Text(strings["profile_save"], color = IvidsColorTokens.ObsidianStage)
                 }
             },
             dismissButton = {
@@ -127,30 +132,127 @@ fun ProfileScreen(
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = ividsScreenPadding(top = 24.dp),
-            verticalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 18.dp else 24.dp)
+            contentPadding = ividsScreenPadding(top = if (metrics.isCompactMobile) 14.dp else 24.dp),
+            verticalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 18.dp else 22.dp)
         ) {
-            item(key = "profile_hero") {
-                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    LivingAlbumHero(
-                        eyebrow = strings["you"],
-                        title = state.profile.displayName.ifBlank { strings["listener"] },
-                        subtitle = state.profile.bio.ifBlank { strings["no_bio"] },
-                        artworkUrl = state.recentlyPlayed.firstOrNull()?.track?.coverUrl,
-                        primaryActionLabel = strings["edit_profile"],
-                        onPrimaryAction = { viewModel.setEditModalOpen(true) },
-                        secondaryActionLabel = strings["settings"],
-                        onSecondaryAction = onOpenSettings
-                    )
-                    FlowRow(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+            item(key = "profile_header") {
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(if (metrics.isCompactMobile) 18.dp else 22.dp),
+                    color = IvidsColorTokens.GlassSurface
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(if (metrics.isCompactMobile) 18.dp else 22.dp))
                     ) {
-                        ProfilePillAction(
-                            icon = Icons.Rounded.Download,
-                            label = strings["nav_downloader"],
-                            onClick = onOpenDownloader
-                        )
+                        if (!recentCover.isNullOrBlank()) {
+                            BlurredArtworkBackdrop(
+                                artworkUrl = recentCover,
+                                tintColor = null,
+                                scrimAlpha = 0.74f,
+                                fallbackColor = IvidsColorTokens.GlassSurface,
+                                modifier = Modifier.matchParentSize()
+                            )
+                        }
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(if (metrics.isCompactMobile) 16.dp else 22.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(if (metrics.isCompactMobile) 14.dp else 18.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(if (metrics.isCompactMobile) 56.dp else 68.dp)
+                                    .clip(CircleShape)
+                                    .background(IvidsColorTokens.PrimaryCyan.copy(alpha = 0.16f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (!recentCover.isNullOrBlank()) {
+                                    AsyncImage(
+                                        model = recentCover,
+                                        contentDescription = displayName,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                } else {
+                                    Text(
+                                        text = avatarInitial,
+                                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold),
+                                        color = IvidsColorTokens.PrimaryCyan
+                                    )
+                                }
+                            }
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = displayName,
+                                    style = if (metrics.isCompactMobile) {
+                                        MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                                    } else {
+                                        MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                                    },
+                                    color = IvidsColorTokens.ChalkInk,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                if (state.profile.bio.isNotBlank()) {
+                                    Text(
+                                        text = state.profile.bio,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = IvidsColorTokens.SlateMuted,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                Row(
+                                    modifier = Modifier.padding(top = 6.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    IvidsTonalPill(
+                                        onClick = { viewModel.setEditModalOpen(true) },
+                                        baseColor = IvidsColorTokens.RecessedTrough,
+                                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 7.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Edit,
+                                            contentDescription = null,
+                                            tint = IvidsColorTokens.ChalkInk,
+                                            modifier = Modifier.size(15.dp)
+                                        )
+                                        Text(
+                                            text = strings["edit_profile"],
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = IvidsColorTokens.ChalkInk,
+                                            maxLines = 1,
+                                            softWrap = false
+                                        )
+                                    }
+                                    if (!metrics.isCompactMobile) {
+                                        IvidsIconButton(onClick = onOpenDownloader, size = 36.dp) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Download,
+                                                contentDescription = strings["nav_downloader"],
+                                                tint = IvidsColorTokens.SlateMuted,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                        IvidsIconButton(onClick = onOpenSettings, size = 36.dp) {
+                                            Icon(
+                                                imageVector = Icons.Rounded.Settings,
+                                                contentDescription = strings["settings"],
+                                                tint = IvidsColorTokens.SlateMuted,
+                                                modifier = Modifier.size(18.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -181,83 +283,95 @@ fun ProfileScreen(
                 }
             }
 
-            item(key = "profile_recent") {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text(
-                        text = strings["recently_played"],
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = IvidsColorTokens.ChalkInk
-                    )
-                    if (state.recentlyPlayed.isEmpty()) {
+            if (state.recentlyPlayed.isEmpty() && state.topGenres.isEmpty()) {
+                item(key = "profile_empty") {
+                    Surface(
+                        shape = RoundedCornerShape(18.dp),
+                        color = IvidsColorTokens.GlassSurface,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
                         Text(
                             text = strings["no_history"],
                             style = MaterialTheme.typography.bodyMedium,
-                            color = IvidsColorTokens.SlateMuted
+                            color = IvidsColorTokens.SlateMuted,
+                            modifier = Modifier.padding(20.dp)
                         )
-                    } else {
-                        val tracks: List<Track> = state.recentlyPlayed.map { it.track }
-                        LazyRow(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                            items(tracks, key = { "pr_${it.id}" }) { track ->
-                                MusicCard(
-                                    title = track.title,
-                                    subtitle = track.artist,
-                                    artworkUrl = track.coverUrl,
-                                    onClick = { onOpenSongDetail(track.id) },
-                                    onPlayClick = { playerViewModel.playTrack(track, tracks) }
-                                )
+                    }
+                }
+            } else {
+                if (state.recentlyPlayed.isNotEmpty()) {
+                    item(key = "profile_recent") {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(
+                                text = strings["recently_played"],
+                                style = MaterialTheme.typography.titleLarge,
+                                color = IvidsColorTokens.ChalkInk
+                            )
+                            val tracks: List<Track> = state.recentlyPlayed.map { it.track }
+                            LazyRow(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                                items(tracks, key = { "pr_${it.id}" }) { track ->
+                                    MusicCard(
+                                        title = track.title,
+                                        subtitle = track.artist,
+                                        artworkUrl = track.coverUrl,
+                                        onClick = { onOpenSongDetail(track.id) },
+                                        onPlayClick = { playerViewModel.playTrack(track, tracks) }
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
 
-            item(key = "profile_genres") {
-                Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                    Text(
-                        text = strings["top_genres"],
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = IvidsColorTokens.ChalkInk
-                    )
-                    if (state.topGenres.isEmpty()) {
-                        Text(
-                            text = strings["no_history"],
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = IvidsColorTokens.SlateMuted
-                        )
-                    } else {
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = IvidsColorTokens.GlassSurface
-                        ) {
-                            Column(
-                                modifier = Modifier.fillMaxWidth().padding(20.dp),
-                                verticalArrangement = Arrangement.spacedBy(14.dp)
+                if (state.topGenres.isNotEmpty()) {
+                    item(key = "profile_genres") {
+                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Text(
+                                text = strings["top_genres"],
+                                style = MaterialTheme.typography.titleLarge,
+                                color = IvidsColorTokens.ChalkInk
+                            )
+                            Surface(
+                                shape = RoundedCornerShape(18.dp),
+                                color = IvidsColorTokens.GlassSurface
                             ) {
-                                state.topGenres.forEach { (genre, weight) ->
-                                    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                        Row(
-                                            modifier = Modifier.fillMaxWidth(),
-                                            horizontalArrangement = Arrangement.SpaceBetween,
-                                            verticalAlignment = Alignment.CenterVertically
+                                Column(
+                                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    state.topGenres.forEach { (genre, weight) ->
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .pointerHoverIcon(PointerIcon.Hand)
+                                                .clickable { onOpenGenreSearch(genre) }
+                                                .padding(vertical = 4.dp),
+                                            verticalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
-                                            TextButton(
-                                                onClick = { onOpenGenreSearch(genre) },
-                                                contentPadding = PaddingValues(0.dp)
+                                            Row(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.SpaceBetween,
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
-                                                Text(genre, style = MaterialTheme.typography.titleMedium, color = IvidsColorTokens.ChalkInk)
+                                                Text(
+                                                    text = genre,
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    color = IvidsColorTokens.ChalkInk
+                                                )
+                                                Text(
+                                                    text = "${(weight * 100).toInt()}%",
+                                                    style = IvidsTextStyles.tabularBadge(),
+                                                    color = IvidsColorTokens.SlateMuted
+                                                )
                                             }
-                                            Text(
-                                                text = "${(weight * 100).toInt()}%",
-                                                style = IvidsTextStyles.tabularBadge(),
-                                                color = IvidsColorTokens.SlateMuted
+                                            LinearProgressIndicator(
+                                                progress = { weight },
+                                                color = IvidsColorTokens.PrimaryCyan,
+                                                trackColor = IvidsColorTokens.RecessedTrough,
+                                                modifier = Modifier.fillMaxWidth().height(6.dp).clip(CircleShape)
                                             )
                                         }
-                                        LinearProgressIndicator(
-                                            progress = { weight },
-                                            color = IvidsColorTokens.ChalkInk,
-                                            trackColor = IvidsColorTokens.RecessedTrough,
-                                            modifier = Modifier.fillMaxWidth().height(7.dp).clip(CircleShape)
-                                        )
                                     }
                                 }
                             }
@@ -266,31 +380,6 @@ fun ProfileScreen(
                 }
             }
         }
-    }
-}
-
-/**
- * Renders a sleek tonal pill shortcut button inside [ProfileScreen] with single-line non-wrapping text.
- */
-@Composable
-private fun ProfilePillAction(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    onClick: () -> Unit
-) {
-    IvidsTonalPill(
-        onClick = onClick,
-        baseColor = IvidsColorTokens.GlassSurface,
-        hoverColor = IvidsColorTokens.GlassHover
-    ) {
-        Icon(icon, null, tint = IvidsColorTokens.SlateMuted, modifier = Modifier.size(16.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelLarge,
-            color = IvidsColorTokens.ChalkInk,
-            maxLines = 1,
-            softWrap = false
-        )
     }
 }
 
@@ -307,24 +396,27 @@ private fun ProfileStatCard(
 ) {
     Surface(
         modifier = modifier,
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(16.dp),
         color = IvidsColorTokens.GlassSurface
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(if (isCompact) 14.dp else 20.dp),
+            modifier = Modifier.fillMaxSize().padding(if (isCompact) 12.dp else 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterVertically)
+            verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterVertically)
         ) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.displaySmall.copy(fontFeatureSettings = "tnum"),
-                color = IvidsColorTokens.ChalkInk
+                style = (if (isCompact) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.headlineMedium)
+                    .copy(fontFeatureSettings = "tnum", fontWeight = FontWeight.Bold),
+                color = IvidsColorTokens.PrimaryCyan
             )
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
                 color = IvidsColorTokens.SlateMuted,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }

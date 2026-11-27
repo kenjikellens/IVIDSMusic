@@ -12,6 +12,22 @@ internal object DesktopNetworkGuard {
     private val CONTROL_OR_CRLF_REGEX = Regex("[\\r\\n\\u0000]")
 
     /**
+     * Parses [rawUrl], verifies an `http`/`https` scheme without userinfo or control chars, and optionally blocks private IPs.
+     * Returns the validated [URI] or `null` when malformed or violating network boundaries.
+     */
+    fun validateHttpUri(rawUrl: String, allowPrivateHosts: Boolean = false): URI? {
+        val trimmed = rawUrl.trim()
+        if (trimmed.isEmpty() || CONTROL_OR_CRLF_REGEX.containsMatchIn(trimmed)) return null
+        val uri = runCatching { URI(trimmed) }.getOrNull() ?: return null
+        val scheme = uri.scheme?.lowercase() ?: return null
+        if (scheme != "http" && scheme != "https") return null
+        if (!uri.rawUserInfo.isNullOrEmpty()) return null
+        val host = uri.host?.trim()?.lowercase()?.takeIf { it.isNotEmpty() } ?: return null
+        if (!allowPrivateHosts && isPrivateOrLoopbackHost(host)) return null
+        return uri
+    }
+
+    /**
      * Validates a redirect hop from [currentUrl] to [location], blocking public-to-private/loopback downgrades.
      * Allows loopback redirects only when [currentUrl] itself targeted a loopback/private address.
      */

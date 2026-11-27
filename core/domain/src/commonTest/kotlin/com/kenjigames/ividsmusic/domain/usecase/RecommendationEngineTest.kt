@@ -146,9 +146,10 @@ class RecommendationEngineTest {
         engine.recordTrackCompletion("t1")
         assertEquals(2, scoreRepo.getScore("track:t1")?.score)
 
-        // Like track: +3 track (total 5), +2 genre (total 3)
+        // Like track: +3 track (total 5), +2 artist (total 3), +2 genre (total 3)
         engine.recordLikeTrack(track)
         assertEquals(5, scoreRepo.getScore("track:t1")?.score)
+        assertEquals(3, scoreRepo.getScore("artist:a1")?.score)
         assertEquals(3, scoreRepo.getScore("genre:electronic")?.score)
 
         // Early skip <20s applies -1, >=20s does not
@@ -157,16 +158,16 @@ class RecommendationEngineTest {
         engine.recordEarlySkip("t1", 20_000L)
         assertEquals(4, scoreRepo.getScore("track:t1")?.score)
 
-        // Dislike track: halves track (4 / 2 = 2), -2 artist (1 - 2 clamped to 0), -1 genre (3 - 1 = 2)
+        // Dislike track: halves track (4 / 2 = 2), -2 artist (3 - 2 = 1), -1 genre (3 - 1 = 2)
         engine.recordDislikeTrack(track)
         assertEquals(2, scoreRepo.getScore("track:t1")?.score)
-        assertEquals(0, scoreRepo.getScore("artist:a1")?.score)
+        assertEquals(1, scoreRepo.getScore("artist:a1")?.score)
         assertEquals(2, scoreRepo.getScore("genre:electronic")?.score)
 
         // Artist click +1 & artist like +3, plus upper bound clamp at 100
         engine.recordArtistClick("a1", "Kenji")
         engine.recordLikeArtist(Artist(id = "a1", name = "Kenji"))
-        assertEquals(4, scoreRepo.getScore("artist:a1")?.score)
+        assertEquals(5, scoreRepo.getScore("artist:a1")?.score)
 
         repeat(40) {
             engine.recordLikeTrack(track)
@@ -251,5 +252,89 @@ class RecommendationEngineTest {
         assertEquals("match_1", feed.discoveryMix.firstOrNull()?.id)
         assertTrue(feed.tasteMatchTracks.any { it.id == "match_1" })
         assertTrue(feed.genreFusionTracks.any { it.id == "match_1" })
+    }
+
+    /** Verifies low positive scores (`1..14`) produce positive user-vector weights and rank matching tracks first. */
+    @Test
+    fun lowPositiveScoresProducePositiveSimilarityAndOutrankUnrelated() = runTest {
+        val scoreRepo = FakeScoreRepository()
+        val clicked = Track(
+            id = "s1",
+            title = "Fresh Track",
+            artist = "NewArtist",
+            artistId = "art_new",
+            genres = listOf("Synthwave")
+        )
+        val matchingCandidate = Track(
+            id = "m_new",
+            title = "Neon Horizon",
+            artist = "NewArtist",
+            artistId = "art_new",
+            genres = listOf("Synthwave")
+        )
+        val unrelated = Track(
+            id = "u_other",
+            title = "Banjo Picking",
+            artist = "Other",
+            artistId = "art_other",
+            genres = listOf("Country")
+        )
+        val engine = RecommendationEngine(
+            scoreRepo,
+            FakeDiscoveryRepository(
+                relatedByTrackId = mapOf("s1" to listOf(unrelated, matchingCandidate)),
+                chartTracks = listOf(unrelated, matchingCandidate)
+            ),
+            clockMs = { clock }
+        )
+
+        engine.recordTrackClick(clicked)
+        val userVector = engine.buildUserProfileVector(scoreRepo.getAllScores(), nowMs = clock)
+        assertTrue((userVector["artist_art_new"] ?: 0.0) > 0.0)
+        assertTrue((userVector["genre_synthwave"] ?: 0.0) > 0.0)
+
+        val feed = (engine.generateRecommendations() as AppResult.Success).data
+        assertEquals("m_new", feed.discoveryMix.firstOrNull()?.id)
+    }
+
+    /** Verifies recency decay downweights stale entries and active era/popularity axes populate from seeds. */
+    @Test
+    fun recencyDecayDownweightsOldEntriesAndDiscoveryMixCapsArtistDominance() = runTest {
+        val nowMs = 60L * 86_400_000L
+        val scoreRepo = FakeScoreRepository()
+        val engine = RecommendationEngine(scoreRepo, FakeDiscoveryRepository(), clockMs = { nowMs })
+
+        assertTrue(engine.recencyWeight(lastUpdatedMs = 0L, nowMs = nowMs) < 1.0001)
+        assertTrue(engine.recencyWeight(lastUpdatedMs = nowMs - 21L * 86_400_000L, nowMs = nowMs) in 0.49..0.51)
+        assertEquals(0.25, engine.recencyWeight(lastUpdatedMs = 1L, nowMs = nowMs), 0.0001)
+
+        scoreRepo.upsertScore(
+            InterestScore("genre:rock", ScoreEntityType.GENRE, "rock", "Rock", score = 10, lastUpdatedMs = 1L)
+        )
+        scoreRepo.upsertScore(
+            InterestScore("genre:jazz", ScoreEntityType.GENRE, "jazz", "Jazz", score = 10, lastUpdatedMs = nowMs)
+        )
+        val seedTrack = Track(
+            id = "seed_j",
+            title = "Blue Note",
+            artist = "Miles",
+            artistId = "a_miles",
+            genres = listOf("Jazz"),
+            releaseYear = 2023,
+            rank = 600_000
+        )
+        val vector = engine.buildUserProfileVector(scoreRepo.getAllScores(), nowMs = nowMs, seedTracks = listOf(seedTrack))
+        assertTrue((vector["genre_jazz"] ?: 0.0) > (vector["genre_rock"] ?: 0.0) * 3.0)
+        assertTrue((vector["era_recent"] ?: 0.0) > 0.0)
+        assertTrue((vector["popularity"] ?: 0.0) > 0.0)
+
+        val skewedPool = (1..8).map { i ->
+            Track(id = "dom_$i", title = "Dom $i", artist = "TopArtist", artistId = "top_a", genres = listOf("Pop"))
+        } + (1..4).map { i ->
+            Track(id = "alt_$i", title = "Alt $i", artist = "AltArtist $i", artistId = "alt_$i", genres = listOf("Jazz"))
+        }
+        val mix = engine.diversifyDiscoveryMix(skewedPool, savedTrackIds = emptySet(), limit = 6)
+        assertEquals(6, mix.size)
+        assertEquals(2, mix.count { it.artistId == "top_a" })
     }
 }

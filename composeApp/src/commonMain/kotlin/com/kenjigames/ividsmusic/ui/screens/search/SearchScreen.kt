@@ -1,16 +1,9 @@
 package com.kenjigames.ividsmusic.ui.screens.search
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.foundation.layout.Arrangement
@@ -43,7 +36,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
@@ -74,6 +66,7 @@ import com.kenjigames.ividsmusic.ui.components.IvidsVinylLoadingBox
 import com.kenjigames.ividsmusic.ui.components.MusicCard
 import com.kenjigames.ividsmusic.ui.components.ToastController
 import com.kenjigames.ividsmusic.ui.components.TrackRowItem
+import com.kenjigames.ividsmusic.ui.components.ividsSearchFieldColors
 import com.kenjigames.ividsmusic.ui.components.ividsTouchFeedback
 import com.kenjigames.ividsmusic.ui.components.rememberTrackPlaylistModalState
 import com.kenjigames.ividsmusic.ui.i18n.LocalStrings
@@ -176,27 +169,21 @@ fun SearchScreen(
                         shape = RoundedCornerShape(16.dp),
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = { viewModel.submitQuery(state.query) }),
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedContainerColor = IvidsColorTokens.GlassSurface,
-                            unfocusedContainerColor = IvidsColorTokens.RecessedTrough,
-                            focusedBorderColor = IvidsColorTokens.HairlineBorder,
-                            unfocusedBorderColor = Color.Transparent,
-                            focusedTextColor = IvidsColorTokens.ChalkInk,
-                            unfocusedTextColor = IvidsColorTokens.ChalkInk
-                        ),
+                        colors = ividsSearchFieldColors(),
                         modifier = Modifier.fillMaxWidth().tvFocusable(shape = RoundedCornerShape(16.dp))
                     )
 
-                    val filterOptions = listOf(
-                        SearchFilterType.ALL to strings["filter_all"],
-                        SearchFilterType.SONG to strings["songs"],
-                        SearchFilterType.ARTIST to strings["artists"],
-                        SearchFilterType.ALBUM to strings["albums"]
-                    )
                     IvidsSegmentedBar(
-                        items = filterOptions.map { it.first },
+                        items = SearchFilterType.entries,
                         selected = state.filterType,
-                        labelProvider = { type -> filterOptions.first { it.first == type }.second },
+                        labelProvider = { type ->
+                            when (type) {
+                                SearchFilterType.ALL -> strings["filter_all"]
+                                SearchFilterType.SONG -> strings["songs"]
+                                SearchFilterType.ARTIST -> strings["artists"]
+                                SearchFilterType.ALBUM -> strings["albums"]
+                            }
+                        },
                         onSelect = viewModel::setFilterType
                     )
 

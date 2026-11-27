@@ -1,14 +1,9 @@
 package com.kenjigames.ividsmusic.ui.components
 
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.hoverable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -35,12 +30,10 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,7 +44,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
@@ -60,17 +52,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
-import com.kenjigames.ividsmusic.ui.theme.ColorExtractor
 import com.kenjigames.ividsmusic.ui.theme.IvidsColorTokens
 import com.kenjigames.ividsmusic.ui.theme.IvidsTextStyles
 import com.kenjigames.ividsmusic.ui.theme.LocalIsTvMode
 import com.kenjigames.ividsmusic.ui.theme.LocalLayoutMetrics
 import com.kenjigames.ividsmusic.ui.theme.tvFocusable
 
-/**
- * Renders a flat YouTube/Spotify artwork tile directly on the dark stage with optional hover lift
- * on Desktop and responsive circular/rounded cover framing plus a Play FAB.
- */
 /**
  * Descriptor for an individual desktop right-click context menu action on [MusicCard].
  */
@@ -112,9 +99,10 @@ fun MusicCard(
         label = "MusicCardPlayAlpha"
     )
 
+    val delayedClick = rememberDelayedOnClick(delayMs = 130L, onClick = onClick)
     Box(modifier = modifier.width(width)) {
         Surface(
-            onClick = onClick,
+            onClick = delayedClick,
             interactionSource = interactionSource,
             modifier = Modifier
                 .fillMaxWidth()
@@ -269,6 +257,7 @@ fun SpotifyQuickPickTile(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
+    val delayedClick = rememberDelayedOnClick(delayMs = 130L, onClick = onClick)
     val playAlpha by animateFloatAsState(
         targetValue = if (isHovered) 1f else 0f,
         animationSpec = tween(140, easing = FastOutSlowInEasing),
@@ -276,7 +265,7 @@ fun SpotifyQuickPickTile(
     )
 
     Surface(
-        onClick = onClick,
+        onClick = delayedClick,
         interactionSource = interactionSource,
         shape = RoundedCornerShape(10.dp),
         color = Color(0xFF181818),
@@ -355,10 +344,6 @@ fun SpotifyQuickPickTile(
 }
 
 /**
- * Renders the signature Living Album Hero banner using a true blurred cover-art backdrop
- * ([BlurredArtworkBackdrop]), crisp cover framing, and smooth hoverable action pills.
- */
-/**
  * Renders the adaptive Living Album Hero banner using [BlurredArtworkBackdrop], stacking content
  * cleanly on compact mobile viewports so titles and [FlowRow] CTAs never clip or misalign with `×`.
  */
@@ -376,19 +361,22 @@ fun LivingAlbumHero(
     onSecondaryAction: (() -> Unit)? = null,
     onDismiss: (() -> Unit)? = null,
     primaryEnabled: Boolean = true,
-    secondaryEnabled: Boolean = true
+    secondaryEnabled: Boolean = true,
+    compact: Boolean = false,
+    trailingActions: (@Composable () -> Unit)? = null
 ) {
     val isCompactMobile = LocalLayoutMetrics.current.isCompactMobile
+    val cornerRadius = if (compact || isCompactMobile) 18.dp else 24.dp
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(if (isCompactMobile) 20.dp else 24.dp),
+        shape = RoundedCornerShape(cornerRadius),
         color = IvidsColorTokens.GlassSurface
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(if (isCompactMobile) 20.dp else 24.dp))
+                .clip(RoundedCornerShape(cornerRadius))
         ) {
             BlurredArtworkBackdrop(
                 artworkUrl = artworkUrl,
@@ -403,13 +391,13 @@ fun LivingAlbumHero(
                 Column(modifier = bodyModifier) {
                     Text(
                         text = title,
-                        style = if (isCompactMobile) {
+                        style = if (isCompactMobile || compact) {
                             MaterialTheme.typography.headlineSmall
                         } else {
                             MaterialTheme.typography.displaySmall
                         },
                         color = IvidsColorTokens.ChalkInk,
-                        maxLines = 2,
+                        maxLines = if (compact) 1 else 2,
                         overflow = TextOverflow.Ellipsis,
                         modifier = if (onDismiss != null && (isCompactMobile || artworkUrl.isNullOrBlank())) {
                             Modifier.padding(end = 36.dp)
@@ -420,27 +408,27 @@ fun LivingAlbumHero(
                         }
                     )
                     if (subtitle.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(if (isCompactMobile) 6.dp else 8.dp))
+                        Spacer(modifier = Modifier.height(if (compact || isCompactMobile) 4.dp else 8.dp))
                         Text(
                             text = subtitle,
-                            style = if (isCompactMobile) {
+                            style = if (compact || isCompactMobile) {
                                 MaterialTheme.typography.bodyMedium
                             } else {
                                 MaterialTheme.typography.bodyLarge
                             },
                             color = IvidsColorTokens.SlateMuted,
-                            maxLines = 2,
+                            maxLines = if (compact) 1 else 2,
                             overflow = TextOverflow.Ellipsis
                         )
                     } else if (eyebrow.isNotBlank()) {
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = eyebrow,
                             style = MaterialTheme.typography.bodyMedium,
                             color = IvidsColorTokens.SlateMuted
                         )
                     }
-                    Spacer(modifier = Modifier.height(if (isCompactMobile) 14.dp else 18.dp))
+                    Spacer(modifier = Modifier.height(if (compact) 12.dp else if (isCompactMobile) 14.dp else 18.dp))
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
@@ -449,8 +437,8 @@ fun LivingAlbumHero(
                             onClick = onPrimaryAction,
                             enabled = primaryEnabled,
                             contentPadding = PaddingValues(
-                                horizontal = if (isCompactMobile) 18.dp else 22.dp,
-                                vertical = if (isCompactMobile) 10.dp else 12.dp
+                                horizontal = if (compact || isCompactMobile) 16.dp else 22.dp,
+                                vertical = if (compact || isCompactMobile) 9.dp else 12.dp
                             )
                         ) {
                             Icon(
@@ -475,8 +463,8 @@ fun LivingAlbumHero(
                                 baseColor = Color(0x22FFFFFF),
                                 hoverColor = Color(0x3DFFFFFF),
                                 contentPadding = PaddingValues(
-                                    horizontal = if (isCompactMobile) 16.dp else 20.dp,
-                                    vertical = if (isCompactMobile) 10.dp else 12.dp
+                                    horizontal = if (compact || isCompactMobile) 15.dp else 20.dp,
+                                    vertical = if (compact || isCompactMobile) 9.dp else 12.dp
                                 )
                             ) {
                                 Text(
@@ -488,6 +476,8 @@ fun LivingAlbumHero(
                                 )
                             }
                         }
+
+                        trailingActions?.invoke()
                     }
                 }
             }
@@ -496,8 +486,8 @@ fun LivingAlbumHero(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(18.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
+                        .padding(if (compact) 14.dp else 18.dp),
+                    verticalArrangement = Arrangement.spacedBy(if (compact) 10.dp else 14.dp)
                 ) {
                     if (!artworkUrl.isNullOrBlank()) {
                         Box(modifier = Modifier.fillMaxWidth()) {
@@ -506,15 +496,15 @@ fun LivingAlbumHero(
                                 contentDescription = title,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
-                                    .size(118.dp)
+                                    .size(if (compact) 84.dp else 118.dp)
                                     .align(Alignment.CenterStart)
                                     .shadow(
                                         elevation = 16.dp,
-                                        shape = RoundedCornerShape(16.dp),
+                                        shape = RoundedCornerShape(14.dp),
                                         ambientColor = Color.Black,
                                         spotColor = Color.Black
                                     )
-                                    .clip(RoundedCornerShape(16.dp))
+                                    .clip(RoundedCornerShape(14.dp))
                                     .background(IvidsColorTokens.RecessedTrough)
                             )
                         }
@@ -525,9 +515,12 @@ fun LivingAlbumHero(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 28.dp, vertical = 26.dp),
+                        .padding(
+                            horizontal = if (compact) 22.dp else 28.dp,
+                            vertical = if (compact) 16.dp else 26.dp
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(24.dp)
+                    horizontalArrangement = Arrangement.spacedBy(if (compact) 18.dp else 24.dp)
                 ) {
                     if (!artworkUrl.isNullOrBlank()) {
                         AsyncImage(
@@ -535,14 +528,14 @@ fun LivingAlbumHero(
                             contentDescription = title,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(144.dp)
+                                .size(if (compact) 104.dp else 144.dp)
                                 .shadow(
                                     elevation = 18.dp,
-                                    shape = RoundedCornerShape(18.dp),
+                                    shape = RoundedCornerShape(if (compact) 14.dp else 18.dp),
                                     ambientColor = Color.Black,
                                     spotColor = Color.Black
                                 )
-                                .clip(RoundedCornerShape(18.dp))
+                                .clip(RoundedCornerShape(if (compact) 14.dp else 18.dp))
                                 .background(IvidsColorTokens.RecessedTrough)
                         )
                     }

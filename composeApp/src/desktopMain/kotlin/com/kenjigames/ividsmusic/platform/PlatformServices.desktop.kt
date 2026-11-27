@@ -1,5 +1,6 @@
 package com.kenjigames.ividsmusic.platform
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -48,12 +49,13 @@ actual class PlatformBridge {
     }
 
     /**
-     * Opens [url] in the host desktop browser when Desktop browsing is supported.
+     * Opens [url] in the host desktop browser after validating an `http://` or `https://` scheme.
      */
     actual fun openExternalUrl(url: String) {
+        if (!isValidExternalHttpUrl(url)) return
         runCatching {
             if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(URI(url))
+                Desktop.getDesktop().browse(URI(url.trim()))
             }
         }
     }
@@ -65,7 +67,7 @@ actual class PlatformBridge {
  */
 actual class AppUpdateChecker(
     private val platformBridge: PlatformBridge,
-    private val json: Json = Json { ignoreUnknownKeys = true }
+    private val json: Json = DefaultPlatformJson
 ) {
     private val _state = MutableStateFlow<AppUpdateState>(AppUpdateState.Idle)
     actual val state: StateFlow<AppUpdateState> = _state.asStateFlow()
@@ -116,6 +118,8 @@ actual class AppUpdateChecker(
                 } ?: htmlUrl
 
                 _state.value = AppUpdateState.Available(tag, changelog, winAssetUrl)
+            } catch (cancel: CancellationException) {
+                throw cancel
             } catch (e: Exception) {
                 _state.value = AppUpdateState.Error(e.message ?: "Update check failed")
             } finally {
@@ -144,22 +148,6 @@ actual class AppUpdateChecker(
         const val GITHUB_RELEASE_URL =
             "https://api.github.com/repos/kenjikellens/IVIDSMusic/releases/latest"
     }
-}
-
-/**
- * Compares dot-separated semantic version tags such as `0.2.5` and `v0.3.0`.
- */
-internal fun isNewerVersion(current: String, latest: String): Boolean {
-    val cParts = current.trim().removePrefix("v").split(".")
-    val lParts = latest.trim().removePrefix("v").split(".")
-    val maxLen = maxOf(cParts.size, lParts.size)
-    for (i in 0 until maxLen) {
-        val cVal = cParts.getOrNull(i)?.filter(Char::isDigit)?.toIntOrNull() ?: 0
-        val lVal = lParts.getOrNull(i)?.filter(Char::isDigit)?.toIntOrNull() ?: 0
-        if (lVal > cVal) return true
-        if (cVal > lVal) return false
-    }
-    return false
 }
 
 /**

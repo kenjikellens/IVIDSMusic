@@ -1,6 +1,8 @@
 package com.kenjigames.ividsmusic.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import com.kenjigames.ividsmusic.ui.components.fetchBoundedDesktopImageBytes
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -10,9 +12,6 @@ import org.jetbrains.skia.Canvas
 import org.jetbrains.skia.Image
 import org.jetbrains.skia.ImageInfo
 import org.jetbrains.skia.Rect
-import java.io.ByteArrayOutputStream
-import java.net.HttpURLConnection
-import java.net.URI
 import kotlin.math.max
 import kotlin.math.min
 
@@ -61,34 +60,12 @@ actual object ColorExtractor {
                         return@withPermit colorCache[imageUrl]?.takeIf { it != Color.Unspecified }
                     }
                 }
-                var connection: HttpURLConnection? = null
                 try {
-                    connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 4_000
-                        readTimeout = 4_000
-                        setRequestProperty("User-Agent", "IVIDS-Music-Desktop")
-                    }
-                    if (connection.responseCode !in 200..299 || connection.contentLengthLong > MAX_BYTES) {
-                        synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
-                        return@withPermit null
-                    }
-                    val bytes = connection.inputStream.use { input ->
-                        val out = ByteArrayOutputStream()
-                        val buf = ByteArray(8192)
-                        var total = 0
-                        while (true) {
-                            val read = input.read(buf)
-                            if (read <= 0) break
-                            total += read
-                            if (total > MAX_BYTES) return@withPermit null
-                            out.write(buf, 0, read)
+                    val bytes = fetchBoundedDesktopImageBytes(imageUrl, MAX_BYTES)
+                        ?: run {
+                            synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
+                            return@withPermit null
                         }
-                        out.toByteArray()
-                    }
-                    if (bytes.isEmpty()) {
-                        synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
-                        return@withPermit null
-                    }
 
                     val extracted = Image.makeFromEncoded(bytes).use { image ->
                         Bitmap().use { bitmap ->
@@ -112,11 +89,11 @@ actual object ColorExtractor {
                         colorCache[imageUrl] = clamped
                     }
                     clamped.takeIf { it != Color.Unspecified }
+                } catch (cancel: CancellationException) {
+                    throw cancel
                 } catch (_: Exception) {
                     synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
                     null
-                } finally {
-                    connection?.disconnect()
                 }
             }
         }

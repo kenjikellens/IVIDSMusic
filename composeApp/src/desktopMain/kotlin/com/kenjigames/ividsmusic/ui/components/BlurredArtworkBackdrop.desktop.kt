@@ -2,6 +2,8 @@ package com.kenjigames.ividsmusic.ui.components
 
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.toComposeImageBitmap
+import com.kenjigames.ividsmusic.platform.isValidExternalHttpUrl
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -29,6 +31,47 @@ private val desktopBlurCache = object : LinkedHashMap<String, ImageBitmap>(DESKT
 }
 
 /**
+ * Validates [imageUrl] as HTTP(S) and downloads up to [maxBytes] into memory for Desktop artwork
+ * decoding, rethrowing [CancellationException] and returning `null` on HTTP or size violations.
+ */
+internal fun fetchBoundedDesktopImageBytes(
+    imageUrl: String,
+    maxBytes: Int = DESKTOP_BLUR_MAX_BYTES
+): ByteArray? {
+    if (!isValidExternalHttpUrl(imageUrl)) return null
+    var connection: HttpURLConnection? = null
+    return try {
+        connection = (URI.create(imageUrl.trim()).toURL().openConnection() as HttpURLConnection).apply {
+            connectTimeout = 4_000
+            readTimeout = 4_000
+            setRequestProperty("User-Agent", "IVIDS-Music-Desktop")
+        }
+        if (connection.responseCode !in 200..299 || connection.contentLengthLong > maxBytes) {
+            return null
+        }
+        connection.inputStream.use { input ->
+            val out = ByteArrayOutputStream()
+            val buf = ByteArray(8192)
+            var total = 0
+            while (true) {
+                val read = input.read(buf)
+                if (read <= 0) break
+                total += read
+                if (total > maxBytes) return null
+                out.write(buf, 0, read)
+            }
+            out.toByteArray().takeIf { it.isNotEmpty() }
+        }
+    } catch (cancel: CancellationException) {
+        throw cancel
+    } catch (_: Exception) {
+        null
+    } finally {
+        connection?.disconnect()
+    }
+}
+
+/**
  * Downloads [imageUrl] on IO dispatcher, downsamples and blurs it once into a 72x72 Skia surface
  * with clamped edges, and caches the resulting [ImageBitmap] for zero-cost 60+ FPS GPU blitting.
  */
@@ -42,30 +85,9 @@ actual suspend fun loadBlurredArtworkBitmap(imageUrl: String?): ImageBitmap? {
             synchronized(desktopBlurLock) {
                 desktopBlurCache[imageUrl]?.let { return@withPermit it }
             }
-            var connection: HttpURLConnection? = null
             try {
-                connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
-                    connectTimeout = 4_000
-                    readTimeout = 4_000
-                    setRequestProperty("User-Agent", "IVIDS-Music-Desktop")
-                }
-                if (connection.responseCode !in 200..299 || connection.contentLengthLong > DESKTOP_BLUR_MAX_BYTES) {
-                    return@withPermit null
-                }
-                val bytes = connection.inputStream.use { input ->
-                    val out = ByteArrayOutputStream()
-                    val buf = ByteArray(8192)
-                    var total = 0
-                    while (true) {
-                        val read = input.read(buf)
-                        if (read <= 0) break
-                        total += read
-                        if (total > DESKTOP_BLUR_MAX_BYTES) return@withPermit null
-                        out.write(buf, 0, read)
-                    }
-                    out.toByteArray()
-                }
-                if (bytes.isEmpty()) return@withPermit null
+                val bytes = fetchBoundedDesktopImageBytes(imageUrl, DESKTOP_BLUR_MAX_BYTES)
+                    ?: return@withPermit null
 
                 val bitmap = Image.makeFromEncoded(bytes).use { source ->
                     Surface.makeRasterN32Premul(DESKTOP_BLUR_TARGET_PX, DESKTOP_BLUR_TARGET_PX).use { surface ->
@@ -90,10 +112,10 @@ actual suspend fun loadBlurredArtworkBitmap(imageUrl: String?): ImageBitmap? {
                     desktopBlurCache[imageUrl] = bitmap
                 }
                 bitmap
+            } catch (cancel: CancellationException) {
+                throw cancel
             } catch (_: Exception) {
                 null
-            } finally {
-                connection?.disconnect()
             }
         }
     }

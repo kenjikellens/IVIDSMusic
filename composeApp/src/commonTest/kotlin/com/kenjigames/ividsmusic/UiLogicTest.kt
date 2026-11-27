@@ -13,9 +13,8 @@ import com.kenjigames.ividsmusic.ui.i18n.AppStrings
 import com.kenjigames.ividsmusic.ui.i18n.SupportedLanguage
 import com.kenjigames.ividsmusic.ui.navigation.AppNavigator
 import com.kenjigames.ividsmusic.ui.navigation.AppRoute
-import com.kenjigames.ividsmusic.ui.screens.home.HomeQuickPick
-import com.kenjigames.ividsmusic.ui.screens.home.HomeUiState
-import com.kenjigames.ividsmusic.ui.screens.home.buildHomeFeedProjection
+import com.kenjigames.ividsmusic.ui.screens.home.formatHeroTrackSubtitle
+import com.kenjigames.ividsmusic.ui.screens.home.healRecentTrackCovers
 import com.kenjigames.ividsmusic.ui.screens.library.sortAndFilterTracks
 import com.kenjigames.ividsmusic.ui.shell.ShellMode
 import com.kenjigames.ividsmusic.ui.shell.resolveShellMode
@@ -24,7 +23,6 @@ import com.kenjigames.ividsmusic.ui.theme.clampAccentContrast
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
@@ -123,56 +121,47 @@ class UiLogicTest {
     }
 
     /**
-     * Verifies Home feed projection fills all 6 quick-pick slots, heals blank history cover URLs from live
-     * charts, selects a distinct Hero track, and excludes already-displayed quick-pick tracks from Recently Listened.
+     * Verifies [healRecentTrackCovers] restores blank or stale history cover URLs from live genre charts.
      */
     @Test
-    fun homeFeedProjectionDeduplicatesQuickPicksHeroAndRecent() {
-        val popTracks = (1..4).map { idx ->
-            Track(id = "pop_$idx", title = "Pop $idx", artist = "Artist $idx", coverUrl = "https://img/$idx.jpg")
-        }
-        val rockTracks = (1..4).map { idx ->
-            Track(id = "rock_$idx", title = "Rock $idx", artist = "Band $idx", coverUrl = "https://img/r$idx.jpg")
-        }
-        val staleRecent = listOf(
-            Track(id = "pop_1", title = "Pop 1", artist = "Artist 1", coverUrl = ""),
-            Track(id = "r_custom", title = "Custom", artist = "Solo", coverUrl = "https://img/c.jpg")
+    fun healRecentTrackCoversRestoresBlankHistoryArtwork() {
+        val chartTracks = listOf(
+            Track(id = "pop_1", title = "Housewife", artist = "Tate McRae", coverUrl = "https://img/housewife.jpg")
         )
-        val projection = buildHomeFeedProjection(
-            state = HomeUiState(
-                heroTrack = popTracks.first(),
-                continueListening = staleRecent,
-                genreSections = listOf(
-                    CategoryRow("pop", "Pop", popTracks),
-                    CategoryRow("rock", "Rock", rockTracks)
-                ),
-                isLoading = false
-            ),
-            playlists = emptyList(),
-            likedTracks = emptyList()
+        val recent = listOf(
+            Track(id = "pop_1", title = "Housewife", artist = "Tate McRae", coverUrl = ""),
+            Track(id = "other", title = "End of Beginning", artist = "Djo", coverUrl = "https://img/djo.jpg")
         )
-        assertEquals(6, projection.quickPicks.size)
-        val pickTracks = projection.quickPicks.filterIsInstance<HomeQuickPick.TrackPick>().map { it.track }
-        assertEquals("https://img/1.jpg", pickTracks.first().coverUrl)
-        assertTrue(projection.remainingRecent.isEmpty())
-        val hero = assertNotNull(projection.heroTrack)
-        assertFalse(pickTracks.any { it.id == hero.id })
+        val healed = healRecentTrackCovers(
+            recent = recent,
+            genreSections = listOf(CategoryRow("pop", "Pop", chartTracks))
+        )
+        assertEquals("https://img/housewife.jpg", healed[0].coverUrl)
+        assertEquals("https://img/djo.jpg", healed[1].coverUrl)
+    }
 
-        val overflowRecent = staleRecent + (1..6).map { idx ->
-            Track(id = "extra_$idx", title = "Extra $idx", artist = "Solo $idx", coverUrl = "https://img/e$idx.jpg")
-        }
-        val overflowProjection = buildHomeFeedProjection(
-            state = HomeUiState(
-                heroTrack = popTracks.first(),
-                continueListening = overflowRecent,
-                genreSections = listOf(CategoryRow("pop", "Pop", popTracks)),
-                isLoading = false
-            ),
-            playlists = emptyList(),
-            likedTracks = emptyList()
+    /**
+     * Verifies [formatHeroTrackSubtitle] joins real track artist, album or genre, release year, and duration.
+     */
+    @Test
+    fun formatHeroTrackSubtitleFormatsAvailableTrackMetadata() {
+        val full = Track(
+            id = "h1",
+            title = "Midnight City",
+            artist = "M83",
+            album = "Hurry Up, We're Dreaming",
+            releaseYear = 2011,
+            durationSeconds = 243
         )
-        assertEquals(6, overflowProjection.quickPicks.size)
-        assertEquals(2, overflowProjection.remainingRecent.size)
-        assertEquals(listOf("extra_5", "extra_6"), overflowProjection.remainingRecent.map { it.id })
+        assertEquals("M83 • Hurry Up, We're Dreaming • 2011 • 4:03", formatHeroTrackSubtitle(full))
+
+        val sparse = Track(
+            id = "h2",
+            title = "Nightcall",
+            artist = "Kavinsky",
+            genres = listOf("Synthwave"),
+            durationSeconds = 0
+        )
+        assertEquals("Kavinsky • Synthwave", formatHeroTrackSubtitle(sparse))
     }
 }

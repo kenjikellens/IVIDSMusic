@@ -3,6 +3,7 @@ package com.kenjigames.ividsmusic.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -30,84 +31,86 @@ fun rememberIvidsTypography(): Typography {
         Font(Res.font.inter_medium, weight = FontWeight.Medium),
         Font(Res.font.inter_semibold, weight = FontWeight.SemiBold)
     )
-    return Typography(
-        displaySmall = TextStyle(
-            fontFamily = displayFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 36.sp,
-            lineHeight = 42.sp,
-            letterSpacing = (-0.75).sp
-        ),
-        headlineMedium = TextStyle(
-            fontFamily = displayFamily,
-            fontWeight = FontWeight.Bold,
-            fontSize = 28.sp,
-            lineHeight = 34.sp,
-            letterSpacing = (-0.45).sp
-        ),
-        headlineSmall = TextStyle(
-            fontFamily = displayFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 22.sp,
-            lineHeight = 28.sp,
-            letterSpacing = (-0.3).sp
-        ),
-        titleLarge = TextStyle(
-            fontFamily = displayFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 19.sp,
-            lineHeight = 25.sp,
-            letterSpacing = (-0.15).sp
-        ),
-        titleMedium = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 16.sp,
-            lineHeight = 22.sp
-        ),
-        titleSmall = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 15.sp,
-            lineHeight = 20.sp
-        ),
-        bodyLarge = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 15.sp,
-            lineHeight = 22.sp
-        ),
-        bodyMedium = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 14.sp,
-            lineHeight = 20.sp
-        ),
-        bodySmall = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Normal,
-            fontSize = 13.sp,
-            lineHeight = 18.sp
-        ),
-        labelLarge = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.SemiBold,
-            fontSize = 14.sp,
-            lineHeight = 18.sp
-        ),
-        labelMedium = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 12.sp,
-            lineHeight = 16.sp
-        ),
-        labelSmall = TextStyle(
-            fontFamily = bodyFamily,
-            fontWeight = FontWeight.Medium,
-            fontSize = 11.sp,
-            lineHeight = 14.sp
+    return remember(displayFamily, bodyFamily) {
+        Typography(
+            displaySmall = TextStyle(
+                fontFamily = displayFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 36.sp,
+                lineHeight = 42.sp,
+                letterSpacing = (-0.75).sp
+            ),
+            headlineMedium = TextStyle(
+                fontFamily = displayFamily,
+                fontWeight = FontWeight.Bold,
+                fontSize = 28.sp,
+                lineHeight = 34.sp,
+                letterSpacing = (-0.45).sp
+            ),
+            headlineSmall = TextStyle(
+                fontFamily = displayFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 22.sp,
+                lineHeight = 28.sp,
+                letterSpacing = (-0.3).sp
+            ),
+            titleLarge = TextStyle(
+                fontFamily = displayFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 19.sp,
+                lineHeight = 25.sp,
+                letterSpacing = (-0.15).sp
+            ),
+            titleMedium = TextStyle(
+                fontFamily = bodyFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 16.sp,
+                lineHeight = 22.sp
+            ),
+            titleSmall = TextStyle(
+                fontFamily = bodyFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 15.sp,
+                lineHeight = 20.sp
+            ),
+            bodyLarge = TextStyle(
+                fontFamily = bodyFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 15.sp,
+                lineHeight = 22.sp
+            ),
+            bodyMedium = TextStyle(
+                fontFamily = bodyFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 14.sp,
+                lineHeight = 20.sp
+            ),
+            bodySmall = TextStyle(
+                fontFamily = bodyFamily,
+                fontWeight = FontWeight.Normal,
+                fontSize = 13.sp,
+                lineHeight = 18.sp
+            ),
+            labelLarge = TextStyle(
+                fontFamily = bodyFamily,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 14.sp,
+                lineHeight = 18.sp
+            ),
+            labelMedium = TextStyle(
+                fontFamily = bodyFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 12.sp,
+                lineHeight = 16.sp
+            ),
+            labelSmall = TextStyle(
+                fontFamily = bodyFamily,
+                fontWeight = FontWeight.Medium,
+                fontSize = 11.sp,
+                lineHeight = 14.sp
+            )
         )
-    )
+    }
 }
 
 /**

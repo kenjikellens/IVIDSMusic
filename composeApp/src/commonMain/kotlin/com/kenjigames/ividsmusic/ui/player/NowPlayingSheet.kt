@@ -307,24 +307,11 @@ fun NowPlayingSheet(
                                             )
                                         }
                                     } else {
-                                        LazyColumn(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                                            itemsIndexed(
-                                                items = playerState.queue,
-                                                key = { idx, item -> "${idx}_${item.id}" }
-                                            ) { index, item ->
-                                                    NowPlayingQueueRow(
-                                                        index = index,
-                                                        item = item,
-                                                        isActive = index == playerState.currentIndex,
-                                                        canMoveUp = index > 0,
-                                                        canMoveDown = index < playerState.queue.lastIndex,
-                                                        onJump = { playerViewModel.jumpToQueueIndex(index) },
-                                                        onMoveUp = { playerViewModel.moveQueueTrack(index, index - 1) },
-                                                        onMoveDown = { playerViewModel.moveQueueTrack(index, index + 1) },
-                                                        onRemove = { playerViewModel.removeFromQueue(index) }
-                                                    )
-                                            }
-                                        }
+                                        NowPlayingQueueList(
+                                            queue = playerState.queue,
+                                            currentIndex = playerState.currentIndex,
+                                            playerViewModel = playerViewModel
+                                        )
                                     }
                                 }
                             }
@@ -407,27 +394,12 @@ fun NowPlayingSheet(
                                                     )
                                                 }
                                             } else {
-                                                LazyColumn(
-                                                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                                                NowPlayingQueueList(
+                                                    queue = playerState.queue,
+                                                    currentIndex = playerState.currentIndex,
+                                                    playerViewModel = playerViewModel,
                                                     contentPadding = PaddingValues(bottom = 12.dp)
-                                                ) {
-                                                    itemsIndexed(
-                                                        items = playerState.queue,
-                                                        key = { idx, item -> "${idx}_${item.id}" }
-                                                    ) { index, item ->
-                                                        NowPlayingQueueRow(
-                                                            index = index,
-                                                            item = item,
-                                                            isActive = index == playerState.currentIndex,
-                                                            canMoveUp = index > 0,
-                                                            canMoveDown = index < playerState.queue.lastIndex,
-                                                            onJump = { playerViewModel.jumpToQueueIndex(index) },
-                                                            onMoveUp = { playerViewModel.moveQueueTrack(index, index - 1) },
-                                                            onMoveDown = { playerViewModel.moveQueueTrack(index, index + 1) },
-                                                            onRemove = { playerViewModel.removeFromQueue(index) }
-                                                        )
-                                                    }
-                                                }
+                                                )
                                             }
                                         }
                                     }
@@ -442,8 +414,39 @@ fun NowPlayingSheet(
 }
 
 /**
- * Renders the Next Up header and optional Clear Queue button inside [NowPlayingSheet].
+ * Renders the shared reorderable queue [LazyColumn] inside [NowPlayingSheet] for both desktop
+ * split-pane and mobile Queue tab layouts.
  */
+@Composable
+private fun NowPlayingQueueList(
+    queue: List<Track>,
+    currentIndex: Int,
+    playerViewModel: PlayerViewModel,
+    contentPadding: PaddingValues = PaddingValues(0.dp)
+) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(6.dp),
+        contentPadding = contentPadding
+    ) {
+        itemsIndexed(
+            items = queue,
+            key = { idx, item -> "${idx}_${item.id}" }
+        ) { index, item ->
+            NowPlayingQueueRow(
+                index = index,
+                item = item,
+                isActive = index == currentIndex,
+                canMoveUp = index > 0,
+                canMoveDown = index < queue.lastIndex,
+                onJump = { playerViewModel.jumpToQueueIndex(index) },
+                onMoveUp = { playerViewModel.moveQueueTrack(index, index - 1) },
+                onMoveDown = { playerViewModel.moveQueueTrack(index, index + 1) },
+                onRemove = { playerViewModel.removeFromQueue(index) }
+            )
+        }
+    }
+}
+
 /**
  * Renders the queue section header with an Autoplay Radio toggle and Clear Queue button.
  */

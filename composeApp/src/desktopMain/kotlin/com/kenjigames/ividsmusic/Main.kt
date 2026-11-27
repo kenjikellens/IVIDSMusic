@@ -49,6 +49,8 @@ import java.awt.GraphicsEnvironment
 import java.io.File
 import kotlin.system.exitProcess
 
+private val windowBoundsJson = Json { ignoreUnknownKeys = true }
+
 @Serializable
 private data class WindowBounds(
     val widthDp: Float = 1280f,
@@ -60,7 +62,7 @@ private data class WindowBounds(
 /** Loads persisted window bounds from [file], returning defaults if absent or off-screen. */
 private fun loadWindowBounds(file: File): WindowBounds {
     val raw = runCatching { file.takeIf { it.isFile }?.readText() }.getOrNull() ?: return WindowBounds()
-    val parsed = runCatching { Json { ignoreUnknownKeys = true }.decodeFromString<WindowBounds>(raw) }.getOrNull()
+    val parsed = runCatching { windowBoundsJson.decodeFromString<WindowBounds>(raw) }.getOrNull()
         ?: return WindowBounds()
     val safeW = parsed.widthDp.coerceIn(720f, 3840f)
     val safeH = parsed.heightDp.coerceIn(520f, 2160f)
@@ -93,7 +95,7 @@ private fun saveWindowBounds(file: File, widthDp: Dp, heightDp: Dp, position: Wi
         xDp = x,
         yDp = y
     )
-    runCatching { file.writeText(Json.encodeToString(payload)) }
+    runCatching { file.writeText(windowBoundsJson.encodeToString(payload)) }
 }
 
 /**

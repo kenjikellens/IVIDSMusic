@@ -4,13 +4,12 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import androidx.compose.ui.graphics.Color
 import androidx.palette.graphics.Palette
+import com.kenjigames.ividsmusic.ui.components.fetchBoundedAndroidImageBytes
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
-import java.io.ByteArrayOutputStream
-import java.net.HttpURLConnection
-import java.net.URI
 
 /**
  * Android implementation of [ColorExtractor] backed by AndroidX Palette and a bounded 120-entry LRU cache.
@@ -57,34 +56,12 @@ actual object ColorExtractor {
                     }
                 }
                 var bitmap: Bitmap? = null
-                var connection: HttpURLConnection? = null
                 try {
-                    connection = (URI.create(imageUrl).toURL().openConnection() as HttpURLConnection).apply {
-                        connectTimeout = 4_000
-                        readTimeout = 4_000
-                        setRequestProperty("User-Agent", "IVIDS-Music-Android")
-                    }
-                    if (connection.responseCode !in 200..299 || connection.contentLengthLong > MAX_BYTES) {
-                        synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
-                        return@withPermit null
-                    }
-                    val bytes = connection.inputStream.use { input ->
-                        val buffer = ByteArrayOutputStream()
-                        val chunk = ByteArray(8192)
-                        var total = 0
-                        while (true) {
-                            val read = input.read(chunk)
-                            if (read <= 0) break
-                            total += read
-                            if (total > MAX_BYTES) return@withPermit null
-                            buffer.write(chunk, 0, read)
+                    val bytes = fetchBoundedAndroidImageBytes(imageUrl, MAX_BYTES)
+                        ?: run {
+                            synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
+                            return@withPermit null
                         }
-                        buffer.toByteArray()
-                    }
-                    if (bytes.isEmpty()) {
-                        synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
-                        return@withPermit null
-                    }
 
                     val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
                     BitmapFactory.decodeByteArray(bytes, 0, bytes.size, bounds)
@@ -113,12 +90,13 @@ actual object ColorExtractor {
                         colorCache[imageUrl] = clamped
                     }
                     clamped.takeIf { it != Color.Unspecified }
+                } catch (cancel: CancellationException) {
+                    throw cancel
                 } catch (_: Exception) {
                     synchronized(cacheLock) { colorCache[imageUrl] = Color.Unspecified }
                     null
                 } finally {
                     bitmap?.recycle()
-                    connection?.disconnect()
                 }
             }
         }

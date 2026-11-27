@@ -106,7 +106,7 @@ class YtDlpDesktopResolver(
 
     /**
      * Executes `yt-dlp.exe` to extract a direct audio stream URL for [target] and resolves its metadata.
-     * Enforces [timeoutSeconds], `--` option termination, and compact M4A preference before MP4 fallbacks.
+     * Enforces [timeoutSeconds], `--` option termination, control-character rejection, and compact M4A preference.
      */
     private suspend fun executeYtDlpUrlLookup(
         target: String,
@@ -114,7 +114,9 @@ class YtDlpDesktopResolver(
         preferredQuality: AudioQuality
     ): AppResult<StreamSource.RemoteUrl> = withContext(ioDispatcher) {
         val cleanTarget = target.trim()
-        if (cleanTarget.startsWith("-") ||
+        val hasControlChars = cleanTarget.any { it == '\r' || it == '\n' || it == '\u0000' }
+        if (hasControlChars ||
+            cleanTarget.startsWith("-") ||
             (!cleanTarget.startsWith("ytsearch1:") &&
                 NetworkSecurityGuard.validateHttpUri(cleanTarget, allowPrivateHosts = false) == null)
         ) {
